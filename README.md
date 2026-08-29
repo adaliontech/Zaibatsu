@@ -66,7 +66,7 @@ improvement and adversarial test; independent validation accepted the result.
 ## What is real today
 
 The architecture is derived from a working private operations program, but its
-parts have different maturity levels. As of 2026-08-28:
+parts have different maturity levels. As of 2026-08-29:
 
 - a Tailscale private administration path is operational;
 - Ansible configuration, host hardening, non-publishing shadow execution,
@@ -74,9 +74,14 @@ parts have different maturity levels. As of 2026-08-28:
   preproduction evidence;
 - the bounded Qwen-backed Droid contribution has reviewed preproduction
   evidence and independent repository validation;
+- the Dispatcher API/policy contract and PostgreSQL job engine have validated
+  preproduction evidence from 158 focused tests and a 104-assertion disposable
+  PostgreSQL 16.15 two-cluster acceptance run;
+- a narrow deterministic read-only coordinator lane uses the durable database
+  for the three allowlisted projects without invoking a model;
 - systemd remains the authoritative production scheduler;
-- the PostgreSQL Dispatcher job engine, leases, project sandboxes, and Nix
-  flakes are design or planned work, not deployed production claims.
+- broader Dispatcher side-effect authority, project sandboxes, and Nix flakes
+  remain unclaimed or planned work.
 
 See [Implementation status](docs/implementation-status.md) for the exact
 claim ledger.
@@ -112,8 +117,8 @@ claim ledger.
    deterministic policy authorization.
 5. Project identities, credentials, data, networks, and deployment rights are
    separated and denied by default.
-6. Git defines intended state; PostgreSQL is the target operational system of
-   record; Kanban is a synchronized view.
+6. Git defines intended state; PostgreSQL owns durable state for the bounded
+   Dispatcher lane; Kanban is a synchronized view.
 7. Tailscale carries private management traffic.
 8. OpenTofu creates infrastructure, Ansible configures hosts, Nix will pin
    project tool environments, and systemd executes durable services.
@@ -125,10 +130,10 @@ claim ledger.
 The intended format is an **open-source project** backed by a technical article
 and short demo. Factory’s Guild asks builders to build with Factory, publish the
 work, and submit a public link. The bounded local-Qwen Droid contribution is
-complete and independently validated. The repository is public and a
-credential-free fresh clone passed the complete validation suite. The final
-demo and applicant-owned form materials remain explicit gates in [Submission
-readiness](architecture/submission-readiness.json).
+complete and independently validated. The repository is public; the final
+release candidate is reproduced from a credential-free clone before tagging.
+The demo and applicant-owned form materials remain explicit gates in
+[Submission readiness](architecture/submission-readiness.json).
 
 Zaibatsu is an independent project and is not affiliated with or endorsed by
 Factory AI.

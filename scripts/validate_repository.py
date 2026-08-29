@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import ipaddress
 import json
 import re
 import sys
@@ -77,8 +78,8 @@ REQUIRED_COMPONENT_MATURITIES = {
     "tailscale-management-network": "operational",
     "ansible-configuration": "validated_preproduction",
     "opentofu-resource-lifecycle": "validated_preproduction",
-    "dispatcher-api-and-policy": "designed",
-    "postgresql-job-state": "designed",
+    "dispatcher-api-and-policy": "validated_preproduction",
+    "postgresql-job-state": "validated_preproduction",
     "project-sandboxes": "planned",
     "probabilistic-workers": "designed",
     "artifact-verification": "validated_preproduction",
@@ -141,7 +142,13 @@ PUBLIC_SAFETY_PATTERNS = {
     "legacy pre-release brand": re.compile(
         "factory" + r"(?:²|\^2|[-_ ]squared)", re.IGNORECASE
     ),
-    "absolute home path": re.compile(r"/home/[A-Za-z0-9._-]+/"),
+    "absolute home path": re.compile(
+        r"(?:(?<![A-Za-z0-9._-])/(?:home|Users)/[A-Za-z0-9._-]+(?:/|\b)|"
+        r"(?i:\b[A-Z]:[\\/]+Users[\\/]+[A-Za-z0-9._-]+(?:[\\/]|\b)))"
+    ),
+    "Tailscale DNS name": re.compile(
+        r"(?i)\b(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+ts\.net\b"
+    ),
     "Tailscale carrier-grade NAT address": re.compile(
         r"\b100\.(?:6[4-9]|[7-9]\d|1[01]\d|12[0-7])(?:\.\d{1,3}){2}\b"
     ),
@@ -164,6 +171,12 @@ PUBLIC_SAFETY_PATTERNS = {
         r"(?im)^\s*(?:authorization\s*:\s*)?bearer\s+(?!<|\$\{)\S+"
     ),
 }
+PUBLIC_SAFETY_ALLOWED_LITERALS = {
+    "Tailscale DNS name": ("gateway.example.ts.net",),
+}
+IPV4_CANDIDATE_RE = re.compile(
+    r"(?<![\d.])(?:\d{1,3}\.){3}\d{1,3}(?![\d.])"
+)
 
 MARKDOWN_LINK_RE = re.compile(r"(?<!!)\[[^\]]+\]\(([^)]+)\)")
 
@@ -466,8 +479,19 @@ def validate_public_safety(root: Path = ROOT) -> list[str]:
             errors.append(f"{path.relative_to(root)}: cannot scan public text: {exc}")
             continue
         for label, pattern in PUBLIC_SAFETY_PATTERNS.items():
-            if pattern.search(text):
+            scanned_text = text
+            for allowed in PUBLIC_SAFETY_ALLOWED_LITERALS.get(label, ()):
+                scanned_text = scanned_text.replace(allowed, "")
+            if pattern.search(scanned_text):
                 errors.append(f"{path.relative_to(root)}: contains {label}")
+        for match in IPV4_CANDIDATE_RE.finditer(text):
+            try:
+                address = ipaddress.ip_address(match.group(0))
+            except ValueError:
+                continue
+            if address.version == 4 and address.is_global:
+                errors.append(f"{path.relative_to(root)}: contains public IPv4 address")
+                break
     return errors
 
 

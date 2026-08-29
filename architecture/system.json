@@ -5,7 +5,7 @@
     "name": "Zaibatsu",
     "spoken_name": "Zaibatsu",
     "tagline": "Deterministic control around probabilistic workers",
-    "as_of": "2026-08-28"
+    "as_of": "2026-08-29"
   },
   "maturity_definitions": {
     "operational": "Running in the current authoritative path",
@@ -59,7 +59,7 @@
       "id": "dispatcher-api-and-policy",
       "plane": "control",
       "kind": "deterministic",
-      "maturity": "designed",
+      "maturity": "validated_preproduction",
       "responsibility": "Route jobs, enforce policy, and authorize transitions",
       "can_trigger_external_side_effects": true,
       "policy_gate": "transactional state machine and risk policy"
@@ -68,7 +68,7 @@
       "id": "postgresql-job-state",
       "plane": "state",
       "kind": "deterministic",
-      "maturity": "designed",
+      "maturity": "validated_preproduction",
       "responsibility": "Persist jobs, leases, attempts, policy decisions, and audit events",
       "can_trigger_external_side_effects": false
     },

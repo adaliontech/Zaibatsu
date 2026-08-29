@@ -6,7 +6,7 @@ Zaibatsu is a small, self-hosted software-factory architecture for operating
 multiple projects without turning an LLM into an infrastructure administrator.
 It combines a private Tailscale management plane, reviewed OpenTofu and Ansible
 automation, durable systemd execution, scoped identities, explicit readiness
-gates, and a target PostgreSQL Dispatcher around replaceable AI workers.
+gates, and a validated PostgreSQL Dispatcher around replaceable AI workers.
 
 The public artifact is an executable architecture kit. A machine-readable
 contract distinguishes operational, validated-preproduction, designed, and
@@ -81,8 +81,17 @@ than by replacing its bootstrap or schedules.
    into separate transfer channels.
 7. Snapshot and restore logic verified a manifest while refusing credentials,
    symlinks, active destination units, or a non-empty target.
-8. Cutover gates stayed red for the missing job database, project sandboxes,
-   production verification, rollback drills, and observation window.
+8. Early cutover gates stayed red for the then-missing job database, project
+   sandboxes, production verification, rollback drills, and observation
+   window.
+
+The later bounded Dispatcher increment crossed only the evidence it actually
+earned: a socket-only PostgreSQL 16 database, transactional API/policy
+contracts, a deterministic read-only coordinator, receipt-bound project
+workers, and cross-host restore drills. The focused source suite now passes 158
+tests, and a disposable PostgreSQL 16.15 two-cluster harness passes 104 live
+assertions including restore equivalence. Heavy production workloads remain
+under the existing systemd authority.
 
 This is the architecture’s core lesson in practice: preparation is not
 authorization, and an artifact existing on a destination is not the same as
@@ -102,8 +111,8 @@ The public repository includes:
 - `scripts/validate_repository.py`, an offline contract and public-safety
   validator;
 - adversarial tests that mutate the valid contract and prove rejection;
-- an implementation-status ledger that prevents planned Nix and Dispatcher
-  components from being described as operational;
+- an implementation-status ledger that prevents planned Nix and sandbox work,
+  or the broader Dispatcher target, from being described as operational;
 - a threat model, reproduction guide, evidence ledger, demo, and application
   package.
 
@@ -114,10 +123,11 @@ keys to the factory floor.
 
 The core artifact remains useful without Droid. For the Guild contribution,
 Factory Droid operated only on a sanitized public clone, never the private
-fleet. The backend was the owner’s Qwen 3.8 27B GGUF 3-bit model through an
-authenticated OpenAI-compatible gateway. Its endpoint and credential stayed
-in ignored local configuration and the launch boundary, not in Git. Factory
-authentication remained separate from model authentication.
+fleet. The backend was the owner’s Qwen 3.8 27B GGUF using the
+`Q4_K - Small` quantization reported by authenticated llama.cpp metadata,
+through an authenticated OpenAI-compatible gateway. Its endpoint and
+credential stayed in ignored local configuration and the launch boundary, not
+in Git. Factory authentication remained separate from model authentication.
 
 The project-level `AGENTS.md` supplies exact commands and security boundaries.
 One headless Droid task ran with low local autonomy. It strengthened the
@@ -144,10 +154,10 @@ reject:
 - a deterministic side-effecting component must declare its policy gate;
 - the task flow must place sandbox execution, verification, and policy in the
   deterministic order required before a controlled side effect;
-- a public document containing a private home path or address fails the safety
-  scan;
-- maturity is explicit, so Nix, leases, and sandboxes cannot silently become
-  “done” in the narrative.
+- a public document containing a private home path, tailnet name, private
+  address, or unapproved public IPv4 address fails the safety scan;
+- maturity is explicit, so Nix, sandboxes, and broad production authority
+  cannot silently become “done” in the narrative.
 
 The private implementation separately carries its operational validation and
 regression evidence. Exact results are recorded in [Evidence](evidence.md)
@@ -172,8 +182,10 @@ give the agent a narrow problem
 
 ## Limitations
 
-- The Dispatcher job API and PostgreSQL state engine are designed, not
-  deployed.
+- The Dispatcher API/policy and PostgreSQL state contracts are validated
+  preproduction; only a narrow deterministic read-only coordinator lane is
+  operational.
+- The existing systemd executor still owns the heavy production workloads.
 - Project sandboxes are planned, not proven.
 - Nix is a deliberate next step and has no current flake implementation.
 - The public validator tests architecture declarations, not the private fleet.

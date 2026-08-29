@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.0.0 - 2026-08-29
 
 - Created the Zaibatsu public architecture and Guild submission package.
 - Added a machine-readable component, maturity, task-flow, and invariant model.
@@ -9,6 +9,16 @@
   evidence, case-study, demo, Droid-session, Guild, and roadmap documents.
 - Added a secret-free local-Qwen Droid configuration example, fail-closed
   preflight, and machine-readable submission gates.
+- Corrected the hosted model description from stale 3-bit wording to its
+  authenticated `Q4_K - Small` llama.cpp metadata.
+- Promoted the implemented Dispatcher API/policy and PostgreSQL state
+  contracts to validated preproduction while documenting the narrow live
+  read-only coordinator lane and preserving systemd workload authority.
+- Hardened the public-safety validator for tailnet DNS names, Linux/macOS and
+  Windows home paths, and public IPv4 addresses, with adversarial tests and a
+  fixed documentation-placeholder allowlist.
+- Added current 158-test Dispatcher and 104-assertion PostgreSQL 16.15
+  acceptance evidence without publishing private coordinates.
 - Corrected application and demo language so no completed Droid contribution
   is claimed before a real reviewed session exists.
 - Hardened architecture and readiness validation against missing components,

@@ -41,10 +41,11 @@ make validate
 Open `docs/implementation-status.md` and
 `architecture/submission-readiness.json`.
 
-> Tailscale is operational and Ansible has preproduction evidence. The
-> Dispatcher database, sandboxes, and Nix remain designed or planned. The
-> bounded Qwen-backed Droid contribution is validated preproduction work, not
-> production authority.
+> Tailscale is operational and Ansible has preproduction evidence. Dispatcher
+> PostgreSQL and its broader API contract are validated preproduction, with one
+> narrow deterministic read-only coordinator lane live. Systemd still owns the
+> production workloads; sandboxes and Nix remain planned. The bounded
+> Qwen-backed Droid contribution has no production authority.
 
 ## Final Guild insert — 25 seconds
 

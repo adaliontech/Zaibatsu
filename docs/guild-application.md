@@ -7,8 +7,8 @@
 **Link to submission:** `https://github.com/adaliontech/Zaibatsu`
 
 The application is prepared but must not be submitted yet. The official Guild
-path requires real Factory work and a public link. The public repository and
-credential-free fresh-clone proof are complete; the final demo and applicant
+path requires real Factory work and a public link. The public repository is
+complete; the release-candidate fresh-clone proof, final demo, and applicant
 materials remain explicit gates in
 [`architecture/submission-readiness.json`](../architecture/submission-readiness.json).
 
@@ -19,13 +19,14 @@ control around probabilistic AI workers. It models durable jobs, scoped
 capabilities, private Tailscale administration, Ansible configuration,
 artifact gates, and recovery boundaries, then validates the safety invariants
 offline. The case study distinguishes operational, preproduction, designed,
-planned, and pending-evidence components—including Nix, the PostgreSQL
-Dispatcher, and project sandboxes.
+planned, and pending-evidence components—including the validated PostgreSQL
+Dispatcher and planned Nix and project sandboxes.
 
 The core repository works without a model or Droid credentials. For the Guild
 case study, authenticated Factory Droid used an owner-operated Qwen 3.8 27B
-GGUF 3-bit model on a clean sanitized clone. Its reviewed change strengthened the
-contract from a three-stage check to the full ordering `persist <
+GGUF with the authenticated server's `Q4_K - Small` quantization on a clean
+sanitized clone. Its reviewed change strengthened the contract from a
+three-stage check to the full ordering `persist <
 execute_in_sandbox < verify < policy_decision < controlled_side_effect` and
 added an adversarial test that the old validator accepted. Independent
 validation passed before the contribution was promoted.
@@ -38,9 +39,9 @@ OpenAI-compatible gateway, changed exactly
 new test moves `policy_decision` before `verify`; the pre-change validator
 accepted that unsafe ordering, while the shipped validator rejects it with a
 deterministic adjacent-stage error. Droid reported 36 passing tests, and an
-independent run reproduced all 36 before later integration and branding checks
-brought the package to 40 passing tests. No model or Factory credential is
-published.
+independent run reproduced all 36 before later integration, branding, and
+release-hardening checks brought the package to 46 passing tests. No model or
+Factory credential is published.
 
 ## One-line description
 
@@ -94,16 +95,20 @@ external side effect.
 ### What is actually deployed?
 
 Private administration, host automation, shadow execution, and the existing
-systemd scheduler have current evidence. The Dispatcher job database,
-sandboxes, and Nix environments are not production claims. The Droid
-contribution is validated preproduction work and has no deployment authority.
+systemd scheduler have current evidence. Dispatcher PostgreSQL and a fixed
+read-only coordinator lane are live; the broader API/policy contract is
+validated preproduction, and systemd remains the production workload
+authority. Sandboxes and Nix environments are not production claims. The
+Droid contribution is validated preproduction work and has no deployment
+authority.
 
 ### What would you build next?
 
-The smallest end-to-end Dispatcher slice: one project, transactional job
-states and leases, one isolated worker, one artifact verifier, append-only
-events, and a tested recovery path. Nix follows when the same worker toolchain
-can be reproduced on multiple eligible nodes.
+Expand the already-deployed read-only Dispatcher slice without skipping its
+gates: add an isolated per-job workspace and deterministic artifact verifier,
+then prove recovery and duplicate-side-effect denial before authorizing one
+low-risk mutation. Nix follows when the same worker toolchain can be
+reproduced on multiple eligible nodes.
 
 ## Applicant-owned fields
 
@@ -126,7 +131,8 @@ the public repository:
 - [x] Factory contribution maturity changes from `pending_evidence` only after
       the receipt exists.
 - [x] Repository is published under the intended owner with an MIT license.
-- [x] Fresh clone passes `make validate` without network access.
+- [ ] Final release candidate passes `make validate` from a credential-free
+      clone.
 - [x] Public repository and article links resolve without authentication.
 - [ ] Demo clip or screenshots show a real Factory task and validation result.
 - [x] No private host, credential, recovery, or deployment detail is exposed.

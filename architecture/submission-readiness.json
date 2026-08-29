@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "schema_version": "zaibatsu.submission-readiness.v1",
-  "as_of": "2026-08-28",
+  "as_of": "2026-08-29",
   "submission_ready": false,
   "submitted": false,
   "gates": [
@@ -21,7 +21,7 @@
       "id": "local_qwen_endpoint",
       "status": "complete",
       "required_for_submission": true,
-      "evidence": "Authenticated OpenAI-compatible Qwen endpoint passed health, model, streaming, and native tool-call canaries on 2026-08-28"
+      "evidence": "Authenticated OpenAI-compatible Qwen endpoint passed health, model, streaming, native tool-call, and redacted model-metadata checks; the loaded GGUF identifies Qwen 3.8 27B and reports Q4_K - Small quantization"
     },
     {
       "id": "local_model_credential",
@@ -39,7 +39,7 @@
       "id": "bounded_droid_contribution",
       "status": "complete",
       "required_for_submission": true,
-      "evidence": "Qwen-backed Droid session 46f941a9-82f8-4df3-a45c-b8158996360b produced a reviewed two-file invariant and adversarial-test change; the integrated Zaibatsu package passes 40 tests"
+      "evidence": "Qwen-backed Droid session 46f941a9-82f8-4df3-a45c-b8158996360b produced a reviewed two-file invariant and adversarial-test change; the integrated Zaibatsu package passes 46 tests"
     },
     {
       "id": "public_repository",
@@ -49,9 +49,9 @@
     },
     {
       "id": "fresh_clone_reproduction",
-      "status": "complete",
+      "status": "pending_external",
       "required_for_submission": true,
-      "evidence": "Credential-free public clone of f039604be4d21b9538b5647665058543dc5f0012 passed make validate with 40 tests, workflow linting, strict Git checks, and history/tree secret scans"
+      "evidence": "The final release candidate must pass make validate, workflow linting, strict Git checks, and history/tree secret scans from a credential-free public clone before this gate returns to complete"
     },
     {
       "id": "public_demo",

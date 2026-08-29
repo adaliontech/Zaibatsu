@@ -9,9 +9,9 @@ mechanism.
 ## Reporting
 
 Do not open a public issue containing a credential, private address, machine
-identity, production topology, or exploitable operational detail. Contact the
-repository owner privately through the security contact published on the
-eventual public repository profile.
+identity, production topology, or exploitable operational detail. Use the
+repository's private vulnerability-reporting form under **Security →
+Advisories → Report a vulnerability** so the report remains non-public.
 
 ## Supported version
 

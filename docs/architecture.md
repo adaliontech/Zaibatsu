@@ -56,10 +56,17 @@ own natural-language answer into terminal success.
 
 ### 2. Durable state
 
-Workers are disposable; work is durable. PostgreSQL is the target source of
-truth for jobs, leases, attempts, policy decisions, evidence, and audit events.
-Kanban is a synchronized human-readable surface, not the only record that work
-exists.
+Workers are disposable; work is durable. PostgreSQL is the source of truth for
+the bounded Dispatcher lane's jobs, leases, attempts, policy decisions,
+evidence, and audit events. Kanban is a synchronized human-readable surface,
+not the only record that work exists.
+
+The private implementation runs PostgreSQL 16 over a Unix socket and a
+deterministic read-only coordinator across the three allowlisted projects. The
+coordinator invokes no model, is idempotent by time bucket, retries once, and
+then blocks. This narrow lane is operational; the broader Dispatcher API and
+policy surface remains validated preproduction, while systemd retains
+authority for the existing production workloads.
 
 Operational state and knowledge stay separate:
 
@@ -147,7 +154,7 @@ Each tool answers a different question.
 | Ansible | How should a host be configured? | identities, hardening, services, guards, monitoring | Validated preproduction |
 | Nix | Which exact project tools should workers receive? | pinned development and runtime environments | Planned |
 | systemd | What executes durably on a host? | current schedules and service supervision | Operational |
-| PostgreSQL | What work exists and what state is it in? | target authoritative Dispatcher state | Designed |
+| PostgreSQL | What work exists and what state is it in? | durable bounded Dispatcher state plus broader validated contract | Validated preproduction |
 | Factory Droid + local Qwen | Where can bounded AI repository work run? | optional public-kit contributor behind deterministic checks | Validated preproduction |
 
 The order is intentional: private access and reproducible host configuration

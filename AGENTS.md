@@ -22,8 +22,10 @@ host inventory, credentials, or bootstrap procedures.
   coordinates, machine fingerprints, personal data, or absolute home paths.
 - Do not add commands that deploy, publish, enroll a device, alter a firewall,
   rotate a secret, or touch a production host.
-- Do not describe a target component as operational. Use only the maturity
-  values defined in `architecture/system.json`.
+- Do not describe a target component as operational beyond its evidenced
+  scope. Use only the maturity values defined in `architecture/system.json`;
+  when a narrow sub-scope is live but the full component is not, name both
+  boundaries explicitly.
 - Keep the distinction between deterministic control and probabilistic worker
   judgment explicit.
 - Preserve the direct-owner recovery path. Dispatcher cannot be its own only

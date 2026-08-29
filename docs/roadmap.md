@@ -6,7 +6,8 @@ authorize production migration.
 ## Phase 0 — Public package and Guild evidence
 
 - validate the architecture kit — complete locally;
-- connect the owner-operated Qwen 3.8 27B GGUF 3-bit model through an
+- connect the owner-operated Qwen 3.8 27B GGUF with verified `Q4_K - Small`
+  quantization through an
   authenticated OpenAI-compatible endpoint without committing its API key —
   complete;
 - authenticate headless Droid separately from the model credential — complete;
@@ -19,7 +20,7 @@ authorize production migration.
 Exit: every Guild claim is backed by a public artifact or explicit private
 evidence class, with no pending claim disguised as complete.
 
-## Phase 1 — Minimum Dispatcher contract
+## Phase 1 — Minimum Dispatcher contract — complete
 
 - PostgreSQL schema for jobs, transitions, attempts, leases, evidence, policy
   decisions, and append-only events;
@@ -30,13 +31,24 @@ evidence class, with no pending claim disguised as complete.
 Exit: jobs survive worker failure, invalid transitions fail closed, and every
 terminal state retains verifier evidence.
 
-## Phase 2 — One bounded worker path
+The current private source passes 158 focused Dispatcher tests and 104 live
+PostgreSQL 16.15 assertions across two disposable socket-only clusters,
+including backup/restore equivalence and post-restore continuation.
 
-- one project and one low-risk workflow;
-- authenticated worker registry and capability matching;
+## Phase 2 — One bounded worker path — narrow read-only lane operational
+
+Complete for the fixed read-only collection lane:
+
+- deterministic jobs for all three allowlisted projects;
+- authenticated capability-bound workers;
+- durable attempts, retained failures, and receipt-bound artifacts;
+- bounded retry, idempotent time buckets, and no model invocation.
+
+Still required before broader authority:
+
 - isolated job workspace;
-- artifact attachment and deterministic validator;
-- lease expiry, reassignment, and idempotency drill.
+- deterministic artifact verification for a side-effecting workflow;
+- interchangeable-worker recovery and duplicate-side-effect denial.
 
 Exit: two interchangeable workers can complete or resume the same bounded job
 without duplicate side effects.

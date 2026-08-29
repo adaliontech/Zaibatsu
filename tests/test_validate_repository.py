@@ -126,6 +126,61 @@ class ArchitectureValidationTests(unittest.TestCase):
             errors = validator.validate_public_safety(root)
         self.assertTrue(any("absolute home path" in error for error in errors))
 
+    def test_public_scan_rejects_home_path_without_trailing_slash(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            (root / "README.md").write_text(
+                "Private path: /" + "home/example\n", encoding="utf-8"
+            )
+            errors = validator.validate_public_safety(root)
+        self.assertTrue(any("absolute home path" in error for error in errors))
+
+    def test_public_scan_rejects_macos_home_path(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            (root / "README.md").write_text(
+                "Private path: /" + "Users/example/private\n", encoding="utf-8"
+            )
+            errors = validator.validate_public_safety(root)
+        self.assertTrue(any("absolute home path" in error for error in errors))
+
+    def test_public_scan_rejects_windows_home_path(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            (root / "README.md").write_text(
+                "Private path: C:" + "\\Users\\example\\private\n", encoding="utf-8"
+            )
+            errors = validator.validate_public_safety(root)
+        self.assertTrue(any("absolute home path" in error for error in errors))
+
+    def test_public_scan_rejects_tailnet_dns_name(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            (root / "README.md").write_text(
+                "Private host: private-host.private-tailnet." + "ts.net\n",
+                encoding="utf-8",
+            )
+            errors = validator.validate_public_safety(root)
+        self.assertTrue(any("Tailscale DNS name" in error for error in errors))
+
+    def test_public_scan_allows_documentation_tailnet_placeholder(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            (root / "README.md").write_text(
+                "Example host: gateway.example." + "ts.net\n", encoding="utf-8"
+            )
+            errors = validator.validate_public_safety(root)
+        self.assertFalse(any("Tailscale DNS name" in error for error in errors))
+
+    def test_public_scan_rejects_public_ipv4_address(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            (root / "README.md").write_text(
+                "Private host: 8.8." + "8.8\n", encoding="utf-8"
+            )
+            errors = validator.validate_public_safety(root)
+        self.assertTrue(any("public IPv4 address" in error for error in errors))
+
     def test_public_scan_rejects_literal_json_api_key(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:
             root = Path(temporary_directory)
