@@ -49,9 +49,9 @@
     },
     {
       "id": "fresh_clone_reproduction",
-      "status": "pending_external",
+      "status": "complete",
       "required_for_submission": true,
-      "evidence": "The final release candidate must pass make validate, workflow linting, strict Git checks, and history/tree secret scans from a credential-free public clone before this gate returns to complete"
+      "evidence": "Credential-free public clone of release candidate 44cc3c1f3811a77f0fddf71d6a34ba565d8331e7 passed all 46 tests, repository validation, workflow linting, strict Git checks, and history/tree secret scans"
     },
     {
       "id": "public_demo",

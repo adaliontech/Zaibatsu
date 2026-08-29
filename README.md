@@ -130,9 +130,9 @@ claim ledger.
 The intended format is an **open-source project** backed by a technical article
 and short demo. Factory’s Guild asks builders to build with Factory, publish the
 work, and submit a public link. The bounded local-Qwen Droid contribution is
-complete and independently validated. The repository is public; the final
-release candidate is reproduced from a credential-free clone before tagging.
-The demo and applicant-owned form materials remain explicit gates in
+complete and independently validated. The repository is public, and the final
+release candidate passed the full suite from a credential-free clone. The demo
+and applicant-owned form materials remain explicit gates in
 [Submission readiness](architecture/submission-readiness.json).
 
 Zaibatsu is an independent project and is not affiliated with or endorsed by

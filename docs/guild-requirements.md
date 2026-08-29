@@ -80,6 +80,6 @@ public clean-clone proof. The exact release checklist is in
 [Guild application](guild-application.md).
 
 The bounded local-Qwen Droid run now supplies reviewable “build something with
-Factory” evidence. The public repository is complete; the release-candidate
-fresh-clone proof, final clip, and applicant-owned form materials are still
-required before submission.
+Factory” evidence. The public repository and release-candidate fresh-clone
+proof are complete. The final clip and applicant-owned form materials are
+still required before submission.

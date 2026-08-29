@@ -42,7 +42,7 @@ and redacted status ledger without receiving production access.
 | Factory/Droid contribution | Passed and reviewed | Session `46f941a9-82f8-4df3-a45c-b8158996360b`; two scoped files; 15 turns; zero Factory credits |
 | Pre-change adversarial proof | Passed | Moving `policy_decision` before `verify` produced no ordering error under the original validator |
 | Independent contribution validation | Passed | The accepted two-file diff passed 36 tests, the standalone validator, and `git diff --check` |
-| Fresh-clone reproduction | Pending release-candidate refresh | The final candidate must pass all 46 tests, repository validation, workflow linting, strict Git checks, and history/tree secret scans from the public remote before release |
+| Fresh-clone reproduction | Passed from the public remote | A credential-free clone of release candidate `44cc3c1f3811a77f0fddf71d6a34ba565d8331e7` passed all 46 tests, repository validation, workflow linting, strict Git checks, and history/tree secret scans; its GitHub Actions run also passed |
 | Demo recording | Ready for owner recording | See [Demo script](demo-script.md) |
 
 ## Architecture claims
@@ -84,6 +84,6 @@ equivalence, and post-restore continuation; it uses no production data.
 
 ## Evidence still required before external submission
 
-The application is not represented as submitted until the final public clone
-proof, a demo or screenshot, and the required applicant resume are attached.
-These are tracked in [Guild application](guild-application.md).
+The application is not represented as submitted until a demo or screenshot
+and the required applicant resume are attached. These are tracked in
+[Guild application](guild-application.md).

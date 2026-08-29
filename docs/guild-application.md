@@ -7,8 +7,8 @@
 **Link to submission:** `https://github.com/adaliontech/Zaibatsu`
 
 The application is prepared but must not be submitted yet. The official Guild
-path requires real Factory work and a public link. The public repository is
-complete; the release-candidate fresh-clone proof, final demo, and applicant
+path requires real Factory work and a public link. The public repository and
+release-candidate fresh-clone proof are complete; the final demo and applicant
 materials remain explicit gates in
 [`architecture/submission-readiness.json`](../architecture/submission-readiness.json).
 
@@ -131,7 +131,7 @@ the public repository:
 - [x] Factory contribution maturity changes from `pending_evidence` only after
       the receipt exists.
 - [x] Repository is published under the intended owner with an MIT license.
-- [ ] Final release candidate passes `make validate` from a credential-free
+- [x] Final release candidate passes `make validate` from a credential-free
       clone.
 - [x] Public repository and article links resolve without authentication.
 - [ ] Demo clip or screenshots show a real Factory task and validation result.
