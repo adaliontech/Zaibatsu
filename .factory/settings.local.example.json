@@ -1,0 +1,13 @@
+{
+  "customModels": [
+    {
+      "model": "REPLACE_WITH_LOCAL_SERVER_MODEL_ID",
+      "displayName": "Local Qwen 3.8 27B",
+      "baseUrl": "http://localhost:1234/v1",
+      "apiKey": "${ZAIBATSU_QWEN_API_KEY}",
+      "provider": "generic-chat-completion-api",
+      "maxOutputTokens": 8192,
+      "noImageSupport": true
+    }
+  ]
+}

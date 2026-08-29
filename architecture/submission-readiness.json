@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "schema_version": "zaibatsu.submission-readiness.v1",
+  "as_of": "2026-08-28",
+  "submission_ready": false,
+  "submitted": false,
+  "gates": [
+    {
+      "id": "public_package",
+      "status": "complete",
+      "required_for_submission": true,
+      "evidence": "Repository contract, documentation, and offline validation suite"
+    },
+    {
+      "id": "droid_cli_install",
+      "status": "complete",
+      "required_for_submission": true,
+      "evidence": "Local Droid CLI 0.206.0 version check"
+    },
+    {
+      "id": "local_qwen_endpoint",
+      "status": "complete",
+      "required_for_submission": true,
+      "evidence": "Authenticated OpenAI-compatible Qwen endpoint passed health, model, streaming, and native tool-call canaries on 2026-08-28"
+    },
+    {
+      "id": "local_model_credential",
+      "status": "complete",
+      "required_for_submission": true,
+      "evidence": "Root-only source-bound client credential was injected transiently; no value is stored in this repository or evidence"
+    },
+    {
+      "id": "factory_cli_authentication",
+      "status": "complete",
+      "required_for_submission": true,
+      "evidence": "Factory CLI login was verified separately from the model credential and completed authenticated Droid Exec sessions"
+    },
+    {
+      "id": "bounded_droid_contribution",
+      "status": "complete",
+      "required_for_submission": true,
+      "evidence": "Qwen-backed Droid session 46f941a9-82f8-4df3-a45c-b8158996360b produced a reviewed two-file invariant and adversarial-test change; the integrated Zaibatsu package passes 40 tests"
+    },
+    {
+      "id": "public_repository",
+      "status": "pending_external",
+      "required_for_submission": true,
+      "evidence": "Awaiting owner-authorized publication"
+    },
+    {
+      "id": "fresh_clone_reproduction",
+      "status": "blocked_by_dependency",
+      "required_for_submission": true,
+      "blocked_by": [
+        "public_repository"
+      ],
+      "evidence": "Run make validate from a fresh clone after publication"
+    },
+    {
+      "id": "public_demo",
+      "status": "blocked_by_dependency",
+      "required_for_submission": true,
+      "blocked_by": [
+        "public_repository"
+      ],
+      "evidence": "Final Guild narration and capture checklist include the real Droid result; recording awaits the public repository URL"
+    },
+    {
+      "id": "applicant_materials",
+      "status": "pending_external",
+      "required_for_submission": true,
+      "evidence": "Applicant supplies personal fields and resume directly to the Guild form"
+    }
+  ]
+}

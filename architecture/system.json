@@ -1,0 +1,152 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "schema_version": "zaibatsu.architecture.v1",
+  "project": {
+    "name": "Zaibatsu",
+    "spoken_name": "Zaibatsu",
+    "tagline": "Deterministic control around probabilistic workers",
+    "as_of": "2026-08-28"
+  },
+  "maturity_definitions": {
+    "operational": "Running in the current authoritative path",
+    "validated_preproduction": "Implemented and evidenced without production authority",
+    "designed": "Contract and boundaries documented; implementation incomplete",
+    "planned": "Intended direction without an implementation claim",
+    "pending_evidence": "Artifact exists but required independent evidence is not yet recorded"
+  },
+  "project_allowlist": [
+    "orchestrator",
+    "simbapool",
+    "ffn"
+  ],
+  "components": [
+    {
+      "id": "current-systemd-executor",
+      "plane": "control",
+      "kind": "deterministic",
+      "maturity": "operational",
+      "responsibility": "Execute current scheduled workloads durably until controlled migration",
+      "can_trigger_external_side_effects": true,
+      "policy_gate": "explicit unit policy, guards, and duplicate-scheduler prevention"
+    },
+    {
+      "id": "tailscale-management-network",
+      "plane": "infrastructure",
+      "kind": "deterministic",
+      "maturity": "operational",
+      "responsibility": "Carry authenticated private administration traffic",
+      "can_trigger_external_side_effects": false
+    },
+    {
+      "id": "ansible-configuration",
+      "plane": "infrastructure",
+      "kind": "deterministic",
+      "maturity": "validated_preproduction",
+      "responsibility": "Harden and configure hosts from reviewed source",
+      "can_trigger_external_side_effects": true,
+      "policy_gate": "reviewed playbooks, explicit authorization variables, and idempotence checks"
+    },
+    {
+      "id": "opentofu-resource-lifecycle",
+      "plane": "infrastructure",
+      "kind": "deterministic",
+      "maturity": "validated_preproduction",
+      "responsibility": "Plan cloud resource existence and shape",
+      "can_trigger_external_side_effects": true,
+      "policy_gate": "saved-plan hash, quoted cost, expiry, and explicit apply authorization"
+    },
+    {
+      "id": "dispatcher-api-and-policy",
+      "plane": "control",
+      "kind": "deterministic",
+      "maturity": "designed",
+      "responsibility": "Route jobs, enforce policy, and authorize transitions",
+      "can_trigger_external_side_effects": true,
+      "policy_gate": "transactional state machine and risk policy"
+    },
+    {
+      "id": "postgresql-job-state",
+      "plane": "state",
+      "kind": "deterministic",
+      "maturity": "designed",
+      "responsibility": "Persist jobs, leases, attempts, policy decisions, and audit events",
+      "can_trigger_external_side_effects": false
+    },
+    {
+      "id": "project-sandboxes",
+      "plane": "execution",
+      "kind": "deterministic",
+      "maturity": "planned",
+      "responsibility": "Isolate per-project and per-job execution",
+      "can_trigger_external_side_effects": false
+    },
+    {
+      "id": "probabilistic-workers",
+      "plane": "execution",
+      "kind": "probabilistic",
+      "maturity": "designed",
+      "responsibility": "Plan, diagnose, research, implement, and critique inside bounded tasks",
+      "deterministic_precondition": "eligible durable job, scoped capability grant, and bounded context",
+      "deterministic_postcondition": "artifact plus machine-verifiable evidence returned to Dispatcher",
+      "can_trigger_external_side_effects": false
+    },
+    {
+      "id": "artifact-verification",
+      "plane": "verification",
+      "kind": "deterministic",
+      "maturity": "validated_preproduction",
+      "responsibility": "Run tests, schema checks, hashes, guards, and acceptance policy",
+      "can_trigger_external_side_effects": false
+    },
+    {
+      "id": "knowledge-memory",
+      "plane": "knowledge",
+      "kind": "deterministic",
+      "maturity": "operational",
+      "responsibility": "Retrieve small provenance-aware context packets from durable documentation",
+      "can_trigger_external_side_effects": false
+    },
+    {
+      "id": "nix-project-environments",
+      "plane": "infrastructure",
+      "kind": "deterministic",
+      "maturity": "planned",
+      "responsibility": "Pin project toolchains and dependencies across eligible workers",
+      "can_trigger_external_side_effects": false
+    },
+    {
+      "id": "factory-droid-contribution",
+      "plane": "development",
+      "kind": "probabilistic",
+      "maturity": "validated_preproduction",
+      "responsibility": "Review and improve the public architecture kit under repository guardrails",
+      "deterministic_precondition": "clean public-safe repository, committed AGENTS.md, bounded low-autonomy prompt, Factory CLI authentication, and locally configured model credential",
+      "deterministic_postcondition": "recorded session output, reviewed diff, and passing make validate",
+      "can_trigger_external_side_effects": false
+    }
+  ],
+  "task_flow": [
+    "intake",
+    "classify",
+    "authorize",
+    "persist",
+    "lease",
+    "execute_in_sandbox",
+    "attach_artifact",
+    "verify",
+    "policy_decision",
+    "controlled_side_effect",
+    "observe",
+    "close_or_repair"
+  ],
+  "invariants": {
+    "unknown_projects_fail_closed": true,
+    "probabilistic_output_is_not_verification": true,
+    "direct_agent_to_production_denied": true,
+    "dispatcher_not_required_for_dispatcher_recovery": true,
+    "jobs_outlive_workers": true,
+    "operational_state_separate_from_knowledge": true,
+    "failed_work_remains_inspectable": true,
+    "every_terminal_state_retains_evidence": true
+  }
+}
