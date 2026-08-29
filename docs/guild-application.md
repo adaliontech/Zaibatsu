@@ -119,7 +119,7 @@ the public repository:
 
 ## Final release and submission checklist
 
-- [ ] `make validate` passes on the release commit.
+- [x] `make validate` passes on the release commit.
 - [x] `make droid-preflight` passes without printing the local key.
 - [x] The local endpoint completes one bounded Droid task.
 - [x] Factory session reference and focused diff are recorded.
@@ -129,7 +129,7 @@ the public repository:
 - [ ] Fresh clone passes `make validate` without network access.
 - [ ] Public repository and article links resolve without authentication.
 - [ ] Demo clip or screenshots show a real Factory task and validation result.
-- [ ] No private host, credential, recovery, or deployment detail is exposed.
+- [x] No private host, credential, recovery, or deployment detail is exposed.
 - [ ] Applicant attaches the required resume and personal fields directly in
       the official form.
 - [ ] Every required readiness gate is `complete` and `submission_ready` is
