@@ -30,7 +30,7 @@ and redacted status ledger without receiving production access.
 | Adversarial unit tests | Passed after Droid contribution, integration review, and branding migration | 40 of 40 tests passed |
 | Broken-link and public-safety scan | Passed after Droid contribution | Included in `scripts/validate_repository.py` |
 | Malformed-input robustness | Passed 2026-08-28 | 5,000 seeded JSON-like cases produced 20,000 validation calls across architecture, readiness, consistency, and preflight with zero unhandled exceptions |
-| Independent secret scan | Passed after branding migration | Checksum-verified Gitleaks `8.30.1` scanned the private pre-release history, sanitized release history, release tree, and authenticated fresh clone with no leaks found |
+| Independent secret scan | Passed after branding migration | Checksum-verified Gitleaks `8.30.1` scanned the private pre-release history, sanitized public history, release tree, Actions logs, and credential-free public clone with no leaks found |
 | Official external links | Resolved 2026-08-28 | 5 of 5 Factory documentation and Guild links resolved successfully |
 | Droid CLI availability | Observed | Local version `0.206.0` returned a version receipt |
 | First headless Droid attempt | Stopped before model work | Factory authentication failed, zero model turns, and no repository changes |
@@ -41,8 +41,8 @@ and redacted status ledger without receiving production access.
 | Factory/Droid contribution | Passed and reviewed | Session `46f941a9-82f8-4df3-a45c-b8158996360b`; two scoped files; 15 turns; zero Factory credits |
 | Pre-change adversarial proof | Passed | Moving `policy_decision` before `verify` produced no ordering error under the original validator |
 | Independent contribution validation | Passed | The accepted two-file diff passed 36 tests, the standalone validator, and `git diff --check` |
-| Fresh-clone reproduction | Authenticated private-remote clone passed; public proof pending | The sanitized release commit passed all 40 tests and repository validation from a fresh clone; repeat without authentication after publication |
-| Demo recording | Pending public link | See [Demo script](demo-script.md) |
+| Fresh-clone reproduction | Passed from the public remote | A credential-free clone of release commit `f039604be4d21b9538b5647665058543dc5f0012` passed all 40 tests, repository validation, workflow linting, strict Git checks, and history/tree secret scans |
+| Demo recording | Ready for owner recording | See [Demo script](demo-script.md) |
 
 ## Architecture claims
 
@@ -87,7 +87,6 @@ bootstrap, or production state.
 
 ## Evidence still required before external submission
 
-The application is not represented as submitted until a public repository
-link, fresh-clone pass, demo or screenshot, and the required applicant resume
-are attached. These are tracked in
+The application is not represented as submitted until a demo or screenshot and
+the required applicant resume are attached. These are tracked in
 [Guild application](guild-application.md).

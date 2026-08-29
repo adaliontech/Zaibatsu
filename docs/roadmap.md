@@ -12,8 +12,8 @@ authorize production migration.
 - authenticate headless Droid separately from the model credential — complete;
 - pass the static Droid preflight, then run, review, and record one bounded
   Factory/Droid contribution — complete;
-- publish the sanitized repository;
-- reproduce from a clean clone;
+- publish the sanitized repository — complete;
+- reproduce from a credential-free public clone — complete;
 - record a short demo and submit the public link.
 
 Exit: every Guild claim is backed by a public artifact or explicit private

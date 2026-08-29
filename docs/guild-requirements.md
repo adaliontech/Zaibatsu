@@ -60,16 +60,16 @@ path.
 
 | Requirement | Artifact | Status |
 | --- | --- | --- |
-| Real public project | This repository | Ready locally; public remote pending owner-authorized publication |
+| Real public project | This repository | Public and anonymously reachable |
 | Clear README | [`README.md`](../README.md) | Complete |
 | License | [`LICENSE`](../LICENSE) | Complete |
-| Runnable quickstart | [`docs/reproducibility.md`](reproducibility.md) | Complete locally without Droid |
+| Runnable quickstart | [`docs/reproducibility.md`](reproducibility.md) | Complete from a credential-free public clone without Droid |
 | Explain Factory/Droid role | [`docs/droid-session.md`](droid-session.md) | Authenticated session, scoped diff, and independent validation recorded |
 | End-to-end case study | [`docs/case-study.md`](case-study.md) | Architecture narrative and real Droid result complete |
 | Exact command/setup | [`docs/droid-session.md`](droid-session.md) | Local-Qwen command, prompt, and redacted credential boundaries recorded |
 | Screenshots/diff/clip | [`docs/demo-script.md`](demo-script.md) | Reviewed diff ready; final public clip pending |
 | Real result or metric | [`docs/evidence.md`](evidence.md) | Two-file contribution, pre-change gap, and passing validation recorded |
-| Public link in submission narrative | [`docs/guild-application.md`](guild-application.md) | URL reserved; public visibility pending |
+| Public link in submission narrative | [`docs/guild-application.md`](guild-application.md) | Public URL verified |
 | Required resume | Applicant-owned file | Required at form submission |
 
 ## Submission gate
@@ -80,5 +80,6 @@ public clean-clone proof. The exact release checklist is in
 [Guild application](guild-application.md).
 
 The bounded local-Qwen Droid run now supplies reviewable “build something with
-Factory” evidence. A public repository URL, fresh-clone proof, final clip, and
-applicant-owned form materials are still required before submission.
+Factory” evidence. The public repository and credential-free fresh-clone proof
+are complete. The final clip and applicant-owned form materials are still
+required before submission.

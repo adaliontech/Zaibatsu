@@ -196,9 +196,14 @@ class SubmissionReadinessTests(unittest.TestCase):
 
     def test_blocked_gate_requires_named_dependency(self) -> None:
         mutated = copy.deepcopy(self.readiness)
+        repository_gate = next(
+            gate for gate in mutated["gates"] if gate["id"] == "public_repository"
+        )
         demo_gate = next(
             gate for gate in mutated["gates"] if gate["id"] == "public_demo"
         )
+        repository_gate["status"] = "pending_external"
+        demo_gate["status"] = "blocked_by_dependency"
         demo_gate["blocked_by"] = []
         errors = validator.validate_submission_readiness(mutated)
         self.assertTrue(any("must exactly match" in error for error in errors))
@@ -215,11 +220,15 @@ class SubmissionReadinessTests(unittest.TestCase):
 
     def test_dependent_gate_cannot_complete_before_prerequisites(self) -> None:
         mutated = copy.deepcopy(self.readiness)
+        repository_gate = next(
+            gate for gate in mutated["gates"] if gate["id"] == "public_repository"
+        )
         clone_gate = next(
             gate for gate in mutated["gates"] if gate["id"] == "fresh_clone_reproduction"
         )
+        repository_gate["status"] = "pending_external"
         clone_gate["status"] = "complete"
-        del clone_gate["blocked_by"]
+        clone_gate.pop("blocked_by", None)
         errors = validator.validate_submission_readiness(mutated)
         self.assertTrue(any("must remain blocked" in error for error in errors))
 

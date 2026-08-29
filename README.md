@@ -125,9 +125,10 @@ claim ledger.
 The intended format is an **open-source project** backed by a technical article
 and short demo. Factory’s Guild asks builders to build with Factory, publish the
 work, and submit a public link. The bounded local-Qwen Droid contribution is
-complete and independently validated. Publication, fresh-clone reproduction,
-the final demo, and applicant-owned form materials remain explicit gates in
-[Submission readiness](architecture/submission-readiness.json).
+complete and independently validated. The repository is public and a
+credential-free fresh clone passed the complete validation suite. The final
+demo and applicant-owned form materials remain explicit gates in [Submission
+readiness](architecture/submission-readiness.json).
 
 Zaibatsu is an independent project and is not affiliated with or endorsed by
 Factory AI.

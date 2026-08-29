@@ -7,9 +7,9 @@
 **Link to submission:** `https://github.com/adaliontech/Zaibatsu`
 
 The application is prepared but must not be submitted yet. The official Guild
-path requires real Factory work and a public link. The local package is ready;
-publication, fresh-clone proof, the final demo, and applicant materials remain
-explicit gates in
+path requires real Factory work and a public link. The public repository and
+credential-free fresh-clone proof are complete; the final demo and applicant
+materials remain explicit gates in
 [`architecture/submission-readiness.json`](../architecture/submission-readiness.json).
 
 ## Current project description
@@ -53,7 +53,7 @@ Independent builder working on self-hosted agentic systems, reproducible
 infrastructure, and deterministic safety boundaries for AI-assisted software
 operations.
 
-## Social post draft — hold until publication
+## Social post draft
 
 I built Zaibatsu: deterministic control around probabilistic workers. It turns
 agentic-system boundaries into an executable architecture contract—durable
@@ -125,9 +125,9 @@ the public repository:
 - [x] Factory session reference and focused diff are recorded.
 - [x] Factory contribution maturity changes from `pending_evidence` only after
       the receipt exists.
-- [ ] Repository is published under the intended owner with an MIT license.
-- [ ] Fresh clone passes `make validate` without network access.
-- [ ] Public repository and article links resolve without authentication.
+- [x] Repository is published under the intended owner with an MIT license.
+- [x] Fresh clone passes `make validate` without network access.
+- [x] Public repository and article links resolve without authentication.
 - [ ] Demo clip or screenshots show a real Factory task and validation result.
 - [x] No private host, credential, recovery, or deployment detail is exposed.
 - [ ] Applicant attaches the required resume and personal fields directly in

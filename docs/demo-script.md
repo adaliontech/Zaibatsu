@@ -1,7 +1,8 @@
 # Demo script
 
 The demo has two cuts. The architecture cut and factual Droid narration are
-ready; the final Guild cut still needs recording after publication.
+ready; the public repository is available and the final Guild cut is ready for
+owner recording.
 
 The demo uses only the public repository. Do not open terminals, tabs, history,
 or files containing private infrastructure, model credentials, or personal

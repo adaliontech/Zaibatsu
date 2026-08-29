@@ -43,27 +43,21 @@
     },
     {
       "id": "public_repository",
-      "status": "pending_external",
+      "status": "complete",
       "required_for_submission": true,
-      "evidence": "Awaiting owner-authorized publication"
+      "evidence": "https://github.com/adaliontech/Zaibatsu is public and anonymously reachable"
     },
     {
       "id": "fresh_clone_reproduction",
-      "status": "blocked_by_dependency",
+      "status": "complete",
       "required_for_submission": true,
-      "blocked_by": [
-        "public_repository"
-      ],
-      "evidence": "Run make validate from a fresh clone after publication"
+      "evidence": "Credential-free public clone of f039604be4d21b9538b5647665058543dc5f0012 passed make validate with 40 tests, workflow linting, strict Git checks, and history/tree secret scans"
     },
     {
       "id": "public_demo",
-      "status": "blocked_by_dependency",
+      "status": "pending_external",
       "required_for_submission": true,
-      "blocked_by": [
-        "public_repository"
-      ],
-      "evidence": "Final Guild narration and capture checklist include the real Droid result; recording awaits the public repository URL"
+      "evidence": "Public URL and final Guild narration are ready; owner records and publishes the final clip or screenshots"
     },
     {
       "id": "applicant_materials",
