@@ -104,7 +104,7 @@
       "id": "public_demo",
       "status": "pending_external",
       "required_for_submission": true,
-      "evidence": "The v1.4.0 candidate passed fresh-clone proof; record and publish the final clip from the immutable release tag"
+      "evidence": "Immutable v1.4.0 is public and passed tag-clone reproduction; record and publish the final clip from that release tag"
     },
     {
       "id": "applicant_materials",

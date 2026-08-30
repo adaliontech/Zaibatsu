@@ -20,9 +20,8 @@ changes.
   evidence as a historical immutable release;
 - preserve the reproduced immutable `v1.3.0` content-addressed module-artifact
   and portable-bundle proof before recording its demo;
-- preserve the reproduced `v1.4.0` verified inspection and semantic bundle
-  comparison candidate, then publish its immutable release before recording
-  the final demo;
+- preserve the reproduced immutable `v1.4.0` verified inspection and semantic
+  bundle-comparison proof before recording the final demo;
 - record the Guild demo and complete applicant-owned submission materials.
 
 Exit: the public narrative, architecture, portable factory, module artifacts,

@@ -15,8 +15,9 @@ passed their own public clone and CI proofs. The v1.3.0 portable-bundle
 candidate passed the same proof and is now an immutable public release; the
 v1.4.0 verified-inspection and semantic-comparison candidate passed 143 tests,
 Gitleaks, semantic assertions, output-schema validation, and independent CI
-from a credential-disabled public clone. Its immutable release, final demo, and
-applicant materials remain explicit gates in
+from a credential-disabled public clone. The immutable v1.4.0 release and its
+tag clone passed the same boundary. The final demo and applicant materials
+remain explicit gates in
 [`architecture/submission-readiness.json`](../architecture/submission-readiness.json).
 
 ## Current project description
