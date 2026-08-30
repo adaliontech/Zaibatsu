@@ -92,4 +92,8 @@ same complete public boundary. The v1.9.0 signed runtime-evidence candidate
 passed the 194-test clean-clone, schema, signature, exact-regeneration,
 Gitleaks, and independent-CI boundary; its immutable release passed roof and
 tag CI, live-schema byte checks, and full-history tag-clone reproduction. The
+v1.10 runtime-evidence-pack candidate passed 203 tests, 90-file validation,
+exact pack/assessment/rebuild regeneration, both Gitleaks modes, five strict
+schemas, and independent CI from a credential-disabled full-history clone. Its
+roof, tag, tagged-schema, tag-clone, and immutable-release gates remain. The
 final clip and applicant-owned form submission remain.

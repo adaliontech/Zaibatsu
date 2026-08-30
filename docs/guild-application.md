@@ -246,8 +246,11 @@ the public repository:
 - [x] Runtime-evidence-pack v1.10 working candidate passes 203 local tests,
       90-file validation, strict pack/assessment/rebuild schemas, exact artifact
       regeneration, and archive/schema/material/replay/type/authority attacks.
-- [ ] v1.10 passes credential-disabled clean-clone, Gitleaks, independent CI,
-      tagged-schema byte checks, and immutable-release proof.
+- [x] v1.10 candidate commit passes credential-disabled full-history clone,
+      both Gitleaks modes, exact regeneration, five strict schemas, and
+      independent CI.
+- [ ] v1.10 passes evidence-roof and tag CI, tagged-schema byte checks,
+      full-history tag-clone reproduction, and immutable-release proof.
 - [x] Public repository and article links resolve without authentication.
 - [ ] Demo clip or screenshots show a real Factory task and validation result.
 - [x] No private host, credential, recovery, or deployment detail is exposed.

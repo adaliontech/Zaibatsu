@@ -602,10 +602,13 @@ release uses annotated tag object `8667e6a104fa0e9fd44568847015d37de3c3e442`
 over evidence roof `6502a2e6ade2ef3a6c6d6c4ad6656dbf8d7b889c`;
 roof and tag CI, a credential-disabled full-history tag clone, four live-schema
 byte checks, exact regeneration, and strict external schema validation all
-passed. GitHub reports the release as immutable. The v1.10 working candidate
-adds the canonical runtime-evidence pack and currently passes 203 tests and
-90-file validation locally; clean-clone, CI, tag, and immutable-release proof
-are not claimed until those gates run.
+passed. GitHub reports the release as immutable. The v1.10 candidate at
+`359cc1bf4c28c4b8dc73f210c685820ee15475c4` adds the canonical
+runtime-evidence pack and passed 203 tests, 90-file validation, exact artifact
+regeneration, both Gitleaks modes, and five strict schemas from a
+credential-disabled full-history clone; [candidate CI run
+33342847863](https://github.com/adaliontech/Zaibatsu/actions/runs/33342847863)
+also passed. Tag and immutable-release proof remain pending.
 
 Zaibatsu is an independent project and is not affiliated with or endorsed by
 Factory AI.
