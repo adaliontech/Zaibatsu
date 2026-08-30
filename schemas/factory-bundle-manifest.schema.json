@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.3.0/schemas/factory-bundle-manifest.schema.json",
+  "title": "Zaibatsu portable factory control-bundle manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_schema", "schema_version", "factory", "source", "files", "selected_modules", "rebuild_claim"],
+  "properties": {
+    "contract_schema": {"const": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.3.0/schemas/factory-bundle-manifest.schema.json"},
+    "schema_version": {"const": "zaibatsu.factory-bundle-manifest.v1"},
+    "factory": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "class"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+        "class": {"enum": ["control_factory", "economic_factory"]}
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["factory_definition_sha256", "module_catalog_sha256", "factory_plan_sha256", "module_api_version"],
+      "properties": {
+        "factory_definition_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "module_catalog_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "factory_plan_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "module_api_version": {"const": "zaibatsu.module.v1"}
+      }
+    },
+    "files": {
+      "type": "array",
+      "minItems": 17,
+      "maxItems": 17,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["path", "sha256", "size"],
+        "properties": {
+          "path": {"type": "string", "minLength": 1},
+          "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+          "size": {"type": "integer", "minimum": 1, "maximum": 262144}
+        }
+      }
+    },
+    "selected_modules": {
+      "type": "array",
+      "minItems": 9,
+      "maxItems": 9,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["position", "slot", "module", "artifact_sha256"],
+        "properties": {
+          "position": {"type": "integer", "minimum": 0, "maximum": 8},
+          "slot": {"type": "string"},
+          "module": {"type": "string"},
+          "artifact_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+        }
+      }
+    },
+    "rebuild_claim": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["scope", "byte_reproducible", "contains_selected_module_contracts", "contains_contract_schemas", "contains_runtime_implementations", "deploys_infrastructure", "proves_runtime_recovery"],
+      "properties": {
+        "scope": {"const": "portable_control_bundle"},
+        "byte_reproducible": {"const": true},
+        "contains_selected_module_contracts": {"const": true},
+        "contains_contract_schemas": {"const": true},
+        "contains_runtime_implementations": {"const": false},
+        "deploys_infrastructure": {"const": false},
+        "proves_runtime_recovery": {"const": false}
+      }
+    }
+  }
+}

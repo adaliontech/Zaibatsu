@@ -1,0 +1,22 @@
+{
+  "contract_schema": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.3.0/schemas/module-artifact.schema.json",
+  "schema_version": "zaibatsu.module-artifact.v1",
+  "module_api_version": "zaibatsu.module.v1",
+  "artifact_kind": "module_contract",
+  "id": "cron-scheduler",
+  "slot": "scheduling",
+  "kind": "deterministic",
+  "implementation_status": "contract_only",
+  "policy_value": "cron",
+  "description": "Describe one bounded cron scheduler of record",
+  "rebuild_boundary": "schedule",
+  "requires_slots": ["host_reproduction"],
+  "provides": ["scheduler_contract", "duplicate_scheduler_denial"],
+  "side_effect_authority": false,
+  "runtime": {
+    "implementation_included": false,
+    "entrypoint": null,
+    "environment_lock_included": false,
+    "deploys_infrastructure": false
+  }
+}

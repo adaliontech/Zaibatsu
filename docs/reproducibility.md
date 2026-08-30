@@ -71,7 +71,12 @@ The validator confirms:
     policy rather than a hard-coded implementation ID, and cannot introduce a
     forward dependency or side-effect authority;
 23. the checked-in control plan exactly matches the canonical definition and
-    catalog digests, and compiling those inputs twice produces identical bytes.
+    catalog digests, and compiling those inputs twice produces identical bytes;
+24. every catalog module binds a module-local, symlink-free artifact whose
+    canonical digest and complete contract agree with the catalog and plan;
+25. the portable bundle includes all selected module contracts and five
+    schemas, rejects unsafe or ambiguous archive forms without extraction, and
+    reproduces identical canonical USTAR bytes.
 
 The adversarial tests mutate valid architecture data and prove that the
 validator rejects meta-factory role drift, a missing or reclassified factory,
@@ -91,6 +96,10 @@ python3 scripts/zaibatsu.py catalog-check
 python3 scripts/zaibatsu.py verify-plan \
   examples/economic-factory.plan.json examples/economic-factory.json
 python3 scripts/zaibatsu.py rebuild-check examples/economic-factory.json
+python3 scripts/zaibatsu.py bundle examples/economic-factory.json \
+  --output /tmp/example-product.factory.tar
+python3 scripts/zaibatsu.py verify-bundle \
+  /tmp/example-product.factory.tar
 ```
 
 To create a new definition, run `python3 scripts/zaibatsu.py scaffold --help`.
@@ -99,10 +108,10 @@ evidence that the new factory is deployed. Operational or
 validated-preproduction maturity requires a scoped, content-addressed,
 independently verified receipt binding.
 
-The rebuild check covers the deterministic control plan. It is path-independent
-and offline, but it does not run Ansible, realize Nix, activate cron/systemd,
-contact a model, deploy a service, or demonstrate recovery. Those are separate
-promotion gates.
+The rebuild check and portable bundle cover the deterministic contract layer.
+They are path-independent and offline, but do not run Ansible, realize Nix,
+activate cron/systemd, contact a model, deploy a service, or demonstrate
+recovery. Those are separate promotion gates.
 
 ## Optional Droid preflight
 
@@ -148,7 +157,7 @@ release reproduction, clone the named tag rather than the moving default
 branch:
 
 ```bash
-git clone --depth 1 --branch v1.2.0 https://github.com/adaliontech/Zaibatsu.git
+git clone --depth 1 --branch v1.3.0 https://github.com/adaliontech/Zaibatsu.git
 cd Zaibatsu
 make validate
 ```

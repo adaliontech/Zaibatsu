@@ -10,8 +10,10 @@ The application is prepared but must not be submitted yet. The official Guild
 path requires real Factory work and a public link. Immutable v1.1.0 passed its
 credential-disabled public-clone proof and independent GitHub CI. Immutable
 v1.1.1 independently passed the same public boundary. The bounded v1.1.2
-portable-schema correction passed its own public clone and CI proof; the final
-demo and applicant materials remain explicit gates in
+portable-schema correction and v1.2.0 deterministic module-composition release
+passed their own public clone and CI proofs. The v1.3.0 portable-bundle
+candidate requires the same proof before release; the final demo and applicant
+materials remain explicit gates in
 [`architecture/submission-readiness.json`](../architecture/submission-readiness.json).
 
 ## Current project description
@@ -19,11 +21,13 @@ demo and applicant materials remain explicit gates in
 Zaibatsu is an evidence-gated architecture and toolkit for building and
 governing project-scoped software factories. It models one control factory and
 two economic factories, and provides a portable contract others can scaffold
-and validate. Git/SOPS versioning, Ansible host reproduction, cron/systemd
-scheduler ownership, modular agent skeletons, interchangeable LLM harnesses,
-deterministic gates, and reviewed feedback are represented at their actual
-maturities. Nix environments remain planned; the agent scaffold is tested
-source but not deployed.
+and validate. Its content-addressed module contracts compose into a resolved
+plan and self-verifying portable bundle. Git/SOPS versioning, Ansible host
+reproduction, cron/systemd scheduler ownership, modular agent skeletons,
+interchangeable LLM harnesses, deterministic gates, and reviewed feedback are
+represented at their actual maturities. The bundle contains contracts and
+schemas, not runtime implementations. Nix environments remain planned; the
+agent scaffold is tested source but not deployed.
 
 The core repository works without a model or Droid credentials. For the Guild
 case study, authenticated Factory Droid used an owner-operated GGUF whose
@@ -45,7 +49,7 @@ new test moves `policy_decision` before `verify`; the pre-change validator
 accepted that unsafe ordering, while the shipped validator rejects it with a
 deterministic adjacent-stage error. Droid reported 36 passing tests, and an
 independent run reproduced all 36 before later integration, branding, release,
-and meta-factory checks brought the package to 114 passing tests. No model or
+and meta-factory checks brought the package to 136 passing tests. No model or
 Factory credential is published.
 
 ## One-line description
@@ -62,9 +66,10 @@ deterministic operational boundaries.
 
 I built Zaibatsu, the factory of software factories: an evidence-gated control
 layer for versioning, scheduling, verifying, and improving project-scoped
-software factories. It includes portable schemas and a validation CLI;
-Git/SOPS and Ansible have bounded evidence, Nix remains planned, and modular
-agent skeletons remain tested source rather than deployed authority.
+software factories. It includes content-addressed module contracts and a
+byte-reproducible, self-verifying control bundle; Git/SOPS and Ansible have
+bounded evidence, Nix remains planned, and modular agent skeletons remain
+tested source rather than deployed authority.
 Local-Qwen-backed Factory Droid strengthened and tested one deterministic
 gate-ordering invariant, with no direct model-to-production path.
 https://github.com/adaliontech/Zaibatsu @FactoryAI
@@ -78,7 +83,9 @@ meta-factory above my real self-hosted software factories. It defines factory
 identity, lifecycle, reproduction, scheduling, modular work,
 harness-independent verification, feedback, and promotion. Anyone can clone
 it, scaffold a new factory definition, and validate the model and adversarial
-cases offline without access to my private fleet.
+cases offline without access to my private fleet. They can substitute a
+policy-compatible hashed module artifact and reproduce the same canonical
+control bundle without granting it runtime or deployment authority.
 
 ### Why does it matter?
 

@@ -1,13 +1,13 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.2.0/schemas/factory-plan.schema.json",
+  "$id": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.3.0/schemas/factory-plan.schema.json",
   "title": "Zaibatsu deterministic factory control plan",
   "type": "object",
   "additionalProperties": false,
   "required": ["contract_schema", "schema_version", "factory", "source", "module_order", "modules", "deterministic_gates", "rebuild_claim", "plan_sha256"],
   "properties": {
-    "contract_schema": {"const": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.2.0/schemas/factory-plan.schema.json"},
-    "schema_version": {"const": "zaibatsu.factory-plan.v1"},
+    "contract_schema": {"const": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.3.0/schemas/factory-plan.schema.json"},
+    "schema_version": {"const": "zaibatsu.factory-plan.v2"},
     "factory": {
       "type": "object",
       "additionalProperties": false,
@@ -39,11 +39,21 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["position", "slot", "module", "policy_value", "interface_version", "kind", "implementation_status", "side_effect_authority", "requires_slots", "provides", "rebuild_boundary"],
+        "required": ["position", "slot", "module", "artifact", "policy_value", "interface_version", "kind", "implementation_status", "side_effect_authority", "requires_slots", "provides", "rebuild_boundary"],
         "properties": {
           "position": {"type": "integer", "minimum": 0, "maximum": 8},
           "slot": {"type": "string"},
           "module": {"type": "string"},
+          "artifact": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["kind", "path", "sha256"],
+            "properties": {
+              "kind": {"const": "module_contract"},
+              "path": {"type": "string"},
+              "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+            }
+          },
           "policy_value": {
             "oneOf": [
               {"type": "string", "minLength": 1},

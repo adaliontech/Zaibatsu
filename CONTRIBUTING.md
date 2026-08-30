@@ -31,7 +31,9 @@ harnesses, verification, or feedback must keep
 [`architecture/system.json`](architecture/system.json) consistent.
 Changes to a module policy, dependency, interface, or implementation boundary
 must also update the catalog, regenerate the example plan, and add a drift or
-compatibility test.
+compatibility test. Regenerate the example bundle manifest and exercise
+`bundle` plus `verify-bundle` whenever a selected artifact, plan, or bundled
+schema changes; do not commit generated tar archives.
 
 ## Pull request evidence
 

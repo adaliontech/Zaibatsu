@@ -11,12 +11,19 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from factory_bundle import (
+    BUNDLE_MANIFEST_SCHEMA_REFERENCE,
+    build_bundle_payloads,
+    validate_bundle_manifest,
+)
 from factory_composer import (
     FACTORY_PLAN_SCHEMA_REFERENCE,
+    MODULE_ARTIFACT_SCHEMA_REFERENCE,
     MODULE_CATALOG_SCHEMA_REFERENCE,
     load_json_file,
     load_factory_plan,
     load_module_catalog,
+    load_module_artifacts,
     validate_factory_bindings,
     validate_factory_plan,
     validate_module_catalog,
@@ -28,6 +35,22 @@ ARCHITECTURE_PATH = ROOT / "architecture" / "system.json"
 FACTORY_MODEL_PATH = ROOT / "architecture" / "factory-model.json"
 READINESS_PATH = ROOT / "architecture" / "submission-readiness.json"
 EXAMPLE_FACTORY_PATH = ROOT / "examples" / "economic-factory.json"
+EXAMPLE_BUNDLE_MANIFEST_PATH = (
+    ROOT / "examples" / "economic-factory.bundle-manifest.json"
+)
+
+MODULE_ARTIFACT_RELATIVES = (
+    "catalog/modules/ansible-host-reproduction/module.json",
+    "catalog/modules/bounded-runtime-secrets/module.json",
+    "catalog/modules/cron-scheduler/module.json",
+    "catalog/modules/deterministic-verification/module.json",
+    "catalog/modules/git-source/module.json",
+    "catalog/modules/nix-worker-environment/module.json",
+    "catalog/modules/owner-gated-feedback/module.json",
+    "catalog/modules/sops-age-static-secrets/module.json",
+    "catalog/modules/systemd-scheduler/module.json",
+    "catalog/modules/typed-agent-execution/module.json",
+)
 
 REQUIRED_FILES = (
     "README.md",
@@ -43,7 +66,9 @@ REQUIRED_FILES = (
     "architecture/system.json",
     "architecture/submission-readiness.json",
     "catalog/modules.json",
+    *MODULE_ARTIFACT_RELATIVES,
     "examples/economic-factory.json",
+    "examples/economic-factory.bundle-manifest.json",
     "examples/economic-factory.plan.json",
     "evidence/dispatcher-validation-v1.json",
     "evidence/droid-contribution-v1.json",
@@ -63,14 +88,17 @@ REQUIRED_FILES = (
     "schemas/dispatcher-validation-receipt.schema.json",
     "schemas/droid-contribution-receipt.schema.json",
     "schemas/factory-definition.schema.json",
+    "schemas/factory-bundle-manifest.schema.json",
     "schemas/factory-plan.schema.json",
     "schemas/factory-model.schema.json",
     "schemas/meta-factory-foundations-receipt.schema.json",
     "schemas/module-catalog.schema.json",
+    "schemas/module-artifact.schema.json",
     "schemas/qwen-model-observation-receipt.schema.json",
     "schemas/submission-readiness.schema.json",
     "schemas/system.schema.json",
     "scripts/droid_preflight.py",
+    "scripts/factory_bundle.py",
     "scripts/factory_composer.py",
     "scripts/zaibatsu.py",
     "scripts/validate_repository.py",
@@ -93,7 +121,7 @@ ARCHITECTURE_SCHEMA_VERSION = "zaibatsu.architecture.v1"
 FACTORY_MODEL_SCHEMA_VERSION = "zaibatsu.factory-model.v1"
 READINESS_SCHEMA_VERSION = "zaibatsu.submission-readiness.v1"
 FACTORY_DEFINITION_SCHEMA_VERSION = "zaibatsu.factory-definition.v2"
-INTEGRATED_TEST_COUNT = 114
+INTEGRATED_TEST_COUNT = 136
 DROID_FACTORY_CLI_VERSION = "0.206.0"
 DROID_SESSION_REFERENCE = "46f941a9-82f8-4df3-a45c-b8158996360b"
 PUBLIC_REPOSITORY_URL = "https://github.com/adaliontech/Zaibatsu"
@@ -131,7 +159,12 @@ CONTRACT_SCHEMA_REFERENCES = {
     "architecture/system.json": "../schemas/system.schema.json",
     "architecture/submission-readiness.json": "../schemas/submission-readiness.schema.json",
     "catalog/modules.json": MODULE_CATALOG_SCHEMA_REFERENCE,
+    **{
+        relative: MODULE_ARTIFACT_SCHEMA_REFERENCE
+        for relative in MODULE_ARTIFACT_RELATIVES
+    },
     "examples/economic-factory.json": PORTABLE_FACTORY_SCHEMA_REFERENCE,
+    "examples/economic-factory.bundle-manifest.json": BUNDLE_MANIFEST_SCHEMA_REFERENCE,
     "examples/economic-factory.plan.json": FACTORY_PLAN_SCHEMA_REFERENCE,
     "evidence/dispatcher-validation-v1.json": "../schemas/dispatcher-validation-receipt.schema.json",
     "evidence/droid-contribution-v1.json": "../schemas/droid-contribution-receipt.schema.json",
@@ -141,7 +174,14 @@ CONTRACT_SCHEMA_REFERENCES = {
 
 REMOTE_SCHEMA_LOCAL_PATHS = {
     "catalog/modules.json": "schemas/module-catalog.schema.json",
+    **{
+        relative: "schemas/module-artifact.schema.json"
+        for relative in MODULE_ARTIFACT_RELATIVES
+    },
     "examples/economic-factory.json": "schemas/factory-definition.schema.json",
+    "examples/economic-factory.bundle-manifest.json": (
+        "schemas/factory-bundle-manifest.schema.json"
+    ),
     "examples/economic-factory.plan.json": "schemas/factory-plan.schema.json",
 }
 
@@ -1216,6 +1256,7 @@ def validate_submission_readiness(data: Any) -> list[str]:
                     "architecture/submission-readiness.json",
                     "catalog/modules.json",
                     "examples/economic-factory.json",
+                    "examples/economic-factory.bundle-manifest.json",
                     "examples/economic-factory.plan.json",
                 }
                 if (
@@ -1631,13 +1672,16 @@ def validate_contract_schema_files(root: Path = ROOT) -> list[str]:
         if schema.get("$schema") != "https://json-schema.org/draft/2020-12/schema":
             errors.append(f"{relative}: project-owned schema must declare JSON Schema 2020-12")
         schema_release = (
-            "v1.2.0"
+            "v1.3.0"
             if schema_path.name
             in {
-                "factory-definition.schema.json",
+                "factory-bundle-manifest.schema.json",
                 "factory-plan.schema.json",
+                "module-artifact.schema.json",
                 "module-catalog.schema.json",
             }
+            else "v1.2.0"
+            if schema_path.name == "factory-definition.schema.json"
             else "v1.1.1"
         )
         expected_id = (
@@ -1692,7 +1736,9 @@ def main() -> int:
     factory_model: Any = None
     factory_definition: Any = None
     module_catalog: Any = None
+    module_artifacts: dict[str, dict[str, Any]] = {}
     factory_plan: Any = None
+    bundle_manifest: Any = None
     readiness: Any = None
     errors.extend(validate_public_paths())
     errors.extend(validate_required_files())
@@ -1721,6 +1767,8 @@ def main() -> int:
         errors.append(f"cannot load module catalog: {exc}")
     else:
         errors.extend(validate_module_catalog(module_catalog))
+        module_artifacts, artifact_errors = load_module_artifacts(module_catalog)
+        errors.extend(artifact_errors)
         if isinstance(factory_definition, dict):
             errors.extend(validate_factory_bindings(factory_definition, module_catalog))
     try:
@@ -1732,6 +1780,34 @@ def main() -> int:
             errors.extend(
                 validate_factory_plan(factory_plan, factory_definition, module_catalog)
             )
+    try:
+        bundle_manifest = load_json_file(EXAMPLE_BUNDLE_MANIFEST_PATH)
+    except (OSError, ValueError) as exc:
+        errors.append(f"cannot load example bundle manifest: {exc}")
+    else:
+        if all(
+            isinstance(value, dict)
+            for value in (factory_definition, module_catalog, factory_plan)
+        ) and module_artifacts:
+            try:
+                payloads = build_bundle_payloads(
+                    factory_definition,
+                    module_catalog,
+                    factory_plan,
+                    module_artifacts,
+                )
+            except (KeyError, TypeError, ValueError) as exc:
+                errors.append(f"cannot rebuild example bundle payloads: {exc}")
+            else:
+                errors.extend(
+                    validate_bundle_manifest(
+                        bundle_manifest,
+                        factory_definition,
+                        module_catalog,
+                        factory_plan,
+                        payloads,
+                    )
+                )
     try:
         readiness = json.loads(READINESS_PATH.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:
@@ -1757,7 +1833,10 @@ def main() -> int:
         f"- {len(factory_model['factory_instances'])} software factories and "
         f"{len(factory_model['capabilities'])} meta-factory capabilities checked"
     )
-    print("- reusable factory definition, module catalog, and control plan checked")
+    print(
+        "- reusable factory definition, content-addressed modules, control plan, "
+        "and bundle manifest checked"
+    )
     print(f"- {len(EVIDENCE_CONTRACTS)} evidence receipts checked")
     print(f"- {len(REQUIRED_FACTORY_INVARIANTS)} meta-factory invariants checked")
     print(f"- {len(REQUIRED_TRUE_INVARIANTS)} fail-closed invariants checked")

@@ -1,0 +1,22 @@
+{
+  "contract_schema": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.3.0/schemas/module-artifact.schema.json",
+  "schema_version": "zaibatsu.module-artifact.v1",
+  "module_api_version": "zaibatsu.module.v1",
+  "artifact_kind": "module_contract",
+  "id": "bounded-runtime-secrets",
+  "slot": "runtime_secrets",
+  "kind": "deterministic",
+  "implementation_status": "contract_only",
+  "policy_value": "bounded_secret_manager",
+  "description": "Describe factory-scoped runtime secret delivery without embedding values",
+  "rebuild_boundary": "runtime_identity_and_scope",
+  "requires_slots": ["source_versioning"],
+  "provides": ["secret_scope_contract", "machine_identity_contract"],
+  "side_effect_authority": false,
+  "runtime": {
+    "implementation_included": false,
+    "entrypoint": null,
+    "environment_lock_included": false,
+    "deploys_infrastructure": false
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "contract_schema": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.3.0/schemas/module-artifact.schema.json",
+  "schema_version": "zaibatsu.module-artifact.v1",
+  "module_api_version": "zaibatsu.module.v1",
+  "artifact_kind": "module_contract",
+  "id": "typed-agent-execution",
+  "slot": "execution",
+  "kind": "probabilistic_adapter",
+  "implementation_status": "source_only",
+  "policy_value": "model_independent_typed_ports",
+  "description": "Bind deterministic or model workers behind typed task and artifact ports",
+  "rebuild_boundary": "worker_contract",
+  "requires_slots": ["runtime_secrets", "worker_environment", "scheduling"],
+  "provides": ["typed_task", "candidate_artifact", "execution_receipt"],
+  "side_effect_authority": false,
+  "runtime": {
+    "implementation_included": false,
+    "entrypoint": null,
+    "environment_lock_included": false,
+    "deploys_infrastructure": false
+  }
+}

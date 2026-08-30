@@ -1,5 +1,23 @@
 # Changelog
 
+## 1.3.0 - Unreleased
+
+- Added individually content-addressed module contract artifacts for every
+  catalog implementation. Catalog validation denies missing, drifting,
+  symlinked, escaping, or digest-mismatched artifacts.
+- Added deterministic `bundle` and `verify-bundle` CLI workflows. The canonical
+  USTAR bundle contains the factory definition, catalog, resolved plan, all
+  selected module contracts, and the five contract schemas.
+- Made the bundle self-verifying without extraction: unsafe paths, links,
+  special files, duplicate or extra members, noncanonical metadata or JSON,
+  malformed archives, payload/schema tampering, schema-body substitution even
+  after manifest recomputation, and trailing data fail closed.
+- Proved a differently named, independently hashed compatible module artifact
+  can replace a bundled implementation and still produce a verified bundle.
+- Preserved the evidence boundary: bundles contain no runtime implementation,
+  entrypoint, environment lock, infrastructure deployment, or recovery proof.
+- Expanded the public adversarial suite from 114 to 136 tests.
+
 ## 1.2.0 - 2026-08-30
 
 - Added a versioned reusable module catalog and policy-compatible module

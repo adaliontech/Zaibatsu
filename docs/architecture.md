@@ -24,9 +24,9 @@ The shared layer controls factory contracts. Each economic factory retains its
 own identity, data, credentials, repositories, schedules, acceptance rules,
 budgets, and production authority.
 
-## Four machine-readable views
+## Five machine-readable views
 
-Zaibatsu deliberately separates four questions:
+Zaibatsu deliberately separates five questions:
 
 | Contract | Question |
 | --- | --- |
@@ -34,6 +34,7 @@ Zaibatsu deliberately separates four questions:
 | [`architecture/system.json`](../architecture/system.json) | Which control-plane components execute the work, what is their maturity, and which invariants constrain them? |
 | [`examples/economic-factory.json`](../examples/economic-factory.json) | Which policies and evidence bindings define one portable factory? |
 | [`catalog/modules.json`](../catalog/modules.json) plus [`examples/economic-factory.plan.json`](../examples/economic-factory.plan.json) | Which compatible module implementations resolve into its deterministic control plan? |
+| [`examples/economic-factory.bundle-manifest.json`](../examples/economic-factory.bundle-manifest.json) | Which exact definition, catalog, plan, selected module contracts, and schemas form its portable control bundle? |
 
 The validator requires the factory registry and shared component maturities to
 agree. A narrative edit cannot silently turn planned Nix reproduction or
@@ -62,11 +63,26 @@ resulting plan. `verify-plan` rejects any definition drift, catalog drift,
 module-policy mismatch, order change, or digest edit. `rebuild-check` compiles
 the same inputs twice and requires identical canonical bytes.
 
+Every catalog entry also names a module-local contract artifact and its
+canonical SHA-256 digest. The artifact repeats the typed interface and policy
+boundary in a portable unit while explicitly denying a bundled runtime,
+entrypoint, environment lock, or effect authority. A replacement module needs
+a compatible policy value and a distinct artifact whose content matches its
+catalog contract and digest.
+
+`bundle` packages the canonical definition, complete catalog, resolved plan,
+nine selected module contracts, five project-owned schemas, and a digest
+manifest into a deterministic uncompressed USTAR archive. `verify-bundle`
+reads it entirely in memory and refuses traversal paths, links, special files,
+duplicates, extras, noncanonical metadata or JSON, payload drift, schema drift,
+and trailing bytes. It then reproduces the exact archive bytes.
+
 This boundary is deliberately narrower than infrastructure reproduction. The
-plan owns no side-effect authority and explicitly states that it neither
-deploys infrastructure nor proves runtime recovery. Ansible application, Nix
-realization, scheduler activation, model execution, effect authorization, and
-recovery each require their own evidence.
+plan and bundle own no side-effect authority and explicitly state that they
+contain no runtime implementations, deploy no infrastructure, and prove no
+runtime recovery. Ansible application, Nix realization, scheduler activation,
+model execution, effect authorization, and recovery each require their own
+evidence.
 
 ## Factory classes
 

@@ -1,6 +1,6 @@
 # Demo script
 
-Use only a fresh clone of immutable `v1.2.0` after its release proof passes. Do
+Use only a fresh clone of immutable `v1.3.0` after its release proof passes. Do
 not show private terminals, history, settings, infrastructure, model
 credentials, notifications, or personal data. Lead with the real Factory
 result; explain the larger architecture only after the reviewer sees working
@@ -60,12 +60,17 @@ Then run:
 python3 scripts/zaibatsu.py verify-plan \
   examples/economic-factory.plan.json examples/economic-factory.json
 python3 scripts/zaibatsu.py rebuild-check examples/economic-factory.json
+python3 scripts/zaibatsu.py bundle examples/economic-factory.json \
+  --output /tmp/example-product.factory.tar
+python3 scripts/zaibatsu.py verify-bundle \
+  /tmp/example-product.factory.tar
 ```
 
 > The factory definition selects policy-compatible reusable modules. The plan
-> binds the complete definition and catalog by SHA-256 and rebuilds to the same
-> bytes. This proves deterministic control-plan composition, not deployment or
-> runtime recovery.
+> binds the complete definition, catalog, and selected module contracts by
+> SHA-256 and rebuilds to the same bytes. The portable bundle also carries its
+> five schemas and verifies without extraction. This proves deterministic
+> contract packaging, not deployment or runtime recovery.
 
 ### 1:35–2:05 — Run every deterministic gate
 
@@ -80,7 +85,7 @@ make validate
 > evidence, force-added ignored files, misleading media suffixes, and premature
 > readiness.
 
-Pause on the final 114-test pass and validator summary.
+Pause on the final 136-test pass and validator summary.
 
 ### 2:05–2:30 — Honest current boundary
 
@@ -96,7 +101,7 @@ Open `docs/implementation-status.md`.
 
 ## Before recording
 
-1. Clone the immutable `v1.2.0` tag into a new temporary directory after its
+1. Clone the immutable `v1.3.0` tag into a new temporary directory after its
    release proof passes.
 2. Increase terminal font size and hide unrelated tabs and notifications.
 3. Run `make validate` once off camera.
@@ -106,13 +111,14 @@ Open `docs/implementation-status.md`.
 
 ## Capture checklist
 
-- [ ] Repository URL and `v1.2.0` tag visible once.
+- [ ] Repository URL and `v1.3.0` tag visible once.
 - [ ] Real Factory/Droid session receipt and shipped diff visible first.
 - [ ] Pre-change gap and adversarial post-change result are understandable.
 - [ ] Portable factory scaffold and validation succeed on screen.
 - [ ] Checked-in plan verification and byte-stable rebuild succeed on screen.
+- [ ] Portable bundle creation and in-memory verification succeed on screen.
 - [ ] “The factory of software factories” hierarchy is visible.
-- [ ] `make validate` shows all 114 tests and contract checks passing.
+- [ ] `make validate` shows all 136 tests and contract checks passing.
 - [ ] Maturity limits are stated explicitly.
 - [ ] No private history, addresses, credentials, local settings, or host details.
 - [ ] Captions are included.

@@ -8,20 +8,23 @@ changes.
 
 - define Zaibatsu as the control factory above economic software factories;
 - encode the closed factory registry and lifecycle;
-- publish the portable factory definition, reusable module catalog, and
-  content-addressed deterministic control plan;
+- publish the portable factory definition, reusable module catalog,
+  content-addressed module contracts, deterministic control plan, and portable
+  self-verifying bundle;
 - represent Git/SOPS, Ansible/Nix, cron/systemd, modular skeletons, harnesses,
   deterministic gates, and recursive improvement at truthful maturity;
 - publish sanitized evidence and adversarial tests;
 - preserve the immutable `v1.1.0` and `v1.1.1` proofs and reproduce corrected
   `v1.1.2` from a credential-free clone;
 - preserve the reproduced `v1.2.0` module-composition candidate and record its
-  demo from the immutable tag;
+  evidence as a historical immutable release;
+- reproduce and release the `v1.3.0` content-addressed module-artifact and
+  portable-bundle candidate before recording its demo;
 - record the Guild demo and complete applicant-owned submission materials.
 
-Exit: the public narrative, architecture, portable factory, module catalog,
-control plan, readiness, and evidence contracts describe the same meta-factory
-without inflating source-only or planned capabilities.
+Exit: the public narrative, architecture, portable factory, module artifacts,
+control plan, bundle, readiness, and evidence contracts describe the same
+meta-factory without inflating source-only or planned capabilities.
 
 ## Phase 1 — Factory identity and versioning
 
@@ -109,6 +112,8 @@ uncertain effects, and recovery does not depend on Dispatcher being healthy.
 
 Implemented source foundation:
 
+- public content-addressed contracts and a reproducible control bundle for the
+  nine required factory slots, with no runtime implementation claimed;
 - typed module, artifact, flow, fragment, implementation, handler, profile,
   runtime, placement, worker, evaluation, approval, and effect contracts;
 - 21 logical modules, 6 flows, 12 deployment profiles, and 23 implementation

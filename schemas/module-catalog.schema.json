@@ -1,13 +1,13 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.2.0/schemas/module-catalog.schema.json",
+  "$id": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.3.0/schemas/module-catalog.schema.json",
   "title": "Zaibatsu reusable module catalog",
   "type": "object",
   "additionalProperties": false,
   "required": ["contract_schema", "schema_version", "module_api_version", "modules"],
   "properties": {
-    "contract_schema": {"const": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.2.0/schemas/module-catalog.schema.json"},
-    "schema_version": {"const": "zaibatsu.module-catalog.v1"},
+    "contract_schema": {"const": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.3.0/schemas/module-catalog.schema.json"},
+    "schema_version": {"const": "zaibatsu.module-catalog.v2"},
     "module_api_version": {"const": "zaibatsu.module.v1"},
     "modules": {
       "type": "array",
@@ -15,7 +15,7 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["id", "slot", "interface_version", "kind", "implementation_status", "side_effect_authority", "policy_value", "description", "rebuild_boundary", "requires_slots", "provides"],
+        "required": ["id", "slot", "interface_version", "kind", "implementation_status", "side_effect_authority", "artifact", "policy_value", "description", "rebuild_boundary", "requires_slots", "provides"],
         "properties": {
           "id": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
           "slot": {"enum": ["source_versioning", "static_secrets", "runtime_secrets", "host_reproduction", "worker_environment", "scheduling", "execution", "verification", "feedback"]},
@@ -23,6 +23,16 @@
           "kind": {"enum": ["deterministic", "probabilistic_adapter"]},
           "implementation_status": {"enum": ["contract_only", "source_only", "planned"]},
           "side_effect_authority": {"const": false},
+          "artifact": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["kind", "path", "sha256"],
+            "properties": {
+              "kind": {"const": "module_contract"},
+              "path": {"type": "string", "pattern": "^modules/[a-z0-9]+(?:-[a-z0-9]+)*/module\\.json$"},
+              "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+            }
+          },
           "policy_value": {
             "oneOf": [
               {"type": "string", "minLength": 1},

@@ -1,0 +1,22 @@
+{
+  "contract_schema": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.3.0/schemas/module-artifact.schema.json",
+  "schema_version": "zaibatsu.module-artifact.v1",
+  "module_api_version": "zaibatsu.module.v1",
+  "artifact_kind": "module_contract",
+  "id": "ansible-host-reproduction",
+  "slot": "host_reproduction",
+  "kind": "deterministic",
+  "implementation_status": "contract_only",
+  "policy_value": "ansible",
+  "description": "Bind host configuration to reviewed Ansible artifacts and evidence",
+  "rebuild_boundary": "host_configuration",
+  "requires_slots": ["source_versioning", "static_secrets"],
+  "provides": ["host_configuration_contract", "idempotence_receipt_requirement"],
+  "side_effect_authority": false,
+  "runtime": {
+    "implementation_included": false,
+    "entrypoint": null,
+    "environment_lock_included": false,
+    "deploys_infrastructure": false
+  }
+}

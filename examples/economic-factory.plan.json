@@ -1,6 +1,6 @@
 {
-  "contract_schema": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.2.0/schemas/factory-plan.schema.json",
-  "schema_version": "zaibatsu.factory-plan.v1",
+  "contract_schema": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.3.0/schemas/factory-plan.schema.json",
+  "schema_version": "zaibatsu.factory-plan.v2",
   "factory": {
     "id": "example-product",
     "class": "economic_factory",
@@ -9,7 +9,7 @@
   },
   "source": {
     "factory_definition_sha256": "b9e0f0e7dcfc850f835d5f56ca8596a4b45419a943777afc889c64f508457eac",
-    "module_catalog_sha256": "445ddbb1a98378c5e13864ad2718b29b48da1b3a5a7713f819fc0baa739eab8c",
+    "module_catalog_sha256": "16db832de54aaba7775461df7e8b4f4e1684deebe32be608806161aac1b2628d",
     "module_api_version": "zaibatsu.module.v1"
   },
   "module_order": [
@@ -28,6 +28,11 @@
       "position": 0,
       "slot": "source_versioning",
       "module": "git-source",
+      "artifact": {
+        "kind": "module_contract",
+        "path": "modules/git-source/module.json",
+        "sha256": "977317056e3b4ae88471cd7aeddb1b514bd5c3310ca1d73c324599785c61e412"
+      },
       "policy_value": "git",
       "interface_version": "zaibatsu.module.v1",
       "kind": "deterministic",
@@ -45,6 +50,11 @@
       "position": 1,
       "slot": "static_secrets",
       "module": "sops-age-static-secrets",
+      "artifact": {
+        "kind": "module_contract",
+        "path": "modules/sops-age-static-secrets/module.json",
+        "sha256": "23462ec661dfc00e330ce8e604157aba5e44b1401e17369ab43ec408e1ac251d"
+      },
       "policy_value": "sops_age",
       "interface_version": "zaibatsu.module.v1",
       "kind": "deterministic",
@@ -63,6 +73,11 @@
       "position": 2,
       "slot": "runtime_secrets",
       "module": "bounded-runtime-secrets",
+      "artifact": {
+        "kind": "module_contract",
+        "path": "modules/bounded-runtime-secrets/module.json",
+        "sha256": "4c62e939782ef9b5990d81de413a809aadfdb58c0c28e2785abd0a57a06a4585"
+      },
       "policy_value": "bounded_secret_manager",
       "interface_version": "zaibatsu.module.v1",
       "kind": "deterministic",
@@ -81,6 +96,11 @@
       "position": 3,
       "slot": "host_reproduction",
       "module": "ansible-host-reproduction",
+      "artifact": {
+        "kind": "module_contract",
+        "path": "modules/ansible-host-reproduction/module.json",
+        "sha256": "905bf55cd2fe0973a89702e8752e8dfec174606d58da15e289d984ecf8385fe9"
+      },
       "policy_value": "ansible",
       "interface_version": "zaibatsu.module.v1",
       "kind": "deterministic",
@@ -100,6 +120,11 @@
       "position": 4,
       "slot": "worker_environment",
       "module": "nix-worker-environment",
+      "artifact": {
+        "kind": "module_contract",
+        "path": "modules/nix-worker-environment/module.json",
+        "sha256": "a58729508be0cda87c2db3748ae487d76d9d90e3facfb78cbcaded5385731759"
+      },
       "policy_value": "nix",
       "interface_version": "zaibatsu.module.v1",
       "kind": "deterministic",
@@ -118,6 +143,11 @@
       "position": 5,
       "slot": "scheduling",
       "module": "systemd-scheduler",
+      "artifact": {
+        "kind": "module_contract",
+        "path": "modules/systemd-scheduler/module.json",
+        "sha256": "ff549f0c47e82dcc0126907d1cb423dc8339c6e294f0a89f465142f3f5e5bdb3"
+      },
       "policy_value": "systemd",
       "interface_version": "zaibatsu.module.v1",
       "kind": "deterministic",
@@ -136,6 +166,11 @@
       "position": 6,
       "slot": "execution",
       "module": "typed-agent-execution",
+      "artifact": {
+        "kind": "module_contract",
+        "path": "modules/typed-agent-execution/module.json",
+        "sha256": "b2a0558758afa709b2e03b3fe8e025c520c5ad6b80e4db7826d7a9b2e802e8d6"
+      },
       "policy_value": "model_independent_typed_ports",
       "interface_version": "zaibatsu.module.v1",
       "kind": "probabilistic_adapter",
@@ -157,6 +192,11 @@
       "position": 7,
       "slot": "verification",
       "module": "deterministic-verification",
+      "artifact": {
+        "kind": "module_contract",
+        "path": "modules/deterministic-verification/module.json",
+        "sha256": "636525656d07dc89683a08ae3ffefabfd592909a61b729f4efc024dc1a43df31"
+      },
       "policy_value": [
         "schemas",
         "linters",
@@ -184,6 +224,11 @@
       "position": 8,
       "slot": "feedback",
       "module": "owner-gated-feedback",
+      "artifact": {
+        "kind": "module_contract",
+        "path": "modules/owner-gated-feedback/module.json",
+        "sha256": "ecb44bb384ff295af9af5b3b121fc53302364d12b6112c7275af2d6169caff26"
+      },
       "policy_value": "reviewed_deterministic_policy_and_owner_gate",
       "interface_version": "zaibatsu.module.v1",
       "kind": "deterministic",
@@ -215,5 +260,5 @@
     "deploys_infrastructure": false,
     "proves_runtime_recovery": false
   },
-  "plan_sha256": "eff8c2573035f2639313ace81500be42ce8005735fd5bfcc2344565b83ad8824"
+  "plan_sha256": "64c5b94ebb155de22293c12d7c0eaa86c523b24627d8eea3d236725893f8c08f"
 }

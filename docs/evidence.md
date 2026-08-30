@@ -28,11 +28,12 @@ and redacted status ledger without receiving production access.
 
 | Evidence | Status | Receipt |
 | --- | --- | --- |
-| Architecture validator | Passed after deterministic composition hardening | 46 required files, 13 components, 3 current software factories, 1 portable factory definition and resolved plan, 10 catalog modules, 11 meta-factory capabilities, 4 evidence receipts, 9 meta-factory invariants, 8 component invariants, and 10 submission gates checked |
-| Adversarial unit tests | Passed after deterministic module-composition hardening | 114 of 114 tests passed locally and from a credential-disabled public clone; candidate CI independently passed |
+| Architecture validator | Passed locally after portable-bundle hardening | 60 required files, 13 components, 3 current software factories, 1 portable definition, 10 catalog modules and content-addressed artifacts, 1 resolved plan and bundle manifest, 11 meta-factory capabilities, 4 evidence receipts, 9 meta-factory invariants, 8 component invariants, and 10 submission gates checked; candidate reproduction remains pending |
+| Adversarial unit tests | Passed locally after module-artifact and archive hardening | 136 of 136 tests passed; candidate CI and credential-disabled fresh-clone proof remain pending |
 | Broken-link and public-safety scan | Passed after release hardening | Git-tracked and non-ignored files are inspected; force-added ignored paths, directory-name bypasses, all symlinks, Git submodules, Linux/macOS/Windows home paths, tailnet DNS, IPv4/IPv6, credential patterns, opaque content regardless of media suffix, invalid UTF-8, and local links fail closed |
 | Malformed-input robustness | Passed 2026-08-30 | 5,000 seeded JSON-like cases produced 50,000 calls across architecture, factory, readiness, consistency, and all four evidence validators with zero unhandled exceptions (seed `20260830`) |
 | Module-composition malformed-input robustness | Passed locally 2026-08-30 | 10,000 seeded JSON-like cases produced 40,000 calls across catalog, binding, plan, and portable-factory validators with zero unhandled exceptions (seed `20260830`) |
+| Module-artifact and bundle malformed-input robustness | Passed locally 2026-08-30 | 20,000 deterministic malformed artifact and archive cases covered random JSON shapes, random bytes, truncation, bit flips, insertion, and trailing data with zero unhandled exceptions (seed `0x5A1BA75`) |
 | Independent secret scan | Passed on v1.1.0 candidate | Checksum-pinned Gitleaks `8.30.1` found no leaks in the full public Git history or candidate tree; GitHub secret scanning and push protection provide a separate repository guard |
 | Official external links | Resolved 2026-08-28 | 5 of 5 Factory documentation and Guild links resolved successfully |
 | Droid CLI availability | Observed | Local version `0.206.0` returned a version receipt |
@@ -48,7 +49,8 @@ and redacted status ledger without receiving production access.
 | v1.1.1 release proof | Passed | Candidate `9f0c1a7f3e866df1e1d5d954e464d53ec96af247` passed 95 tests, schema and receipt contracts, strict Git checks, index-mode denial, and Gitleaks; [candidate CI 33319619388](https://github.com/adaliontech/Zaibatsu/actions/runs/33319619388) and [release CI 33319676893](https://github.com/adaliontech/Zaibatsu/actions/runs/33319676893) passed, then an immutable-tag clone passed again. A post-release usability review found that externally scaffolded files needed a canonical rather than relative schema URI; v1.1.2 is the bounded correction. |
 | Fresh-clone reproduction | Passed for v1.1.2 candidate | Credential-disabled public clone of `03d325241c81dec4c83629d36dd4aff3b5e2cf92` passed all 95 tests, schema and receipt contracts, strict Git checks, and Gitleaks 8.30.1 history/tree scans; [GitHub Actions run 33319815603](https://github.com/adaliontech/Zaibatsu/actions/runs/33319815603) independently passed |
 | v1.2.0 candidate proof | Passed | Credential-disabled public clone of `d42831e7d6fa367f225fb4a6e489391ad3856e9a` passed all 114 tests, schema and receipt contracts, strict Git checks, and Gitleaks 8.30.1 history/tree scans; [GitHub Actions run 33332863314](https://github.com/adaliontech/Zaibatsu/actions/runs/33332863314) independently passed |
-| Demo recording | Ready after immutable v1.2.0 tag; applicant action pending | Record from the released tag using the [Demo script](demo-script.md) |
+| v1.3.0 candidate proof | Pending | Content-addressed module artifacts and the self-verifying portable bundle require candidate CI, strict Git checks, Gitleaks, and a credential-disabled clone before release |
+| Demo recording | Blocked on immutable v1.3.0 release; applicant action follows | Record from the released tag using the [Demo script](demo-script.md) |
 
 ## Architecture claims
 

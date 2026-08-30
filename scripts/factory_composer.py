@@ -7,7 +7,7 @@ import hashlib
 import json
 import re
 from copy import deepcopy
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Any
 
 
@@ -15,16 +15,21 @@ ROOT = Path(__file__).resolve().parents[1]
 MODULE_CATALOG_PATH = ROOT / "catalog" / "modules.json"
 EXAMPLE_PLAN_PATH = ROOT / "examples" / "economic-factory.plan.json"
 
-MODULE_CATALOG_SCHEMA_VERSION = "zaibatsu.module-catalog.v1"
-FACTORY_PLAN_SCHEMA_VERSION = "zaibatsu.factory-plan.v1"
+MODULE_CATALOG_SCHEMA_VERSION = "zaibatsu.module-catalog.v2"
+FACTORY_PLAN_SCHEMA_VERSION = "zaibatsu.factory-plan.v2"
+MODULE_ARTIFACT_SCHEMA_VERSION = "zaibatsu.module-artifact.v1"
 MODULE_API_VERSION = "zaibatsu.module.v1"
 MODULE_CATALOG_SCHEMA_REFERENCE = (
     "https://raw.githubusercontent.com/adaliontech/Zaibatsu/"
-    "v1.2.0/schemas/module-catalog.schema.json"
+    "v1.3.0/schemas/module-catalog.schema.json"
 )
 FACTORY_PLAN_SCHEMA_REFERENCE = (
     "https://raw.githubusercontent.com/adaliontech/Zaibatsu/"
-    "v1.2.0/schemas/factory-plan.schema.json"
+    "v1.3.0/schemas/factory-plan.schema.json"
+)
+MODULE_ARTIFACT_SCHEMA_REFERENCE = (
+    "https://raw.githubusercontent.com/adaliontech/Zaibatsu/"
+    "v1.3.0/schemas/module-artifact.schema.json"
 )
 
 REQUIRED_MODULE_SLOTS = (
@@ -42,6 +47,7 @@ REQUIRED_MODULE_SLOTS = (
 ALLOWED_IMPLEMENTATION_STATUSES = {"contract_only", "source_only", "planned"}
 ALLOWED_MODULE_KINDS = {"deterministic", "probabilistic_adapter"}
 MODULE_ID_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 CATALOG_FIELDS = {
     "contract_schema",
     "schema_version",
@@ -55,12 +61,14 @@ MODULE_FIELDS = {
     "kind",
     "implementation_status",
     "side_effect_authority",
+    "artifact",
     "policy_value",
     "description",
     "rebuild_boundary",
     "requires_slots",
     "provides",
 }
+ARTIFACT_FIELDS = {"kind", "path", "sha256"}
 
 
 def canonical_json_bytes(value: Any) -> bytes:
@@ -95,8 +103,12 @@ def _reject_nonstandard_number(value: str) -> None:
 
 
 def load_json_file(path: Path) -> Any:
+    return load_json_bytes(path.read_bytes())
+
+
+def load_json_bytes(value: bytes) -> Any:
     return json.loads(
-        path.read_text(encoding="utf-8"),
+        value.decode("utf-8"),
         object_pairs_hook=_reject_duplicate_keys,
         parse_constant=_reject_nonstandard_number,
     )
@@ -108,6 +120,17 @@ def load_module_catalog(path: Path = MODULE_CATALOG_PATH) -> dict[str, Any]:
 
 def load_factory_plan(path: Path = EXAMPLE_PLAN_PATH) -> dict[str, Any]:
     return load_json_file(path)
+
+
+def _safe_artifact_path(value: Any, module_id: str) -> bool:
+    if not isinstance(value, str) or "\\" in value:
+        return False
+    path = PurePosixPath(value)
+    return (
+        not path.is_absolute()
+        and all(part not in {"", ".", ".."} for part in path.parts)
+        and value == f"modules/{module_id}/module.json"
+    )
 
 
 def validate_module_catalog(data: Any) -> list[str]:
@@ -130,6 +153,7 @@ def validate_module_catalog(data: Any) -> list[str]:
         return errors + ["module catalog modules must be a list"]
 
     seen_ids: set[str] = set()
+    seen_artifact_paths: set[str] = set()
     by_slot: dict[str, list[dict[str, Any]]] = {
         slot: [] for slot in REQUIRED_MODULE_SLOTS
     }
@@ -162,6 +186,22 @@ def validate_module_catalog(data: Any) -> list[str]:
             errors.append(f"{module_id}: invalid implementation_status {status!r}")
         if module.get("side_effect_authority") is not False:
             errors.append(f"{module_id}: catalog modules may not own side-effect authority")
+        artifact = module.get("artifact")
+        if not isinstance(artifact, dict) or set(artifact) != ARTIFACT_FIELDS:
+            errors.append(f"{module_id}: artifact must contain kind, path, and sha256")
+        else:
+            artifact_path = artifact.get("path")
+            if artifact.get("kind") != "module_contract":
+                errors.append(f"{module_id}: artifact kind must be module_contract")
+            if not _safe_artifact_path(artifact_path, module_id):
+                errors.append(f"{module_id}: artifact path must be module-local and relative")
+            elif artifact_path in seen_artifact_paths:
+                errors.append(f"{module_id}: artifact path must be unique")
+            else:
+                seen_artifact_paths.add(artifact_path)
+            digest = artifact.get("sha256")
+            if not isinstance(digest, str) or not SHA256_RE.fullmatch(digest):
+                errors.append(f"{module_id}: artifact sha256 must be lowercase SHA-256")
         for field in ("description", "rebuild_boundary"):
             if not isinstance(module.get(field), str) or not module[field].strip():
                 errors.append(f"{module_id}: {field} must be non-empty")
@@ -205,6 +245,97 @@ def validate_module_catalog(data: Any) -> list[str]:
     if missing_slots:
         errors.append("module catalog missing slots: " + ", ".join(missing_slots))
     return errors
+
+
+def expected_module_artifact(module: dict[str, Any]) -> dict[str, Any]:
+    """Return the exact portable contract represented by one catalog entry."""
+    return {
+        "contract_schema": MODULE_ARTIFACT_SCHEMA_REFERENCE,
+        "schema_version": MODULE_ARTIFACT_SCHEMA_VERSION,
+        "module_api_version": MODULE_API_VERSION,
+        "artifact_kind": "module_contract",
+        "id": module["id"],
+        "slot": module["slot"],
+        "kind": module["kind"],
+        "implementation_status": module["implementation_status"],
+        "policy_value": deepcopy(module["policy_value"]),
+        "description": module["description"],
+        "rebuild_boundary": module["rebuild_boundary"],
+        "requires_slots": list(module["requires_slots"]),
+        "provides": list(module["provides"]),
+        "side_effect_authority": False,
+        "runtime": {
+            "implementation_included": False,
+            "entrypoint": None,
+            "environment_lock_included": False,
+            "deploys_infrastructure": False,
+        },
+    }
+
+
+def validate_module_artifact(data: Any, module: Any) -> list[str]:
+    if not isinstance(data, dict):
+        return ["module artifact root must be an object"]
+    if not isinstance(module, dict):
+        return ["catalog module must be an object"]
+    try:
+        expected = expected_module_artifact(module)
+    except (KeyError, TypeError, ValueError) as exc:
+        return [f"cannot derive expected module artifact: {exc}"]
+    if data != expected:
+        module_id = module.get("id", "unknown")
+        return [f"{module_id}: module artifact must exactly match catalog contract"]
+    return []
+
+
+def load_module_artifacts(
+    catalog: Any,
+    base: Path = MODULE_CATALOG_PATH.parent,
+) -> tuple[dict[str, dict[str, Any]], list[str]]:
+    """Load and content-verify every artifact without following symlink files."""
+    if not isinstance(catalog, dict) or not isinstance(catalog.get("modules"), list):
+        return {}, ["module catalog modules must be a list"]
+    artifacts: dict[str, dict[str, Any]] = {}
+    errors: list[str] = []
+    base_resolved = base.resolve()
+    for module in catalog["modules"]:
+        if not isinstance(module, dict) or not isinstance(module.get("id"), str):
+            continue
+        module_id = module["id"]
+        descriptor = module.get("artifact")
+        if not isinstance(descriptor, dict):
+            errors.append(f"{module_id}: cannot load missing artifact descriptor")
+            continue
+        relative = descriptor.get("path")
+        if not _safe_artifact_path(relative, module_id):
+            errors.append(f"{module_id}: cannot load unsafe artifact path")
+            continue
+        path = base / relative
+        if path.is_symlink():
+            errors.append(f"{module_id}: module artifact must not be a symlink")
+            continue
+        try:
+            resolved = path.resolve(strict=True)
+            resolved.relative_to(base_resolved)
+        except (OSError, ValueError):
+            errors.append(f"{module_id}: module artifact is missing or escapes catalog root")
+            continue
+        if not resolved.is_file():
+            errors.append(f"{module_id}: module artifact must be a regular file")
+            continue
+        try:
+            data = load_json_file(resolved)
+        except (OSError, ValueError) as exc:
+            errors.append(f"{module_id}: cannot load module artifact: {exc}")
+            continue
+        artifact_errors = validate_module_artifact(data, module)
+        errors.extend(artifact_errors)
+        digest = sha256_json(data)
+        if descriptor.get("sha256") != digest:
+            errors.append(f"{module_id}: module artifact digest does not match catalog")
+        if not artifact_errors and descriptor.get("sha256") == digest:
+            artifacts[module_id] = data
+    return artifacts, errors
 
 
 def validate_factory_bindings(definition: Any, catalog: Any) -> list[str]:
@@ -299,6 +430,7 @@ def build_factory_plan(
                 "position": position,
                 "slot": slot,
                 "module": module["id"],
+                "artifact": deepcopy(module["artifact"]),
                 "policy_value": deepcopy(module["policy_value"]),
                 "interface_version": module["interface_version"],
                 "kind": module["kind"],

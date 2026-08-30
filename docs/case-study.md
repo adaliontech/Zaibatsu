@@ -201,9 +201,14 @@ reusable contracts while preserving evidence and limitations:
 - `catalog/modules.json` defines policy-compatible implementations for every
   factory control slot, while `examples/economic-factory.plan.json` proves a
   content-addressed, dependency-ordered composition;
+- ten module-local contract artifacts make each catalog implementation
+  independently addressable without presenting a contract as a runtime;
 - `zaibatsu plan`, `verify-plan`, and `rebuild-check` reject module-policy
   mismatch, definition or catalog drift, and plan tampering without claiming
   infrastructure deployment or recovery;
+- `zaibatsu bundle` and `verify-bundle` package and reproduce the definition,
+  catalog, plan, selected module contracts, and schemas as canonical USTAR
+  bytes without extracting untrusted archive members;
 - project-owned JSON Schemas describe the architecture, factory, readiness,
   and evidence documents;
 - `scripts/validate_repository.py` checks all contracts, evidence semantics,

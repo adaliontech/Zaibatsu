@@ -9,10 +9,12 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from factory_bundle import build_factory_bundle, sha256_bytes, verify_factory_bundle
 from factory_composer import (
     MODULE_CATALOG_PATH,
     build_factory_plan,
     load_json_file,
+    load_module_artifacts,
     rebuild_check,
     validate_factory_bindings,
     validate_factory_plan,
@@ -98,6 +100,17 @@ def write_document(document: dict[str, Any], output: str | None) -> int:
     return 0
 
 
+def write_binary(value: bytes, output: str) -> int:
+    path = Path(output)
+    if path.exists() or path.is_symlink():
+        print(f"refusing to overwrite existing path: {path}", file=sys.stderr)
+        return 2
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_bytes(value)
+    print(f"created {path}")
+    return 0
+
+
 def load_json_document(path: str, label: str) -> Any | None:
     document_path = Path(path)
     try:
@@ -107,9 +120,15 @@ def load_json_document(path: str, label: str) -> Any | None:
         return None
 
 
-def factory_and_catalog_errors(document: Any, catalog: Any) -> list[str]:
+def factory_and_catalog_errors(
+    document: Any,
+    catalog: Any,
+    catalog_base: Path,
+) -> list[str]:
     errors = validate_factory_definition(document)
     errors.extend(validate_module_catalog(catalog))
+    _, artifact_errors = load_module_artifacts(catalog, catalog_base)
+    errors.extend(artifact_errors)
     errors.extend(validate_factory_bindings(document, catalog))
     return errors
 
@@ -120,7 +139,7 @@ def command_validate(path: str, catalog_path: str) -> int:
     catalog = load_json_document(catalog_path, "module catalog")
     if document is None or catalog is None:
         return 2
-    errors = factory_and_catalog_errors(document, catalog)
+    errors = factory_and_catalog_errors(document, catalog, Path(catalog_path).parent)
     if errors:
         print(f"factory definition failed: {document_path}", file=sys.stderr)
         for error in errors:
@@ -135,6 +154,8 @@ def command_catalog_check(path: str) -> int:
     if catalog is None:
         return 2
     errors = validate_module_catalog(catalog)
+    _, artifact_errors = load_module_artifacts(catalog, Path(path).parent)
+    errors.extend(artifact_errors)
     if errors:
         print(f"module catalog failed: {path}", file=sys.stderr)
         for error in errors:
@@ -149,7 +170,7 @@ def command_plan(path: str, catalog_path: str, output: str | None) -> int:
     catalog = load_json_document(catalog_path, "module catalog")
     if definition is None or catalog is None:
         return 2
-    errors = factory_and_catalog_errors(definition, catalog)
+    errors = factory_and_catalog_errors(definition, catalog, Path(catalog_path).parent)
     if errors:
         print("cannot compose invalid factory inputs", file=sys.stderr)
         for error in errors:
@@ -164,7 +185,7 @@ def command_verify_plan(plan_path: str, factory_path: str, catalog_path: str) ->
     catalog = load_json_document(catalog_path, "module catalog")
     if plan is None or definition is None or catalog is None:
         return 2
-    errors = factory_and_catalog_errors(definition, catalog)
+    errors = factory_and_catalog_errors(definition, catalog, Path(catalog_path).parent)
     errors.extend(validate_factory_plan(plan, definition, catalog))
     if errors:
         print(f"factory plan failed: {plan_path}", file=sys.stderr)
@@ -181,7 +202,7 @@ def command_rebuild_check(path: str, catalog_path: str) -> int:
     catalog = load_json_document(catalog_path, "module catalog")
     if definition is None or catalog is None:
         return 2
-    errors = factory_and_catalog_errors(definition, catalog)
+    errors = factory_and_catalog_errors(definition, catalog, Path(catalog_path).parent)
     if errors:
         print("cannot rebuild invalid factory inputs", file=sys.stderr)
         for error in errors:
@@ -193,6 +214,49 @@ def command_rebuild_check(path: str, catalog_path: str) -> int:
         return 1
     print("factory control plan rebuild passed")
     print(f"plan sha256: {digest}")
+    return 0
+
+
+def command_bundle(path: str, catalog_path: str, output: str) -> int:
+    definition = load_json_document(path, "factory definition")
+    catalog = load_json_document(catalog_path, "module catalog")
+    if definition is None or catalog is None:
+        return 2
+    catalog_base = Path(catalog_path).parent
+    errors = validate_factory_definition(definition)
+    errors.extend(validate_module_catalog(catalog))
+    errors.extend(validate_factory_bindings(definition, catalog))
+    artifacts, artifact_errors = load_module_artifacts(catalog, catalog_base)
+    errors.extend(artifact_errors)
+    if errors:
+        print("cannot bundle invalid factory inputs", file=sys.stderr)
+        for error in errors:
+            print(f"- {error}", file=sys.stderr)
+        return 1
+    bundle, _ = build_factory_bundle(definition, catalog, artifacts)
+    result = write_binary(bundle, output)
+    if result == 0:
+        print(f"bundle sha256: {sha256_bytes(bundle)}")
+    return result
+
+
+def command_verify_bundle(path: str) -> int:
+    bundle_path = Path(path)
+    try:
+        bundle = bundle_path.read_bytes()
+    except OSError as exc:
+        print(f"cannot load factory bundle: {exc}", file=sys.stderr)
+        return 2
+    errors, result = verify_factory_bundle(bundle)
+    if errors or result is None:
+        print(f"factory bundle failed: {bundle_path}", file=sys.stderr)
+        for error in errors:
+            print(f"- {error}", file=sys.stderr)
+        return 1
+    print(f"factory bundle passed: {bundle_path}")
+    print(f"factory id: {result['factory_id']}")
+    print(f"plan sha256: {result['plan_sha256']}")
+    print(f"bundle sha256: {result['bundle_sha256']}")
     return 0
 
 
@@ -232,6 +296,18 @@ def build_parser() -> argparse.ArgumentParser:
     rebuild.add_argument("path")
     rebuild.add_argument("--catalog", default=str(MODULE_CATALOG_PATH))
 
+    bundle = commands.add_parser(
+        "bundle", help="build a canonical self-contained factory control bundle"
+    )
+    bundle.add_argument("path")
+    bundle.add_argument("--catalog", default=str(MODULE_CATALOG_PATH))
+    bundle.add_argument("--output", required=True, help="write a new uncompressed tar")
+
+    verify_bundle = commands.add_parser(
+        "verify-bundle", help="verify and reproduce a factory control bundle"
+    )
+    verify_bundle.add_argument("path")
+
     scaffold = commands.add_parser("scaffold", help="create a safe factory skeleton")
     scaffold.add_argument("--id", required=True, dest="factory_id")
     scaffold.add_argument(
@@ -260,6 +336,10 @@ def main() -> int:
         )
     if arguments.command == "rebuild-check":
         return command_rebuild_check(arguments.path, arguments.catalog)
+    if arguments.command == "bundle":
+        return command_bundle(arguments.path, arguments.catalog, arguments.output)
+    if arguments.command == "verify-bundle":
+        return command_verify_bundle(arguments.path)
     document = factory_template(
         arguments.factory_id,
         arguments.factory_class,
@@ -269,7 +349,9 @@ def main() -> int:
     catalog = load_json_document(str(MODULE_CATALOG_PATH), "bundled module catalog")
     if catalog is None:
         return 2
-    errors = factory_and_catalog_errors(document, catalog)
+    errors = factory_and_catalog_errors(
+        document, catalog, MODULE_CATALOG_PATH.parent
+    )
     if errors:
         for error in errors:
             print(f"internal scaffold error: {error}", file=sys.stderr)

@@ -2,10 +2,12 @@ from __future__ import annotations
 
 import copy
 import importlib.util
+import io
 import json
 import shutil
 import subprocess
 import sys
+import tarfile
 import tempfile
 import unittest
 from pathlib import Path
@@ -18,6 +20,7 @@ SPEC = importlib.util.spec_from_file_location("validate_repository", MODULE_PATH
 assert SPEC and SPEC.loader
 validator = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(validator)
+import factory_bundle as bundler
 import factory_composer as composer
 
 
@@ -672,6 +675,7 @@ class ModuleCompositionTests(unittest.TestCase):
         factory = copy.deepcopy(self.factory)
         module = next(item for item in catalog["modules"] if item["id"] == "git-source")
         module["id"] = "alternate-git-source"
+        module["artifact"]["path"] = "modules/alternate-git-source/module.json"
         binding = next(
             item
             for item in factory["module_bindings"]
@@ -680,6 +684,34 @@ class ModuleCompositionTests(unittest.TestCase):
         binding["module"] = "alternate-git-source"
         self.assertEqual([], composer.validate_module_catalog(catalog))
         self.assertEqual([], composer.validate_factory_bindings(factory, catalog))
+
+    def test_compatible_alternate_artifact_builds_verified_bundle(self) -> None:
+        catalog = copy.deepcopy(self.catalog)
+        factory = copy.deepcopy(self.factory)
+        module = next(item for item in catalog["modules"] if item["id"] == "git-source")
+        module["id"] = "alternate-git-source"
+        module["artifact"]["path"] = "modules/alternate-git-source/module.json"
+        artifact = composer.expected_module_artifact(module)
+        module["artifact"]["sha256"] = composer.sha256_json(artifact)
+        binding = next(
+            item
+            for item in factory["module_bindings"]
+            if item["slot"] == "source_versioning"
+        )
+        binding["module"] = "alternate-git-source"
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            base = Path(temporary_directory)
+            shutil.copytree(validator.ROOT / "catalog" / "modules", base / "modules")
+            artifact_path = base / module["artifact"]["path"]
+            artifact_path.parent.mkdir()
+            artifact_path.write_text(json.dumps(artifact), encoding="utf-8")
+            artifacts, errors = composer.load_module_artifacts(catalog, base)
+        self.assertEqual([], composer.validate_module_catalog(catalog))
+        self.assertEqual([], composer.validate_factory_bindings(factory, catalog))
+        self.assertEqual([], errors)
+        bundle, _ = bundler.build_factory_bundle(factory, catalog, artifacts)
+        verification_errors, _ = bundler.verify_factory_bundle(bundle)
+        self.assertEqual([], verification_errors)
 
     def test_module_policy_mismatch_fails_closed(self) -> None:
         catalog = copy.deepcopy(self.catalog)
@@ -731,6 +763,56 @@ class ModuleCompositionTests(unittest.TestCase):
         factory["module_bindings"][0]["slot"] = []
         errors = composer.validate_factory_bindings(factory, self.catalog)
         self.assertTrue(any("invalid slot" in error for error in errors))
+
+    def test_repository_module_artifacts_are_content_addressed(self) -> None:
+        artifacts, errors = composer.load_module_artifacts(self.catalog)
+        self.assertEqual([], errors)
+        self.assertEqual(10, len(artifacts))
+        for module in self.catalog["modules"]:
+            artifact = artifacts[module["id"]]
+            self.assertEqual([], composer.validate_module_artifact(artifact, module))
+            self.assertEqual(
+                module["artifact"]["sha256"], composer.sha256_json(artifact)
+            )
+
+    def test_module_artifact_digest_drift_is_rejected(self) -> None:
+        catalog = copy.deepcopy(self.catalog)
+        catalog["modules"][0]["artifact"]["sha256"] = "0" * 64
+        _, errors = composer.load_module_artifacts(catalog)
+        self.assertTrue(any("digest does not match" in error for error in errors))
+
+    def test_module_artifact_contract_drift_is_rejected(self) -> None:
+        module = self.catalog["modules"][0]
+        artifact = composer.expected_module_artifact(module)
+        artifact["provides"].append("undeclared_output")
+        errors = composer.validate_module_artifact(artifact, module)
+        self.assertTrue(any("exactly match" in error for error in errors))
+
+    def test_module_artifact_path_traversal_is_rejected(self) -> None:
+        catalog = copy.deepcopy(self.catalog)
+        catalog["modules"][0]["artifact"]["path"] = "../outside/module.json"
+        errors = composer.validate_module_catalog(catalog)
+        self.assertTrue(any("module-local" in error for error in errors))
+
+    def test_module_artifact_symlink_is_rejected(self) -> None:
+        module = copy.deepcopy(self.catalog["modules"][0])
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            base = Path(temporary_directory)
+            artifact_path = base / module["artifact"]["path"]
+            artifact_path.parent.mkdir(parents=True)
+            target = base / "target.json"
+            target.write_text("{}\n", encoding="utf-8")
+            artifact_path.symlink_to(target)
+            _, errors = composer.load_module_artifacts({"modules": [module]}, base)
+        self.assertTrue(any("must not be a symlink" in error for error in errors))
+
+    def test_plan_binds_every_selected_module_artifact(self) -> None:
+        catalog_modules = {module["id"]: module for module in self.catalog["modules"]}
+        for resolved in self.plan["modules"]:
+            self.assertEqual(
+                catalog_modules[resolved["module"]]["artifact"],
+                resolved["artifact"],
+            )
 
     def test_definition_drift_invalidates_recorded_plan(self) -> None:
         factory = copy.deepcopy(self.factory)
@@ -884,6 +966,202 @@ class ModuleCompositionTests(unittest.TestCase):
                     sys.executable,
                     str(validator.ROOT / "scripts" / "zaibatsu.py"),
                     "plan",
+                    str(validator.EXAMPLE_FACTORY_PATH),
+                    "--output",
+                    str(output),
+                ],
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+        self.assertEqual(2, result.returncode)
+        self.assertIn("refusing to overwrite", result.stderr)
+        self.assertFalse(target.exists())
+
+
+class FactoryBundleTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.factory = validator.load_factory_definition()
+        self.catalog = composer.load_module_catalog()
+        self.plan = composer.load_factory_plan()
+        self.artifacts, errors = composer.load_module_artifacts(self.catalog)
+        self.assertEqual([], errors)
+        self.bundle, self.manifest = bundler.build_factory_bundle(
+            self.factory, self.catalog, self.artifacts
+        )
+
+    def test_bundle_round_trip_passes(self) -> None:
+        errors, result = bundler.verify_factory_bundle(self.bundle)
+        self.assertEqual([], errors)
+        self.assertIsNotNone(result)
+        assert result is not None
+        self.assertEqual("example-product", result["factory_id"])
+        self.assertEqual(self.plan["plan_sha256"], result["plan_sha256"])
+        self.assertEqual(bundler.sha256_bytes(self.bundle), result["bundle_sha256"])
+
+    def test_bundle_is_byte_reproducible(self) -> None:
+        second, second_manifest = bundler.build_factory_bundle(
+            copy.deepcopy(self.factory),
+            copy.deepcopy(self.catalog),
+            copy.deepcopy(self.artifacts),
+        )
+        self.assertEqual(self.bundle, second)
+        self.assertEqual(self.manifest, second_manifest)
+
+    def test_repository_bundle_manifest_matches_builder(self) -> None:
+        recorded = composer.load_json_file(validator.EXAMPLE_BUNDLE_MANIFEST_PATH)
+        self.assertEqual(self.manifest, recorded)
+
+    def test_bundle_tar_metadata_and_order_are_canonical(self) -> None:
+        with tarfile.open(fileobj=io.BytesIO(self.bundle), mode="r:") as archive:
+            members = archive.getmembers()
+        self.assertEqual(
+            sorted(member.name for member in members),
+            [member.name for member in members],
+        )
+        for member in members:
+            self.assertTrue(member.isfile())
+            self.assertEqual(0o644, member.mode)
+            self.assertEqual(0, member.mtime)
+            self.assertEqual(0, member.uid)
+            self.assertEqual(0, member.gid)
+            self.assertEqual("", member.uname)
+            self.assertEqual("", member.gname)
+
+    def test_bundle_contains_only_selected_module_contracts(self) -> None:
+        with tarfile.open(fileobj=io.BytesIO(self.bundle), mode="r:") as archive:
+            names = {member.name for member in archive.getmembers()}
+        self.assertNotIn("modules/cron-scheduler/module.json", names)
+        self.assertIn("modules/systemd-scheduler/module.json", names)
+        claim = self.manifest["rebuild_claim"]
+        self.assertTrue(claim["contains_selected_module_contracts"])
+        self.assertTrue(claim["contains_contract_schemas"])
+        self.assertFalse(claim["contains_runtime_implementations"])
+        self.assertFalse(claim["deploys_infrastructure"])
+        self.assertFalse(claim["proves_runtime_recovery"])
+
+    def test_bundle_payload_tampering_is_rejected(self) -> None:
+        tampered = self.bundle.replace(b"Git lineage", b"Git lineagf", 1)
+        self.assertNotEqual(self.bundle, tampered)
+        errors, _ = bundler.verify_factory_bundle(tampered)
+        self.assertTrue(errors)
+
+    def test_bundled_schema_body_tampering_is_rejected_after_manifest_rebuild(self) -> None:
+        payloads, read_errors = bundler._read_archive_payloads(self.bundle)
+        self.assertEqual([], read_errors)
+        schema_path = "schemas/factory-bundle-manifest.schema.json"
+        schema = composer.load_json_bytes(payloads[schema_path])
+        schema["description"] = "attacker-controlled rule change"
+        payloads[schema_path] = composer.canonical_json_bytes(schema)
+
+        content_payloads = {
+            path: data
+            for path, data in payloads.items()
+            if path != bundler.MANIFEST_PATH
+        }
+        malicious_manifest = bundler.build_bundle_manifest(
+            self.factory,
+            self.catalog,
+            self.plan,
+            content_payloads,
+        )
+        payloads[bundler.MANIFEST_PATH] = composer.canonical_json_bytes(
+            malicious_manifest
+        )
+        malicious_bundle = bundler.canonical_tar_bytes(payloads)
+
+        errors, _ = bundler.verify_factory_bundle(malicious_bundle)
+        self.assertTrue(any("immutable content digest" in error for error in errors))
+
+    def test_bundle_trailing_bytes_are_rejected(self) -> None:
+        errors, _ = bundler.verify_factory_bundle(self.bundle + b"unexpected")
+        self.assertTrue(any("not canonical" in error for error in errors))
+
+    def test_bundle_path_traversal_is_rejected(self) -> None:
+        malicious = bundler.canonical_tar_bytes({"../escape.json": b"{}\n"})
+        errors, _ = bundler.verify_factory_bundle(malicious)
+        self.assertTrue(any("unsafe" in error for error in errors))
+
+    def test_bundle_symlink_member_is_rejected(self) -> None:
+        output = io.BytesIO()
+        with tarfile.open(fileobj=output, mode="w", format=tarfile.USTAR_FORMAT) as archive:
+            member = tarfile.TarInfo("unsafe-link")
+            member.type = tarfile.SYMTYPE
+            member.linkname = "outside"
+            member.mode = 0o644
+            member.mtime = 0
+            archive.addfile(member)
+        errors, _ = bundler.verify_factory_bundle(output.getvalue())
+        self.assertTrue(any("regular file" in error for error in errors))
+
+    def test_bundle_duplicate_member_is_rejected(self) -> None:
+        output = io.BytesIO()
+        with tarfile.open(fileobj=output, mode="w", format=tarfile.USTAR_FORMAT) as archive:
+            for _ in range(2):
+                member = tarfile.TarInfo(bundler.MANIFEST_PATH)
+                member.size = 3
+                member.mode = 0o644
+                member.mtime = 0
+                archive.addfile(member, io.BytesIO(b"{}\n"))
+        errors, _ = bundler.verify_factory_bundle(output.getvalue())
+        self.assertTrue(any("duplicate" in error for error in errors))
+
+    def test_bundle_extra_member_is_rejected(self) -> None:
+        payloads, read_errors = bundler._read_archive_payloads(self.bundle)
+        self.assertEqual([], read_errors)
+        payloads["unexpected.json"] = b"{}\n"
+        errors, _ = bundler.verify_factory_bundle(
+            bundler.canonical_tar_bytes(payloads)
+        )
+        self.assertTrue(any("unexpected members" in error for error in errors))
+
+    def test_malformed_bundle_fails_cleanly(self) -> None:
+        for value in (b"", b"not a tar", b"\0" * 512, b"x" * 1024):
+            errors, result = bundler.verify_factory_bundle(value)
+            self.assertTrue(errors)
+            self.assertIsNone(result)
+
+    def test_cli_bundle_and_verify_round_trip(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            output = Path(temporary_directory) / "factory.tar"
+            cli = [sys.executable, str(validator.ROOT / "scripts" / "zaibatsu.py")]
+            built = subprocess.run(
+                cli
+                + [
+                    "bundle",
+                    str(validator.EXAMPLE_FACTORY_PATH),
+                    "--output",
+                    str(output),
+                ],
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(0, built.returncode, built.stderr)
+            self.assertEqual(self.bundle, output.read_bytes())
+            verified = subprocess.run(
+                cli + ["verify-bundle", str(output)],
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(0, verified.returncode, verified.stderr)
+            self.assertIn(bundler.sha256_bytes(self.bundle), verified.stdout)
+
+    def test_cli_bundle_refuses_dangling_output_symlink(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            output = root / "factory.tar"
+            target = root / "missing.tar"
+            output.symlink_to(target)
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(validator.ROOT / "scripts" / "zaibatsu.py"),
+                    "bundle",
                     str(validator.EXAMPLE_FACTORY_PATH),
                     "--output",
                     str(output),

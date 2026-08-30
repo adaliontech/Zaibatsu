@@ -173,11 +173,11 @@ make validate
 ```
 
 `make validate` checks the project-owned schemas, architecture contracts,
-portable factory example, reusable module catalog, content-addressed control
-plan, evidence receipts, factory hierarchy and lifecycle, maturity boundaries,
-submission gates, public-safety rules, local links, and adversarial mutations.
-No model, network access, cloud account, secret, Nix installation, or
-production system is required.
+portable factory example, content-addressed module artifacts, resolved control
+plan, portable bundle manifest, evidence receipts, factory hierarchy and
+lifecycle, maturity boundaries, submission gates, public-safety rules, local
+links, and adversarial mutations. No model, network access, cloud account,
+secret, Nix installation, or production system is required.
 
 ## Apply the contract to another factory
 
@@ -204,10 +204,11 @@ inspect without creating a file.
 ## Compose a factory control plan
 
 The versioned [`catalog/modules.json`](catalog/modules.json) describes reusable
-module implementations for the nine control slots. A binding is compatible
-when its declared policy value matches the factory policy; the implementation
-ID itself is replaceable. Resolve the example, verify the checked-in plan, and
-prove a second compilation is byte-identical:
+module implementations for the nine control slots and binds each one to a
+SHA-256-addressed contract artifact under [`catalog/modules/`](catalog/modules/).
+A binding is compatible when its declared policy value matches the factory
+policy; the implementation ID itself is replaceable. Resolve the example,
+verify the checked-in plan, and prove a second compilation is byte-identical:
 
 ```bash
 python3 scripts/zaibatsu.py catalog-check
@@ -223,6 +224,25 @@ order, preserves module implementation boundaries, and carries an explicit
 least-authority claim. It proves reproducible **control-plan composition only**.
 It does not install Ansible roles, build a Nix environment, create schedules,
 contact a model, deploy infrastructure, or prove runtime recovery.
+
+Package the complete selected control surface into a canonical archive and
+verify it without extraction:
+
+```bash
+python3 scripts/zaibatsu.py bundle examples/economic-factory.json \
+  --output /tmp/example-product.factory.tar
+python3 scripts/zaibatsu.py verify-bundle \
+  /tmp/example-product.factory.tar
+```
+
+The uncompressed USTAR bundle is byte-reproducible and includes the canonical
+factory definition, complete catalog, resolved plan, nine selected module
+contract artifacts, five JSON Schemas, and a per-file digest manifest. The
+verifier denies traversal paths, links, special files, duplicate or extra
+members, noncanonical metadata or JSON, schema or payload tampering, and
+trailing data. The bundle contains **contracts, not runtimes**: every module
+artifact explicitly says that no implementation, entrypoint, environment lock,
+deployment authority, or runtime-recovery proof is included.
 
 ## Factory AI and local Qwen
 
@@ -253,9 +273,12 @@ and the complete repository suite was rerun independently.
   task flow, and fail-closed invariants.
 - [Portable factory definition](examples/economic-factory.json) — reusable
   contract for a new control or economic factory.
-- [Reusable module catalog](catalog/modules.json) and [example control
-  plan](examples/economic-factory.plan.json) — policy-compatible implementations
-  resolved into a content-addressed, dependency-ordered plan.
+- [Reusable module catalog](catalog/modules.json), [module contract
+  artifacts](catalog/modules/), [example control
+  plan](examples/economic-factory.plan.json), and [bundle
+  manifest](examples/economic-factory.bundle-manifest.json) — independently
+  hashed module contracts resolved and packaged into a dependency-ordered,
+  reproducible control bundle.
 - [Project-owned schemas](schemas/) — JSON Schema contracts for architecture,
   readiness, portable factories, and sanitized evidence.
 - [Architecture guide](docs/architecture.md) — how the two models compose.
@@ -287,6 +310,8 @@ and the complete repository suite was rerun independently.
    exit gates.
 8. Module IDs select implementations; declared policy compatibility decides
    whether a module may fill a factory slot.
+9. A module artifact, plan, or bundle is accepted only when every canonical
+   digest, member, dependency, and least-authority boundary matches.
 8. Tests, schemas, linters, hashes, policy, receipts, and owner approval outrank
    model confidence.
 9. Feedback may propose shared improvement but cannot self-promote.
