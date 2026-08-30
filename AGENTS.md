@@ -12,6 +12,8 @@
 - Bundle proof: `python3 scripts/zaibatsu.py verify-bundle /tmp/example-product.factory.tar`
 - Bundle inspection: `python3 scripts/zaibatsu.py inspect-bundle /tmp/example-product.factory.tar`
 - Module-change comparison: build the cron example, then run `python3 scripts/zaibatsu.py compare-bundles /tmp/example-product.factory.tar /tmp/example-product-cron.factory.tar`
+- Qualification requirements: `python3 scripts/zaibatsu.py qualification-plan /tmp/example-product.factory.tar --output /tmp/example-product.qualification-plan.json`
+- Qualification-plan proof: `python3 scripts/zaibatsu.py verify-qualification-plan /tmp/example-product.qualification-plan.json /tmp/example-product.factory.tar`
 - Tests only: `python3 -m unittest discover -s tests -v`
 - Deferred local-model preflight: `make droid-preflight`
 
@@ -50,6 +52,9 @@ credentials, or bootstrap procedures.
 - Preserve the closed factory/project registry and deny unknown identities.
 - Keep every JSON instance bound to its project-owned schema. Evidence receipts
   and completed submission gates require typed fields, not prose alone.
+- Treat a qualification plan only as a content-addressed list of missing
+  evidence. It may not accept self-attestation, mark a bundled contract
+  runtime-eligible, authorize activation, or replace owner approval.
 - Treat every tracked or non-ignored path as public. Opaque files, symlinks,
   and Git submodules are outside the scanner's inspectable boundary and must
   fail closed.

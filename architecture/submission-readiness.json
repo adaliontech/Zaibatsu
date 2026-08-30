@@ -19,7 +19,9 @@
           "examples/economic-factory.json",
           "examples/economic-factory-cron.json",
           "examples/economic-factory.bundle-manifest.json",
-          "examples/economic-factory.plan.json"
+          "examples/economic-factory.plan.json",
+          "examples/economic-factory.qualification-plan.json",
+          "policies/runtime-qualification-v1.json"
         ],
         "validator": "scripts/validate_repository.py"
       }
@@ -86,25 +88,18 @@
     },
     {
       "id": "fresh_clone_reproduction",
-      "status": "complete",
+      "status": "pending_external",
       "required_for_submission": true,
-      "evidence": "Credential-disabled public clone of the v1.4.0 candidate passed 143 tests, schema and receipt contracts, strict Git checks, Gitleaks 8.30.1 history/tree scans, canonical systemd and cron bundle reproduction, semantic comparison assertions, AJV output-schema validation, and independent GitHub Actions",
-      "proof": {
-        "candidate_commit": "44c29183ea6b5f7d307ccdd3ef1a37162d476752",
-        "tests_passed": 143,
-        "gitleaks_version": "8.30.1",
-        "systemd_bundle_sha256": "d4918fd16f55b907a0b2b9734422d7106d3030a511e5cae5d6efc1cb7b253aba",
-        "cron_bundle_sha256": "1b7b7ea21ffce65c47dae79765fbf46368e00da44ed2426791de1cc3365c2f72",
-        "inspection_sha256": "0ec784c98036b6b43fd8c8a41bb033ac5cb660ef39fd9f159e3720d2bf3a17a1",
-        "comparison_sha256": "252dcdfd28b3cd93449ec97f11bdcf9e3c9c19c9bc51cffbbfacc25d87486b0b",
-        "github_actions_run": "https://github.com/adaliontech/Zaibatsu/actions/runs/33335215008"
-      }
+      "evidence": "The immutable v1.4.0 proof remains historical; the v1.5.0 qualification-policy and missing-evidence-plan candidate requires its own credential-disabled clone, 153-test, strict-Git, Gitleaks, schema, determinism, and CI proof"
     },
     {
       "id": "public_demo",
-      "status": "pending_external",
+      "status": "blocked_by_dependency",
       "required_for_submission": true,
-      "evidence": "Immutable v1.4.0 is public and passed tag-clone reproduction; record and publish the final clip from that release tag"
+      "evidence": "Record and publish the final clip only after the current qualification-plan candidate passes fresh-clone proof and is released",
+      "blocked_by": [
+        "fresh_clone_reproduction"
+      ]
     },
     {
       "id": "applicant_materials",

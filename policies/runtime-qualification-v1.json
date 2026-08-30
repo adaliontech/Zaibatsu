@@ -1,0 +1,91 @@
+{
+  "contract_schema": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.5.0/schemas/module-qualification-policy.schema.json",
+  "schema_version": "zaibatsu.module-qualification-policy.v1",
+  "policy_id": "runtime-eligibility-default",
+  "module_api_version": "zaibatsu.module.v1",
+  "scope": "runtime_eligibility_prerequisites",
+  "base_requirements": [
+    "contract_conformance_receipt",
+    "environment_lock_digest",
+    "implementation_artifact_digest",
+    "recovery_receipt",
+    "source_revision"
+  ],
+  "slot_requirements": [
+    {
+      "slot": "source_versioning",
+      "requirements": [
+        "repository_lineage_receipt"
+      ]
+    },
+    {
+      "slot": "static_secrets",
+      "requirements": [
+        "ciphertext_policy_receipt",
+        "secret_recovery_receipt"
+      ]
+    },
+    {
+      "slot": "runtime_secrets",
+      "requirements": [
+        "secret_revocation_receipt",
+        "secret_scope_receipt"
+      ]
+    },
+    {
+      "slot": "host_reproduction",
+      "requirements": [
+        "clean_host_recovery_receipt",
+        "idempotence_receipt"
+      ]
+    },
+    {
+      "slot": "worker_environment",
+      "requirements": [
+        "cache_independence_receipt",
+        "cross_node_reproduction_receipt"
+      ]
+    },
+    {
+      "slot": "scheduling",
+      "requirements": [
+        "duplicate_trigger_denial_receipt",
+        "failure_route_receipt",
+        "scheduler_authority_receipt"
+      ]
+    },
+    {
+      "slot": "execution",
+      "requirements": [
+        "budget_policy_receipt",
+        "fixed_fixture_evaluation_receipt",
+        "network_policy_receipt",
+        "sandbox_isolation_receipt",
+        "secret_policy_receipt",
+        "typed_port_conformance_receipt"
+      ]
+    },
+    {
+      "slot": "verification",
+      "requirements": [
+        "adversarial_fixture_receipt",
+        "deterministic_gate_receipt"
+      ]
+    },
+    {
+      "slot": "feedback",
+      "requirements": [
+        "promotion_authority_receipt",
+        "rollback_receipt"
+      ]
+    }
+  ],
+  "decision_boundary": {
+    "evidence_must_be_content_addressed": true,
+    "missing_evidence_fails_closed": true,
+    "owner_approval_required_for_activation": true,
+    "qualification_grants_activation": false,
+    "qualification_plan_is_evidence": false,
+    "self_attestation_accepted": false
+  }
+}

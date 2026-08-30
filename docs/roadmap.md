@@ -22,11 +22,14 @@ changes.
   and portable-bundle proof before recording its demo;
 - preserve the reproduced immutable `v1.4.0` verified inspection and semantic
   bundle-comparison proof before recording the final demo;
+- reproduce and release the `v1.5.0` fail-closed qualification policy and
+  content-addressed missing-evidence plan before recording the final demo;
 - record the Guild demo and complete applicant-owned submission materials.
 
 Exit: the public narrative, architecture, portable factory, module artifacts,
-control plan, bundle, readiness, and evidence contracts describe the same
-meta-factory without inflating source-only or planned capabilities.
+control plan, bundle, qualification plan, readiness, and evidence contracts
+describe the same meta-factory without inflating source-only or planned
+capabilities.
 
 ## Phase 1 — Factory identity and versioning
 
@@ -116,6 +119,8 @@ Implemented source foundation:
 
 - public content-addressed contracts and a reproducible control bundle for the
   nine required factory slots, with no runtime implementation claimed;
+- a public minimum qualification policy and reproducible plan that enumerate
+  67 missing evidence bindings without granting eligibility or activation;
 - typed module, artifact, flow, fragment, implementation, handler, profile,
   runtime, placement, worker, evaluation, approval, and effect contracts;
 - 21 logical modules, 6 flows, 12 deployment profiles, and 23 implementation

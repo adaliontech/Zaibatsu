@@ -79,7 +79,10 @@ The validator confirms:
     reproduces identical canonical USTAR bytes.
 26. inspection and comparison accept only fully verified canonical bundles,
     report a scheduler substitution at the module slot, and preserve the
-    explicit no-runtime and no-deployment boundary.
+    explicit no-runtime and no-deployment boundary;
+27. the qualification policy preserves every mandatory evidence class, and
+    the checked-in plan exactly matches its verified bundle and policy while
+    granting no runtime eligibility, activation, or owner approval.
 
 The adversarial tests mutate valid architecture data and prove that the
 validator rejects meta-factory role drift, a missing or reclassified factory,
@@ -110,6 +113,12 @@ python3 scripts/zaibatsu.py bundle examples/economic-factory-cron.json \
 python3 scripts/zaibatsu.py compare-bundles \
   /tmp/example-product.factory.tar \
   /tmp/example-product-cron.factory.tar
+python3 scripts/zaibatsu.py qualification-plan \
+  /tmp/example-product.factory.tar \
+  --output /tmp/example-product.qualification-plan.json
+python3 scripts/zaibatsu.py verify-qualification-plan \
+  /tmp/example-product.qualification-plan.json \
+  /tmp/example-product.factory.tar
 ```
 
 To create a new definition, run `python3 scripts/zaibatsu.py scaffold --help`.
@@ -122,6 +131,11 @@ The rebuild check and portable bundle cover the deterministic contract layer.
 They are path-independent and offline, but do not run Ansible, realize Nix,
 activate cron/systemd, contact a model, deploy a service, or demonstrate
 recovery. Those are separate promotion gates.
+
+The qualification plan closes none of those gates. It binds the control bundle
+and minimum policy by digest and enumerates missing evidence. The public
+example contains 67 missing bindings across 27 requirement types, marks zero
+of nine modules eligible, accepts no self-attestation, and grants no activation.
 
 ## Optional Droid preflight
 
@@ -167,7 +181,7 @@ release reproduction, clone the named tag rather than the moving default
 branch:
 
 ```bash
-git clone --depth 1 --branch v1.4.0 https://github.com/adaliontech/Zaibatsu.git
+git clone --depth 1 --branch v1.5.0 https://github.com/adaliontech/Zaibatsu.git
 cd Zaibatsu
 make validate
 ```

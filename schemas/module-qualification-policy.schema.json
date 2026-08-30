@@ -1,0 +1,230 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.5.0/schemas/module-qualification-policy.schema.json",
+  "title": "Zaibatsu module runtime-qualification policy",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_schema", "schema_version", "policy_id", "module_api_version", "scope", "base_requirements", "slot_requirements", "decision_boundary"],
+  "properties": {
+    "contract_schema": {"const": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.5.0/schemas/module-qualification-policy.schema.json"},
+    "schema_version": {"const": "zaibatsu.module-qualification-policy.v1"},
+    "policy_id": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+    "module_api_version": {"const": "zaibatsu.module.v1"},
+    "scope": {"const": "runtime_eligibility_prerequisites"},
+    "base_requirements": {
+      "allOf": [
+        {"$ref": "#/$defs/requirements"},
+        {"type": "array", "contains": {"const": "contract_conformance_receipt"}},
+        {"type": "array", "contains": {"const": "environment_lock_digest"}},
+        {"type": "array", "contains": {"const": "implementation_artifact_digest"}},
+        {"type": "array", "contains": {"const": "recovery_receipt"}},
+        {"type": "array", "contains": {"const": "source_revision"}}
+      ]
+    },
+    "slot_requirements": {
+      "type": "array",
+      "minItems": 9,
+      "maxItems": 9,
+      "prefixItems": [
+        {"$ref": "#/$defs/sourceVersioningPolicy"},
+        {"$ref": "#/$defs/staticSecretsPolicy"},
+        {"$ref": "#/$defs/runtimeSecretsPolicy"},
+        {"$ref": "#/$defs/hostReproductionPolicy"},
+        {"$ref": "#/$defs/workerEnvironmentPolicy"},
+        {"$ref": "#/$defs/schedulingPolicy"},
+        {"$ref": "#/$defs/executionPolicy"},
+        {"$ref": "#/$defs/verificationPolicy"},
+        {"$ref": "#/$defs/feedbackPolicy"}
+      ],
+      "items": false
+    },
+    "decision_boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["evidence_must_be_content_addressed", "missing_evidence_fails_closed", "owner_approval_required_for_activation", "qualification_grants_activation", "qualification_plan_is_evidence", "self_attestation_accepted"],
+      "properties": {
+        "evidence_must_be_content_addressed": {"const": true},
+        "missing_evidence_fails_closed": {"const": true},
+        "owner_approval_required_for_activation": {"const": true},
+        "qualification_grants_activation": {"const": false},
+        "qualification_plan_is_evidence": {"const": false},
+        "self_attestation_accepted": {"const": false}
+      }
+    }
+  },
+  "$defs": {
+    "slot": {"enum": ["source_versioning", "static_secrets", "runtime_secrets", "host_reproduction", "worker_environment", "scheduling", "execution", "verification", "feedback"]},
+    "requirement": {"type": "string", "pattern": "^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$"},
+    "requirements": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/requirement"}
+    },
+    "slotPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["slot", "requirements"],
+      "properties": {
+        "slot": {"$ref": "#/$defs/slot"},
+        "requirements": {"$ref": "#/$defs/requirements"}
+      }
+    },
+    "sourceVersioningPolicy": {
+      "allOf": [
+        {"$ref": "#/$defs/slotPolicy"},
+        {
+          "type": "object",
+          "properties": {
+            "slot": {"const": "source_versioning"},
+            "requirements": {
+              "type": "array",
+              "contains": {"const": "repository_lineage_receipt"}
+            }
+          }
+        }
+      ]
+    },
+    "staticSecretsPolicy": {
+      "allOf": [
+        {"$ref": "#/$defs/slotPolicy"},
+        {
+          "type": "object",
+          "properties": {
+            "slot": {"const": "static_secrets"},
+            "requirements": {
+              "allOf": [
+                {"type": "array", "contains": {"const": "ciphertext_policy_receipt"}},
+                {"type": "array", "contains": {"const": "secret_recovery_receipt"}}
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "runtimeSecretsPolicy": {
+      "allOf": [
+        {"$ref": "#/$defs/slotPolicy"},
+        {
+          "type": "object",
+          "properties": {
+            "slot": {"const": "runtime_secrets"},
+            "requirements": {
+              "allOf": [
+                {"type": "array", "contains": {"const": "secret_revocation_receipt"}},
+                {"type": "array", "contains": {"const": "secret_scope_receipt"}}
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "hostReproductionPolicy": {
+      "allOf": [
+        {"$ref": "#/$defs/slotPolicy"},
+        {
+          "type": "object",
+          "properties": {
+            "slot": {"const": "host_reproduction"},
+            "requirements": {
+              "allOf": [
+                {"type": "array", "contains": {"const": "clean_host_recovery_receipt"}},
+                {"type": "array", "contains": {"const": "idempotence_receipt"}}
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "workerEnvironmentPolicy": {
+      "allOf": [
+        {"$ref": "#/$defs/slotPolicy"},
+        {
+          "type": "object",
+          "properties": {
+            "slot": {"const": "worker_environment"},
+            "requirements": {
+              "allOf": [
+                {"type": "array", "contains": {"const": "cache_independence_receipt"}},
+                {"type": "array", "contains": {"const": "cross_node_reproduction_receipt"}}
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "schedulingPolicy": {
+      "allOf": [
+        {"$ref": "#/$defs/slotPolicy"},
+        {
+          "type": "object",
+          "properties": {
+            "slot": {"const": "scheduling"},
+            "requirements": {
+              "allOf": [
+                {"type": "array", "contains": {"const": "duplicate_trigger_denial_receipt"}},
+                {"type": "array", "contains": {"const": "failure_route_receipt"}},
+                {"type": "array", "contains": {"const": "scheduler_authority_receipt"}}
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "executionPolicy": {
+      "allOf": [
+        {"$ref": "#/$defs/slotPolicy"},
+        {
+          "type": "object",
+          "properties": {
+            "slot": {"const": "execution"},
+            "requirements": {
+              "allOf": [
+                {"type": "array", "contains": {"const": "budget_policy_receipt"}},
+                {"type": "array", "contains": {"const": "fixed_fixture_evaluation_receipt"}},
+                {"type": "array", "contains": {"const": "network_policy_receipt"}},
+                {"type": "array", "contains": {"const": "sandbox_isolation_receipt"}},
+                {"type": "array", "contains": {"const": "secret_policy_receipt"}},
+                {"type": "array", "contains": {"const": "typed_port_conformance_receipt"}}
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "verificationPolicy": {
+      "allOf": [
+        {"$ref": "#/$defs/slotPolicy"},
+        {
+          "type": "object",
+          "properties": {
+            "slot": {"const": "verification"},
+            "requirements": {
+              "allOf": [
+                {"type": "array", "contains": {"const": "adversarial_fixture_receipt"}},
+                {"type": "array", "contains": {"const": "deterministic_gate_receipt"}}
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "feedbackPolicy": {
+      "allOf": [
+        {"$ref": "#/$defs/slotPolicy"},
+        {
+          "type": "object",
+          "properties": {
+            "slot": {"const": "feedback"},
+            "requirements": {
+              "allOf": [
+                {"type": "array", "contains": {"const": "promotion_authority_receipt"}},
+                {"type": "array", "contains": {"const": "rollback_receipt"}}
+              ]
+            }
+          }
+        }
+      ]
+    }
+  }
+}

@@ -29,6 +29,11 @@ from factory_composer import (
     validate_factory_plan,
     validate_module_catalog,
 )
+from factory_qualification import (
+    QUALIFICATION_POLICY_PATH,
+    qualification_plan_for_bundle,
+    verify_qualification_plan_for_bundle,
+)
 from validate_repository import (
     FACTORY_DEFINITION_SCHEMA_VERSION,
     PORTABLE_FACTORY_SCHEMA_REFERENCE,
@@ -350,6 +355,47 @@ def command_compare_bundles(
     return write_document(comparison, output)
 
 
+def command_qualification_plan(
+    bundle_path: str,
+    policy_path: str,
+    output: str | None,
+) -> int:
+    bundle = load_bundle(bundle_path, "factory bundle")
+    policy = load_json_document(policy_path, "qualification policy")
+    if bundle is None or policy is None:
+        return 2
+    errors, plan = qualification_plan_for_bundle(bundle, policy)
+    if errors or plan is None:
+        print("cannot build qualification plan", file=sys.stderr)
+        for error in errors:
+            print(f"- {error}", file=sys.stderr)
+        return 1
+    return write_document(plan, output)
+
+
+def command_verify_qualification_plan(
+    plan_path: str,
+    bundle_path: str,
+    policy_path: str,
+) -> int:
+    plan = load_json_document(plan_path, "qualification plan")
+    bundle = load_bundle(bundle_path, "factory bundle")
+    policy = load_json_document(policy_path, "qualification policy")
+    if plan is None or bundle is None or policy is None:
+        return 2
+    errors = verify_qualification_plan_for_bundle(plan, bundle, policy)
+    if errors:
+        print(f"qualification plan failed: {plan_path}", file=sys.stderr)
+        for error in errors:
+            print(f"- {error}", file=sys.stderr)
+        return 1
+    print(f"qualification plan passed: {plan_path}")
+    print(f"qualification plan sha256: {plan['qualification_plan_sha256']}")
+    print("runtime eligible: false")
+    print("activation authorized: false")
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="zaibatsu",
@@ -413,6 +459,32 @@ def build_parser() -> argparse.ArgumentParser:
         "--output", help="write comparison JSON to a new file"
     )
 
+    qualification_plan = commands.add_parser(
+        "qualification-plan",
+        help="list evidence required before bundle modules can be runtime-eligible",
+    )
+    qualification_plan.add_argument("bundle_path")
+    qualification_plan.add_argument(
+        "--policy",
+        default=str(QUALIFICATION_POLICY_PATH),
+        help="qualification policy JSON",
+    )
+    qualification_plan.add_argument(
+        "--output", help="write qualification-plan JSON to a new file"
+    )
+
+    verify_qualification_plan = commands.add_parser(
+        "verify-qualification-plan",
+        help="verify a qualification plan against its bundle and policy",
+    )
+    verify_qualification_plan.add_argument("plan_path")
+    verify_qualification_plan.add_argument("bundle_path")
+    verify_qualification_plan.add_argument(
+        "--policy",
+        default=str(QUALIFICATION_POLICY_PATH),
+        help="qualification policy JSON",
+    )
+
     scaffold = commands.add_parser("scaffold", help="create a safe factory skeleton")
     scaffold.add_argument("--id", required=True, dest="factory_id")
     scaffold.add_argument(
@@ -452,6 +524,18 @@ def main() -> int:
             arguments.before_path,
             arguments.after_path,
             arguments.output,
+        )
+    if arguments.command == "qualification-plan":
+        return command_qualification_plan(
+            arguments.bundle_path,
+            arguments.policy,
+            arguments.output,
+        )
+    if arguments.command == "verify-qualification-plan":
+        return command_verify_qualification_plan(
+            arguments.plan_path,
+            arguments.bundle_path,
+            arguments.policy,
         )
     document = factory_template(
         arguments.factory_id,

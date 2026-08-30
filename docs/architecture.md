@@ -24,9 +24,9 @@ The shared layer controls factory contracts. Each economic factory retains its
 own identity, data, credentials, repositories, schedules, acceptance rules,
 budgets, and production authority.
 
-## Five machine-readable views
+## Six machine-readable views
 
-Zaibatsu deliberately separates five questions:
+Zaibatsu deliberately separates six questions:
 
 | Contract | Question |
 | --- | --- |
@@ -35,6 +35,7 @@ Zaibatsu deliberately separates five questions:
 | [`examples/economic-factory.json`](../examples/economic-factory.json) | Which policies and evidence bindings define one portable factory? |
 | [`catalog/modules.json`](../catalog/modules.json) plus [`examples/economic-factory.plan.json`](../examples/economic-factory.plan.json) | Which compatible module implementations resolve into its deterministic control plan? |
 | [`examples/economic-factory.bundle-manifest.json`](../examples/economic-factory.bundle-manifest.json) | Which exact definition, catalog, plan, selected module contracts, and schemas form its portable control bundle? |
+| [`policies/runtime-qualification-v1.json`](../policies/runtime-qualification-v1.json) plus [`examples/economic-factory.qualification-plan.json`](../examples/economic-factory.qualification-plan.json) | Which content-addressed evidence bindings are still required before those contracts can become runtime-eligible? |
 
 The validator requires the factory registry and shared component maturities to
 agree. A narrative edit cannot silently turn planned Nix reproduction or
@@ -84,6 +85,16 @@ archives before reporting definition, catalog, plan, module, or schema
 changes. The public systemd and cron variants demonstrate that scheduler
 selection is modular while leaving the shared catalog, schemas, and
 least-authority boundary unchanged.
+
+`qualification-plan` joins a fully verified bundle to a versioned minimum
+policy and emits a content-addressed list of missing implementation, source,
+environment, conformance, recovery, and slot-specific evidence. The public
+systemd plan contains 67 missing bindings across 27 requirement types and
+marks zero of nine modules eligible. `verify-qualification-plan` rebuilds the
+expected plan from both inputs and denies bundle drift, policy drift, digest
+drift, self-attestation, eligibility inflation, or activation authority. A
+qualification plan contains no evidence and cannot substitute for owner
+approval.
 
 This boundary is deliberately narrower than infrastructure reproduction. The
 plan and bundle own no side-effect authority and explicitly state that they

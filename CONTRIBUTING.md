@@ -37,6 +37,10 @@ schema changes; do not commit generated tar archives.
 Changes to inspection or comparison behavior must prove that invalid bundles
 are rejected before a semantic result is emitted and that the result preserves
 the bundle's non-authorizing runtime boundary.
+Qualification-policy changes may add requirements but may not remove the
+mandatory minimum, accept self-attestation, treat a plan as evidence, grant
+runtime eligibility or activation, or bypass owner approval. Regenerate and
+verify the checked-in qualification plan after any bundle or policy change.
 
 ## Pull request evidence
 

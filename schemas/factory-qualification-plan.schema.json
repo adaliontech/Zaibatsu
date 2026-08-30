@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.5.0/schemas/factory-qualification-plan.schema.json",
+  "title": "Zaibatsu deterministic factory qualification plan",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_schema", "schema_version", "factory", "source", "modules", "summary", "qualification_boundary", "qualification_plan_sha256"],
+  "properties": {
+    "contract_schema": {"const": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.5.0/schemas/factory-qualification-plan.schema.json"},
+    "schema_version": {"const": "zaibatsu.factory-qualification-plan.v1"},
+    "factory": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "class"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+        "class": {"enum": ["control_factory", "economic_factory"]}
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["bundle_sha256", "factory_plan_sha256", "module_catalog_sha256", "qualification_policy_id", "qualification_policy_sha256", "module_api_version"],
+      "properties": {
+        "bundle_sha256": {"$ref": "#/$defs/sha256"},
+        "factory_plan_sha256": {"$ref": "#/$defs/sha256"},
+        "module_catalog_sha256": {"$ref": "#/$defs/sha256"},
+        "qualification_policy_id": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+        "qualification_policy_sha256": {"$ref": "#/$defs/sha256"},
+        "module_api_version": {"const": "zaibatsu.module.v1"}
+      }
+    },
+    "modules": {
+      "type": "array",
+      "minItems": 9,
+      "maxItems": 9,
+      "items": {"$ref": "#/$defs/moduleQualification"}
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["module_count", "runtime_eligible_modules", "runtime_ineligible_modules", "missing_evidence_bindings", "unique_requirement_types", "all_requirements_satisfied"],
+      "properties": {
+        "module_count": {"const": 9},
+        "runtime_eligible_modules": {"const": 0},
+        "runtime_ineligible_modules": {"const": 9},
+        "missing_evidence_bindings": {"type": "integer", "minimum": 54},
+        "unique_requirement_types": {"type": "integer", "minimum": 14},
+        "all_requirements_satisfied": {"const": false}
+      }
+    },
+    "qualification_boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["contains_qualification_evidence", "self_attestation_accepted", "runtime_eligibility_granted", "activation_authorized", "owner_approval_required_for_activation"],
+      "properties": {
+        "contains_qualification_evidence": {"const": false},
+        "self_attestation_accepted": {"const": false},
+        "runtime_eligibility_granted": {"const": false},
+        "activation_authorized": {"const": false},
+        "owner_approval_required_for_activation": {"const": true}
+      }
+    },
+    "qualification_plan_sha256": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "slot": {"enum": ["source_versioning", "static_secrets", "runtime_secrets", "host_reproduction", "worker_environment", "scheduling", "execution", "verification", "feedback"]},
+    "requirement": {"type": "string", "pattern": "^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$"},
+    "moduleQualification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["position", "slot", "module", "artifact_sha256", "required_evidence", "evidence_status", "runtime_eligible", "reason"],
+      "properties": {
+        "position": {"type": "integer", "minimum": 0, "maximum": 8},
+        "slot": {"$ref": "#/$defs/slot"},
+        "module": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+        "artifact_sha256": {"$ref": "#/$defs/sha256"},
+        "required_evidence": {
+          "type": "array",
+          "minItems": 6,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/requirement"}
+        },
+        "evidence_status": {"const": "not_provided"},
+        "runtime_eligible": {"const": false},
+        "reason": {"const": "control_bundle_contains_no_runtime_implementation"}
+      }
+    }
+  }
+}

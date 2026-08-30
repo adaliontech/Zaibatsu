@@ -212,6 +212,9 @@ reusable contracts while preserving evidence and limitations:
 - `zaibatsu inspect-bundle` and `compare-bundles` expose the exact semantic
   delta between the public systemd and cron variants only after both bundles
   pass complete verification;
+- the versioned qualification policy and `qualification-plan` workflow turn a
+  verified bundle into 67 content-addressed missing-evidence bindings without
+  accepting self-attestation or granting runtime eligibility or activation;
 - project-owned JSON Schemas describe the architecture, factory, readiness,
   and evidence documents;
 - `scripts/validate_repository.py` checks all contracts, evidence semantics,
@@ -233,6 +236,7 @@ The public package can now reject claims or architectures in which:
 - plaintext secrets become allowed in Git;
 - cron and systemd both own the same workload;
 - a source-only skeleton is described as deployed;
+- a missing-evidence plan is presented as qualification or activation;
 - a model authorizes an external effect;
 - a factory promotes its own feedback into shared policy;
 - component and meta-factory maturity ledgers diverge.

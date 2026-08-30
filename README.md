@@ -113,6 +113,7 @@ The target stack is intentionally boring at authority boundaries:
 | Modular agent skeletons | Reusable typed modules, flows, profiles, approvals, and effect fences | Implemented and tested source; not deployed |
 | LLM harness adapters | Bind different models behind typed module contracts | Validated at bounded source/contribution scope; general unattended routing is not active |
 | Recursive improvement | Return evidence and improve shared factory patterns | Evidence return is bounded and operational; shared automatic promotion remains designed and owner-gated |
+| Qualification planner | Bind a verified control bundle to mandatory runtime evidence requirements | Implemented and tested; the public plan contains no qualification evidence and grants no eligibility or activation |
 
 The machine-readable source of this hierarchy is
 [`architecture/factory-model.json`](architecture/factory-model.json). The
@@ -156,6 +157,7 @@ Zaibatsu does not currently claim:
 - Nix-based worker reconstruction;
 - general production execution through the PostgreSQL Dispatcher;
 - direct model publication, deployment, secret use, or infrastructure control;
+- completed runtime qualification of any public bundle module;
 - completed consolidation of every private product repository.
 
 Source, tests, and a deployment plan are evidence classes—not proof that a
@@ -174,10 +176,11 @@ make validate
 
 `make validate` checks the project-owned schemas, architecture contracts,
 portable factory example, content-addressed module artifacts, resolved control
-plan, portable bundle manifest, evidence receipts, factory hierarchy and
-lifecycle, maturity boundaries, submission gates, public-safety rules, local
-links, and adversarial mutations. No model, network access, cloud account,
-secret, Nix installation, or production system is required.
+plan, portable bundle manifest, qualification policy and plan, evidence
+receipts, factory hierarchy and lifecycle, maturity boundaries, submission
+gates, public-safety rules, local links, and adversarial mutations. No model,
+network access, cloud account, secret, Nix installation, or production system
+is required.
 
 ## Apply the contract to another factory
 
@@ -263,6 +266,30 @@ remain unchanged, while the factory definition and resolved plan receive new
 content digests. Both sides still report runtime ineligible: comparison proves
 a modular control-contract change, not scheduler activation.
 
+## Plan runtime qualification
+
+Turn the verified bundle into a content-addressed list of evidence required
+before its selected modules could become runtime-eligible:
+
+```bash
+python3 scripts/zaibatsu.py qualification-plan \
+  /tmp/example-product.factory.tar \
+  --output /tmp/example-product.qualification-plan.json
+python3 scripts/zaibatsu.py verify-qualification-plan \
+  /tmp/example-product.qualification-plan.json \
+  /tmp/example-product.factory.tar
+```
+
+The default [qualification policy](policies/runtime-qualification-v1.json)
+requires content-addressed implementation, source, environment, conformance,
+and recovery evidence for every module, plus slot-specific proofs. For the
+public example that resolves to 67 missing bindings across 27 requirement
+types. The checked-in [qualification
+plan](examples/economic-factory.qualification-plan.json) marks zero of nine
+modules runtime-eligible. It is a reproducible request for missing evidence,
+not evidence itself: self-attestation is rejected, qualification never grants
+activation, and owner approval remains a separate prerequisite.
+
 ## Factory AI and local Qwen
 
 Zaibatsu is the meta-factory; Factory AI's Droid is one possible worker
@@ -299,6 +326,10 @@ and the complete repository suite was rerun independently.
   manifest](examples/economic-factory.bundle-manifest.json) — independently
   hashed module contracts resolved and packaged into a dependency-ordered,
   reproducible control bundle.
+- [Qualification policy](policies/runtime-qualification-v1.json) and [example
+  qualification plan](examples/economic-factory.qualification-plan.json) —
+  content-addressed missing-evidence requirements with no runtime or activation
+  authority.
 - [Project-owned schemas](schemas/) — JSON Schema contracts for architecture,
   readiness, portable factories, and sanitized evidence.
 - [Architecture guide](docs/architecture.md) — how the two models compose.
@@ -332,10 +363,12 @@ and the complete repository suite was rerun independently.
    whether a module may fill a factory slot.
 9. A module artifact, plan, or bundle is accepted only when every canonical
    digest, member, dependency, and least-authority boundary matches.
-8. Tests, schemas, linters, hashes, policy, receipts, and owner approval outrank
-   model confidence.
-9. Feedback may propose shared improvement but cannot self-promote.
-10. Failed work remains inspectable, and the owner retains a recovery path
+10. A qualification plan lists missing evidence; it is not evidence, runtime
+    eligibility, activation authority, or owner approval.
+11. Tests, schemas, linters, hashes, policy, receipts, and owner approval
+    outrank model confidence.
+12. Feedback may propose shared improvement but cannot self-promote.
+13. Failed work remains inspectable, and the owner retains a recovery path
     outside Dispatcher.
 
 ## Factory Guild submission
@@ -345,8 +378,11 @@ short demo. Immutable `v1.1.0` passed a credential-disabled public-clone proof
 and independent GitHub CI. Immutable `v1.1.1` added reusable contracts and
 harder evidence validation and passed its own anonymous-clone and CI proof.
 The `v1.1.2` candidate corrects the portable schema URI for definitions created
-outside this repository and passed its own anonymous-clone and CI proof. The
-final demo and applicant-owned form materials remain external submission gates.
+outside this repository and passed its own anonymous-clone and CI proof.
+Immutable `v1.2.0` through `v1.4.0` then proved module composition, portable
+bundles, and semantic comparison at their scoped public boundaries. The current
+qualification-plan candidate requires the same proof before release; the final
+demo and applicant-owned form materials remain external submission gates.
 
 Zaibatsu is an independent project and is not affiliated with or endorsed by
 Factory AI.

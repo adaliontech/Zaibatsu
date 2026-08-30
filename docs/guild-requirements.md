@@ -63,8 +63,8 @@ path.
 | Real public project | This repository | Public and anonymously reachable |
 | Clear README | [`README.md`](../README.md) | Complete |
 | License | [`LICENSE`](../LICENSE) | Complete |
-| Runnable quickstart | [`docs/reproducibility.md`](reproducibility.md) | Immutable v1.4.0 passed 143 tests, Gitleaks, semantic assertions, output-schema validation, and independent CI from credential-disabled candidate and tag clones |
-| Reusable value | [`examples/economic-factory.json`](../examples/economic-factory.json), [cron variant](../examples/economic-factory-cron.json), [`catalog/modules.json`](../catalog/modules.json), [`examples/economic-factory.bundle-manifest.json`](../examples/economic-factory.bundle-manifest.json), and [`scripts/zaibatsu.py`](../scripts/zaibatsu.py) | Another project can scaffold a fail-closed definition, reproduce and inspect a self-verifying control bundle, then compare a policy-compatible module substitution offline |
+| Runnable quickstart | [`docs/reproducibility.md`](reproducibility.md) | Immutable v1.4.0 remains reproduced; the v1.5.0 qualification-plan candidate requires its own 153-test credential-disabled clone and independent CI proof |
+| Reusable value | [`examples/economic-factory.json`](../examples/economic-factory.json), [cron variant](../examples/economic-factory-cron.json), [`catalog/modules.json`](../catalog/modules.json), [qualification policy](../policies/runtime-qualification-v1.json), and [`scripts/zaibatsu.py`](../scripts/zaibatsu.py) | Another project can scaffold a fail-closed definition, reproduce and inspect a self-verifying control bundle, compare a policy-compatible module substitution, and generate a content-addressed missing-evidence plan offline |
 | Explain Factory/Droid role | [`docs/droid-session.md`](droid-session.md) | Authenticated session, scoped diff, and independent validation recorded |
 | End-to-end case study | [`docs/case-study.md`](case-study.md) | Factory-of-software-factories narrative and real Droid result complete |
 | Exact command/setup | [`docs/droid-session.md`](droid-session.md) | Local-Qwen command, prompt, and redacted credential boundaries recorded |
@@ -82,5 +82,6 @@ public clean-clone proof. The exact release checklist is in
 
 The bounded local-Qwen Droid run supplies reviewable “build something with
 Factory” evidence. The v1.1.0 through v1.4.0 candidates passed their scoped
-clean-clone gates, and v1.4.0 is now an immutable public release. The final clip
-and applicant-owned form materials are still required before submission.
+clean-clone gates, and v1.4.0 is now an immutable public release. The v1.5.0
+qualification-planning follow-up requires the same proof before the final clip
+and applicant-owned form submission.

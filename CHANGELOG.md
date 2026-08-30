@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.5.0 - Unreleased
+
+- Added a versioned runtime-qualification policy with mandatory base and
+  slot-specific evidence requirements for every selected factory module.
+- Added deterministic `qualification-plan` and `verify-qualification-plan`
+  workflows. Plans bind a fully verified bundle and policy by SHA-256.
+- Published a systemd example plan with 67 missing evidence bindings across 27
+  requirement types and zero of nine modules marked runtime-eligible.
+- Denied self-attestation, missing-evidence success, runtime eligibility,
+  activation authority, and owner-approval bypass at both schema and semantic
+  validation layers.
+- Expanded the public adversarial suite from 143 to 153 tests.
+
 ## 1.4.0 - 2026-08-30
 
 - Added stable `inspect-bundle` output for verified bundle identity, source

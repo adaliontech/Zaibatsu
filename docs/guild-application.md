@@ -16,8 +16,9 @@ candidate passed the same proof and is now an immutable public release; the
 v1.4.0 verified-inspection and semantic-comparison candidate passed 143 tests,
 Gitleaks, semantic assertions, output-schema validation, and independent CI
 from a credential-disabled public clone. The immutable v1.4.0 release and its
-tag clone passed the same boundary. The final demo and applicant materials
-remain explicit gates in
+tag clone passed the same boundary. The v1.5.0 qualification-policy and
+missing-evidence-plan candidate now requires its own 153-test public proof.
+The final demo and applicant materials remain explicit gates in
 [`architecture/submission-readiness.json`](../architecture/submission-readiness.json).
 
 ## Current project description
@@ -31,7 +32,9 @@ reproduction, cron/systemd scheduler ownership, modular agent skeletons,
 interchangeable LLM harnesses, deterministic gates, and reviewed feedback are
 represented at their actual maturities. The bundle contains contracts and
 schemas, not runtime implementations. Nix environments remain planned; the
-agent scaffold is tested source but not deployed.
+agent scaffold is tested source but not deployed. A deterministic
+qualification plan lists the runtime evidence still missing for every selected
+module while granting no eligibility or activation.
 
 The core repository works without a model or Droid credentials. For the Guild
 case study, authenticated Factory Droid used an owner-operated GGUF whose
@@ -53,7 +56,7 @@ new test moves `policy_decision` before `verify`; the pre-change validator
 accepted that unsafe ordering, while the shipped validator rejects it with a
 deterministic adjacent-stage error. Droid reported 36 passing tests, and an
 independent run reproduced all 36 before later integration, branding, release,
-and meta-factory checks brought the package to 143 passing tests. No model or
+and meta-factory checks brought the package to 153 passing tests. No model or
 Factory credential is published.
 
 ## One-line description
@@ -165,6 +168,9 @@ the public repository:
       bundle reproduction, and independent CI from the public boundary.
 - [x] Bundle-inspection v1.4.0 candidate passes 143 tests, semantic
       systemd/cron comparison, Gitleaks, and independent public CI.
+- [ ] Qualification-planning v1.5.0 candidate passes 153 tests, policy
+      weakening and stale-plan adversarial checks, Gitleaks, schema validation,
+      deterministic reproduction, and independent public CI.
 - [x] Public repository and article links resolve without authentication.
 - [ ] Demo clip or screenshots show a real Factory task and validation result.
 - [x] No private host, credential, recovery, or deployment detail is exposed.

@@ -22,6 +22,7 @@ validator = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(validator)
 import factory_bundle as bundler
 import factory_composer as composer
+import factory_qualification as qualification
 
 
 class ArchitectureValidationTests(unittest.TestCase):
@@ -1394,6 +1395,267 @@ class FactoryBundleTests(unittest.TestCase):
                     )
                     self.assertEqual(2, result.returncode)
                     self.assertIn("cannot load", result.stderr)
+
+
+class QualificationPlanningTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.factory = validator.load_factory_definition()
+        self.catalog = composer.load_module_catalog()
+        self.artifacts, errors = composer.load_module_artifacts(self.catalog)
+        self.assertEqual([], errors)
+        self.bundle, _ = bundler.build_factory_bundle(
+            self.factory,
+            self.catalog,
+            self.artifacts,
+        )
+        self.policy = qualification.load_qualification_policy()
+        self.recorded = qualification.load_qualification_plan()
+
+    def test_repository_qualification_policy_and_plan_pass(self) -> None:
+        self.assertEqual([], qualification.validate_qualification_policy(self.policy))
+        bundle_errors, verified = bundler.verify_factory_bundle(self.bundle)
+        self.assertEqual([], bundle_errors)
+        self.assertIsNotNone(verified)
+        assert verified is not None
+        self.assertEqual(
+            [],
+            qualification.validate_qualification_plan(
+                self.recorded,
+                verified,
+                self.policy,
+            ),
+        )
+        self.assertEqual(
+            self.recorded,
+            qualification.build_qualification_plan(verified, self.policy),
+        )
+
+    def test_qualification_plan_is_stable_and_non_authorizing(self) -> None:
+        errors, first = qualification.qualification_plan_for_bundle(
+            self.bundle,
+            self.policy,
+        )
+        second_errors, second = qualification.qualification_plan_for_bundle(
+            self.bundle,
+            copy.deepcopy(self.policy),
+        )
+        self.assertEqual([], errors)
+        self.assertEqual([], second_errors)
+        self.assertEqual(first, second)
+        self.assertIsNotNone(first)
+        assert first is not None
+        without_digest = copy.deepcopy(first)
+        digest = without_digest.pop("qualification_plan_sha256")
+        self.assertEqual(composer.sha256_json(without_digest), digest)
+        self.assertEqual(9, first["summary"]["module_count"])
+        self.assertEqual(0, first["summary"]["runtime_eligible_modules"])
+        self.assertEqual(67, first["summary"]["missing_evidence_bindings"])
+        self.assertEqual(27, first["summary"]["unique_requirement_types"])
+        self.assertFalse(first["summary"]["all_requirements_satisfied"])
+        self.assertFalse(first["qualification_boundary"]["activation_authorized"])
+        self.assertFalse(
+            first["qualification_boundary"]["runtime_eligibility_granted"]
+        )
+        self.assertTrue(
+            first["qualification_boundary"][
+                "owner_approval_required_for_activation"
+            ]
+        )
+        self.assertTrue(all(not module["runtime_eligible"] for module in first["modules"]))
+        policy_schema = composer.load_json_file(
+            validator.ROOT
+            / "schemas"
+            / "module-qualification-policy.schema.json"
+        )
+        plan_schema = composer.load_json_file(
+            validator.ROOT
+            / "schemas"
+            / "factory-qualification-plan.schema.json"
+        )
+        self.assertEqual(
+            qualification.QUALIFICATION_POLICY_SCHEMA_REFERENCE,
+            policy_schema["$id"],
+        )
+        self.assertEqual(
+            qualification.QUALIFICATION_PLAN_SCHEMA_REFERENCE,
+            plan_schema["$id"],
+        )
+        self.assertEqual(set(plan_schema["required"]), set(first))
+
+    def test_policy_cannot_accept_self_attestation_or_grant_activation(self) -> None:
+        for field, unsafe_value in (
+            ("self_attestation_accepted", True),
+            ("qualification_plan_is_evidence", True),
+            ("qualification_grants_activation", True),
+            ("owner_approval_required_for_activation", False),
+        ):
+            with self.subTest(field=field):
+                mutated = copy.deepcopy(self.policy)
+                mutated["decision_boundary"][field] = unsafe_value
+                errors = qualification.validate_qualification_policy(mutated)
+                self.assertTrue(any("fail-closed" in error for error in errors))
+
+        type_confused = copy.deepcopy(self.policy)
+        type_confused["decision_boundary"][
+            "owner_approval_required_for_activation"
+        ] = 1
+        errors = qualification.validate_qualification_policy(type_confused)
+        self.assertTrue(any("fail-closed" in error for error in errors))
+
+    def test_policy_cannot_remove_mandatory_requirements(self) -> None:
+        missing_base = copy.deepcopy(self.policy)
+        missing_base["base_requirements"].remove("implementation_artifact_digest")
+        errors = qualification.validate_qualification_policy(missing_base)
+        self.assertTrue(any("base qualification requirements" in error for error in errors))
+
+        missing_slot = copy.deepcopy(self.policy)
+        execution = next(
+            entry
+            for entry in missing_slot["slot_requirements"]
+            if entry["slot"] == "execution"
+        )
+        execution["requirements"].remove("fixed_fixture_evaluation_receipt")
+        errors = qualification.validate_qualification_policy(missing_slot)
+        self.assertTrue(any("execution qualification requirements" in error for error in errors))
+
+    def test_policy_rejects_duplicate_or_reordered_requirements(self) -> None:
+        reordered = copy.deepcopy(self.policy)
+        reordered["base_requirements"].reverse()
+        errors = qualification.validate_qualification_policy(reordered)
+        self.assertTrue(any("must be sorted" in error for error in errors))
+
+        duplicate = copy.deepcopy(self.policy)
+        source = duplicate["slot_requirements"][0]["requirements"]
+        source.append("contract_conformance_receipt")
+        source.sort()
+        errors = qualification.validate_qualification_policy(duplicate)
+        self.assertTrue(any("globally unique" in error for error in errors))
+
+    def test_stale_plan_is_rejected_after_bundle_or_policy_change(self) -> None:
+        cron_factory = composer.load_json_file(
+            validator.ROOT / "examples" / "economic-factory-cron.json"
+        )
+        cron_bundle, _ = bundler.build_factory_bundle(
+            cron_factory,
+            self.catalog,
+            self.artifacts,
+        )
+        errors = qualification.verify_qualification_plan_for_bundle(
+            self.recorded,
+            cron_bundle,
+            self.policy,
+        )
+        self.assertTrue(any("does not exactly match" in error for error in errors))
+
+        stronger = copy.deepcopy(self.policy)
+        stronger["base_requirements"].append("additional_runtime_receipt")
+        stronger["base_requirements"].sort()
+        self.assertEqual([], qualification.validate_qualification_policy(stronger))
+        errors = qualification.verify_qualification_plan_for_bundle(
+            self.recorded,
+            self.bundle,
+            stronger,
+        )
+        self.assertTrue(any("does not exactly match" in error for error in errors))
+
+    def test_plan_authority_inflation_is_rejected(self) -> None:
+        mutated = copy.deepcopy(self.recorded)
+        mutated["qualification_boundary"]["activation_authorized"] = True
+        errors = qualification.verify_qualification_plan_for_bundle(
+            mutated,
+            self.bundle,
+            self.policy,
+        )
+        self.assertTrue(any("non-authorizing boundary" in error for error in errors))
+
+        type_confused = copy.deepcopy(self.recorded)
+        type_confused["qualification_boundary"]["activation_authorized"] = 0
+        errors = qualification.verify_qualification_plan_for_bundle(
+            type_confused,
+            self.bundle,
+            self.policy,
+        )
+        self.assertTrue(any("non-authorizing boundary" in error for error in errors))
+
+        numeric_position = copy.deepcopy(self.recorded)
+        numeric_position["modules"][1]["position"] = True
+        errors = qualification.verify_qualification_plan_for_bundle(
+            numeric_position,
+            self.bundle,
+            self.policy,
+        )
+        self.assertTrue(any("does not exactly match" in error for error in errors))
+
+    def test_qualification_rejects_tampered_bundle_before_plan(self) -> None:
+        tampered = self.bundle.replace(b"Git lineage", b"Git lineagf", 1)
+        errors, plan = qualification.qualification_plan_for_bundle(
+            tampered,
+            self.policy,
+        )
+        self.assertTrue(any(error.startswith("factory bundle:") for error in errors))
+        self.assertIsNone(plan)
+
+    def test_malformed_qualification_inputs_fail_cleanly(self) -> None:
+        for malformed in (None, [], {}, {"slot_requirements": [None]}):
+            with self.subTest(malformed=malformed):
+                errors, plan = qualification.qualification_plan_for_bundle(
+                    self.bundle,
+                    malformed,
+                )
+                self.assertTrue(errors)
+                self.assertIsNone(plan)
+        errors = qualification.validate_qualification_plan(
+            {"qualification_boundary": []},
+            [],
+            self.policy,
+        )
+        self.assertTrue(errors)
+
+    def test_cli_qualification_plan_round_trip_and_overwrite_refusal(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            bundle_path = root / "factory.tar"
+            output = root / "qualification-plan.json"
+            bundle_path.write_bytes(self.bundle)
+            cli = [sys.executable, str(validator.ROOT / "scripts" / "zaibatsu.py")]
+            command = cli + [
+                "qualification-plan",
+                str(bundle_path),
+                "--output",
+                str(output),
+            ]
+            generated = subprocess.run(
+                command,
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(0, generated.returncode, generated.stderr)
+            self.assertEqual(self.recorded, json.loads(output.read_text(encoding="utf-8")))
+            verified = subprocess.run(
+                cli
+                + [
+                    "verify-qualification-plan",
+                    str(output),
+                    str(bundle_path),
+                ],
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(0, verified.returncode, verified.stderr)
+            self.assertIn("runtime eligible: false", verified.stdout)
+            repeated = subprocess.run(
+                command,
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(2, repeated.returncode)
+            self.assertIn("refusing to overwrite", repeated.stderr)
 
 
 class EvidenceReceiptTests(unittest.TestCase):

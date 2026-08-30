@@ -38,6 +38,7 @@ not publicly reproducible or deployed.
 | Reusable module catalog and artifacts | Operational in the public kit | Versioned catalog, ten independently hashed contract artifacts, schemas, alternate-artifact substitution, and compatibility/dependency/drift tests | A factory can replace an implementation ID only when the selected artifact preserves the declared slot policy and exact content digest; artifacts contain contracts rather than executable runtimes |
 | Deterministic control-plan composition | Operational in the public kit | Canonical input digests, exact plan verification, byte-stable rebuild check, and drift/tamper tests | The same definition and catalog reproduce the same control plan independent of checkout path; infrastructure deployment and runtime recovery are explicitly not proved |
 | Portable control bundle | Operational in the public kit | Canonical USTAR builder, in-memory verifier, stable inspection/comparison, public systemd/cron variants, per-file manifest, five bundled schemas, and archive/path/link/metadata/tamper adversarial tests | The same selected control inputs reproduce the same self-contained contract bundle; verified comparisons expose exact module changes, while no runtime implementation, environment realization, deployment, or recovery is included |
+| Runtime-qualification planning | Operational in the public kit | Versioned minimum policy, two project-owned schemas, content-addressed systemd example, exact rebuild verification, and policy-weakening/staleness/authority adversarial tests | A verified bundle deterministically expands into 67 missing evidence bindings across 27 requirement types; zero modules become eligible, the plan contains no evidence, and qualification grants no activation authority |
 | Evidence receipt validation | Operational in the public kit | Four typed receipt classes plus malformed, contradictory, count, digest, scope, and limitation tests | Receipt files must contain enforceable evidence fields; their sanitized private observations are not independently reproduced by the public validator |
 | Submission readiness validation | Operational in the public kit | Typed completion proof, exact dependency graph, and adversarial tests | Non-empty prose alone cannot complete a gate; final demo and applicant materials remain external |
 | Public-safety scan | Operational in the public kit | Git-aware enumeration and adversarial path/content tests | Tracked and non-ignored public files are text-scanned; opaque files, symlinks, and Git submodules fail closed |
@@ -79,6 +80,7 @@ The private implementation itself is not publicly reproducible.
 - automatic rollout of a shared pattern to economic factories;
 - unattended model or harness routing;
 - deployed modular agent profiles;
+- completed runtime qualification of any public bundle module;
 - direct model publication, deployment, commit, database apply, or secret use;
 - Nix-based worker reconstruction;
 - completed project/job sandboxes or separate sandbox hosts;
