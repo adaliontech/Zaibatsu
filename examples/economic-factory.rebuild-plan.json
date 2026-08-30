@@ -1,6 +1,6 @@
 {
-  "contract_schema": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.8.0/schemas/factory-rebuild-plan.schema.json",
-  "schema_version": "zaibatsu.factory-rebuild-plan.v1",
+  "contract_schema": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.9.0/schemas/factory-rebuild-plan.schema.json",
+  "schema_version": "zaibatsu.factory-rebuild-plan.v2",
   "factory": {
     "class": "economic_factory",
     "id": "example-product"
@@ -15,8 +15,12 @@
     "qualification_policy_id": "runtime-eligibility-default",
     "qualification_policy_sha256": "4fd359cc6dfe3eb3b555eb26a3453939fde34efd8d65a281a81dd34041468e9a",
     "qualification_plan_sha256": "a9419341bf0806e1a6fc3769354e46ac6eb1c29043042ddd7eec35cca1a8ff81",
-    "qualification_evidence_sha256": "a19e1f82e13f6a7e07011c6e80e112d4981740e9188805e615ee57e12c9d1963",
-    "qualification_assessment_sha256": "465fc52b7941bda938480767277af39b4677cc23e5817273845e9c8e0711d8d2",
+    "contract_qualification_evidence_sha256": "a19e1f82e13f6a7e07011c6e80e112d4981740e9188805e615ee57e12c9d1963",
+    "runtime_evidence_set_sha256": "d084a11b7cda2ec8615f583a07ba6b219913249e35cd6d54c0dea191809eba77",
+    "verifier_registry_sha256": "9196fd8a8afbb161bdc8f5d2fad1a28bef467ff6786c3f732d2d4c187079bff6",
+    "runtime_assessment_sha256": "4eb09dd60ad709b849602a0768165fade53cfb5800a00d0c6769f676a7f6ac26",
+    "qualification_scope": "public_test_fixture",
+    "evaluated_at": "2026-08-30T23:00:00Z",
     "module_api_version": "zaibatsu.module.v1"
   },
   "actions": [
@@ -29,14 +33,14 @@
       "artifact_sha256": "977317056e3b4ae88471cd7aeddb1b514bd5c3310ca1d73c324599785c61e412",
       "requires_actions": [],
       "verified_evidence": [
-        "contract_conformance_receipt"
+        "contract_conformance_receipt",
+        "source_revision"
       ],
       "missing_evidence": [
         "environment_lock_digest",
         "implementation_artifact_digest",
         "recovery_receipt",
-        "repository_lineage_receipt",
-        "source_revision"
+        "repository_lineage_receipt"
       ],
       "dependency_blockers": [],
       "status": "blocked_missing_evidence",
@@ -347,8 +351,8 @@
     "action_count": 9,
     "qualification_ready_actions": 0,
     "blocked_actions": 9,
-    "verified_evidence_bindings": 9,
-    "missing_evidence_bindings": 58,
+    "verified_evidence_bindings": 10,
+    "missing_evidence_bindings": 57,
     "all_rebuild_actions_qualified": false,
     "rebuild_executed": false,
     "factory_rebuilt": false,
@@ -357,6 +361,8 @@
   "rebuild_boundary": {
     "plan_only": true,
     "control_inputs_reverified": true,
+    "runtime_evidence_signatures_reverified": true,
+    "trusted_verifier_assertions_reexecuted": false,
     "remote_repository_contacted": false,
     "contains_runtime_implementations": false,
     "executes_rebuild_actions": false,
@@ -371,5 +377,5 @@
     "deploys_infrastructure": false,
     "proves_runtime_recovery": false
   },
-  "factory_rebuild_plan_sha256": "bc0e093fd97e7a2a2cfc62f8c6082d9013b5c3fa0ff0fe28dff1d819dc39e445"
+  "factory_rebuild_plan_sha256": "a7ae3bc1371b8700cd71e0e2d6d696528c44e95c76ef426dc1a9f19ac24d02a5"
 }

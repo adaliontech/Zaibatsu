@@ -30,7 +30,6 @@ from factory_composer import (
     validate_module_catalog,
 )
 from factory_qualification import (
-    EXAMPLE_QUALIFICATION_ASSESSMENT_PATH,
     EXAMPLE_QUALIFICATION_EVIDENCE_PATH,
     EXAMPLE_QUALIFICATION_PLAN_PATH,
     QUALIFICATION_POLICY_PATH,
@@ -44,6 +43,14 @@ from factory_qualification import (
 from factory_rebuild import (
     factory_rebuild_plan_for_bundle,
     verify_factory_rebuild_plan_for_bundle,
+)
+from factory_runtime_evidence import (
+    EXAMPLE_RUNTIME_ASSESSMENT_PATH,
+    EXAMPLE_RUNTIME_EVIDENCE_PATH,
+    VERIFIER_REGISTRY_PATH,
+    runtime_assessment_for_bundle,
+    validate_runtime_evidence_set,
+    verify_runtime_assessment_for_bundle,
 )
 from factory_source_lock import (
     EXAMPLE_SOURCE_LOCK_PATH,
@@ -434,64 +441,101 @@ def command_verify_source_lock(
 
 def _load_rebuild_inputs(
     source_lock_path: str,
-    assessment_path: str,
-    evidence_path: str,
+    runtime_assessment_path: str,
+    runtime_evidence_path: str,
+    contract_evidence_path: str,
     qualification_plan_path: str,
     policy_path: str,
-) -> tuple[Any, Any, Any, Any, Any] | None:
+    verifier_registry_path: str,
+) -> tuple[Any, Any, Any, Any, Any, Any, Any] | None:
     source_lock = load_json_document(source_lock_path, "factory source lock")
-    assessment = load_json_document(
-        assessment_path,
-        "qualification assessment",
+    runtime_assessment = load_json_document(
+        runtime_assessment_path,
+        "runtime assessment",
     )
-    evidence = load_json_document(evidence_path, "qualification evidence")
+    runtime_evidence = load_json_document(
+        runtime_evidence_path,
+        "runtime evidence",
+    )
+    contract_evidence = load_json_document(
+        contract_evidence_path,
+        "qualification evidence",
+    )
     qualification_plan = load_json_document(
         qualification_plan_path,
         "qualification plan",
     )
     policy = load_json_document(policy_path, "qualification policy")
+    verifier_registry = load_json_document(
+        verifier_registry_path,
+        "runtime evidence verifier registry",
+    )
     if any(
         document is None
         for document in (
             source_lock,
-            assessment,
-            evidence,
+            runtime_assessment,
+            runtime_evidence,
+            contract_evidence,
             qualification_plan,
             policy,
+            verifier_registry,
         )
     ):
         return None
-    return source_lock, assessment, evidence, qualification_plan, policy
+    return (
+        source_lock,
+        runtime_assessment,
+        runtime_evidence,
+        contract_evidence,
+        qualification_plan,
+        policy,
+        verifier_registry,
+    )
 
 
 def command_rebuild_plan(
     bundle_path: str,
     source_lock_path: str,
-    assessment_path: str,
-    evidence_path: str,
+    runtime_assessment_path: str,
+    runtime_evidence_path: str,
+    contract_evidence_path: str,
     qualification_plan_path: str,
     policy_path: str,
+    verifier_registry_path: str,
     repository_path: str,
     output: str | None,
 ) -> int:
     bundle = load_bundle(bundle_path, "factory bundle")
     documents = _load_rebuild_inputs(
         source_lock_path,
-        assessment_path,
-        evidence_path,
+        runtime_assessment_path,
+        runtime_evidence_path,
+        contract_evidence_path,
         qualification_plan_path,
         policy_path,
+        verifier_registry_path,
     )
     if bundle is None or documents is None:
         return 2
-    source_lock, assessment, evidence, qualification_plan, policy = documents
+    (
+        source_lock,
+        runtime_assessment,
+        runtime_evidence,
+        contract_evidence,
+        qualification_plan,
+        policy,
+        verifier_registry,
+    ) = documents
     errors, rebuild_plan = factory_rebuild_plan_for_bundle(
         source_lock,
-        assessment,
-        evidence,
+        runtime_assessment,
+        runtime_evidence,
+        contract_evidence,
         qualification_plan,
         bundle,
         policy,
+        verifier_registry,
         Path(repository_path),
     )
     if errors or rebuild_plan is None:
@@ -506,32 +550,46 @@ def command_verify_rebuild_plan(
     rebuild_plan_path: str,
     bundle_path: str,
     source_lock_path: str,
-    assessment_path: str,
-    evidence_path: str,
+    runtime_assessment_path: str,
+    runtime_evidence_path: str,
+    contract_evidence_path: str,
     qualification_plan_path: str,
     policy_path: str,
+    verifier_registry_path: str,
     repository_path: str,
 ) -> int:
     rebuild_plan = load_json_document(rebuild_plan_path, "factory rebuild plan")
     bundle = load_bundle(bundle_path, "factory bundle")
     documents = _load_rebuild_inputs(
         source_lock_path,
-        assessment_path,
-        evidence_path,
+        runtime_assessment_path,
+        runtime_evidence_path,
+        contract_evidence_path,
         qualification_plan_path,
         policy_path,
+        verifier_registry_path,
     )
     if rebuild_plan is None or bundle is None or documents is None:
         return 2
-    source_lock, assessment, evidence, qualification_plan, policy = documents
+    (
+        source_lock,
+        runtime_assessment,
+        runtime_evidence,
+        contract_evidence,
+        qualification_plan,
+        policy,
+        verifier_registry,
+    ) = documents
     errors = verify_factory_rebuild_plan_for_bundle(
         rebuild_plan,
         source_lock,
-        assessment,
-        evidence,
+        runtime_assessment,
+        runtime_evidence,
+        contract_evidence,
         qualification_plan,
         bundle,
         policy,
+        verifier_registry,
         Path(repository_path),
     )
     if errors:
@@ -552,6 +610,10 @@ def command_verify_rebuild_plan(
     print(
         "missing evidence bindings: "
         f"{rebuild_plan['summary']['missing_evidence_bindings']}"
+    )
+    print(
+        "qualification scope: "
+        f"{rebuild_plan['source']['qualification_scope']}"
     )
     print("rebuild executed: false")
     print("factory rebuilt: false")
@@ -733,6 +795,209 @@ def command_verify_qualification_assessment(
     return 0
 
 
+def command_verify_runtime_evidence(
+    runtime_evidence_path: str,
+    bundle_path: str,
+    qualification_plan_path: str,
+    policy_path: str,
+    verifier_registry_path: str,
+) -> int:
+    runtime_evidence = load_json_document(
+        runtime_evidence_path,
+        "runtime evidence",
+    )
+    bundle = load_bundle(bundle_path, "factory bundle")
+    qualification_plan = load_json_document(
+        qualification_plan_path,
+        "qualification plan",
+    )
+    policy = load_json_document(policy_path, "qualification policy")
+    verifier_registry = load_json_document(
+        verifier_registry_path,
+        "runtime evidence verifier registry",
+    )
+    if any(
+        value is None
+        for value in (
+            runtime_evidence,
+            bundle,
+            qualification_plan,
+            policy,
+            verifier_registry,
+        )
+    ):
+        return 2
+    assert isinstance(bundle, bytes)
+    bundle_errors, verified_bundle = verify_factory_bundle(bundle)
+    errors = [f"factory bundle: {error}" for error in bundle_errors]
+    if verified_bundle is not None:
+        errors.extend(
+            validate_runtime_evidence_set(
+                runtime_evidence,
+                verified_bundle,
+                qualification_plan,
+                policy,
+                verifier_registry,
+            )
+        )
+    if errors:
+        print(
+            f"runtime evidence failed: {runtime_evidence_path}",
+            file=sys.stderr,
+        )
+        for error in errors:
+            print(f"- {error}", file=sys.stderr)
+        return 1
+    assert isinstance(runtime_evidence, dict)
+    print(f"runtime evidence passed: {runtime_evidence_path}")
+    print(
+        "runtime evidence sha256: "
+        f"{runtime_evidence['runtime_evidence_set_sha256']}"
+    )
+    print(f"qualification scope: {runtime_evidence['qualification_scope']}")
+    print(f"verified signatures: {runtime_evidence['summary']['signature_count']}")
+    print("trusted verifier assertions reexecuted: false")
+    print("runtime eligibility granted: false")
+    print("activation authorized: false")
+    print("execution authorized: false")
+    return 0
+
+
+def command_runtime_assessment(
+    runtime_evidence_path: str,
+    contract_evidence_path: str,
+    qualification_plan_path: str,
+    bundle_path: str,
+    policy_path: str,
+    verifier_registry_path: str,
+    evaluated_at: str,
+    output: str | None,
+) -> int:
+    runtime_evidence = load_json_document(
+        runtime_evidence_path,
+        "runtime evidence",
+    )
+    contract_evidence = load_json_document(
+        contract_evidence_path,
+        "qualification evidence",
+    )
+    qualification_plan = load_json_document(
+        qualification_plan_path,
+        "qualification plan",
+    )
+    bundle = load_bundle(bundle_path, "factory bundle")
+    policy = load_json_document(policy_path, "qualification policy")
+    verifier_registry = load_json_document(
+        verifier_registry_path,
+        "runtime evidence verifier registry",
+    )
+    if any(
+        value is None
+        for value in (
+            runtime_evidence,
+            contract_evidence,
+            qualification_plan,
+            bundle,
+            policy,
+            verifier_registry,
+        )
+    ):
+        return 2
+    assert isinstance(bundle, bytes)
+    errors, assessment = runtime_assessment_for_bundle(
+        contract_evidence,
+        runtime_evidence,
+        qualification_plan,
+        bundle,
+        policy,
+        verifier_registry,
+        evaluated_at,
+    )
+    if errors or assessment is None:
+        print("cannot build runtime assessment", file=sys.stderr)
+        for error in errors:
+            print(f"- {error}", file=sys.stderr)
+        return 1
+    return write_document(assessment, output)
+
+
+def command_verify_runtime_assessment(
+    assessment_path: str,
+    runtime_evidence_path: str,
+    contract_evidence_path: str,
+    qualification_plan_path: str,
+    bundle_path: str,
+    policy_path: str,
+    verifier_registry_path: str,
+) -> int:
+    assessment = load_json_document(assessment_path, "runtime assessment")
+    runtime_evidence = load_json_document(
+        runtime_evidence_path,
+        "runtime evidence",
+    )
+    contract_evidence = load_json_document(
+        contract_evidence_path,
+        "qualification evidence",
+    )
+    qualification_plan = load_json_document(
+        qualification_plan_path,
+        "qualification plan",
+    )
+    bundle = load_bundle(bundle_path, "factory bundle")
+    policy = load_json_document(policy_path, "qualification policy")
+    verifier_registry = load_json_document(
+        verifier_registry_path,
+        "runtime evidence verifier registry",
+    )
+    if any(
+        value is None
+        for value in (
+            assessment,
+            runtime_evidence,
+            contract_evidence,
+            qualification_plan,
+            bundle,
+            policy,
+            verifier_registry,
+        )
+    ):
+        return 2
+    assert isinstance(bundle, bytes)
+    errors = verify_runtime_assessment_for_bundle(
+        assessment,
+        contract_evidence,
+        runtime_evidence,
+        qualification_plan,
+        bundle,
+        policy,
+        verifier_registry,
+    )
+    if errors:
+        print(f"runtime assessment failed: {assessment_path}", file=sys.stderr)
+        for error in errors:
+            print(f"- {error}", file=sys.stderr)
+        return 1
+    assert isinstance(assessment, dict)
+    print(f"runtime assessment passed: {assessment_path}")
+    print(
+        "runtime assessment sha256: "
+        f"{assessment['runtime_assessment_sha256']}"
+    )
+    print(f"evaluated at: {assessment['source']['evaluated_at']}")
+    print(f"qualification scope: {assessment['source']['qualification_scope']}")
+    print(
+        "runtime-eligible modules: "
+        f"{assessment['summary']['runtime_eligible_modules']}"
+    )
+    print(
+        "missing evidence bindings: "
+        f"{assessment['summary']['missing_evidence_bindings']}"
+    )
+    print("activation authorized: false")
+    print("execution authorized: false")
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="zaibatsu",
@@ -849,9 +1114,16 @@ def build_parser() -> argparse.ArgumentParser:
         help="verified annotated-release source lock JSON",
     )
     rebuild_plan.add_argument(
+        "--runtime-assessment",
         "--qualification-assessment",
-        default=str(EXAMPLE_QUALIFICATION_ASSESSMENT_PATH),
-        help="verified qualification assessment JSON",
+        dest="runtime_assessment",
+        default=str(EXAMPLE_RUNTIME_ASSESSMENT_PATH),
+        help="signed-evidence runtime assessment JSON",
+    )
+    rebuild_plan.add_argument(
+        "--runtime-evidence",
+        default=str(EXAMPLE_RUNTIME_EVIDENCE_PATH),
+        help="signed runtime evidence JSON",
     )
     rebuild_plan.add_argument(
         "--qualification-evidence",
@@ -867,6 +1139,11 @@ def build_parser() -> argparse.ArgumentParser:
         "--policy",
         default=str(QUALIFICATION_POLICY_PATH),
         help="qualification policy JSON",
+    )
+    rebuild_plan.add_argument(
+        "--verifier-registry",
+        default=str(VERIFIER_REGISTRY_PATH),
+        help="content-addressed trusted verifier registry JSON",
     )
     rebuild_plan.add_argument(
         "--repository",
@@ -889,8 +1166,14 @@ def build_parser() -> argparse.ArgumentParser:
         default=str(EXAMPLE_SOURCE_LOCK_PATH),
     )
     verify_rebuild_plan.add_argument(
+        "--runtime-assessment",
         "--qualification-assessment",
-        default=str(EXAMPLE_QUALIFICATION_ASSESSMENT_PATH),
+        dest="runtime_assessment",
+        default=str(EXAMPLE_RUNTIME_ASSESSMENT_PATH),
+    )
+    verify_rebuild_plan.add_argument(
+        "--runtime-evidence",
+        default=str(EXAMPLE_RUNTIME_EVIDENCE_PATH),
     )
     verify_rebuild_plan.add_argument(
         "--qualification-evidence",
@@ -903,6 +1186,10 @@ def build_parser() -> argparse.ArgumentParser:
     verify_rebuild_plan.add_argument(
         "--policy",
         default=str(QUALIFICATION_POLICY_PATH),
+    )
+    verify_rebuild_plan.add_argument(
+        "--verifier-registry",
+        default=str(VERIFIER_REGISTRY_PATH),
     )
     verify_rebuild_plan.add_argument("--repository", default=".")
 
@@ -990,6 +1277,70 @@ def build_parser() -> argparse.ArgumentParser:
         help="qualification policy JSON",
     )
 
+    verify_runtime_evidence = commands.add_parser(
+        "verify-runtime-evidence",
+        help="verify signed runtime evidence and its exact provenance",
+    )
+    verify_runtime_evidence.add_argument("runtime_evidence_path")
+    verify_runtime_evidence.add_argument("bundle_path")
+    verify_runtime_evidence.add_argument(
+        "--qualification-plan",
+        default=str(EXAMPLE_QUALIFICATION_PLAN_PATH),
+    )
+    verify_runtime_evidence.add_argument(
+        "--policy",
+        default=str(QUALIFICATION_POLICY_PATH),
+    )
+    verify_runtime_evidence.add_argument(
+        "--verifier-registry",
+        default=str(VERIFIER_REGISTRY_PATH),
+    )
+
+    runtime_assessment = commands.add_parser(
+        "runtime-assessment",
+        help="assess fresh signed evidence at an explicit time without execution",
+    )
+    runtime_assessment.add_argument("runtime_evidence_path")
+    runtime_assessment.add_argument("contract_evidence_path")
+    runtime_assessment.add_argument("qualification_plan_path")
+    runtime_assessment.add_argument("bundle_path")
+    runtime_assessment.add_argument(
+        "--as-of",
+        required=True,
+        dest="evaluated_at",
+        help="exact RFC3339 UTC assessment time",
+    )
+    runtime_assessment.add_argument(
+        "--policy",
+        default=str(QUALIFICATION_POLICY_PATH),
+    )
+    runtime_assessment.add_argument(
+        "--verifier-registry",
+        default=str(VERIFIER_REGISTRY_PATH),
+    )
+    runtime_assessment.add_argument(
+        "--output",
+        help="write runtime-assessment JSON to a new file",
+    )
+
+    verify_runtime_assessment = commands.add_parser(
+        "verify-runtime-assessment",
+        help="rebuild a runtime assessment and reverify every signature",
+    )
+    verify_runtime_assessment.add_argument("assessment_path")
+    verify_runtime_assessment.add_argument("runtime_evidence_path")
+    verify_runtime_assessment.add_argument("contract_evidence_path")
+    verify_runtime_assessment.add_argument("qualification_plan_path")
+    verify_runtime_assessment.add_argument("bundle_path")
+    verify_runtime_assessment.add_argument(
+        "--policy",
+        default=str(QUALIFICATION_POLICY_PATH),
+    )
+    verify_runtime_assessment.add_argument(
+        "--verifier-registry",
+        default=str(VERIFIER_REGISTRY_PATH),
+    )
+
     scaffold = commands.add_parser("scaffold", help="create a safe factory skeleton")
     scaffold.add_argument("--id", required=True, dest="factory_id")
     scaffold.add_argument(
@@ -1050,10 +1401,12 @@ def main() -> int:
         return command_rebuild_plan(
             arguments.bundle_path,
             arguments.source_lock,
-            arguments.qualification_assessment,
+            arguments.runtime_assessment,
+            arguments.runtime_evidence,
             arguments.qualification_evidence,
             arguments.qualification_plan,
             arguments.policy,
+            arguments.verifier_registry,
             arguments.repository,
             arguments.output,
         )
@@ -1062,10 +1415,12 @@ def main() -> int:
             arguments.rebuild_plan_path,
             arguments.bundle_path,
             arguments.source_lock,
-            arguments.qualification_assessment,
+            arguments.runtime_assessment,
+            arguments.runtime_evidence,
             arguments.qualification_evidence,
             arguments.qualification_plan,
             arguments.policy,
+            arguments.verifier_registry,
             arguments.repository,
         )
     if arguments.command == "qualification-plan":
@@ -1109,6 +1464,35 @@ def main() -> int:
             arguments.plan_path,
             arguments.bundle_path,
             arguments.policy,
+        )
+    if arguments.command == "verify-runtime-evidence":
+        return command_verify_runtime_evidence(
+            arguments.runtime_evidence_path,
+            arguments.bundle_path,
+            arguments.qualification_plan,
+            arguments.policy,
+            arguments.verifier_registry,
+        )
+    if arguments.command == "runtime-assessment":
+        return command_runtime_assessment(
+            arguments.runtime_evidence_path,
+            arguments.contract_evidence_path,
+            arguments.qualification_plan_path,
+            arguments.bundle_path,
+            arguments.policy,
+            arguments.verifier_registry,
+            arguments.evaluated_at,
+            arguments.output,
+        )
+    if arguments.command == "verify-runtime-assessment":
+        return command_verify_runtime_assessment(
+            arguments.assessment_path,
+            arguments.runtime_evidence_path,
+            arguments.contract_evidence_path,
+            arguments.qualification_plan_path,
+            arguments.bundle_path,
+            arguments.policy,
+            arguments.verifier_registry,
         )
     document = factory_template(
         arguments.factory_id,

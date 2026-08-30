@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.9.0/schemas/factory-runtime-assessment.schema.json",
+  "title": "Zaibatsu signed runtime evidence assessment",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_schema", "schema_version", "factory", "source", "modules", "summary", "assessment_boundary", "runtime_assessment_sha256"],
+  "properties": {
+    "contract_schema": {"const": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.9.0/schemas/factory-runtime-assessment.schema.json"},
+    "schema_version": {"const": "zaibatsu.factory-runtime-assessment.v1"},
+    "factory": {"$ref": "#/$defs/factory"},
+    "source": {"$ref": "#/$defs/source"},
+    "modules": {"type": "array", "minItems": 9, "maxItems": 9, "uniqueItems": true, "items": {"$ref": "#/$defs/module"}},
+    "summary": {"$ref": "#/$defs/summary"},
+    "assessment_boundary": {"$ref": "#/$defs/boundary"},
+    "runtime_assessment_sha256": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "slug": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+    "requirement": {"type": "string", "pattern": "^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$"},
+    "timestamp": {"type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$"},
+    "scope": {"enum": ["factory_runtime", "public_test_fixture"]},
+    "requirementSet": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/requirement"}},
+    "factory": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "class"],
+      "properties": {"id": {"$ref": "#/$defs/slug"}, "class": {"enum": ["control_factory", "economic_factory"]}}
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["bundle_sha256", "qualification_plan_sha256", "qualification_policy_id", "qualification_policy_sha256", "verifier_registry_sha256", "module_api_version", "qualification_evidence_sha256", "runtime_evidence_set_sha256", "evaluated_at", "qualification_scope"],
+      "properties": {
+        "bundle_sha256": {"$ref": "#/$defs/sha256"},
+        "qualification_plan_sha256": {"$ref": "#/$defs/sha256"},
+        "qualification_policy_id": {"$ref": "#/$defs/slug"},
+        "qualification_policy_sha256": {"$ref": "#/$defs/sha256"},
+        "verifier_registry_sha256": {"$ref": "#/$defs/sha256"},
+        "module_api_version": {"const": "zaibatsu.module.v1"},
+        "qualification_evidence_sha256": {"$ref": "#/$defs/sha256"},
+        "runtime_evidence_set_sha256": {"$ref": "#/$defs/sha256"},
+        "evaluated_at": {"$ref": "#/$defs/timestamp"},
+        "qualification_scope": {"$ref": "#/$defs/scope"}
+      }
+    },
+    "module": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["position", "slot", "module", "artifact_sha256", "required_evidence", "verified_control_evidence", "verified_runtime_evidence", "stale_runtime_evidence", "verified_evidence", "missing_evidence", "evidence_status", "qualification_scope", "runtime_eligible", "reason"],
+      "properties": {
+        "position": {"type": "integer", "minimum": 0, "maximum": 8},
+        "slot": {"enum": ["source_versioning", "static_secrets", "runtime_secrets", "host_reproduction", "worker_environment", "scheduling", "execution", "verification", "feedback"]},
+        "module": {"$ref": "#/$defs/slug"},
+        "artifact_sha256": {"$ref": "#/$defs/sha256"},
+        "required_evidence": {"$ref": "#/$defs/requirementSet"},
+        "verified_control_evidence": {"$ref": "#/$defs/requirementSet"},
+        "verified_runtime_evidence": {"$ref": "#/$defs/requirementSet"},
+        "stale_runtime_evidence": {"$ref": "#/$defs/requirementSet"},
+        "verified_evidence": {"$ref": "#/$defs/requirementSet"},
+        "missing_evidence": {"$ref": "#/$defs/requirementSet"},
+        "evidence_status": {"enum": ["partial", "complete"]},
+        "qualification_scope": {"$ref": "#/$defs/scope"},
+        "runtime_eligible": {"type": "boolean"},
+        "reason": {"enum": ["test_fixture_scope_not_runtime_eligible", "runtime_evidence_missing_or_stale", "runtime_evidence_incomplete", "qualified_not_authorized"]}
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["module_count", "runtime_eligible_modules", "runtime_ineligible_modules", "required_evidence_bindings", "verified_evidence_bindings", "fresh_runtime_evidence_bindings", "stale_runtime_evidence_bindings", "missing_evidence_bindings", "verified_requirement_types", "missing_requirement_types", "all_requirements_satisfied", "qualification_scope"],
+      "properties": {
+        "module_count": {"const": 9},
+        "runtime_eligible_modules": {"type": "integer", "minimum": 0, "maximum": 9},
+        "runtime_ineligible_modules": {"type": "integer", "minimum": 0, "maximum": 9},
+        "required_evidence_bindings": {"type": "integer", "minimum": 0},
+        "verified_evidence_bindings": {"type": "integer", "minimum": 0},
+        "fresh_runtime_evidence_bindings": {"type": "integer", "minimum": 0},
+        "stale_runtime_evidence_bindings": {"type": "integer", "minimum": 0},
+        "missing_evidence_bindings": {"type": "integer", "minimum": 0},
+        "verified_requirement_types": {"type": "integer", "minimum": 0},
+        "missing_requirement_types": {"type": "integer", "minimum": 0},
+        "all_requirements_satisfied": {"type": "boolean"},
+        "qualification_scope": {"$ref": "#/$defs/scope"}
+      }
+    },
+    "boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cryptographic_signatures_verified", "verifier_registry_selected_externally", "verifier_key_ownership_verified", "verifier_independence_verified", "trusted_verifier_assertions_reexecuted", "evidence_artifacts_retrieved", "evaluation_time_externally_supplied", "trusted_current_clock_enforced", "self_attestation_accepted", "qualification_grants_activation", "owner_approval_required_for_activation", "activation_authorized", "execution_authorized", "fixture_scope_only"],
+      "properties": {
+        "cryptographic_signatures_verified": {"const": true},
+        "verifier_registry_selected_externally": {"const": true},
+        "verifier_key_ownership_verified": {"const": false},
+        "verifier_independence_verified": {"const": false},
+        "trusted_verifier_assertions_reexecuted": {"const": false},
+        "evidence_artifacts_retrieved": {"const": false},
+        "evaluation_time_externally_supplied": {"const": true},
+        "trusted_current_clock_enforced": {"const": false},
+        "self_attestation_accepted": {"const": false},
+        "qualification_grants_activation": {"const": false},
+        "owner_approval_required_for_activation": {"const": true},
+        "activation_authorized": {"const": false},
+        "execution_authorized": {"const": false},
+        "fixture_scope_only": {"type": "boolean"}
+      }
+    }
+  }
+}

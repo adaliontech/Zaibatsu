@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import base64
 import copy
 import importlib.util
 import io
@@ -25,6 +26,7 @@ import factory_bundle as bundler
 import factory_composer as composer
 import factory_qualification as qualification
 import factory_rebuild as rebuild
+import factory_runtime_evidence as runtime_evidence
 import factory_source_lock as source_lock
 
 
@@ -1830,7 +1832,9 @@ class FactoryRebuildPlanTests(unittest.TestCase):
         self.policy = qualification.load_qualification_policy()
         self.qualification_plan = qualification.load_qualification_plan()
         self.evidence = qualification.load_qualification_evidence()
-        self.assessment = qualification.load_qualification_assessment()
+        self.runtime_evidence = runtime_evidence.load_runtime_evidence()
+        self.registry = runtime_evidence.load_verifier_registry()
+        self.assessment = runtime_evidence.load_runtime_assessment()
         self.rebuild_plan = rebuild.load_rebuild_plan()
 
     @staticmethod
@@ -1851,10 +1855,12 @@ class FactoryRebuildPlanTests(unittest.TestCase):
             document,
             self.source_lock if source_document is None else source_document,
             self.assessment if assessment is None else assessment,
+            self.runtime_evidence,
             self.evidence,
             self.qualification_plan,
             self.bundle if bundle is None else bundle,
             self.policy,
+            self.registry,
             validator.ROOT if repository is None else repository,
         )
 
@@ -1862,10 +1868,12 @@ class FactoryRebuildPlanTests(unittest.TestCase):
         errors, generated = rebuild.factory_rebuild_plan_for_bundle(
             self.source_lock,
             self.assessment,
+            self.runtime_evidence,
             self.evidence,
             self.qualification_plan,
             self.bundle,
             self.policy,
+            self.registry,
             validator.ROOT,
         )
         self.assertEqual([], errors)
@@ -1908,8 +1916,8 @@ class FactoryRebuildPlanTests(unittest.TestCase):
         self.assertEqual(9, summary["action_count"])
         self.assertEqual(0, summary["qualification_ready_actions"])
         self.assertEqual(9, summary["blocked_actions"])
-        self.assertEqual(9, summary["verified_evidence_bindings"])
-        self.assertEqual(58, summary["missing_evidence_bindings"])
+        self.assertEqual(10, summary["verified_evidence_bindings"])
+        self.assertEqual(57, summary["missing_evidence_bindings"])
         for action in self.rebuild_plan["actions"]:
             self.assertFalse(action["qualification_ready"])
             self.assertFalse(action["execution_authorized"])
@@ -1917,9 +1925,11 @@ class FactoryRebuildPlanTests(unittest.TestCase):
         boundary = self.rebuild_plan["rebuild_boundary"]
         self.assertTrue(boundary["plan_only"])
         self.assertTrue(boundary["control_inputs_reverified"])
+        self.assertTrue(boundary["runtime_evidence_signatures_reverified"])
         for denied in set(boundary) - {
             "plan_only",
             "control_inputs_reverified",
+            "runtime_evidence_signatures_reverified",
         }:
             self.assertFalse(boundary[denied])
 
@@ -1997,10 +2007,12 @@ class FactoryRebuildPlanTests(unittest.TestCase):
         errors, generated = rebuild.factory_rebuild_plan_for_bundle(
             forged_source,
             self.assessment,
+            self.runtime_evidence,
             self.evidence,
             self.qualification_plan,
             self.bundle,
             self.policy,
+            self.registry,
             validator.ROOT,
         )
         self.assertIsNone(generated)
@@ -2010,15 +2022,17 @@ class FactoryRebuildPlanTests(unittest.TestCase):
         forged_assessment["modules"][0]["missing_evidence"].pop()
         self._refresh_digest(
             forged_assessment,
-            "qualification_assessment_sha256",
+            "runtime_assessment_sha256",
         )
         errors, generated = rebuild.factory_rebuild_plan_for_bundle(
             self.source_lock,
             forged_assessment,
+            self.runtime_evidence,
             self.evidence,
             self.qualification_plan,
             self.bundle,
             self.policy,
+            self.registry,
             validator.ROOT,
         )
         self.assertIsNone(generated)
@@ -2037,10 +2051,12 @@ class FactoryRebuildPlanTests(unittest.TestCase):
             errors, generated = rebuild.factory_rebuild_plan_for_bundle(
                 malformed_source,
                 malformed_assessment,
+                self.runtime_evidence,
                 self.evidence,
                 self.qualification_plan,
                 self.bundle,
                 self.policy,
+                self.registry,
                 validator.ROOT,
             )
             self.assertIsNone(generated)
@@ -2146,6 +2162,667 @@ class FactoryRebuildPlanTests(unittest.TestCase):
             self.assertIn(malformed.returncode, (1, 2))
             self.assertTrue(malformed.stderr.strip())
             self.assertNotIn("Traceback", malformed.stderr)
+
+
+class SignedRuntimeEvidenceTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.factory = validator.load_factory_definition()
+        self.catalog = composer.load_module_catalog()
+        self.artifacts, errors = composer.load_module_artifacts(self.catalog)
+        self.assertEqual([], errors)
+        self.bundle, _ = bundler.build_factory_bundle(
+            self.factory,
+            self.catalog,
+            self.artifacts,
+        )
+        bundle_errors, self.verified_bundle = bundler.verify_factory_bundle(
+            self.bundle
+        )
+        self.assertEqual([], bundle_errors)
+        self.assertIsNotNone(self.verified_bundle)
+        self.policy = qualification.load_qualification_policy()
+        self.plan = qualification.load_qualification_plan()
+        self.contract_evidence = qualification.load_qualification_evidence()
+        self.registry = runtime_evidence.load_verifier_registry()
+        self.evidence = runtime_evidence.load_runtime_evidence()
+        self.assessment = runtime_evidence.load_runtime_assessment()
+
+    @staticmethod
+    def _refresh_digest(document: dict[str, object], field: str) -> None:
+        without_digest = copy.deepcopy(document)
+        without_digest.pop(field, None)
+        document[field] = composer.sha256_json(without_digest)
+
+    @staticmethod
+    def _generate_key(root: Path, name: str = "verifier") -> tuple[Path, str]:
+        key_path = root / name
+        result = subprocess.run(
+            [
+                str(runtime_evidence.SSH_KEYGEN_PATH),
+                "-q",
+                "-t",
+                "ed25519",
+                "-N",
+                "",
+                "-C",
+                "",
+                "-f",
+                str(key_path),
+            ],
+            check=False,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
+        if result.returncode != 0:
+            raise AssertionError(result.stderr)
+        public_fields = (root / f"{name}.pub").read_text(
+            encoding="utf-8"
+        ).split()
+        return key_path, " ".join(public_fields[:2])
+
+    @staticmethod
+    def _sign_payload(
+        root: Path,
+        key_path: Path,
+        payload: dict[str, object],
+        name: str,
+        namespace: str = runtime_evidence.SIGNATURE_NAMESPACE,
+    ) -> str:
+        payload_path = root / f"{name}.json"
+        payload_path.write_bytes(composer.canonical_json_bytes(payload))
+        result = subprocess.run(
+            [
+                str(runtime_evidence.SSH_KEYGEN_PATH),
+                "-Y",
+                "sign",
+                "-f",
+                str(key_path),
+                "-n",
+                namespace,
+                str(payload_path),
+            ],
+            check=False,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
+        if result.returncode != 0:
+            raise AssertionError(result.stderr)
+        return base64.b64encode(
+            Path(f"{payload_path}.sig").read_bytes()
+        ).decode("ascii")
+
+    def _signed_source_evidence(
+        self,
+        scope: str = "factory_runtime",
+    ) -> tuple[dict[str, object], dict[str, object]]:
+        assert isinstance(self.verified_bundle, dict)
+        source_module = self.plan["modules"][0]
+        requirements = sorted(
+            requirement
+            for requirement in source_module["required_evidence"]
+            if requirement != "contract_conformance_receipt"
+        )
+        implementation_digest = "d" * 64
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            key_path, public_key = self._generate_key(root)
+            registry: dict[str, object] = {
+                "contract_schema": (
+                    runtime_evidence.VERIFIER_REGISTRY_SCHEMA_REFERENCE
+                ),
+                "schema_version": (
+                    runtime_evidence.VERIFIER_REGISTRY_SCHEMA_VERSION
+                ),
+                "registry_id": "test-runtime-verifiers",
+                "signature_namespace": runtime_evidence.SIGNATURE_NAMESPACE,
+                "verifiers": [
+                    {
+                        "position": 0,
+                        "verifier_id": "runtime-source-verifier",
+                        "public_key": public_key,
+                        "implementation_sha256": implementation_digest,
+                        "allowed_factories": [self.plan["factory"]["id"]],
+                        "allowed_scopes": [scope],
+                        "allowed_requirements": requirements,
+                        "allowed_methods": ["source_runtime_verification"],
+                        "max_validity_seconds": 3600,
+                        "trust_role": "test-runtime-verifier",
+                        "active": True,
+                    }
+                ],
+                "registry_boundary": copy.deepcopy(
+                    runtime_evidence.REGISTRY_BOUNDARY
+                ),
+            }
+            self._refresh_digest(registry, "verifier_registry_sha256")
+            source = {
+                "bundle_sha256": self.verified_bundle["bundle_sha256"],
+                "qualification_plan_sha256": self.plan[
+                    "qualification_plan_sha256"
+                ],
+                "qualification_policy_id": self.policy["policy_id"],
+                "qualification_policy_sha256": composer.sha256_json(
+                    self.policy
+                ),
+                "verifier_registry_sha256": registry[
+                    "verifier_registry_sha256"
+                ],
+                "module_api_version": self.plan["source"][
+                    "module_api_version"
+                ],
+            }
+            receipts = []
+            for index, requirement in enumerate(requirements):
+                payload: dict[str, object] = {
+                    "factory_id": self.plan["factory"]["id"],
+                    "bundle_sha256": self.verified_bundle["bundle_sha256"],
+                    "qualification_plan_sha256": self.plan[
+                        "qualification_plan_sha256"
+                    ],
+                    "qualification_policy_sha256": composer.sha256_json(
+                        self.policy
+                    ),
+                    "verifier_registry_sha256": registry[
+                        "verifier_registry_sha256"
+                    ],
+                    "position": source_module["position"],
+                    "slot": source_module["slot"],
+                    "module": source_module["module"],
+                    "artifact_sha256": source_module["artifact_sha256"],
+                    "requirement": requirement,
+                    "qualification_scope": scope,
+                    "evidence_artifact_sha256": composer.sha256_json(
+                        {"requirement": requirement, "test_fixture": True}
+                    ),
+                    "verifier_id": "runtime-source-verifier",
+                    "verification_method": "source_runtime_verification",
+                    "verifier_implementation_sha256": implementation_digest,
+                    "observed_at": "2026-08-30T23:00:00Z",
+                    "valid_until": "2026-08-30T23:30:00Z",
+                    "result": "passed",
+                    "self_attested": False,
+                    "grants_activation": False,
+                    "grants_execution": False,
+                }
+                receipts.append(
+                    {
+                        "payload": payload,
+                        "payload_sha256": composer.sha256_json(payload),
+                        "signature": {
+                            "algorithm": "ssh-ed25519",
+                            "namespace": runtime_evidence.SIGNATURE_NAMESPACE,
+                            "value_base64": self._sign_payload(
+                                root,
+                                key_path,
+                                payload,
+                                f"receipt-{index}",
+                            ),
+                        },
+                    }
+                )
+        evidence: dict[str, object] = {
+            "contract_schema": runtime_evidence.RUNTIME_EVIDENCE_SCHEMA_REFERENCE,
+            "schema_version": runtime_evidence.RUNTIME_EVIDENCE_SCHEMA_VERSION,
+            "factory": copy.deepcopy(self.plan["factory"]),
+            "source": source,
+            "qualification_scope": scope,
+            "receipts": receipts,
+            "summary": {
+                "receipt_count": len(receipts),
+                "unique_bindings": len(receipts),
+                "signature_count": len(receipts),
+                "qualification_scope": scope,
+            },
+            "evidence_boundary": copy.deepcopy(
+                runtime_evidence.EVIDENCE_BOUNDARY
+            ),
+        }
+        self._refresh_digest(evidence, "runtime_evidence_set_sha256")
+        return registry, evidence
+
+    def _validate(
+        self,
+        evidence: object | None = None,
+        registry: object | None = None,
+        bundle_result: object | None = None,
+        plan: object | None = None,
+        policy: object | None = None,
+    ) -> list[str]:
+        return runtime_evidence.validate_runtime_evidence_set(
+            self.evidence if evidence is None else evidence,
+            self.verified_bundle if bundle_result is None else bundle_result,
+            self.plan if plan is None else plan,
+            self.policy if policy is None else policy,
+            self.registry if registry is None else registry,
+        )
+
+    def test_repository_signed_runtime_artifacts_are_exact(self) -> None:
+        self.assertEqual([], runtime_evidence.validate_verifier_registry(self.registry))
+        self.assertEqual([], self._validate())
+        self.assertEqual(
+            [],
+            runtime_evidence.verify_runtime_assessment_for_bundle(
+                self.assessment,
+                self.contract_evidence,
+                self.evidence,
+                self.plan,
+                self.bundle,
+                self.policy,
+                self.registry,
+            ),
+        )
+        fixture_method = composer.load_json_file(
+            validator.ROOT
+            / "examples"
+            / "runtime-evidence"
+            / "fixture-verifier-method.json"
+        )
+        fixture_artifact = composer.load_json_file(
+            validator.ROOT
+            / "examples"
+            / "runtime-evidence"
+            / "source-revision-fixture.json"
+        )
+        self.assertEqual(
+            composer.sha256_json(fixture_method),
+            self.registry["verifiers"][0]["implementation_sha256"],
+        )
+        self.assertEqual(
+            composer.sha256_json(fixture_artifact),
+            self.evidence["receipts"][0]["payload"][
+                "evidence_artifact_sha256"
+            ],
+        )
+        self.assertTrue(fixture_method["fixture_only"])
+        self.assertFalse(fixture_method["runtime_assertion_performed"])
+        self.assertFalse(fixture_artifact["runtime_observed"])
+        for schema_name, schema_reference, instance in (
+            (
+                "runtime-evidence-verifier-registry.schema.json",
+                runtime_evidence.VERIFIER_REGISTRY_SCHEMA_REFERENCE,
+                self.registry,
+            ),
+            (
+                "factory-runtime-evidence.schema.json",
+                runtime_evidence.RUNTIME_EVIDENCE_SCHEMA_REFERENCE,
+                self.evidence,
+            ),
+            (
+                "factory-runtime-assessment.schema.json",
+                runtime_evidence.RUNTIME_ASSESSMENT_SCHEMA_REFERENCE,
+                self.assessment,
+            ),
+        ):
+            schema = composer.load_json_file(
+                validator.ROOT / "schemas" / schema_name
+            )
+            self.assertEqual(schema_reference, schema["$id"])
+            self.assertEqual(set(instance), set(schema["required"]))
+
+    def test_fixture_scope_is_cryptographic_but_never_runtime_eligible(self) -> None:
+        self.assertEqual("public_test_fixture", self.evidence["qualification_scope"])
+        self.assertEqual(1, self.evidence["summary"]["signature_count"])
+        self.assertEqual(10, self.assessment["summary"]["verified_evidence_bindings"])
+        self.assertEqual(57, self.assessment["summary"]["missing_evidence_bindings"])
+        self.assertEqual(0, self.assessment["summary"]["runtime_eligible_modules"])
+        self.assertTrue(self.assessment["assessment_boundary"]["fixture_scope_only"])
+        self.assertTrue(
+            self.assessment["assessment_boundary"][
+                "cryptographic_signatures_verified"
+            ]
+        )
+        self.assertTrue(
+            self.assessment["assessment_boundary"][
+                "verifier_registry_selected_externally"
+            ]
+        )
+        self.assertTrue(
+            self.assessment["assessment_boundary"][
+                "evaluation_time_externally_supplied"
+            ]
+        )
+        self.assertFalse(
+            self.assessment["assessment_boundary"][
+                "verifier_key_ownership_verified"
+            ]
+        )
+        self.assertFalse(
+            self.assessment["assessment_boundary"][
+                "verifier_independence_verified"
+            ]
+        )
+        self.assertFalse(
+            self.assessment["assessment_boundary"][
+                "trusted_current_clock_enforced"
+            ]
+        )
+        self.assertFalse(self.assessment["assessment_boundary"]["execution_authorized"])
+        self.assertFalse(self.assessment["assessment_boundary"]["activation_authorized"])
+
+    def test_payload_tampering_fails_after_digest_refresh(self) -> None:
+        forged = copy.deepcopy(self.evidence)
+        forged["receipts"][0]["payload"]["evidence_artifact_sha256"] = "a" * 64
+        forged["receipts"][0]["payload_sha256"] = composer.sha256_json(
+            forged["receipts"][0]["payload"]
+        )
+        self._refresh_digest(forged, "runtime_evidence_set_sha256")
+        errors = self._validate(evidence=forged)
+        self.assertTrue(any("signature verification failed" in error for error in errors))
+
+    def test_signer_identity_signature_metadata_and_key_fail_closed(self) -> None:
+        for field, value, message in (
+            ("algorithm", "ssh-rsa", "algorithm"),
+            ("namespace", "other-namespace", "namespace"),
+            ("value_base64", "not base64!", "base64"),
+        ):
+            with self.subTest(field=field):
+                forged = copy.deepcopy(self.evidence)
+                forged["receipts"][0]["signature"][field] = value
+                self._refresh_digest(forged, "runtime_evidence_set_sha256")
+                self.assertTrue(any(message in error for error in self._validate(forged)))
+
+        unknown = copy.deepcopy(self.evidence)
+        unknown["receipts"][0]["payload"]["verifier_id"] = "unknown-verifier"
+        unknown["receipts"][0]["payload_sha256"] = composer.sha256_json(
+            unknown["receipts"][0]["payload"]
+        )
+        self._refresh_digest(unknown, "runtime_evidence_set_sha256")
+        self.assertTrue(any("not trusted" in error for error in self._validate(unknown)))
+
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            _, other_key = self._generate_key(Path(temporary_directory), "other")
+        wrong_registry = copy.deepcopy(self.registry)
+        wrong_registry["verifiers"][0]["public_key"] = other_key
+        self._refresh_digest(wrong_registry, "verifier_registry_sha256")
+        errors = self._validate(registry=wrong_registry)
+        self.assertTrue(any("signature verification failed" in error for error in errors))
+
+        malformed_registry = copy.deepcopy(self.registry)
+        malformed_registry["verifiers"][0]["public_key"] = "ssh-ed25519 AAAA"
+        self._refresh_digest(malformed_registry, "verifier_registry_sha256")
+        self.assertTrue(
+            any(
+                "valid exact ssh-ed25519" in error
+                for error in runtime_evidence.validate_verifier_registry(
+                    malformed_registry
+                )
+            )
+        )
+
+    def test_source_plan_policy_and_registry_replay_fail_closed(self) -> None:
+        cron_factory = composer.load_json_file(
+            validator.ROOT / "examples" / "economic-factory-cron.json"
+        )
+        cron_bundle, _ = bundler.build_factory_bundle(
+            cron_factory,
+            self.catalog,
+            self.artifacts,
+        )
+        bundle_errors, cron_verified = bundler.verify_factory_bundle(cron_bundle)
+        self.assertEqual([], bundle_errors)
+        self.assertTrue(self._validate(bundle_result=cron_verified))
+
+        stronger_policy = copy.deepcopy(self.policy)
+        stronger_policy["base_requirements"].append("additional_runtime_receipt")
+        stronger_policy["base_requirements"].sort()
+        self.assertTrue(self._validate(policy=stronger_policy))
+
+        changed_registry = copy.deepcopy(self.registry)
+        changed_registry["registry_id"] = "replacement-runtime-verifiers"
+        self._refresh_digest(changed_registry, "verifier_registry_sha256")
+        errors = self._validate(registry=changed_registry)
+        self.assertTrue(any("source does not match" in error for error in errors))
+
+    def test_verifier_allowlists_and_authority_flags_fail_closed(self) -> None:
+        for field, replacement, message in (
+            ("allowed_factories", ["another-factory"], "factory"),
+            ("allowed_scopes", ["factory_runtime"], "scope"),
+            (
+                "allowed_requirements",
+                ["environment_lock_digest"],
+                "requirement",
+            ),
+            ("allowed_methods", ["another_method"], "method"),
+        ):
+            with self.subTest(field=field):
+                registry = copy.deepcopy(self.registry)
+                registry["verifiers"][0][field] = replacement
+                self._refresh_digest(registry, "verifier_registry_sha256")
+                self.assertTrue(
+                    any(message in error for error in self._validate(registry=registry))
+                )
+
+        for field, value in (
+            ("self_attested", True),
+            ("grants_activation", True),
+            ("grants_execution", True),
+            ("grants_execution", 0),
+        ):
+            with self.subTest(field=field, value=value):
+                evidence = copy.deepcopy(self.evidence)
+                evidence["receipts"][0]["payload"][field] = value
+                evidence["receipts"][0]["payload_sha256"] = composer.sha256_json(
+                    evidence["receipts"][0]["payload"]
+                )
+                self._refresh_digest(evidence, "runtime_evidence_set_sha256")
+                self.assertTrue(self._validate(evidence=evidence))
+
+    def test_freshness_is_explicit_deterministic_and_exclusive(self) -> None:
+        errors, fresh = runtime_evidence.runtime_assessment_for_bundle(
+            self.contract_evidence,
+            self.evidence,
+            self.plan,
+            self.bundle,
+            self.policy,
+            self.registry,
+            "2026-08-31T22:39:59Z",
+        )
+        self.assertEqual([], errors)
+        self.assertIsNotNone(fresh)
+        assert fresh is not None
+        self.assertEqual(10, fresh["summary"]["verified_evidence_bindings"])
+        self.assertEqual(0, fresh["summary"]["stale_runtime_evidence_bindings"])
+
+        errors, expired = runtime_evidence.runtime_assessment_for_bundle(
+            self.contract_evidence,
+            self.evidence,
+            self.plan,
+            self.bundle,
+            self.policy,
+            self.registry,
+            "2026-08-31T22:40:00Z",
+        )
+        self.assertEqual([], errors)
+        self.assertIsNotNone(expired)
+        assert expired is not None
+        self.assertEqual(9, expired["summary"]["verified_evidence_bindings"])
+        self.assertEqual(1, expired["summary"]["stale_runtime_evidence_bindings"])
+        self.assertEqual(
+            ["source_revision"],
+            expired["modules"][0]["stale_runtime_evidence"],
+        )
+
+        too_long = copy.deepcopy(self.evidence)
+        too_long["receipts"][0]["payload"]["valid_until"] = (
+            "2026-09-01T22:40:01Z"
+        )
+        too_long["receipts"][0]["payload_sha256"] = composer.sha256_json(
+            too_long["receipts"][0]["payload"]
+        )
+        self._refresh_digest(too_long, "runtime_evidence_set_sha256")
+        self.assertTrue(
+            any("validity exceeds" in error for error in self._validate(too_long))
+        )
+
+    def test_duplicate_reordered_and_malformed_evidence_fail_cleanly(self) -> None:
+        registry, signed = self._signed_source_evidence()
+        self.assertEqual([], self._validate(evidence=signed, registry=registry))
+
+        reordered = copy.deepcopy(signed)
+        reordered["receipts"].reverse()
+        self._refresh_digest(reordered, "runtime_evidence_set_sha256")
+        self.assertTrue(
+            any("binding order" in error for error in self._validate(reordered, registry))
+        )
+
+        duplicate = copy.deepcopy(signed)
+        duplicate["receipts"][1] = copy.deepcopy(duplicate["receipts"][0])
+        duplicate["summary"]["unique_bindings"] -= 1
+        self._refresh_digest(duplicate, "runtime_evidence_set_sha256")
+        self.assertTrue(
+            any("must be unique" in error for error in self._validate(duplicate, registry))
+        )
+
+        self.assertTrue(
+            runtime_evidence.validate_runtime_evidence_set(
+                None,
+                self.verified_bundle,
+                self.plan,
+                self.policy,
+                self.registry,
+            )
+        )
+        for malformed in ([], "evidence", 1, True, {}, {"receipts": [None]}):
+            with self.subTest(malformed=malformed):
+                self.assertTrue(self._validate(evidence=malformed))
+        self.assertTrue(runtime_evidence.validate_verifier_registry(None))
+        self.assertTrue(
+            runtime_evidence.validate_runtime_assessment(
+                None,
+                self.contract_evidence,
+                self.evidence,
+                self.verified_bundle,
+                self.plan,
+                self.policy,
+                self.registry,
+            )
+        )
+
+    def test_cli_runtime_evidence_assessment_round_trip(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            bundle_path = root / "factory.tar"
+            assessment_path = root / "runtime-assessment.json"
+            bundle_path.write_bytes(self.bundle)
+            cli = [sys.executable, str(validator.ROOT / "scripts" / "zaibatsu.py")]
+            verified = subprocess.run(
+                cli
+                + [
+                    "verify-runtime-evidence",
+                    str(runtime_evidence.EXAMPLE_RUNTIME_EVIDENCE_PATH),
+                    str(bundle_path),
+                ],
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(0, verified.returncode, verified.stderr)
+            self.assertIn("verified signatures: 1", verified.stdout)
+            self.assertIn("runtime eligibility granted: false", verified.stdout)
+
+            command = cli + [
+                "runtime-assessment",
+                str(runtime_evidence.EXAMPLE_RUNTIME_EVIDENCE_PATH),
+                str(qualification.EXAMPLE_QUALIFICATION_EVIDENCE_PATH),
+                str(qualification.EXAMPLE_QUALIFICATION_PLAN_PATH),
+                str(bundle_path),
+                "--as-of",
+                "2026-08-30T23:00:00Z",
+                "--output",
+                str(assessment_path),
+            ]
+            generated = subprocess.run(
+                command,
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(0, generated.returncode, generated.stderr)
+            self.assertEqual(
+                self.assessment,
+                json.loads(assessment_path.read_text(encoding="utf-8")),
+            )
+            checked = subprocess.run(
+                cli
+                + [
+                    "verify-runtime-assessment",
+                    str(assessment_path),
+                    str(runtime_evidence.EXAMPLE_RUNTIME_EVIDENCE_PATH),
+                    str(qualification.EXAMPLE_QUALIFICATION_EVIDENCE_PATH),
+                    str(qualification.EXAMPLE_QUALIFICATION_PLAN_PATH),
+                    str(bundle_path),
+                ],
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(0, checked.returncode, checked.stderr)
+            self.assertIn("runtime-eligible modules: 0", checked.stdout)
+            repeated = subprocess.run(
+                command,
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(2, repeated.returncode)
+            self.assertIn("refusing to overwrite", repeated.stderr)
+
+    def test_ephemeral_runtime_signer_can_qualify_one_module_without_authority(self) -> None:
+        registry, evidence = self._signed_source_evidence()
+        errors, assessment = runtime_evidence.runtime_assessment_for_bundle(
+            self.contract_evidence,
+            evidence,
+            self.plan,
+            self.bundle,
+            self.policy,
+            registry,
+            "2026-08-30T23:15:00Z",
+        )
+        self.assertEqual([], errors)
+        self.assertIsNotNone(assessment)
+        assert assessment is not None
+        source_assessment = assessment["modules"][0]
+        self.assertTrue(source_assessment["runtime_eligible"])
+        self.assertEqual([], source_assessment["missing_evidence"])
+        self.assertEqual(1, assessment["summary"]["runtime_eligible_modules"])
+        self.assertFalse(assessment["assessment_boundary"]["execution_authorized"])
+
+        errors, plan = rebuild.factory_rebuild_plan_for_bundle(
+            source_lock.load_source_lock(),
+            assessment,
+            evidence,
+            self.contract_evidence,
+            self.plan,
+            self.bundle,
+            self.policy,
+            registry,
+            validator.ROOT,
+        )
+        self.assertEqual([], errors)
+        self.assertIsNotNone(plan)
+        assert plan is not None
+        self.assertEqual("qualified_not_authorized", plan["actions"][0]["status"])
+        self.assertTrue(plan["actions"][0]["qualification_ready"])
+        self.assertFalse(plan["actions"][0]["execution_authorized"])
+        self.assertEqual(1, plan["summary"]["qualification_ready_actions"])
+        self.assertFalse(plan["summary"]["rebuild_executed"])
+        self.assertFalse(plan["summary"]["activation_authorized"])
+        self.assertEqual("blocked", plan["gates"][1]["status"])
+
+    def test_missing_ssh_keygen_fails_closed(self) -> None:
+        with mock.patch.object(
+            runtime_evidence,
+            "SSH_KEYGEN_PATH",
+            Path("/definitely/missing/ssh-keygen"),
+        ):
+            errors = self._validate()
+        self.assertTrue(any("ssh-keygen is required" in error for error in errors))
 
 
 class QualificationPlanningTests(unittest.TestCase):
@@ -3013,7 +3690,7 @@ class SubmissionReadinessTests(unittest.TestCase):
         completion_proofs = {
             "fresh_clone_reproduction": {
                 "candidate_commit": "a" * 40,
-                "tests_passed": validator.INTEGRATED_TEST_COUNT,
+                "tests_passed": validator.LATEST_VALIDATED_RELEASE_TEST_COUNT,
                 "gitleaks_version": "8.30.1",
                 "github_actions_run": "https://github.com/example/project/actions/runs/1",
             },

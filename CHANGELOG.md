@@ -1,5 +1,36 @@
 # Changelog
 
+## 1.9.0 - 2026-08-30
+
+- Added OpenSSH Ed25519 verification for externally supplied runtime-evidence
+  assertions. Every payload binds the exact factory, bundle, qualification
+  policy and plan, verifier registry, module artifact, requirement, scope,
+  evidence-artifact digest, verifier method and implementation, validity
+  interval, and false activation/execution authority.
+- Added a content-addressed verifier public-key registry with exact
+  factory/scope/requirement/method allowlists and maximum validity intervals,
+  plus `verify-runtime-evidence`, `runtime-assessment`, and
+  `verify-runtime-assessment` CLI workflows.
+- Added a fixture-only signed public receipt and combined runtime assessment.
+  The signature verifies, but `public_test_fixture` scope can never grant
+  runtime eligibility: the checked state is 10 of 67 bindings verified, 57
+  missing, zero eligible modules, and zero activation or execution authority.
+- Upgraded the deterministic rebuild DAG to bind and reverify the registry,
+  signed evidence, explicit assessment time, and combined evidence state. The
+  checked graph remains fully inert with all nine actions blocked.
+- Added generated-key positive-path coverage proving that complete, fresh
+  `factory_runtime` evidence can move one module to
+  `qualified_not_authorized` while every execution, side-effect, approval, and
+  activation boundary remains denied.
+- Added tamper, wrong-key, identity, algorithm, namespace, allowlist, replay,
+  freshness, duplicate, reorder, type-confusion, malformed-input, missing-tool,
+  strict-schema, and fuzz coverage. The integrated public suite now contains
+  194 tests and the validator requires 87 files.
+- Documented that a signature authenticates an assertion rather than its
+  semantic truth: registry selection is an evaluator trust decision, key
+  ownership and independence are not inferred, verifier assertions are not
+  rerun, and evidence artifacts are not retrieved in this release.
+
 ## 1.8.0 - 2026-08-30
 
 - Added a deterministic, content-addressed factory rebuild plan that turns the

@@ -1,0 +1,71 @@
+{
+  "contract_schema": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.9.0/schemas/factory-runtime-evidence.schema.json",
+  "schema_version": "zaibatsu.factory-runtime-evidence.v1",
+  "factory": {
+    "id": "example-product",
+    "class": "economic_factory"
+  },
+  "source": {
+    "bundle_sha256": "d4918fd16f55b907a0b2b9734422d7106d3030a511e5cae5d6efc1cb7b253aba",
+    "qualification_plan_sha256": "a9419341bf0806e1a6fc3769354e46ac6eb1c29043042ddd7eec35cca1a8ff81",
+    "qualification_policy_id": "runtime-eligibility-default",
+    "qualification_policy_sha256": "4fd359cc6dfe3eb3b555eb26a3453939fde34efd8d65a281a81dd34041468e9a",
+    "verifier_registry_sha256": "9196fd8a8afbb161bdc8f5d2fad1a28bef467ff6786c3f732d2d4c187079bff6",
+    "module_api_version": "zaibatsu.module.v1"
+  },
+  "qualification_scope": "public_test_fixture",
+  "receipts": [
+    {
+      "payload": {
+        "factory_id": "example-product",
+        "bundle_sha256": "d4918fd16f55b907a0b2b9734422d7106d3030a511e5cae5d6efc1cb7b253aba",
+        "qualification_plan_sha256": "a9419341bf0806e1a6fc3769354e46ac6eb1c29043042ddd7eec35cca1a8ff81",
+        "qualification_policy_sha256": "4fd359cc6dfe3eb3b555eb26a3453939fde34efd8d65a281a81dd34041468e9a",
+        "verifier_registry_sha256": "9196fd8a8afbb161bdc8f5d2fad1a28bef467ff6786c3f732d2d4c187079bff6",
+        "position": 0,
+        "slot": "source_versioning",
+        "module": "git-source",
+        "artifact_sha256": "977317056e3b4ae88471cd7aeddb1b514bd5c3310ca1d73c324599785c61e412",
+        "requirement": "source_revision",
+        "qualification_scope": "public_test_fixture",
+        "evidence_artifact_sha256": "5318c7217cd3fb378e54fb743147562a6b49efcfe28f1170d527511e8595fee1",
+        "verifier_id": "public-fixture-verifier",
+        "verification_method": "fixture_source_revision_check",
+        "verifier_implementation_sha256": "6aea669ddf506f0c7ba59ebcc573bd78b1e647e8921bfafd29c700304d637d8a",
+        "observed_at": "2026-08-30T22:40:00Z",
+        "valid_until": "2026-08-31T22:40:00Z",
+        "result": "passed",
+        "self_attested": false,
+        "grants_activation": false,
+        "grants_execution": false
+      },
+      "payload_sha256": "ef459d960e54060b94c4255b0e712cbc5e8162ddaccdb3c249a8678c60bf9873",
+      "signature": {
+        "algorithm": "ssh-ed25519",
+        "namespace": "zaibatsu-runtime-evidence-v1",
+        "value_base64": "LS0tLS1CRUdJTiBTU0ggU0lHTkFUVVJFLS0tLS0KVTFOSVUwbEhBQUFBQVFBQUFETUFBQUFMYzNOb0xXVmtNalUxTVRrQUFBQWdDaHZmamhtM0FvNFlmME04QW1HZUZXYUZUdwpCWFBjSENBa0xwN0c4S0d0TUFBQUFjZW1GcFltRjBjM1V0Y25WdWRHbHRaUzFsZG1sa1pXNWpaUzEyTVFBQUFBQUFBQUFHCmMyaGhOVEV5QUFBQVV3QUFBQXR6YzJndFpXUXlOVFV4T1FBQUFFQW1HRWFmdDdOTlZ6bEZoMVl1WGhnSElOQ2MvRXZKd2IKSXZuQVpRazA3dkJZWEhLNnJLSndaZDQ0d0cyVUl5OFlKcDlmVjZhOXI1cDFnTTNOUVExb3dQCi0tLS0tRU5EIFNTSCBTSUdOQVRVUkUtLS0tLQo="
+      }
+    }
+  ],
+  "summary": {
+    "receipt_count": 1,
+    "unique_bindings": 1,
+    "signature_count": 1,
+    "qualification_scope": "public_test_fixture"
+  },
+  "evidence_boundary": {
+    "externally_supplied": true,
+    "trusted_key_registry_required": true,
+    "verifier_registry_selected_externally": true,
+    "verifier_key_ownership_verified": false,
+    "verifier_independence_verified": false,
+    "requires_signature_verification": true,
+    "verifier_assertions_reexecuted": false,
+    "evidence_artifacts_embedded": false,
+    "self_attestation_accepted": false,
+    "signature_grants_runtime_eligibility": false,
+    "activation_authorized": false,
+    "execution_authorized": false
+  },
+  "runtime_evidence_set_sha256": "d084a11b7cda2ec8615f583a07ba6b219913249e35cd6d54c0dea191809eba77"
+}

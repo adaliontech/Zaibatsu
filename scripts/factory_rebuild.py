@@ -9,16 +9,16 @@ from typing import Any
 
 from factory_bundle import verify_factory_bundle
 from factory_composer import canonical_json_bytes, load_json_file, sha256_json
-from factory_qualification import validate_qualification_assessment
+from factory_runtime_evidence import validate_runtime_assessment
 from factory_source_lock import validate_source_lock
 
 
 ROOT = Path(__file__).resolve().parents[1]
 EXAMPLE_REBUILD_PLAN_PATH = ROOT / "examples" / "economic-factory.rebuild-plan.json"
-REBUILD_PLAN_SCHEMA_VERSION = "zaibatsu.factory-rebuild-plan.v1"
+REBUILD_PLAN_SCHEMA_VERSION = "zaibatsu.factory-rebuild-plan.v2"
 REBUILD_PLAN_SCHEMA_REFERENCE = (
     "https://raw.githubusercontent.com/adaliontech/Zaibatsu/"
-    "v1.8.0/schemas/factory-rebuild-plan.schema.json"
+    "v1.9.0/schemas/factory-rebuild-plan.schema.json"
 )
 
 ACTION_INTENTS = {
@@ -48,6 +48,8 @@ REBUILD_PLAN_FIELDS = {
 REBUILD_BOUNDARY = {
     "plan_only": True,
     "control_inputs_reverified": True,
+    "runtime_evidence_signatures_reverified": True,
+    "trusted_verifier_assertions_reexecuted": False,
     "remote_repository_contacted": False,
     "contains_runtime_implementations": False,
     "executes_rebuild_actions": False,
@@ -84,17 +86,17 @@ def _json_exactly_equal(left: Any, right: Any) -> bool:
 def build_factory_rebuild_plan(
     verified_bundle: dict[str, Any],
     source_lock: dict[str, Any],
-    qualification_assessment: dict[str, Any],
+    runtime_assessment: dict[str, Any],
 ) -> dict[str, Any]:
     """Compile verified control and qualification state into an inert DAG."""
     control_plan = verified_bundle["plan"]
     assessed_by_position = {
         module["position"]: module
-        for module in qualification_assessment["modules"]
+        for module in runtime_assessment["modules"]
     }
     eligible_by_slot = {
         module["slot"]: module["runtime_eligible"]
-        for module in qualification_assessment["modules"]
+        for module in runtime_assessment["modules"]
     }
     action_ids = {
         module["slot"]: _action_id(module["slot"])
@@ -197,11 +199,11 @@ def build_factory_rebuild_plan(
         },
     ]
 
-    assessment_source = qualification_assessment["source"]
+    assessment_source = runtime_assessment["source"]
     plan_without_digest: dict[str, Any] = {
         "contract_schema": REBUILD_PLAN_SCHEMA_REFERENCE,
         "schema_version": REBUILD_PLAN_SCHEMA_VERSION,
-        "factory": deepcopy(qualification_assessment["factory"]),
+        "factory": deepcopy(runtime_assessment["factory"]),
         "source": {
             "bundle_sha256": verified_bundle["bundle_sha256"],
             "factory_plan_sha256": verified_bundle["plan_sha256"],
@@ -224,12 +226,20 @@ def build_factory_rebuild_plan(
             "qualification_plan_sha256": assessment_source[
                 "qualification_plan_sha256"
             ],
-            "qualification_evidence_sha256": assessment_source[
+            "contract_qualification_evidence_sha256": assessment_source[
                 "qualification_evidence_sha256"
             ],
-            "qualification_assessment_sha256": qualification_assessment[
-                "qualification_assessment_sha256"
+            "runtime_evidence_set_sha256": assessment_source[
+                "runtime_evidence_set_sha256"
             ],
+            "verifier_registry_sha256": assessment_source[
+                "verifier_registry_sha256"
+            ],
+            "runtime_assessment_sha256": runtime_assessment[
+                "runtime_assessment_sha256"
+            ],
+            "qualification_scope": assessment_source["qualification_scope"],
+            "evaluated_at": assessment_source["evaluated_at"],
             "module_api_version": assessment_source["module_api_version"],
         },
         "actions": actions,
@@ -238,10 +248,10 @@ def build_factory_rebuild_plan(
             "action_count": len(actions),
             "qualification_ready_actions": qualification_ready_actions,
             "blocked_actions": len(actions) - qualification_ready_actions,
-            "verified_evidence_bindings": qualification_assessment["summary"][
+            "verified_evidence_bindings": runtime_assessment["summary"][
                 "verified_evidence_bindings"
             ],
-            "missing_evidence_bindings": qualification_assessment["summary"][
+            "missing_evidence_bindings": runtime_assessment["summary"][
                 "missing_evidence_bindings"
             ],
             "all_rebuild_actions_qualified": qualification_complete,
@@ -285,11 +295,13 @@ def validate_factory_rebuild_plan(
 
 def _verify_rebuild_inputs(
     source_lock: Any,
-    qualification_assessment: Any,
-    qualification_evidence: Any,
+    runtime_assessment: Any,
+    runtime_evidence: Any,
+    contract_evidence: Any,
     qualification_plan: Any,
     bundle: bytes,
     qualification_policy: Any,
+    verifier_registry: Any,
     repository: Path,
 ) -> tuple[list[str], dict[str, Any] | None]:
     bundle_errors, verified_bundle = verify_factory_bundle(bundle)
@@ -299,15 +311,17 @@ def _verify_rebuild_inputs(
 
     source_errors = validate_source_lock(source_lock, repository, bundle)
     errors.extend(f"factory source lock: {error}" for error in source_errors)
-    assessment_errors = validate_qualification_assessment(
-        qualification_assessment,
-        qualification_evidence,
+    assessment_errors = validate_runtime_assessment(
+        runtime_assessment,
+        contract_evidence,
+        runtime_evidence,
         verified_bundle,
         qualification_plan,
         qualification_policy,
+        verifier_registry,
     )
     errors.extend(
-        f"qualification assessment: {error}" for error in assessment_errors
+        f"runtime assessment: {error}" for error in assessment_errors
     )
     if errors:
         return errors, None
@@ -316,20 +330,24 @@ def _verify_rebuild_inputs(
 
 def factory_rebuild_plan_for_bundle(
     source_lock: Any,
-    qualification_assessment: Any,
-    qualification_evidence: Any,
+    runtime_assessment: Any,
+    runtime_evidence: Any,
+    contract_evidence: Any,
     qualification_plan: Any,
     bundle: bytes,
     qualification_policy: Any,
+    verifier_registry: Any,
     repository: Path,
 ) -> tuple[list[str], dict[str, Any] | None]:
     errors, verified_bundle = _verify_rebuild_inputs(
         source_lock,
-        qualification_assessment,
-        qualification_evidence,
+        runtime_assessment,
+        runtime_evidence,
+        contract_evidence,
         qualification_plan,
         bundle,
         qualification_policy,
+        verifier_registry,
         repository,
     )
     if errors or verified_bundle is None:
@@ -338,7 +356,7 @@ def factory_rebuild_plan_for_bundle(
         rebuild_plan = build_factory_rebuild_plan(
             verified_bundle,
             source_lock,
-            qualification_assessment,
+            runtime_assessment,
         )
     except (KeyError, RecursionError, TypeError, ValueError) as exc:
         return [f"cannot build factory rebuild plan: {exc}"], None
@@ -348,20 +366,24 @@ def factory_rebuild_plan_for_bundle(
 def verify_factory_rebuild_plan_for_bundle(
     rebuild_plan: Any,
     source_lock: Any,
-    qualification_assessment: Any,
-    qualification_evidence: Any,
+    runtime_assessment: Any,
+    runtime_evidence: Any,
+    contract_evidence: Any,
     qualification_plan: Any,
     bundle: bytes,
     qualification_policy: Any,
+    verifier_registry: Any,
     repository: Path,
 ) -> list[str]:
     errors, verified_bundle = _verify_rebuild_inputs(
         source_lock,
-        qualification_assessment,
-        qualification_evidence,
+        runtime_assessment,
+        runtime_evidence,
+        contract_evidence,
         qualification_plan,
         bundle,
         qualification_policy,
+        verifier_registry,
         repository,
     )
     if errors or verified_bundle is None:
@@ -370,7 +392,7 @@ def verify_factory_rebuild_plan_for_bundle(
         expected = build_factory_rebuild_plan(
             verified_bundle,
             source_lock,
-            qualification_assessment,
+            runtime_assessment,
         )
     except (KeyError, RecursionError, TypeError, ValueError) as exc:
         return [f"cannot rebuild expected factory rebuild plan: {exc}"]

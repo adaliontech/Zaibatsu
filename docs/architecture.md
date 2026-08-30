@@ -26,7 +26,7 @@ budgets, and production authority.
 
 ## Nine machine-readable views
 
-Zaibatsu deliberately separates nine questions:
+Zaibatsu deliberately separates ten questions:
 
 | Contract | Question |
 | --- | --- |
@@ -38,6 +38,7 @@ Zaibatsu deliberately separates nine questions:
 | [`examples/economic-factory.source-lock.json`](../examples/economic-factory.source-lock.json) | Which immutable annotated-release Git objects supplied the exact control files that reproduce that bundle? |
 | [`policies/runtime-qualification-v1.json`](../policies/runtime-qualification-v1.json) plus [`examples/economic-factory.qualification-plan.json`](../examples/economic-factory.qualification-plan.json) | Which content-addressed evidence bindings are still required before those contracts can become runtime-eligible? |
 | [`examples/economic-factory.qualification-evidence.json`](../examples/economic-factory.qualification-evidence.json) plus [`examples/economic-factory.qualification-assessment.json`](../examples/economic-factory.qualification-assessment.json) | Which requirements does the verified bundle itself actually prove, and exactly which runtime proofs remain missing? |
+| [`policies/runtime-evidence-verifiers-v1.json`](../policies/runtime-evidence-verifiers-v1.json), [`examples/economic-factory.runtime-evidence.json`](../examples/economic-factory.runtime-evidence.json), and [`examples/economic-factory.runtime-assessment.json`](../examples/economic-factory.runtime-assessment.json) | Which externally supplied assertions were signed by evaluator-selected keys under exact allowlists, provenance, scope, and freshness rules—and what do they still not authorize? |
 | [`examples/economic-factory.rebuild-plan.json`](../examples/economic-factory.rebuild-plan.json) | In which dependency order would a qualified factory be rebuilt, which direct and upstream blockers stop each action, and which separate gates still deny activation? |
 
 The validator requires the factory registry and shared component maturities to
@@ -121,13 +122,32 @@ runtime implementation, environment realization, recovery, isolation,
 external independent verifier, eligibility, or activation. Replaying a receipt
 against the cron bundle, another plan, policy, module, or artifact fails closed.
 
+`verify-runtime-evidence` adds a separate OpenSSH signature layer. Every signed
+payload binds the factory, bundle, qualification plan and policy, verifier
+registry, module position/slot/ID/artifact, requirement, scope, evidence-artifact
+digest, verifier/method/implementation digest, validity interval, and false
+activation/execution flags. The content-addressed registry restricts each key
+to exact factories, scopes, requirements, methods, and maximum validity.
+`runtime-assessment` combines fresh signed assertions with the nine
+bundle-derived contract receipts at an explicit `evaluated_at` time.
+
+The public key is intentionally fixture-only: its registry permits only
+`public_test_fixture` and `source_revision`. The signature passes, but the scope
+can never yield runtime eligibility. The checked assessment therefore records
+10 verified bindings, 57 missing, and zero eligible modules. Signature validity
+does not prove who owns the key, organizational independence, verifier
+correctness, or artifact truth. The evaluator selects and must separately pin
+and review the registry; v1.9 neither reruns the verifier assertion nor retrieves
+the evidence artifact.
+
 `rebuild-plan` then joins the fully reverified bundle, source lock,
-qualification policy, plan, evidence, and assessment. It converts the same
+qualification policy and plan, bundle-derived evidence, verifier registry,
+signed runtime evidence, and runtime assessment. It converts the same
 nine module slots into an action DAG, preserves their dependency edges, records
 direct missing-evidence and upstream blockers separately, and terminates in
 four gates: control artifacts reverified, all modules runtime-qualified, owner
 activation approval, and factory activation. The public example has zero
-qualification-ready actions and 58 missing evidence bindings. The first gate
+qualification-ready actions and 57 missing evidence bindings. The first gate
 passes because all control inputs were reverified; that pass grants no effect
 authority and cannot satisfy the three later gates.
 
@@ -138,11 +158,12 @@ owner approval, activate a factory, deploy infrastructure, or prove runtime
 recovery. A reordered node, changed dependency, different input, inflated
 status, or false authority bit makes exact verification fail.
 
-The current `v1` qualification-evidence and assessment contracts deliberately
-derive only bundle-level contract-conformance receipts. They cannot produce a
-qualification-ready module. The rebuild schema reserves later statuses for a
-future independently verified runtime-evidence contract; their presence is not
-evidence that promotion or execution is implemented.
+Generated-key tests supply every non-contract requirement for the source module
+under `factory_runtime` scope and prove that it becomes
+`qualified_not_authorized`. They simultaneously prove that no action gains
+execution or side-effect authority and that the overall factory gate remains
+blocked. This demonstrates a reachable qualification path without implementing
+promotion or execution.
 
 This boundary is deliberately narrower than infrastructure reproduction. The
 plan and bundle own no side-effect authority and explicitly state that they

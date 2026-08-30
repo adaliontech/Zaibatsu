@@ -50,14 +50,19 @@ qualification plan lists the runtime evidence still missing for every selected
 module while granting no eligibility or activation. Bundle verification also
 derives nine reproducible contract-conformance receipts; the partial assessment
 credits only those 9 of 67 bindings, leaves 58 missing, and grants no runtime
-eligibility or activation.
+eligibility or activation. Signed runtime-evidence ingestion then verifies
+exact OpenSSH payload provenance, evaluator-selected key allowlists, and
+freshness. Its public fixture adds one binding only in permanently ineligible
+test scope, so the combined assessment records 10 verified, 57 missing, and
+zero eligible modules. Signature validity is not presented as proof of key
+ownership, verifier correctness, artifact truth, or independence.
 An annotated-release source lock binds that control bundle to exact local Git
 objects without trusting the checkout. It does not authenticate repository
 ownership, verify a signature, contain runtime implementation source, or count
 as qualification evidence.
 The deterministic rebuild plan then binds all of those verified inputs into
 nine dependency-ordered action intents and four separate gates. In the public
-example all nine actions remain blocked by 58 missing evidence bindings; the
+example all nine actions remain blocked by 57 missing evidence bindings; the
 plan executes nothing and grants no qualification, owner approval, activation,
 deployment, or recovery authority.
 
@@ -81,7 +86,7 @@ new test moves `policy_decision` before `verify`; the pre-change validator
 accepted that unsafe ordering, while the shipped validator rejects it with a
 deterministic adjacent-stage error. Droid reported 36 passing tests, and an
 independent run reproduced all 36 before later integration, branding, release,
-and meta-factory checks brought the package to 183 passing tests. No model or
+and meta-factory checks brought the current package to 194 passing tests. No model or
 Factory credential is published.
 
 ## One-line description

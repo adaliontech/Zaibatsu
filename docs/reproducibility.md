@@ -9,6 +9,7 @@ hierarchy, lifecycle, maturity, and safety properties remain congruent.
 ## Requirements
 
 - Python 3.10 or later;
+- OpenSSH `ssh-keygen` with `-Y verify` support;
 - GNU Make for the convenience target (optional);
 - no third-party Python package;
 - no network access;
@@ -91,8 +92,16 @@ The validator confirms:
     blob objects with Git replacements disabled, reproduces the byte-identical
     bundle, and preserves explicit remote-ownership, signature, runtime-source,
     qualification, eligibility, activation, and deployment denials.
-30. the factory rebuild plan fully reverifies the bundle, source lock, policy,
-    qualification plan, evidence, and assessment; preserves exact action and
+30. the signed runtime-evidence registry, receipts, and assessment bind exact
+    public keys, allowlists, provenance, scope, verifier implementation,
+    validity, and false authority flags; tampering, replay, wrong keys,
+    duplicates, stale evidence, type confusion, and missing OpenSSH fail closed;
+31. the public signature is restricted to fixture scope, while an ephemeral-key
+    positive test proves a complete `factory_runtime` set can qualify one module
+    without granting execution, side effects, owner approval, or activation;
+32. the factory rebuild plan fully reverifies the bundle, source lock, policy,
+    qualification plan, both evidence classes, registry, and assessment;
+    preserves exact action and
     gate order, dependencies, blockers, and digests; and grants no execution,
     qualification, owner approval, activation, deployment, or recovery
     authority.
@@ -107,7 +116,8 @@ dependency bypass, optionalized gates, and premature readiness.
 
 ## Validate another factory
 
-The reusable CLI uses the same standard-library contract implementation:
+The reusable CLI uses the same standard-library contract implementation and
+OpenSSH verifier:
 
 ```bash
 python3 scripts/zaibatsu.py validate examples/economic-factory.json
@@ -158,6 +168,22 @@ python3 scripts/zaibatsu.py verify-qualification-assessment \
   /tmp/example-product.qualification-evidence.json \
   /tmp/example-product.qualification-plan.json \
   /tmp/example-product.factory.tar
+python3 scripts/zaibatsu.py verify-runtime-evidence \
+  examples/economic-factory.runtime-evidence.json \
+  /tmp/example-product.factory.tar
+python3 scripts/zaibatsu.py runtime-assessment \
+  examples/economic-factory.runtime-evidence.json \
+  examples/economic-factory.qualification-evidence.json \
+  examples/economic-factory.qualification-plan.json \
+  /tmp/example-product.factory.tar \
+  --as-of 2026-08-30T23:00:00Z \
+  --output /tmp/example-product.runtime-assessment.json
+python3 scripts/zaibatsu.py verify-runtime-assessment \
+  /tmp/example-product.runtime-assessment.json \
+  examples/economic-factory.runtime-evidence.json \
+  examples/economic-factory.qualification-evidence.json \
+  examples/economic-factory.qualification-plan.json \
+  /tmp/example-product.factory.tar
 python3 scripts/zaibatsu.py rebuild-plan \
   /tmp/example-product.factory.tar \
   --output /tmp/example-product.rebuild-plan.json
@@ -170,7 +196,7 @@ To create a new definition, run `python3 scripts/zaibatsu.py scaffold --help`.
 The scaffold starts at planned maturity; it is a policy-safe definition, not
 evidence that the new factory is deployed. Operational or
 validated-preproduction maturity requires a scoped, content-addressed,
-independently verified receipt binding.
+trusted-verifier receipt binding whose trust root is separately reviewed.
 
 The rebuild check and portable bundle cover the deterministic contract layer.
 They are path-independent and offline, but do not run Ansible, realize Nix,
@@ -198,17 +224,25 @@ artifact. The assessment therefore reports 9 verified and 58 missing bindings.
 It explicitly contains no runtime implementation, environment, recovery,
 isolation, external independent-verifier, eligibility, or activation proof.
 
+The checked signed receipt adds one fresh `source_revision` binding at the
+recorded assessment time. Its registry permits only `public_test_fixture`, so
+the combined assessment reports 10 verified and 57 missing bindings while all
+nine modules remain ineligible. OpenSSH proves that the exact payload matches
+the selected public key and namespace. It does not rerun the verifier, retrieve
+the evidence artifact, authenticate the key owner, or establish organizational
+independence. Registry selection and the assessment clock are explicit trust
+inputs that a production caller must separately review and pin.
+
 The rebuild plan consumes those fully reverified inputs and emits an inert
 nine-action dependency graph plus four gates. The public result has zero
-qualification-ready actions, all nine blocked, and 58 missing evidence
+qualification-ready actions, all nine blocked, and 57 missing evidence
 bindings. It reports future action intents and blockers; it does not read
 secrets, run Ansible, realize Nix, install a scheduler, invoke a model, produce
 qualification evidence, obtain owner approval, activate or deploy anything, or
-prove that a runtime can be recovered.
-Because the current evidence contract derives only contract-conformance
-receipts from the bundle, no valid v1 assessment can make an action
-qualification-ready. Independent runtime-evidence ingestion and assessment are
-future contracts, not an undocumented escape hatch in this graph.
+prove that a runtime can be recovered. Generated-key tests exercise the
+reachable `qualified_not_authorized` state for one fully evidenced source
+module; no checked public module is currently qualified, and qualification
+still grants no execution or activation authority.
 
 ## Optional Droid preflight
 

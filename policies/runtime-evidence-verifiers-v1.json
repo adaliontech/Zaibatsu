@@ -1,0 +1,40 @@
+{
+  "contract_schema": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.9.0/schemas/runtime-evidence-verifier-registry.schema.json",
+  "schema_version": "zaibatsu.runtime-evidence-verifier-registry.v1",
+  "registry_id": "runtime-evidence-verifiers-default",
+  "signature_namespace": "zaibatsu-runtime-evidence-v1",
+  "verifiers": [
+    {
+      "position": 0,
+      "verifier_id": "public-fixture-verifier",
+      "public_key": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAob344ZtwKOGH9DPAJhnhVmhU8AVz3BwgJC6exvChrT",
+      "implementation_sha256": "6aea669ddf506f0c7ba59ebcc573bd78b1e647e8921bfafd29c700304d637d8a",
+      "allowed_factories": [
+        "example-product"
+      ],
+      "allowed_scopes": [
+        "public_test_fixture"
+      ],
+      "allowed_requirements": [
+        "source_revision"
+      ],
+      "allowed_methods": [
+        "fixture_source_revision_check"
+      ],
+      "max_validity_seconds": 86400,
+      "trust_role": "public-test-fixture-only",
+      "active": true
+    }
+  ],
+  "registry_boundary": {
+    "public_keys_only": true,
+    "private_keys_included": false,
+    "exact_allowlists_required": true,
+    "signatures_required": true,
+    "self_attestation_accepted": false,
+    "signature_grants_runtime_eligibility": false,
+    "signature_grants_activation": false,
+    "signature_grants_execution": false
+  },
+  "verifier_registry_sha256": "9196fd8a8afbb161bdc8f5d2fad1a28bef467ff6786c3f732d2d4c187079bff6"
+}

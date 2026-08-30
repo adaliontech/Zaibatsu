@@ -1,0 +1,15 @@
+{
+  "schema_version": "zaibatsu.public-runtime-evidence-fixture-method.v1",
+  "method_id": "fixture_source_revision_check",
+  "qualification_scope": "public_test_fixture",
+  "checks": [
+    "canonical_fixture_shape",
+    "exact_factory_module_requirement_binding",
+    "fixture_only_and_nonproduction_flags"
+  ],
+  "fixture_only": true,
+  "runtime_assertion_performed": false,
+  "grants_runtime_eligibility": false,
+  "grants_activation": false,
+  "grants_execution": false
+}

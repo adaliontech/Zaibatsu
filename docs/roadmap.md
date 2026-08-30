@@ -31,11 +31,14 @@ changes.
   qualification evidence;
 - preserve the reproduced immutable `v1.8.0` deterministic rebuild DAG without
   presenting action intents as execution or its gates as runtime authority;
+- complete the `v1.9.0` signed runtime-evidence release proof without
+  presenting a fixture key, evaluator-selected registry, or historical
+  assessment time as independent operational truth;
 - record the Guild demo and complete applicant-owned submission materials.
 
 Exit: the public narrative, architecture, portable factory, module artifacts,
 control plan, bundle, source lock, qualification plan, partial assessment,
-rebuild plan, readiness, and evidence contracts describe the same meta-factory
+signed runtime assessment, rebuild plan, readiness, and evidence contracts describe the same meta-factory
 without inflating source-only or planned capabilities.
 
 ## Phase 1 — Factory identity and versioning
@@ -133,6 +136,12 @@ Implemented source foundation:
   67 missing evidence bindings without granting eligibility or activation;
 - nine reproducible bundle-derived contract-conformance receipts and a partial
   assessment that leaves 58 bindings missing and all modules ineligible;
+- OpenSSH-signed runtime-evidence ingestion with content-addressed verifier
+  allowlists and explicit freshness; the checked fixture raises the combined
+  count to 10 verified and 57 missing without making a module eligible;
+- generated-key proof that complete `factory_runtime` evidence can make one
+  module qualification-ready while all execution, side-effect, approval, and
+  activation authority remains false;
 - a deterministic nine-action rebuild DAG that preserves module dependencies,
   direct evidence gaps, upstream blockers, and four non-authorizing gates while
   executing no operation;
@@ -159,6 +168,12 @@ authority or silently changing production.
 
 ## Phase 6 — Multi-harness qualification
 
+- pin production verifier registries through separately reviewed trust roots;
+- run verifier methods independently and retain/retrieve the evidence artifacts
+  whose digests are signed, instead of treating signature validity as semantic
+  truth;
+- enforce a trusted current clock and bounded revocation/rotation policy before
+  any assessment feeds an activation decision;
 - define fixed task/evaluation fixtures for each probabilistic module class;
 - compare Codex, Qwen, Factory Droid, and future harness implementations behind
   identical typed ports where their terms and capabilities permit;

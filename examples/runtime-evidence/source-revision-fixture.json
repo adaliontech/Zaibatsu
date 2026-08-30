@@ -1,0 +1,12 @@
+{
+  "schema_version": "zaibatsu.public-runtime-evidence-fixture.v1",
+  "factory_id": "example-product",
+  "module": "git-source",
+  "requirement": "source_revision",
+  "qualification_scope": "public_test_fixture",
+  "source_revision": "fixture-revision-not-a-runtime-deployment",
+  "assertion": "signed_evidence_ingestion_fixture_only",
+  "fixture_only": true,
+  "runtime_observed": false,
+  "production_evidence": false
+}

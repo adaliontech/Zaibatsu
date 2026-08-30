@@ -1,6 +1,6 @@
 # Demo script
 
-Use only a full-history fresh clone of immutable `v1.8.0` after its release
+Use only a full-history fresh clone of immutable `v1.9.0` after its release
 proof passes. Do not show private terminals, history, settings,
 infrastructure, model credentials, notifications, or personal data. Lead with
 the real Factory
@@ -95,6 +95,22 @@ python3 scripts/zaibatsu.py verify-qualification-assessment \
   /tmp/example-product.qualification-evidence.json \
   /tmp/example-product.qualification-plan.json \
   /tmp/example-product.factory.tar
+python3 scripts/zaibatsu.py verify-runtime-evidence \
+  examples/economic-factory.runtime-evidence.json \
+  /tmp/example-product.factory.tar
+python3 scripts/zaibatsu.py runtime-assessment \
+  examples/economic-factory.runtime-evidence.json \
+  examples/economic-factory.qualification-evidence.json \
+  examples/economic-factory.qualification-plan.json \
+  /tmp/example-product.factory.tar \
+  --as-of 2026-08-30T23:00:00Z \
+  --output /tmp/example-product.runtime-assessment.json
+python3 scripts/zaibatsu.py verify-runtime-assessment \
+  /tmp/example-product.runtime-assessment.json \
+  examples/economic-factory.runtime-evidence.json \
+  examples/economic-factory.qualification-evidence.json \
+  examples/economic-factory.qualification-plan.json \
+  /tmp/example-product.factory.tar
 python3 scripts/zaibatsu.py rebuild-plan \
   /tmp/example-product.factory.tar \
   --output /tmp/example-product.rebuild-plan.json
@@ -115,9 +131,13 @@ python3 scripts/zaibatsu.py verify-rebuild-plan \
 > catalog and schemas stay fixed, making modularity directly inspectable. The
 > qualification plan then lists 67 evidence bindings still missing across all
 > nine modules. Bundle verification then derives nine real but narrow
-> contract-conformance receipts. The assessment credits exactly those nine,
-> leaves 58 runtime bindings missing, marks none eligible, and authorizes no
-> activation. The rebuild graph preserves the nine module dependencies and
+> contract-conformance receipts. The signed fixture adds one fresh
+> source-revision assertion under a scope that is cryptographically valid but
+> permanently ineligible. The combined assessment records 10 verified and 57
+> missing, marks none eligible, and authorizes no activation or execution. A
+> signature authenticates the assertion; it does not prove key ownership,
+> verifier correctness, or artifact truth. The rebuild graph preserves the
+> nine module dependencies and
 > four separate gates, but every action remains blocked and has false execution
 > authority. These are future action intents, not Ansible, Nix, secret,
 > scheduler, model, deployment, or recovery operations. Content identity is not
@@ -136,7 +156,7 @@ make validate
 > evidence, force-added ignored files, misleading media suffixes, and premature
 > readiness.
 
-Pause on the final 183-test pass and 78-file validator summary.
+Pause on the final 194-test pass and 87-file validator summary.
 
 ### 2:05–2:30 — Honest current boundary
 
@@ -152,7 +172,7 @@ Open `docs/implementation-status.md`.
 
 ## Before recording
 
-1. Clone the immutable `v1.8.0` tag with full history into a new temporary
+1. Clone the immutable `v1.9.0` tag with full history into a new temporary
    directory after its release proof passes. Do not use `--depth 1`; source-lock
    verification requires the referenced annotated `v1.6.0` tag and objects.
 2. Increase terminal font size and hide unrelated tabs and notifications.
@@ -163,7 +183,7 @@ Open `docs/implementation-status.md`.
 
 ## Capture checklist
 
-- [ ] Repository URL and `v1.8.0` tag visible once.
+- [ ] Repository URL and `v1.9.0` tag visible once.
 - [ ] Real Factory/Droid session receipt and shipped diff visible first.
 - [ ] Pre-change gap and adversarial post-change result are understandable.
 - [ ] Portable factory scaffold and validation succeed on screen.
@@ -172,12 +192,12 @@ Open `docs/implementation-status.md`.
 - [ ] Source-lock verification reports the annotated `v1.6.0` tag, sixteen
       inputs, and false qualification, eligibility, and activation flags.
 - [ ] Qualification plan visibly leaves all nine modules runtime-ineligible.
-- [ ] Qualification assessment shows 9 verified contract bindings, 58 missing
-      runtime bindings, and zero eligible modules.
+- [ ] Runtime assessment shows 10 verified bindings, 57 missing runtime
+      bindings, fixture-only scope, and zero eligible modules.
 - [ ] Rebuild-plan verification shows nine blocked actions, four separate gates,
       and false execution, activation, deployment, and recovery authority.
 - [ ] “The factory of software factories” hierarchy is visible.
-- [ ] `make validate` shows all 183 tests and 78 contract files passing.
+- [ ] `make validate` shows all 194 tests and 87 contract files passing.
 - [ ] Maturity limits are stated explicitly.
 - [ ] No private history, addresses, credentials, local settings, or host details.
 - [ ] Captions are included.

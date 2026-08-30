@@ -54,6 +54,20 @@ from factory_rebuild import (
     load_rebuild_plan,
     verify_factory_rebuild_plan_for_bundle,
 )
+from factory_runtime_evidence import (
+    EXAMPLE_RUNTIME_ASSESSMENT_PATH,
+    EXAMPLE_RUNTIME_EVIDENCE_PATH,
+    RUNTIME_ASSESSMENT_SCHEMA_REFERENCE,
+    RUNTIME_EVIDENCE_SCHEMA_REFERENCE,
+    VERIFIER_REGISTRY_PATH,
+    VERIFIER_REGISTRY_SCHEMA_REFERENCE,
+    load_runtime_assessment,
+    load_runtime_evidence,
+    load_verifier_registry,
+    validate_runtime_assessment,
+    validate_runtime_evidence_set,
+    validate_verifier_registry,
+)
 from factory_source_lock import (
     EXAMPLE_SOURCE_LOCK_PATH,
     SOURCE_LOCK_SCHEMA_REFERENCE,
@@ -108,6 +122,10 @@ REQUIRED_FILES = (
     "examples/economic-factory.qualification-assessment.json",
     "examples/economic-factory.qualification-evidence.json",
     "examples/economic-factory.qualification-plan.json",
+    "examples/economic-factory.runtime-assessment.json",
+    "examples/economic-factory.runtime-evidence.json",
+    "examples/runtime-evidence/fixture-verifier-method.json",
+    "examples/runtime-evidence/source-revision-fixture.json",
     "evidence/dispatcher-validation-v1.json",
     "evidence/droid-contribution-v1.json",
     "evidence/meta-factory-foundations-v1.json",
@@ -131,6 +149,8 @@ REQUIRED_FILES = (
     "schemas/factory-bundle-manifest.schema.json",
     "schemas/factory-plan.schema.json",
     "schemas/factory-rebuild-plan.schema.json",
+    "schemas/factory-runtime-assessment.schema.json",
+    "schemas/factory-runtime-evidence.schema.json",
     "schemas/factory-source-lock.schema.json",
     "schemas/factory-qualification-assessment.schema.json",
     "schemas/factory-qualification-evidence.schema.json",
@@ -141,6 +161,7 @@ REQUIRED_FILES = (
     "schemas/module-artifact.schema.json",
     "schemas/module-qualification-policy.schema.json",
     "schemas/qwen-model-observation-receipt.schema.json",
+    "schemas/runtime-evidence-verifier-registry.schema.json",
     "schemas/submission-readiness.schema.json",
     "schemas/system.schema.json",
     "scripts/droid_preflight.py",
@@ -148,12 +169,14 @@ REQUIRED_FILES = (
     "scripts/factory_composer.py",
     "scripts/factory_qualification.py",
     "scripts/factory_rebuild.py",
+    "scripts/factory_runtime_evidence.py",
     "scripts/factory_source_lock.py",
     "scripts/zaibatsu.py",
     "scripts/validate_repository.py",
     "tests/test_droid_preflight.py",
     "tests/test_validate_repository.py",
     "policies/runtime-qualification-v1.json",
+    "policies/runtime-evidence-verifiers-v1.json",
 )
 
 ALLOWED_MATURITIES = {
@@ -171,7 +194,8 @@ ARCHITECTURE_SCHEMA_VERSION = "zaibatsu.architecture.v1"
 FACTORY_MODEL_SCHEMA_VERSION = "zaibatsu.factory-model.v1"
 READINESS_SCHEMA_VERSION = "zaibatsu.submission-readiness.v1"
 FACTORY_DEFINITION_SCHEMA_VERSION = "zaibatsu.factory-definition.v2"
-INTEGRATED_TEST_COUNT = 183
+INTEGRATED_TEST_COUNT = 194
+LATEST_VALIDATED_RELEASE_TEST_COUNT = 183
 DROID_FACTORY_CLI_VERSION = "0.206.0"
 DROID_SESSION_REFERENCE = "46f941a9-82f8-4df3-a45c-b8158996360b"
 PUBLIC_REPOSITORY_URL = "https://github.com/adaliontech/Zaibatsu"
@@ -228,7 +252,16 @@ CONTRACT_SCHEMA_REFERENCES = {
     "examples/economic-factory.qualification-plan.json": (
         QUALIFICATION_PLAN_SCHEMA_REFERENCE
     ),
+    "examples/economic-factory.runtime-assessment.json": (
+        RUNTIME_ASSESSMENT_SCHEMA_REFERENCE
+    ),
+    "examples/economic-factory.runtime-evidence.json": (
+        RUNTIME_EVIDENCE_SCHEMA_REFERENCE
+    ),
     "policies/runtime-qualification-v1.json": QUALIFICATION_POLICY_SCHEMA_REFERENCE,
+    "policies/runtime-evidence-verifiers-v1.json": (
+        VERIFIER_REGISTRY_SCHEMA_REFERENCE
+    ),
     "evidence/dispatcher-validation-v1.json": "../schemas/dispatcher-validation-receipt.schema.json",
     "evidence/droid-contribution-v1.json": "../schemas/droid-contribution-receipt.schema.json",
     "evidence/meta-factory-foundations-v1.json": "../schemas/meta-factory-foundations-receipt.schema.json",
@@ -262,8 +295,17 @@ REMOTE_SCHEMA_LOCAL_PATHS = {
     "examples/economic-factory.qualification-plan.json": (
         "schemas/factory-qualification-plan.schema.json"
     ),
+    "examples/economic-factory.runtime-assessment.json": (
+        "schemas/factory-runtime-assessment.schema.json"
+    ),
+    "examples/economic-factory.runtime-evidence.json": (
+        "schemas/factory-runtime-evidence.schema.json"
+    ),
     "policies/runtime-qualification-v1.json": (
         "schemas/module-qualification-policy.schema.json"
+    ),
+    "policies/runtime-evidence-verifiers-v1.json": (
+        "schemas/runtime-evidence-verifier-registry.schema.json"
     ),
 }
 
@@ -1346,6 +1388,9 @@ def validate_submission_readiness(data: Any) -> list[str]:
                     "examples/economic-factory.qualification-assessment.json",
                     "examples/economic-factory.qualification-evidence.json",
                     "examples/economic-factory.qualification-plan.json",
+                    "examples/economic-factory.runtime-assessment.json",
+                    "examples/economic-factory.runtime-evidence.json",
+                    "policies/runtime-evidence-verifiers-v1.json",
                     "policies/runtime-qualification-v1.json",
                 }
                 if (
@@ -1391,8 +1436,10 @@ def validate_submission_readiness(data: Any) -> list[str]:
                 commit = proof.get("candidate_commit")
                 if not isinstance(commit, str) or not HEX_40_RE.fullmatch(commit):
                     errors.append(f"{gate_id}: proof must pin a full candidate commit")
-                if proof.get("tests_passed") != INTEGRATED_TEST_COUNT:
-                    errors.append(f"{gate_id}: proof must match the integrated test count")
+                if proof.get("tests_passed") != LATEST_VALIDATED_RELEASE_TEST_COUNT:
+                    errors.append(
+                        f"{gate_id}: proof must match the latest validated release test count"
+                    )
                 if not isinstance(proof.get("gitleaks_version"), str) or not proof["gitleaks_version"].strip():
                     errors.append(f"{gate_id}: proof must record the Gitleaks version")
                 if not isinstance(proof.get("github_actions_run"), str) or not proof["github_actions_run"].startswith("https://github.com/"):
@@ -1761,8 +1808,14 @@ def validate_contract_schema_files(root: Path = ROOT) -> list[str]:
         if schema.get("$schema") != "https://json-schema.org/draft/2020-12/schema":
             errors.append(f"{relative}: project-owned schema must declare JSON Schema 2020-12")
         schema_release = (
-            "v1.8.0"
-            if schema_path.name == "factory-rebuild-plan.schema.json"
+            "v1.9.0"
+            if schema_path.name
+            in {
+                "factory-rebuild-plan.schema.json",
+                "factory-runtime-assessment.schema.json",
+                "factory-runtime-evidence.schema.json",
+                "runtime-evidence-verifier-registry.schema.json",
+            }
             else "v1.7.0"
             if schema_path.name == "factory-source-lock.schema.json"
             else "v1.6.0"
@@ -1848,6 +1901,9 @@ def main() -> int:
     qualification_plan: Any = None
     qualification_evidence: Any = None
     qualification_assessment: Any = None
+    verifier_registry: Any = None
+    runtime_evidence: Any = None
+    runtime_assessment: Any = None
     rebuild_plan_document: Any = None
     source_lock_document: Any = None
     qualification_bundle: bytes | None = None
@@ -2015,6 +2071,48 @@ def main() -> int:
                 )
             )
     try:
+        verifier_registry = load_verifier_registry(VERIFIER_REGISTRY_PATH)
+    except (OSError, RecursionError, ValueError) as exc:
+        errors.append(f"cannot load runtime evidence verifier registry: {exc}")
+    else:
+        errors.extend(validate_verifier_registry(verifier_registry))
+    try:
+        runtime_evidence = load_runtime_evidence(
+            EXAMPLE_RUNTIME_EVIDENCE_PATH
+        )
+    except (OSError, RecursionError, ValueError) as exc:
+        errors.append(f"cannot load example runtime evidence: {exc}")
+    else:
+        if verified_qualification_bundle is not None:
+            errors.extend(
+                validate_runtime_evidence_set(
+                    runtime_evidence,
+                    verified_qualification_bundle,
+                    qualification_plan,
+                    qualification_policy,
+                    verifier_registry,
+                )
+            )
+    try:
+        runtime_assessment = load_runtime_assessment(
+            EXAMPLE_RUNTIME_ASSESSMENT_PATH
+        )
+    except (OSError, RecursionError, ValueError) as exc:
+        errors.append(f"cannot load example runtime assessment: {exc}")
+    else:
+        if verified_qualification_bundle is not None:
+            errors.extend(
+                validate_runtime_assessment(
+                    runtime_assessment,
+                    qualification_evidence,
+                    runtime_evidence,
+                    verified_qualification_bundle,
+                    qualification_plan,
+                    qualification_policy,
+                    verifier_registry,
+                )
+            )
+    try:
         rebuild_plan_document = load_rebuild_plan(EXAMPLE_REBUILD_PLAN_PATH)
     except (OSError, RecursionError, ValueError) as exc:
         errors.append(f"cannot load example factory rebuild plan: {exc}")
@@ -2025,10 +2123,12 @@ def main() -> int:
                 isinstance(value, dict)
                 for value in (
                     source_lock_document,
-                    qualification_assessment,
+                    runtime_assessment,
+                    runtime_evidence,
                     qualification_evidence,
                     qualification_plan,
                     qualification_policy,
+                    verifier_registry,
                 )
             )
         ):
@@ -2036,11 +2136,13 @@ def main() -> int:
                 verify_factory_rebuild_plan_for_bundle(
                     rebuild_plan_document,
                     source_lock_document,
-                    qualification_assessment,
+                    runtime_assessment,
+                    runtime_evidence,
                     qualification_evidence,
                     qualification_plan,
                     qualification_bundle,
                     qualification_policy,
+                    verifier_registry,
                     ROOT,
                 )
             )
@@ -2071,7 +2173,7 @@ def main() -> int:
     )
     print(
         "- 2 reusable factory definitions, content-addressed modules, control "
-        "plan, bundle manifest, source lock, qualification evidence, and "
+        "plan, bundle manifest, source lock, signed runtime evidence, and "
         "non-executing rebuild DAG checked"
     )
     print(f"- {len(EVIDENCE_CONTRACTS)} evidence receipts checked")

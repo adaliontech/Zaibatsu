@@ -114,7 +114,7 @@ The target stack is intentionally boring at authority boundaries:
 | LLM harness adapters | Bind different models behind typed module contracts | Validated at bounded source/contribution scope; general unattended routing is not active |
 | Recursive improvement | Return evidence and improve shared factory patterns | Evidence return is bounded and operational; shared automatic promotion remains designed and owner-gated |
 | Qualification planner | Bind a verified control bundle to mandatory runtime evidence requirements | Implemented and tested; the public plan contains no qualification evidence and grants no eligibility or activation |
-| Qualification evidence assessment | Derive and assess reproducible proof from verified control inputs | Contract-conformance evidence is verified for all nine public modules; 58 runtime evidence bindings remain missing, with zero eligibility or activation |
+| Signed runtime-evidence assessment | Combine bundle-derived contract receipts with fresh, allowlisted OpenSSH-signed verifier assertions | The public fixture verifies one signature in test-only scope: 10 of 67 bindings verified, 57 missing, zero runtime-eligible modules, and no activation or execution authority |
 | Annotated-release source lock | Bind one verified control bundle to exact versioned source inputs | Sixteen Git blobs from immutable v1.6.0 rebuild the byte-identical bundle; no remote, signature, runtime-source, qualification, eligibility, or activation proof is claimed |
 | Deterministic rebuild DAG | Join verified control provenance, module dependencies, qualification gaps, and activation gates | Implemented and tested as an inert nine-action plan; zero actions are qualification-ready, all nine remain blocked, and no execution or effect authority is granted |
 
@@ -169,7 +169,8 @@ for the full claim ledger.
 
 ## Quickstart
 
-The public validator uses only Python's standard library:
+The public validator uses Python's standard library plus the OpenSSH
+`ssh-keygen` binary for detached-signature verification:
 
 ```bash
 git clone https://github.com/adaliontech/Zaibatsu.git
@@ -180,11 +181,11 @@ make validate
 `make validate` checks the project-owned schemas, architecture contracts,
 portable factory example, content-addressed module artifacts, resolved control
 plan, portable bundle manifest, annotated-release source lock, qualification
-policy, plan, evidence and assessment, deterministic rebuild DAG, sanitized
-receipts, factory hierarchy and lifecycle, maturity boundaries, submission
-gates, public-safety rules, local links, and adversarial mutations. No model
-request, network access, cloud account, secret, Ansible or Nix execution, or
-production system is required.
+policy and plan, bundle-derived evidence, signed runtime evidence, runtime
+assessment, deterministic rebuild DAG, sanitized receipts, factory hierarchy
+and lifecycle, maturity boundaries, submission gates, public-safety rules,
+local links, and adversarial mutations. No model request, network access, cloud
+account, secret, Ansible or Nix execution, or production system is required.
 
 ## Apply the contract to another factory
 
@@ -359,6 +360,49 @@ only those facts: 9 of 67 bindings verified, 58 missing, and zero modules
 runtime-eligible. They include no implementation, environment, isolation,
 recovery, independent external-verifier, activation, or deployment proof.
 
+Add externally supplied signed assertions through a separately hashed verifier
+registry, then evaluate freshness at an explicit timestamp:
+
+```bash
+python3 scripts/zaibatsu.py verify-runtime-evidence \
+  examples/economic-factory.runtime-evidence.json \
+  /tmp/example-product.factory.tar
+python3 scripts/zaibatsu.py runtime-assessment \
+  examples/economic-factory.runtime-evidence.json \
+  examples/economic-factory.qualification-evidence.json \
+  examples/economic-factory.qualification-plan.json \
+  /tmp/example-product.factory.tar \
+  --as-of 2026-08-30T23:00:00Z \
+  --output /tmp/example-product.runtime-assessment.json
+python3 scripts/zaibatsu.py verify-runtime-assessment \
+  /tmp/example-product.runtime-assessment.json \
+  examples/economic-factory.runtime-evidence.json \
+  examples/economic-factory.qualification-evidence.json \
+  examples/economic-factory.qualification-plan.json \
+  /tmp/example-product.factory.tar
+```
+
+The checked [verifier registry](policies/runtime-evidence-verifiers-v1.json)
+contains a public key, exact factory/scope/requirement/method allowlists, a
+verifier-implementation digest, and a maximum validity interval. Its one signed
+[runtime-evidence receipt](examples/economic-factory.runtime-evidence.json) is
+deliberately restricted to `public_test_fixture`; it demonstrates signature,
+provenance, allowlist, replay, and freshness checks but can never make a module
+runtime-eligible. The resulting [runtime
+assessment](examples/economic-factory.runtime-assessment.json) records 10 of 67
+bindings verified, 57 missing, and zero eligible modules.
+
+This trust boundary is intentionally narrow. The registry is an explicit
+evaluator-selected trust input; its content digest proves which keys and rules
+were selected, not who owns a key or whether its operator is organizationally
+independent. A valid signature authenticates the exact assertion payload, not
+the assertion's semantic truth. Zaibatsu v1.9 does not rerun the named verifier
+or retrieve the evidence artifact. A production `factory_runtime` assessment
+therefore requires a separately reviewed and pinned registry, a trusted
+verifier allowed for every exact binding, and a current externally chosen
+`--as-of` time. Even complete runtime qualification grants no activation,
+execution, secret, deployment, or side-effect authority.
+
 ## Plan the factory rebuild
 
 Compile the verified control and qualification state into an ordered,
@@ -374,7 +418,8 @@ python3 scripts/zaibatsu.py verify-rebuild-plan \
 ```
 
 Both commands fully reverify the bundle, annotated-release source lock,
-qualification policy, plan, evidence, and assessment. The resulting [rebuild
+qualification policy and plan, bundle-derived evidence, signed runtime
+evidence, verifier registry, and runtime assessment. The resulting [rebuild
 plan](examples/economic-factory.rebuild-plan.json) binds their exact digests
 and expresses the nine module slots as a dependency-ordered action DAG. Each
 node records its intended operation, verified evidence, direct missing
@@ -382,16 +427,16 @@ evidence, upstream blockers, and false execution authority. Four gates keep
 control-artifact verification, complete runtime qualification, explicit owner
 approval, and factory activation separate.
 
-For the public contracts, the graph reports 9 of 67 evidence bindings verified,
-58 missing, zero qualification-ready actions, and all nine actions blocked.
+For the public contracts, the graph reports 10 of 67 evidence bindings verified,
+57 missing, zero qualification-ready actions, and all nine actions blocked.
 Names such as `apply_host_configuration` and `realize_worker_environment` are
 intents, not executed commands. Generation and verification read no secrets,
 run no Ansible or Nix, install no scheduler, invoke no model, grant no approval,
-activate nothing, deploy nothing, and prove no runtime recovery.
-The current `v1` evidence and assessment contracts intentionally accept only
-bundle-derived contract-conformance receipts, so they cannot advance an action
-to qualification-ready. A future independently verified runtime-evidence
-contract is required before those states can be reached.
+activate nothing, deploy nothing, and prove no runtime recovery. Generated-key
+tests prove that a complete, fresh `factory_runtime` evidence set can advance
+one module to `qualified_not_authorized`; the same tests prove that this state
+still carries false execution and side-effect authority and leaves the factory
+activation gate blocked.
 
 ## Factory AI and local Qwen
 
@@ -441,6 +486,11 @@ and the complete repository suite was rerun independently.
   and [partial assessment](examples/economic-factory.qualification-assessment.json)
   — reproducible contract-only receipts, exact remaining gaps, and no runtime
   eligibility or activation authority.
+- [Runtime verifier registry](policies/runtime-evidence-verifiers-v1.json),
+  [signed evidence](examples/economic-factory.runtime-evidence.json), and
+  [runtime assessment](examples/economic-factory.runtime-assessment.json) —
+  exact public keys, allowlists, provenance, freshness, remaining gaps, and an
+  explicitly fixture-only non-authorizing signature example.
 - [Factory rebuild plan](examples/economic-factory.rebuild-plan.json) — the
   exact nine-action dependency graph, evidence blockers, and four
   non-authorizing gates derived from fully reverified control inputs.
@@ -479,17 +529,20 @@ and the complete repository suite was rerun independently.
    digest, member, dependency, and least-authority boundary matches.
 10. A qualification plan lists missing evidence; it is not evidence, runtime
     eligibility, activation authority, or owner approval.
-11. Content addressing proves evidence identity, not truth; only the exact
-    deterministic verifier scope may satisfy a qualification binding.
+11. Content addressing proves evidence identity, not truth; a signed assertion
+    counts only under the exact evaluator-selected key, factory, scope,
+    requirement, method, implementation digest, and validity interval.
 12. A source lock proves exact local Git-object lineage for control contracts;
     it does not prove remote ownership, signature trust, or runtime source.
-13. A rebuild plan reports intended actions and blockers; it executes no action
+13. A signature authenticates an assertion; it does not prove key ownership,
+    organizational independence, verifier correctness, or artifact truth.
+14. A rebuild plan reports intended actions and blockers; it executes no action
     and grants no qualification, approval, activation, deployment, or recovery
     authority.
-14. Tests, schemas, linters, hashes, policy, receipts, and owner approval
+15. Tests, schemas, linters, hashes, policy, receipts, and owner approval
     outrank model confidence.
-15. Feedback may propose shared improvement but cannot self-promote.
-16. Failed work remains inspectable, and the owner retains a recovery path
+16. Feedback may propose shared improvement but cannot self-promote.
+17. Failed work remains inspectable, and the owner retains a recovery path
     outside Dispatcher.
 
 ## Factory Guild submission

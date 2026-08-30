@@ -18,13 +18,16 @@
 - Qualification-plan proof: `python3 scripts/zaibatsu.py verify-qualification-plan /tmp/example-product.qualification-plan.json /tmp/example-product.factory.tar`
 - Bundle-derived evidence: `python3 scripts/zaibatsu.py qualification-evidence /tmp/example-product.qualification-plan.json /tmp/example-product.factory.tar --output /tmp/example-product.qualification-evidence.json`
 - Partial assessment: `python3 scripts/zaibatsu.py qualification-assessment /tmp/example-product.qualification-evidence.json /tmp/example-product.qualification-plan.json /tmp/example-product.factory.tar --output /tmp/example-product.qualification-assessment.json`
+- Signed runtime-evidence proof: `python3 scripts/zaibatsu.py verify-runtime-evidence examples/economic-factory.runtime-evidence.json /tmp/example-product.factory.tar`
+- Combined runtime assessment: `python3 scripts/zaibatsu.py runtime-assessment examples/economic-factory.runtime-evidence.json examples/economic-factory.qualification-evidence.json examples/economic-factory.qualification-plan.json /tmp/example-product.factory.tar --as-of 2026-08-30T23:00:00Z --output /tmp/example-product.runtime-assessment.json`
 - Factory rebuild DAG: `python3 scripts/zaibatsu.py rebuild-plan /tmp/example-product.factory.tar --output /tmp/example-product.rebuild-plan.json`
 - Rebuild-DAG proof: `python3 scripts/zaibatsu.py verify-rebuild-plan /tmp/example-product.rebuild-plan.json /tmp/example-product.factory.tar`
 - Tests only: `python3 -m unittest discover -s tests -v`
 - Deferred local-model preflight: `make droid-preflight`
 
 No dependency installation, network access, secret, cloud account, or
-production connection is required.
+production connection is required. OpenSSH `ssh-keygen` is required to verify
+signed runtime evidence.
 
 ## Repository purpose
 
@@ -65,6 +68,11 @@ credentials, or bootstrap procedures.
   contract/catalog/schema/digest checks the bundle verifier reruns. It may not
   claim an external independent verifier, runtime implementation evidence,
   full qualification, eligibility, activation, or deployment.
+- Treat a runtime-evidence signature only as authentication of the exact
+  assertion under the evaluator-selected registry and timestamp. It does not
+  prove key ownership, organizational independence, verifier correctness,
+  artifact truth, activation, or execution. Never commit a verifier private
+  key. Production trust roots and clocks require separate review and pinning.
 - Treat a factory source lock only as proof that exact JSON blobs in one local
   annotated release rebuild the verified control bundle. It does not contact
   or authenticate the named remote, verify a tag signature or repository
