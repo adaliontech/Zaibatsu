@@ -511,8 +511,10 @@ applicant-owned form materials remain external submission gates. The `v1.7.0`
 annotated-release control-source-lock candidate passed its own 173-test
 full-history clone, schema, secret-scan, determinism, and independent-CI
 boundary; immutable `v1.7.0` and its full-history tag clone passed the complete
-release proof. The v1.8.0 rebuild-DAG candidate is under local validation and
-has not yet earned immutable-release or public-clone evidence.
+release proof. The v1.8.0 rebuild-DAG candidate passed its 183-test
+credential-disabled full-history clone, strict schema,
+secret-scan, exact-regeneration, non-authorizing semantic, and independent-CI
+boundary. Immutable-release and tag-clone evidence remain pending.
 
 Zaibatsu is an independent project and is not affiliated with or endorsed by
 Factory AI.

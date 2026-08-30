@@ -92,18 +92,21 @@
     },
     {
       "id": "fresh_clone_reproduction",
-      "status": "pending_external",
+      "status": "complete",
       "required_for_submission": true,
-      "evidence": "Immutable v1.7.0 remains reproduced; the v1.8.0 deterministic rebuild-DAG candidate requires its own full-history credential-disabled clone, 183-test, strict-Git, Gitleaks, schema, determinism, and CI proof"
+      "evidence": "Credential-disabled full-history clone of v1.8.0 candidate b05f085182285f4f77c8d3d96b90583903fc587d passed 183 tests, 78-file validation, strict Git, both checksum-pinned Gitleaks modes, strict schema controls, exact rebuild-plan regeneration, non-authorizing assertions, and independent CI",
+      "proof": {
+        "candidate_commit": "b05f085182285f4f77c8d3d96b90583903fc587d",
+        "tests_passed": 183,
+        "gitleaks_version": "8.30.1",
+        "github_actions_run": "https://github.com/adaliontech/Zaibatsu/actions/runs/33339430389"
+      }
     },
     {
       "id": "public_demo",
-      "status": "blocked_by_dependency",
+      "status": "pending_external",
       "required_for_submission": true,
-      "evidence": "Record and publish the final clip only after the current rebuild-DAG candidate passes fresh-clone proof and is released",
-      "blocked_by": [
-        "fresh_clone_reproduction"
-      ]
+      "evidence": "Record and publish the final clip from immutable v1.8.0 after its separate release proof passes"
     },
     {
       "id": "applicant_materials",

@@ -26,9 +26,10 @@ and independent-CI proof. Immutable v1.6.0 and its tag clone passed the same
 release boundary. The v1.7.0 annotated-release control-source-lock candidate
 passed its full-history 173-test clone, Gitleaks, schema, determinism, and
 independent-CI proof. Immutable v1.7.0 and its full-history tag clone passed the
-complete release boundary. The v1.8.0 deterministic rebuild-DAG change passes
-183 tests and strict schema/adversarial review locally; its public candidate,
-CI, immutable tag, and tag-clone proofs remain pending. The final demo and
+complete release boundary. The v1.8.0 deterministic rebuild-DAG candidate
+passed its 183-test credential-disabled full-history clone, strict schema,
+Gitleaks, exact-regeneration, non-authorizing semantic, and independent-CI
+proof. Its immutable tag and tag-clone proofs remain pending. The final demo and
 applicant materials remain explicit gates in
 [`architecture/submission-readiness.json`](../architecture/submission-readiness.json).
 
@@ -215,7 +216,7 @@ the public repository:
       Gitleaks, and independent public CI from a full-history clone.
 - [x] Immutable v1.7.0 passes roof and tag CI, tagged-schema byte checks, and
       the full credential-disabled tag-clone reproduction.
-- [ ] Deterministic rebuild-DAG v1.8.0 candidate passes 183 tests,
+- [x] Deterministic rebuild-DAG v1.8.0 candidate passes 183 tests,
       reorder/dependency/replay/type/authority adversarial checks, strict schema
       validation, exact regeneration, Gitleaks, and independent public CI from
       a full-history clone.

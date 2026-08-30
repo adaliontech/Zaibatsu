@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.8.0 - Unreleased
+## 1.8.0 - 2026-08-30
 
 - Added a deterministic, content-addressed factory rebuild plan that turns the
   verified control bundle, annotated-release source lock, qualification policy,
