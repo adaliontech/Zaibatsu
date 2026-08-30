@@ -44,8 +44,8 @@ and redacted status ledger without receiving production access.
 | Pre-change adversarial proof | Passed | Moving `policy_decision` before `verify` produced no ordering error under the original validator |
 | Independent contribution validation | Passed | The accepted two-file diff passed 36 tests, the standalone validator, and `git diff --check` |
 | Prior immutable release proof | Passed on v1.1.0 | Credential-disabled public clone of `b9a628a7d9a4910c0e5456c2930b260a96c7d864` passed all 70 tests, the prior contracts, workflow linting, strict Git checks, symlink denial, and both Gitleaks modes; [GitHub Actions run 33291506370](https://github.com/adaliontech/Zaibatsu/actions/runs/33291506370) independently passed before the immutable release |
-| Fresh-clone reproduction | Pending for v1.1.1 | The hardened candidate must pass all 95 tests, contract checks, workflow linting, strict Git checks, and Gitleaks history/tree scans from a credential-disabled public clone |
-| Demo recording | Blocked on v1.1.1 clone proof | Record from the immutable v1.1.1 tag using the [Demo script](demo-script.md) after the release proof passes |
+| Fresh-clone reproduction | Passed for v1.1.1 candidate | Credential-disabled public clone of `9f0c1a7f3e866df1e1d5d954e464d53ec96af247` passed all 95 tests, schema and receipt contracts, strict Git checks, index-mode denial, and Gitleaks 8.30.1 history/tree scans; [GitHub Actions run 33319619388](https://github.com/adaliontech/Zaibatsu/actions/runs/33319619388) independently passed |
+| Demo recording | Ready; applicant action pending | Record from the immutable v1.1.1 tag using the [Demo script](demo-script.md) |
 
 ## Architecture claims
 
@@ -110,7 +110,6 @@ does not represent private implementation as publicly reproducible.
 
 ## Evidence still required before external submission
 
-The application is not represented as submitted until the hardened v1.1.1
-public-clone proof passes, a demo or screenshot is published, and the required
-applicant resume is attached. These are tracked in
+The application is not represented as submitted until a demo or screenshot is
+published and the required applicant resume is attached. These are tracked in
 [Guild application](guild-application.md).

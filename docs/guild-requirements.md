@@ -63,7 +63,7 @@ path.
 | Real public project | This repository | Public and anonymously reachable |
 | Clear README | [`README.md`](../README.md) | Complete |
 | License | [`LICENSE`](../LICENSE) | Complete |
-| Runnable quickstart | [`docs/reproducibility.md`](reproducibility.md) | Immutable v1.1.0 passed from a credential-disabled public clone without Droid; hardened v1.1.1 proof pending |
+| Runnable quickstart | [`docs/reproducibility.md`](reproducibility.md) | Immutable v1.1.0 and hardened v1.1.1 candidate passed from credential-disabled public clones without Droid |
 | Reusable value | [`examples/economic-factory.json`](../examples/economic-factory.json) and [`scripts/zaibatsu.py`](../scripts/zaibatsu.py) | Another project can scaffold and validate a fail-closed factory definition offline |
 | Explain Factory/Droid role | [`docs/droid-session.md`](droid-session.md) | Authenticated session, scoped diff, and independent validation recorded |
 | End-to-end case study | [`docs/case-study.md`](case-study.md) | Factory-of-software-factories narrative and real Droid result complete |
@@ -81,6 +81,6 @@ public clean-clone proof. The exact release checklist is in
 [Guild application](guild-application.md).
 
 The bounded local-Qwen Droid run supplies reviewable “build something with
-Factory” evidence. Immutable v1.1.0 passed its clean-clone gate; the hardened
-v1.1.1 package must earn a separate proof before recording. The final clip and
-applicant-owned form materials are still required before submission.
+Factory” evidence. Immutable v1.1.0 and the hardened v1.1.1 candidate passed
+their clean-clone gates. The final clip and applicant-owned form materials are
+still required before submission.
