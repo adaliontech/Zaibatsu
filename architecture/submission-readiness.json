@@ -9,7 +9,7 @@
       "id": "public_package",
       "status": "complete",
       "required_for_submission": true,
-      "evidence": "Meta-factory, component, portable factory, content-addressed module, control-plan, bundle, signed-runtime-evidence, rebuild, readiness, and evidence contracts are enforced by the offline validator and adversarial suite",
+      "evidence": "Meta-factory, component, portable factory, content-addressed module, control-plan, bundle, signed-runtime-evidence-pack, rebuild, readiness, and evidence contracts are enforced by the offline validator and adversarial suite",
       "proof": {
         "contracts": [
           "architecture/factory-model.json",
@@ -27,6 +27,7 @@
           "examples/economic-factory.qualification-plan.json",
           "examples/economic-factory.runtime-assessment.json",
           "examples/economic-factory.runtime-evidence.json",
+          "examples/economic-factory.runtime-evidence-pack-manifest.json",
           "policies/runtime-evidence-verifiers-v1.json",
           "policies/runtime-qualification-v1.json"
         ],

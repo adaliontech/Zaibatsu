@@ -1,6 +1,6 @@
 {
-  "contract_schema": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.9.0/schemas/factory-rebuild-plan.schema.json",
-  "schema_version": "zaibatsu.factory-rebuild-plan.v2",
+  "contract_schema": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.10.0/schemas/factory-rebuild-plan.schema.json",
+  "schema_version": "zaibatsu.factory-rebuild-plan.v3",
   "factory": {
     "class": "economic_factory",
     "id": "example-product"
@@ -17,8 +17,9 @@
     "qualification_plan_sha256": "a9419341bf0806e1a6fc3769354e46ac6eb1c29043042ddd7eec35cca1a8ff81",
     "contract_qualification_evidence_sha256": "a19e1f82e13f6a7e07011c6e80e112d4981740e9188805e615ee57e12c9d1963",
     "runtime_evidence_set_sha256": "d084a11b7cda2ec8615f583a07ba6b219913249e35cd6d54c0dea191809eba77",
+    "runtime_evidence_pack_sha256": "92357de9906842bdfaa14d2056173f24113f686e108d74ce44e7685d4b344759",
     "verifier_registry_sha256": "9196fd8a8afbb161bdc8f5d2fad1a28bef467ff6786c3f732d2d4c187079bff6",
-    "runtime_assessment_sha256": "4eb09dd60ad709b849602a0768165fade53cfb5800a00d0c6769f676a7f6ac26",
+    "runtime_assessment_sha256": "07076a30f1bffe83527d7c80ce6c93627d87a592cb9392b6af13dcdc7feab9f0",
     "qualification_scope": "public_test_fixture",
     "evaluated_at": "2026-08-30T23:00:00Z",
     "module_api_version": "zaibatsu.module.v1"
@@ -362,7 +363,11 @@
     "plan_only": true,
     "control_inputs_reverified": true,
     "runtime_evidence_signatures_reverified": true,
+    "runtime_evidence_pack_reverified": true,
+    "evidence_artifacts_retrieved": true,
+    "verifier_implementation_materials_retrieved": true,
     "trusted_verifier_assertions_reexecuted": false,
+    "artifact_semantic_truth_verified": false,
     "remote_repository_contacted": false,
     "contains_runtime_implementations": false,
     "executes_rebuild_actions": false,
@@ -377,5 +382,5 @@
     "deploys_infrastructure": false,
     "proves_runtime_recovery": false
   },
-  "factory_rebuild_plan_sha256": "a7ae3bc1371b8700cd71e0e2d6d696528c44e95c76ef426dc1a9f19ac24d02a5"
+  "factory_rebuild_plan_sha256": "eb98c2148298aa8c31f892dccc901e2618291a51cfbacc7c3bfce0cb07ffb18c"
 }

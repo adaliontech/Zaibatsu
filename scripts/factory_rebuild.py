@@ -9,16 +9,17 @@ from typing import Any
 
 from factory_bundle import verify_factory_bundle
 from factory_composer import canonical_json_bytes, load_json_file, sha256_json
+from factory_evidence_pack import verify_runtime_evidence_pack_for_bundle
 from factory_runtime_evidence import validate_runtime_assessment
 from factory_source_lock import validate_source_lock
 
 
 ROOT = Path(__file__).resolve().parents[1]
 EXAMPLE_REBUILD_PLAN_PATH = ROOT / "examples" / "economic-factory.rebuild-plan.json"
-REBUILD_PLAN_SCHEMA_VERSION = "zaibatsu.factory-rebuild-plan.v2"
+REBUILD_PLAN_SCHEMA_VERSION = "zaibatsu.factory-rebuild-plan.v3"
 REBUILD_PLAN_SCHEMA_REFERENCE = (
     "https://raw.githubusercontent.com/adaliontech/Zaibatsu/"
-    "v1.9.0/schemas/factory-rebuild-plan.schema.json"
+    "v1.10.0/schemas/factory-rebuild-plan.schema.json"
 )
 
 ACTION_INTENTS = {
@@ -49,7 +50,11 @@ REBUILD_BOUNDARY = {
     "plan_only": True,
     "control_inputs_reverified": True,
     "runtime_evidence_signatures_reverified": True,
+    "runtime_evidence_pack_reverified": True,
+    "evidence_artifacts_retrieved": True,
+    "verifier_implementation_materials_retrieved": True,
     "trusted_verifier_assertions_reexecuted": False,
+    "artifact_semantic_truth_verified": False,
     "remote_repository_contacted": False,
     "contains_runtime_implementations": False,
     "executes_rebuild_actions": False,
@@ -232,6 +237,9 @@ def build_factory_rebuild_plan(
             "runtime_evidence_set_sha256": assessment_source[
                 "runtime_evidence_set_sha256"
             ],
+            "runtime_evidence_pack_sha256": assessment_source[
+                "runtime_evidence_pack_sha256"
+            ],
             "verifier_registry_sha256": assessment_source[
                 "verifier_registry_sha256"
             ],
@@ -296,12 +304,11 @@ def validate_factory_rebuild_plan(
 def _verify_rebuild_inputs(
     source_lock: Any,
     runtime_assessment: Any,
-    runtime_evidence: Any,
+    runtime_evidence_pack: bytes,
     contract_evidence: Any,
     qualification_plan: Any,
     bundle: bytes,
     qualification_policy: Any,
-    verifier_registry: Any,
     repository: Path,
 ) -> tuple[list[str], dict[str, Any] | None]:
     bundle_errors, verified_bundle = verify_factory_bundle(bundle)
@@ -311,14 +318,24 @@ def _verify_rebuild_inputs(
 
     source_errors = validate_source_lock(source_lock, repository, bundle)
     errors.extend(f"factory source lock: {error}" for error in source_errors)
+    pack_errors, verified_pack = verify_runtime_evidence_pack_for_bundle(
+        runtime_evidence_pack,
+        qualification_plan,
+        bundle,
+        qualification_policy,
+    )
+    errors.extend(f"runtime-evidence pack: {error}" for error in pack_errors)
+    if verified_pack is None:
+        return errors, None
     assessment_errors = validate_runtime_assessment(
         runtime_assessment,
         contract_evidence,
-        runtime_evidence,
+        verified_pack["runtime_evidence"],
         verified_bundle,
         qualification_plan,
         qualification_policy,
-        verifier_registry,
+        verified_pack["verifier_registry"],
+        verified_pack["runtime_evidence_pack_sha256"],
     )
     errors.extend(
         f"runtime assessment: {error}" for error in assessment_errors
@@ -331,23 +348,21 @@ def _verify_rebuild_inputs(
 def factory_rebuild_plan_for_bundle(
     source_lock: Any,
     runtime_assessment: Any,
-    runtime_evidence: Any,
+    runtime_evidence_pack: bytes,
     contract_evidence: Any,
     qualification_plan: Any,
     bundle: bytes,
     qualification_policy: Any,
-    verifier_registry: Any,
     repository: Path,
 ) -> tuple[list[str], dict[str, Any] | None]:
     errors, verified_bundle = _verify_rebuild_inputs(
         source_lock,
         runtime_assessment,
-        runtime_evidence,
+        runtime_evidence_pack,
         contract_evidence,
         qualification_plan,
         bundle,
         qualification_policy,
-        verifier_registry,
         repository,
     )
     if errors or verified_bundle is None:
@@ -367,23 +382,21 @@ def verify_factory_rebuild_plan_for_bundle(
     rebuild_plan: Any,
     source_lock: Any,
     runtime_assessment: Any,
-    runtime_evidence: Any,
+    runtime_evidence_pack: bytes,
     contract_evidence: Any,
     qualification_plan: Any,
     bundle: bytes,
     qualification_policy: Any,
-    verifier_registry: Any,
     repository: Path,
 ) -> list[str]:
     errors, verified_bundle = _verify_rebuild_inputs(
         source_lock,
         runtime_assessment,
-        runtime_evidence,
+        runtime_evidence_pack,
         contract_evidence,
         qualification_plan,
         bundle,
         qualification_policy,
-        verifier_registry,
         repository,
     )
     if errors or verified_bundle is None:

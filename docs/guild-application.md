@@ -60,7 +60,11 @@ exact OpenSSH payload provenance, evaluator-selected key allowlists, and
 freshness. Its public fixture adds one binding only in permanently ineligible
 test scope, so the combined assessment records 10 verified, 57 missing, and
 zero eligible modules. Signature validity is not presented as proof of key
-ownership, verifier correctness, artifact truth, or independence.
+ownership, verifier correctness, artifact truth, or independence. A canonical
+runtime-evidence pack carries the signed set, registry, exact evidence
+artifacts, verifier descriptors, and manifest schema together; it verifies
+their bytes and digests without rerunning verifier assertions or inferring
+semantic truth.
 An annotated-release source lock binds that control bundle to exact local Git
 objects without trusting the checkout. It does not authenticate repository
 ownership, verify a signature, contain runtime implementation source, or count
@@ -91,7 +95,7 @@ new test moves `policy_decision` before `verify`; the pre-change validator
 accepted that unsafe ordering, while the shipped validator rejects it with a
 deterministic adjacent-stage error. Droid reported 36 passing tests, and an
 independent run reproduced all 36 before later integration, branding, release,
-and meta-factory checks brought the current package to 194 passing tests. No model or
+and meta-factory checks brought the current package to 203 passing tests. No model or
 Factory credential is published.
 
 ## One-line description
@@ -239,6 +243,11 @@ the public repository:
       full-history clone.
 - [x] Immutable v1.9.0 passes roof and tag CI, four tagged-schema byte checks,
       and the full credential-disabled tag-clone reproduction.
+- [x] Runtime-evidence-pack v1.10 working candidate passes 203 local tests,
+      90-file validation, strict pack/assessment/rebuild schemas, exact artifact
+      regeneration, and archive/schema/material/replay/type/authority attacks.
+- [ ] v1.10 passes credential-disabled clean-clone, Gitleaks, independent CI,
+      tagged-schema byte checks, and immutable-release proof.
 - [x] Public repository and article links resolve without authentication.
 - [ ] Demo clip or screenshots show a real Factory task and validation result.
 - [x] No private host, credential, recovery, or deployment detail is exposed.

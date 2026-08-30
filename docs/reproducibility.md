@@ -92,15 +92,20 @@ The validator confirms:
     blob objects with Git replacements disabled, reproduces the byte-identical
     bundle, and preserves explicit remote-ownership, signature, runtime-source,
     qualification, eligibility, activation, and deployment denials.
-30. the signed runtime-evidence registry, receipts, and assessment bind exact
-    public keys, allowlists, provenance, scope, verifier implementation,
-    validity, and false authority flags; tampering, replay, wrong keys,
-    duplicates, stale evidence, type confusion, and missing OpenSSH fail closed;
-31. the public signature is restricted to fixture scope, while an ephemeral-key
+30. the signed runtime-evidence registry and receipts bind exact public keys,
+    allowlists, provenance, scope, verifier implementation, validity, and false
+    authority flags; tampering, replay, wrong keys, duplicates, stale evidence,
+    type confusion, and missing OpenSSH fail closed;
+31. the canonical runtime-evidence pack embeds the signed set, registry, exact
+    evidence artifacts, verifier descriptors, and immutable manifest schema;
+    archive, schema, digest, replay, size, and authority mutations fail closed,
+    while verifier reexecution and artifact truth remain explicit nonclaims;
+32. the public signature is restricted to fixture scope, while an ephemeral-key
     positive test proves a complete `factory_runtime` set can qualify one module
     without granting execution, side effects, owner approval, or activation;
-32. the factory rebuild plan fully reverifies the bundle, source lock, policy,
-    qualification plan, both evidence classes, registry, and assessment;
+33. the factory rebuild plan fully reverifies the bundle, source lock, policy,
+    qualification plan, both evidence classes, runtime-evidence pack, embedded
+    materials, registry, and assessment;
     preserves exact action and
     gate order, dependencies, blockers, and digests; and grants no execution,
     qualification, owner approval, activation, deployment, or recovery
@@ -171,8 +176,17 @@ python3 scripts/zaibatsu.py verify-qualification-assessment \
 python3 scripts/zaibatsu.py verify-runtime-evidence \
   examples/economic-factory.runtime-evidence.json \
   /tmp/example-product.factory.tar
-python3 scripts/zaibatsu.py runtime-assessment \
+python3 scripts/zaibatsu.py evidence-pack \
   examples/economic-factory.runtime-evidence.json \
+  /tmp/example-product.factory.tar \
+  --evidence-artifact examples/runtime-evidence/source-revision-fixture.json \
+  --verifier-implementation examples/runtime-evidence/fixture-verifier-method.json \
+  --output /tmp/example-product.runtime-evidence.tar
+python3 scripts/zaibatsu.py verify-evidence-pack \
+  /tmp/example-product.runtime-evidence.tar \
+  /tmp/example-product.factory.tar
+python3 scripts/zaibatsu.py runtime-assessment \
+  /tmp/example-product.runtime-evidence.tar \
   examples/economic-factory.qualification-evidence.json \
   examples/economic-factory.qualification-plan.json \
   /tmp/example-product.factory.tar \
@@ -180,16 +194,18 @@ python3 scripts/zaibatsu.py runtime-assessment \
   --output /tmp/example-product.runtime-assessment.json
 python3 scripts/zaibatsu.py verify-runtime-assessment \
   /tmp/example-product.runtime-assessment.json \
-  examples/economic-factory.runtime-evidence.json \
+  /tmp/example-product.runtime-evidence.tar \
   examples/economic-factory.qualification-evidence.json \
   examples/economic-factory.qualification-plan.json \
   /tmp/example-product.factory.tar
 python3 scripts/zaibatsu.py rebuild-plan \
   /tmp/example-product.factory.tar \
+  --runtime-evidence-pack /tmp/example-product.runtime-evidence.tar \
   --output /tmp/example-product.rebuild-plan.json
 python3 scripts/zaibatsu.py verify-rebuild-plan \
   /tmp/example-product.rebuild-plan.json \
-  /tmp/example-product.factory.tar
+  /tmp/example-product.factory.tar \
+  --runtime-evidence-pack /tmp/example-product.runtime-evidence.tar
 ```
 
 To create a new definition, run `python3 scripts/zaibatsu.py scaffold --help`.
@@ -228,10 +244,12 @@ The checked signed receipt adds one fresh `source_revision` binding at the
 recorded assessment time. Its registry permits only `public_test_fixture`, so
 the combined assessment reports 10 verified and 57 missing bindings while all
 nine modules remain ineligible. OpenSSH proves that the exact payload matches
-the selected public key and namespace. It does not rerun the verifier, retrieve
-the evidence artifact, authenticate the key owner, or establish organizational
-independence. Registry selection and the assessment clock are explicit trust
-inputs that a production caller must separately review and pin.
+the selected public key and namespace. The canonical pack retrieves and
+digest-verifies the exact evidence artifact and verifier descriptor named by
+that payload. It does not rerun the verifier, infer the artifact's semantic
+truth, authenticate the key owner, or establish organizational independence.
+Registry selection and the assessment clock are explicit trust inputs that a
+production caller must separately review and pin.
 
 The rebuild plan consumes those fully reverified inputs and emits an inert
 nine-action dependency graph plus four gates. The public result has zero

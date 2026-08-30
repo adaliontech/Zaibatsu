@@ -139,6 +139,10 @@ Implemented source foundation:
 - OpenSSH-signed runtime-evidence ingestion with content-addressed verifier
   allowlists and explicit freshness; the checked fixture raises the combined
   count to 10 verified and 57 missing without making a module eligible;
+- a canonical runtime-evidence pack that embeds the signed set, registry,
+  evidence artifacts, verifier descriptors, and manifest schema, rechecks every
+  digest and signature, and deliberately makes no verifier-reexecution or
+  artifact-truth claim;
 - generated-key proof that complete `factory_runtime` evidence can make one
   module qualification-ready while all execution, side-effect, approval, and
   activation authority remains false;

@@ -1,13 +1,13 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.9.0/schemas/factory-runtime-assessment.schema.json",
+  "$id": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.10.0/schemas/factory-runtime-assessment.schema.json",
   "title": "Zaibatsu signed runtime evidence assessment",
   "type": "object",
   "additionalProperties": false,
   "required": ["contract_schema", "schema_version", "factory", "source", "modules", "summary", "assessment_boundary", "runtime_assessment_sha256"],
   "properties": {
-    "contract_schema": {"const": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.9.0/schemas/factory-runtime-assessment.schema.json"},
-    "schema_version": {"const": "zaibatsu.factory-runtime-assessment.v1"},
+    "contract_schema": {"const": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.10.0/schemas/factory-runtime-assessment.schema.json"},
+    "schema_version": {"const": "zaibatsu.factory-runtime-assessment.v2"},
     "factory": {"$ref": "#/$defs/factory"},
     "source": {"$ref": "#/$defs/source"},
     "modules": {"type": "array", "minItems": 9, "maxItems": 9, "uniqueItems": true, "items": {"$ref": "#/$defs/module"}},
@@ -31,7 +31,7 @@
     "source": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["bundle_sha256", "qualification_plan_sha256", "qualification_policy_id", "qualification_policy_sha256", "verifier_registry_sha256", "module_api_version", "qualification_evidence_sha256", "runtime_evidence_set_sha256", "evaluated_at", "qualification_scope"],
+      "required": ["bundle_sha256", "qualification_plan_sha256", "qualification_policy_id", "qualification_policy_sha256", "verifier_registry_sha256", "module_api_version", "qualification_evidence_sha256", "runtime_evidence_set_sha256", "runtime_evidence_pack_sha256", "evaluated_at", "qualification_scope"],
       "properties": {
         "bundle_sha256": {"$ref": "#/$defs/sha256"},
         "qualification_plan_sha256": {"$ref": "#/$defs/sha256"},
@@ -41,6 +41,7 @@
         "module_api_version": {"const": "zaibatsu.module.v1"},
         "qualification_evidence_sha256": {"$ref": "#/$defs/sha256"},
         "runtime_evidence_set_sha256": {"$ref": "#/$defs/sha256"},
+        "runtime_evidence_pack_sha256": {"$ref": "#/$defs/sha256"},
         "evaluated_at": {"$ref": "#/$defs/timestamp"},
         "qualification_scope": {"$ref": "#/$defs/scope"}
       }
@@ -88,14 +89,16 @@
     "boundary": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["cryptographic_signatures_verified", "verifier_registry_selected_externally", "verifier_key_ownership_verified", "verifier_independence_verified", "trusted_verifier_assertions_reexecuted", "evidence_artifacts_retrieved", "evaluation_time_externally_supplied", "trusted_current_clock_enforced", "self_attestation_accepted", "qualification_grants_activation", "owner_approval_required_for_activation", "activation_authorized", "execution_authorized", "fixture_scope_only"],
+      "required": ["cryptographic_signatures_verified", "verifier_registry_selected_externally", "verifier_key_ownership_verified", "verifier_independence_verified", "trusted_verifier_assertions_reexecuted", "evidence_artifacts_retrieved", "verifier_implementation_materials_retrieved", "artifact_semantic_truth_verified", "evaluation_time_externally_supplied", "trusted_current_clock_enforced", "self_attestation_accepted", "qualification_grants_activation", "owner_approval_required_for_activation", "activation_authorized", "execution_authorized", "fixture_scope_only"],
       "properties": {
         "cryptographic_signatures_verified": {"const": true},
         "verifier_registry_selected_externally": {"const": true},
         "verifier_key_ownership_verified": {"const": false},
         "verifier_independence_verified": {"const": false},
         "trusted_verifier_assertions_reexecuted": {"const": false},
-        "evidence_artifacts_retrieved": {"const": false},
+        "evidence_artifacts_retrieved": {"const": true},
+        "verifier_implementation_materials_retrieved": {"const": true},
+        "artifact_semantic_truth_verified": {"const": false},
         "evaluation_time_externally_supplied": {"const": true},
         "trusted_current_clock_enforced": {"const": false},
         "self_attestation_accepted": {"const": false},

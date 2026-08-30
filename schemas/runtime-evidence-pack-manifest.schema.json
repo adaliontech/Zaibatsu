@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.10.0/schemas/runtime-evidence-pack-manifest.schema.json",
+  "title": "Zaibatsu portable runtime-evidence pack manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_schema", "schema_version", "factory", "source", "files", "receipts", "pack_boundary"],
+  "properties": {
+    "contract_schema": {"const": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.10.0/schemas/runtime-evidence-pack-manifest.schema.json"},
+    "schema_version": {"const": "zaibatsu.runtime-evidence-pack-manifest.v1"},
+    "factory": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "class"],
+      "properties": {
+        "id": {"$ref": "#/$defs/slug"},
+        "class": {"enum": ["control_factory", "economic_factory"]}
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["bundle_sha256", "qualification_plan_sha256", "qualification_policy_id", "qualification_policy_sha256", "runtime_evidence_set_sha256", "verifier_registry_sha256", "module_api_version", "qualification_scope"],
+      "properties": {
+        "bundle_sha256": {"$ref": "#/$defs/sha256"},
+        "qualification_plan_sha256": {"$ref": "#/$defs/sha256"},
+        "qualification_policy_id": {"$ref": "#/$defs/slug"},
+        "qualification_policy_sha256": {"$ref": "#/$defs/sha256"},
+        "runtime_evidence_set_sha256": {"$ref": "#/$defs/sha256"},
+        "verifier_registry_sha256": {"$ref": "#/$defs/sha256"},
+        "module_api_version": {"const": "zaibatsu.module.v1"},
+        "qualification_scope": {"enum": ["factory_runtime", "public_test_fixture"]}
+      }
+    },
+    "files": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 515,
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["path", "role", "sha256", "size"],
+        "properties": {
+          "path": {"type": "string", "pattern": "^[a-z0-9][a-z0-9./_-]*\\.json$"},
+          "role": {"enum": ["runtime_evidence", "verifier_registry", "evidence_artifact", "verifier_implementation", "contract_schema"]},
+          "sha256": {"$ref": "#/$defs/sha256"},
+          "size": {"type": "integer", "minimum": 1, "maximum": 262144}
+        }
+      }
+    },
+    "receipts": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 256,
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["position", "module_position", "slot", "module", "requirement", "payload_sha256", "evidence_artifact_path", "evidence_artifact_sha256", "verifier_id", "verification_method", "verifier_implementation_path", "verifier_implementation_sha256"],
+        "properties": {
+          "position": {"type": "integer", "minimum": 0, "maximum": 255},
+          "module_position": {"type": "integer", "minimum": 0, "maximum": 8},
+          "slot": {"enum": ["source_versioning", "static_secrets", "runtime_secrets", "host_reproduction", "worker_environment", "scheduling", "execution", "verification", "feedback"]},
+          "module": {"$ref": "#/$defs/slug"},
+          "requirement": {"$ref": "#/$defs/requirement"},
+          "payload_sha256": {"$ref": "#/$defs/sha256"},
+          "evidence_artifact_path": {"type": "string", "pattern": "^artifacts/[0-9a-f]{64}\\.json$"},
+          "evidence_artifact_sha256": {"$ref": "#/$defs/sha256"},
+          "verifier_id": {"$ref": "#/$defs/slug"},
+          "verification_method": {"$ref": "#/$defs/requirement"},
+          "verifier_implementation_path": {"type": "string", "pattern": "^verifier-implementations/[0-9a-f]{64}\\.json$"},
+          "verifier_implementation_sha256": {"$ref": "#/$defs/sha256"}
+        }
+      }
+    },
+    "pack_boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["canonical_archive", "runtime_evidence_signatures_reverified", "evidence_artifacts_embedded", "evidence_artifact_digests_verified", "verifier_implementation_materials_embedded", "verifier_implementation_digests_verified", "verifier_assertions_reexecuted", "artifact_semantic_truth_verified", "verifier_key_ownership_verified", "verifier_independence_verified", "pack_grants_runtime_eligibility", "activation_authorized", "execution_authorized"],
+      "properties": {
+        "canonical_archive": {"const": true},
+        "runtime_evidence_signatures_reverified": {"const": true},
+        "evidence_artifacts_embedded": {"const": true},
+        "evidence_artifact_digests_verified": {"const": true},
+        "verifier_implementation_materials_embedded": {"const": true},
+        "verifier_implementation_digests_verified": {"const": true},
+        "verifier_assertions_reexecuted": {"const": false},
+        "artifact_semantic_truth_verified": {"const": false},
+        "verifier_key_ownership_verified": {"const": false},
+        "verifier_independence_verified": {"const": false},
+        "pack_grants_runtime_eligibility": {"const": false},
+        "activation_authorized": {"const": false},
+        "execution_authorized": {"const": false}
+      }
+    }
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "slug": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+    "requirement": {"type": "string", "pattern": "^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$"}
+  }
+}

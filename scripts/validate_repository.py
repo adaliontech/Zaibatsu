@@ -30,6 +30,13 @@ from factory_composer import (
     validate_factory_plan,
     validate_module_catalog,
 )
+from factory_evidence_pack import (
+    EXAMPLE_PACK_MANIFEST_PATH,
+    PACK_MANIFEST_SCHEMA_REFERENCE,
+    load_pack_manifest,
+    runtime_evidence_pack_for_bundle,
+    verify_runtime_evidence_pack_for_bundle,
+)
 from factory_qualification import (
     EXAMPLE_QUALIFICATION_ASSESSMENT_PATH,
     EXAMPLE_QUALIFICATION_EVIDENCE_PATH,
@@ -124,6 +131,7 @@ REQUIRED_FILES = (
     "examples/economic-factory.qualification-plan.json",
     "examples/economic-factory.runtime-assessment.json",
     "examples/economic-factory.runtime-evidence.json",
+    "examples/economic-factory.runtime-evidence-pack-manifest.json",
     "examples/runtime-evidence/fixture-verifier-method.json",
     "examples/runtime-evidence/source-revision-fixture.json",
     "evidence/dispatcher-validation-v1.json",
@@ -151,6 +159,7 @@ REQUIRED_FILES = (
     "schemas/factory-rebuild-plan.schema.json",
     "schemas/factory-runtime-assessment.schema.json",
     "schemas/factory-runtime-evidence.schema.json",
+    "schemas/runtime-evidence-pack-manifest.schema.json",
     "schemas/factory-source-lock.schema.json",
     "schemas/factory-qualification-assessment.schema.json",
     "schemas/factory-qualification-evidence.schema.json",
@@ -167,6 +176,7 @@ REQUIRED_FILES = (
     "scripts/droid_preflight.py",
     "scripts/factory_bundle.py",
     "scripts/factory_composer.py",
+    "scripts/factory_evidence_pack.py",
     "scripts/factory_qualification.py",
     "scripts/factory_rebuild.py",
     "scripts/factory_runtime_evidence.py",
@@ -194,7 +204,7 @@ ARCHITECTURE_SCHEMA_VERSION = "zaibatsu.architecture.v1"
 FACTORY_MODEL_SCHEMA_VERSION = "zaibatsu.factory-model.v1"
 READINESS_SCHEMA_VERSION = "zaibatsu.submission-readiness.v1"
 FACTORY_DEFINITION_SCHEMA_VERSION = "zaibatsu.factory-definition.v2"
-INTEGRATED_TEST_COUNT = 194
+INTEGRATED_TEST_COUNT = 203
 LATEST_VALIDATED_RELEASE_TEST_COUNT = 194
 DROID_FACTORY_CLI_VERSION = "0.206.0"
 DROID_SESSION_REFERENCE = "46f941a9-82f8-4df3-a45c-b8158996360b"
@@ -258,6 +268,9 @@ CONTRACT_SCHEMA_REFERENCES = {
     "examples/economic-factory.runtime-evidence.json": (
         RUNTIME_EVIDENCE_SCHEMA_REFERENCE
     ),
+    "examples/economic-factory.runtime-evidence-pack-manifest.json": (
+        PACK_MANIFEST_SCHEMA_REFERENCE
+    ),
     "policies/runtime-qualification-v1.json": QUALIFICATION_POLICY_SCHEMA_REFERENCE,
     "policies/runtime-evidence-verifiers-v1.json": (
         VERIFIER_REGISTRY_SCHEMA_REFERENCE
@@ -300,6 +313,9 @@ REMOTE_SCHEMA_LOCAL_PATHS = {
     ),
     "examples/economic-factory.runtime-evidence.json": (
         "schemas/factory-runtime-evidence.schema.json"
+    ),
+    "examples/economic-factory.runtime-evidence-pack-manifest.json": (
+        "schemas/runtime-evidence-pack-manifest.schema.json"
     ),
     "policies/runtime-qualification-v1.json": (
         "schemas/module-qualification-policy.schema.json"
@@ -1390,6 +1406,7 @@ def validate_submission_readiness(data: Any) -> list[str]:
                     "examples/economic-factory.qualification-plan.json",
                     "examples/economic-factory.runtime-assessment.json",
                     "examples/economic-factory.runtime-evidence.json",
+                    "examples/economic-factory.runtime-evidence-pack-manifest.json",
                     "policies/runtime-evidence-verifiers-v1.json",
                     "policies/runtime-qualification-v1.json",
                 }
@@ -1808,11 +1825,16 @@ def validate_contract_schema_files(root: Path = ROOT) -> list[str]:
         if schema.get("$schema") != "https://json-schema.org/draft/2020-12/schema":
             errors.append(f"{relative}: project-owned schema must declare JSON Schema 2020-12")
         schema_release = (
-            "v1.9.0"
+            "v1.10.0"
             if schema_path.name
             in {
                 "factory-rebuild-plan.schema.json",
                 "factory-runtime-assessment.schema.json",
+                "runtime-evidence-pack-manifest.schema.json",
+            }
+            else "v1.9.0"
+            if schema_path.name
+            in {
                 "factory-runtime-evidence.schema.json",
                 "runtime-evidence-verifier-registry.schema.json",
             }
@@ -2070,6 +2092,10 @@ def main() -> int:
                     qualification_policy,
                 )
             )
+    verifier_registry: Any = None
+    runtime_evidence: Any = None
+    runtime_evidence_pack: bytes | None = None
+    verified_pack: dict[str, Any] | None = None
     try:
         verifier_registry = load_verifier_registry(VERIFIER_REGISTRY_PATH)
     except (OSError, RecursionError, ValueError) as exc:
@@ -2083,7 +2109,10 @@ def main() -> int:
     except (OSError, RecursionError, ValueError) as exc:
         errors.append(f"cannot load example runtime evidence: {exc}")
     else:
-        if verified_qualification_bundle is not None:
+        if (
+            verified_qualification_bundle is not None
+            and isinstance(verifier_registry, dict)
+        ):
             errors.extend(
                 validate_runtime_evidence_set(
                     runtime_evidence,
@@ -2094,22 +2123,81 @@ def main() -> int:
                 )
             )
     try:
+        checked_pack_manifest = load_pack_manifest(EXAMPLE_PACK_MANIFEST_PATH)
+        evidence_artifact = load_json_file(
+            ROOT / "examples" / "runtime-evidence" / "source-revision-fixture.json"
+        )
+        verifier_implementation = load_json_file(
+            ROOT / "examples" / "runtime-evidence" / "fixture-verifier-method.json"
+        )
+    except (OSError, RecursionError, ValueError) as exc:
+        errors.append(f"cannot load runtime-evidence pack inputs: {exc}")
+    else:
+        if (
+            verified_qualification_bundle is not None
+            and qualification_bundle is not None
+            and isinstance(runtime_evidence, dict)
+            and isinstance(verifier_registry, dict)
+        ):
+            try:
+                artifact_digest = runtime_evidence["receipts"][0]["payload"][
+                    "evidence_artifact_sha256"
+                ]
+                implementation_digest = runtime_evidence["receipts"][0]["payload"][
+                    "verifier_implementation_sha256"
+                ]
+            except (IndexError, KeyError, TypeError) as exc:
+                errors.append(f"cannot derive runtime-evidence pack materials: {exc}")
+            else:
+                pack_errors, runtime_evidence_pack, generated_manifest = (
+                    runtime_evidence_pack_for_bundle(
+                        runtime_evidence,
+                        verifier_registry,
+                        {artifact_digest: evidence_artifact},
+                        {implementation_digest: verifier_implementation},
+                        qualification_plan,
+                        qualification_bundle,
+                        qualification_policy,
+                    )
+                )
+                errors.extend(
+                    f"runtime-evidence pack: {error}" for error in pack_errors
+                )
+                if generated_manifest != checked_pack_manifest:
+                    errors.append(
+                        "checked runtime-evidence pack manifest does not match builder"
+                    )
+                if runtime_evidence_pack is not None:
+                    pack_verify_errors, verified_pack = (
+                        verify_runtime_evidence_pack_for_bundle(
+                            runtime_evidence_pack,
+                            qualification_plan,
+                            qualification_bundle,
+                            qualification_policy,
+                        )
+                    )
+                    errors.extend(
+                        f"runtime-evidence pack: {error}"
+                        for error in pack_verify_errors
+                    )
+    try:
         runtime_assessment = load_runtime_assessment(
             EXAMPLE_RUNTIME_ASSESSMENT_PATH
         )
     except (OSError, RecursionError, ValueError) as exc:
         errors.append(f"cannot load example runtime assessment: {exc}")
     else:
-        if verified_qualification_bundle is not None:
+        if verified_qualification_bundle is not None and verified_pack is not None:
             errors.extend(
                 validate_runtime_assessment(
                     runtime_assessment,
                     qualification_evidence,
-                    runtime_evidence,
+                    verified_pack["runtime_evidence"],
                     verified_qualification_bundle,
                     qualification_plan,
                     qualification_policy,
-                    verifier_registry,
+                    verified_pack["verifier_registry"],
+                    verified_pack["runtime_evidence_pack_sha256"],
                 )
             )
     try:
@@ -2119,16 +2207,15 @@ def main() -> int:
     else:
         if (
             qualification_bundle is not None
+            and runtime_evidence_pack is not None
             and all(
                 isinstance(value, dict)
                 for value in (
                     source_lock_document,
                     runtime_assessment,
-                    runtime_evidence,
                     qualification_evidence,
                     qualification_plan,
                     qualification_policy,
-                    verifier_registry,
                 )
             )
         ):
@@ -2137,12 +2224,11 @@ def main() -> int:
                     rebuild_plan_document,
                     source_lock_document,
                     runtime_assessment,
-                    runtime_evidence,
+                    runtime_evidence_pack,
                     qualification_evidence,
                     qualification_plan,
                     qualification_bundle,
                     qualification_policy,
-                    verifier_registry,
                     ROOT,
                 )
             )
@@ -2173,8 +2259,8 @@ def main() -> int:
     )
     print(
         "- 2 reusable factory definitions, content-addressed modules, control "
-        "plan, bundle manifest, source lock, signed runtime evidence, and "
-        "non-executing rebuild DAG checked"
+        "plan, bundle manifest, source lock, signed runtime-evidence pack, "
+        "and non-executing rebuild DAG checked"
     )
     print(f"- {len(EVIDENCE_CONTRACTS)} evidence receipts checked")
     print(f"- {len(REQUIRED_FACTORY_INVARIANTS)} meta-factory invariants checked")

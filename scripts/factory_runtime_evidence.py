@@ -39,7 +39,7 @@ VERIFIER_REGISTRY_SCHEMA_VERSION = (
 )
 RUNTIME_EVIDENCE_SCHEMA_VERSION = "zaibatsu.factory-runtime-evidence.v1"
 RUNTIME_ASSESSMENT_SCHEMA_VERSION = (
-    "zaibatsu.factory-runtime-assessment.v1"
+    "zaibatsu.factory-runtime-assessment.v2"
 )
 VERIFIER_REGISTRY_SCHEMA_REFERENCE = (
     "https://raw.githubusercontent.com/adaliontech/Zaibatsu/"
@@ -51,7 +51,7 @@ RUNTIME_EVIDENCE_SCHEMA_REFERENCE = (
 )
 RUNTIME_ASSESSMENT_SCHEMA_REFERENCE = (
     "https://raw.githubusercontent.com/adaliontech/Zaibatsu/"
-    "v1.9.0/schemas/factory-runtime-assessment.schema.json"
+    "v1.10.0/schemas/factory-runtime-assessment.schema.json"
 )
 
 SIGNATURE_NAMESPACE = "zaibatsu-runtime-evidence-v1"
@@ -160,7 +160,9 @@ ASSESSMENT_BOUNDARY_BASE = {
     "verifier_key_ownership_verified": False,
     "verifier_independence_verified": False,
     "trusted_verifier_assertions_reexecuted": False,
-    "evidence_artifacts_retrieved": False,
+    "evidence_artifacts_retrieved": True,
+    "verifier_implementation_materials_retrieved": True,
+    "artifact_semantic_truth_verified": False,
     "evaluation_time_externally_supplied": True,
     "trusted_current_clock_enforced": False,
     "self_attestation_accepted": False,
@@ -719,6 +721,7 @@ def _assessment_source(
     contract_evidence: dict[str, Any],
     runtime_evidence: dict[str, Any],
     registry: dict[str, Any],
+    runtime_evidence_pack_sha256: str,
     evaluated_at: str,
 ) -> dict[str, Any]:
     return {
@@ -729,6 +732,7 @@ def _assessment_source(
         "runtime_evidence_set_sha256": runtime_evidence[
             "runtime_evidence_set_sha256"
         ],
+        "runtime_evidence_pack_sha256": runtime_evidence_pack_sha256,
         "evaluated_at": evaluated_at,
         "qualification_scope": runtime_evidence["qualification_scope"],
     }
@@ -741,6 +745,7 @@ def build_runtime_assessment(
     contract_evidence: dict[str, Any],
     runtime_evidence: dict[str, Any],
     registry: dict[str, Any],
+    runtime_evidence_pack_sha256: str,
     evaluated_at: str,
 ) -> dict[str, Any]:
     evaluation_time = _parse_time(evaluated_at)
@@ -835,6 +840,7 @@ def build_runtime_assessment(
             contract_evidence,
             runtime_evidence,
             registry,
+            runtime_evidence_pack_sha256,
             evaluated_at,
         ),
         "modules": modules,
@@ -874,6 +880,7 @@ def validate_runtime_assessment(
     plan: Any,
     policy: Any,
     registry: Any,
+    runtime_evidence_pack_sha256: Any,
 ) -> list[str]:
     errors: list[str] = []
     if not isinstance(assessment, dict):
@@ -913,6 +920,7 @@ def validate_runtime_assessment(
             contract_evidence,
             runtime_evidence,
             registry,
+            runtime_evidence_pack_sha256,
             evaluated_at,
         )
     except (KeyError, RecursionError, TypeError, ValueError) as exc:
@@ -926,16 +934,27 @@ def validate_runtime_assessment(
 
 def runtime_assessment_for_bundle(
     contract_evidence: Any,
-    runtime_evidence: Any,
+    runtime_evidence_pack: bytes,
     plan: Any,
     bundle: bytes,
     policy: Any,
-    registry: Any,
     evaluated_at: str,
 ) -> tuple[list[str], dict[str, Any] | None]:
+    from factory_evidence_pack import verify_runtime_evidence_pack_for_bundle
+
     bundle_errors, verified = verify_factory_bundle(bundle)
     if bundle_errors or verified is None:
         return [f"factory bundle: {error}" for error in bundle_errors], None
+    pack_errors, verified_pack = verify_runtime_evidence_pack_for_bundle(
+        runtime_evidence_pack,
+        plan,
+        bundle,
+        policy,
+    )
+    if pack_errors or verified_pack is None:
+        return [f"runtime-evidence pack: {error}" for error in pack_errors], None
+    runtime_evidence = verified_pack["runtime_evidence"]
+    registry = verified_pack["verifier_registry"]
     contract_errors = validate_qualification_evidence(
         contract_evidence,
         verified,
@@ -962,6 +981,7 @@ def runtime_assessment_for_bundle(
         contract_evidence,
         runtime_evidence,
         registry,
+        verified_pack["runtime_evidence_pack_sha256"],
         evaluated_at,
     )
 
@@ -969,21 +989,31 @@ def runtime_assessment_for_bundle(
 def verify_runtime_assessment_for_bundle(
     assessment: Any,
     contract_evidence: Any,
-    runtime_evidence: Any,
+    runtime_evidence_pack: bytes,
     plan: Any,
     bundle: bytes,
     policy: Any,
-    registry: Any,
 ) -> list[str]:
+    from factory_evidence_pack import verify_runtime_evidence_pack_for_bundle
+
     bundle_errors, verified = verify_factory_bundle(bundle)
     if bundle_errors or verified is None:
         return [f"factory bundle: {error}" for error in bundle_errors]
+    pack_errors, verified_pack = verify_runtime_evidence_pack_for_bundle(
+        runtime_evidence_pack,
+        plan,
+        bundle,
+        policy,
+    )
+    if pack_errors or verified_pack is None:
+        return [f"runtime-evidence pack: {error}" for error in pack_errors]
     return validate_runtime_assessment(
         assessment,
         contract_evidence,
-        runtime_evidence,
+        verified_pack["runtime_evidence"],
         verified,
         plan,
         policy,
-        registry,
+        verified_pack["verifier_registry"],
+        verified_pack["runtime_evidence_pack_sha256"],
     )

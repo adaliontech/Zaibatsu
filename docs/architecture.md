@@ -24,9 +24,9 @@ The shared layer controls factory contracts. Each economic factory retains its
 own identity, data, credentials, repositories, schedules, acceptance rules,
 budgets, and production authority.
 
-## Nine machine-readable views
+## Eleven machine-readable views
 
-Zaibatsu deliberately separates ten questions:
+Zaibatsu deliberately separates eleven questions:
 
 | Contract | Question |
 | --- | --- |
@@ -38,7 +38,8 @@ Zaibatsu deliberately separates ten questions:
 | [`examples/economic-factory.source-lock.json`](../examples/economic-factory.source-lock.json) | Which immutable annotated-release Git objects supplied the exact control files that reproduce that bundle? |
 | [`policies/runtime-qualification-v1.json`](../policies/runtime-qualification-v1.json) plus [`examples/economic-factory.qualification-plan.json`](../examples/economic-factory.qualification-plan.json) | Which content-addressed evidence bindings are still required before those contracts can become runtime-eligible? |
 | [`examples/economic-factory.qualification-evidence.json`](../examples/economic-factory.qualification-evidence.json) plus [`examples/economic-factory.qualification-assessment.json`](../examples/economic-factory.qualification-assessment.json) | Which requirements does the verified bundle itself actually prove, and exactly which runtime proofs remain missing? |
-| [`policies/runtime-evidence-verifiers-v1.json`](../policies/runtime-evidence-verifiers-v1.json), [`examples/economic-factory.runtime-evidence.json`](../examples/economic-factory.runtime-evidence.json), and [`examples/economic-factory.runtime-assessment.json`](../examples/economic-factory.runtime-assessment.json) | Which externally supplied assertions were signed by evaluator-selected keys under exact allowlists, provenance, scope, and freshness rules—and what do they still not authorize? |
+| [`policies/runtime-evidence-verifiers-v1.json`](../policies/runtime-evidence-verifiers-v1.json) plus [`examples/economic-factory.runtime-evidence.json`](../examples/economic-factory.runtime-evidence.json) | Which externally supplied assertions were signed by evaluator-selected keys under exact allowlists, provenance, scope, and freshness rules? |
+| [`examples/economic-factory.runtime-evidence-pack-manifest.json`](../examples/economic-factory.runtime-evidence-pack-manifest.json) plus [`examples/economic-factory.runtime-assessment.json`](../examples/economic-factory.runtime-assessment.json) | Which exact evidence artifacts and verifier descriptors were retrieved and digest-verified, and what do those bytes still not prove or authorize? |
 | [`examples/economic-factory.rebuild-plan.json`](../examples/economic-factory.rebuild-plan.json) | In which dependency order would a qualified factory be rebuilt, which direct and upstream blockers stop each action, and which separate gates still deny activation? |
 
 The validator requires the factory registry and shared component maturities to
@@ -128,8 +129,13 @@ registry, module position/slot/ID/artifact, requirement, scope, evidence-artifac
 digest, verifier/method/implementation digest, validity interval, and false
 activation/execution flags. The content-addressed registry restricts each key
 to exact factories, scopes, requirements, methods, and maximum validity.
-`runtime-assessment` combines fresh signed assertions with the nine
-bundle-derived contract receipts at an explicit `evaluated_at` time.
+`evidence-pack` then places the signed set, registry, every referenced evidence
+artifact and verifier descriptor, and the immutable manifest schema into a
+canonical USTAR archive. `verify-evidence-pack` rejects unsafe or noncanonical
+archives, exact-member drift, schema substitution, material digest mismatch,
+registry replay, and signature failure before exposing any embedded document.
+`runtime-assessment` combines fresh assertions from that verified pack with the
+nine bundle-derived contract receipts at an explicit `evaluated_at` time.
 
 The public key is intentionally fixture-only: its registry permits only
 `public_test_fixture` and `source_revision`. The signature passes, but the scope
@@ -137,12 +143,14 @@ can never yield runtime eligibility. The checked assessment therefore records
 10 verified bindings, 57 missing, and zero eligible modules. Signature validity
 does not prove who owns the key, organizational independence, verifier
 correctness, or artifact truth. The evaluator selects and must separately pin
-and review the registry; v1.9 neither reruns the verifier assertion nor retrieves
-the evidence artifact.
+and review the registry. v1.10 retrieves and digest-verifies the exact artifact
+and verifier descriptor, but it neither reruns the verifier assertion nor
+infers semantic truth from those bytes.
 
 `rebuild-plan` then joins the fully reverified bundle, source lock,
-qualification policy and plan, bundle-derived evidence, verifier registry,
-signed runtime evidence, and runtime assessment. It converts the same
+qualification policy and plan, bundle-derived evidence, canonical
+runtime-evidence pack, embedded materials, verifier registry, signed runtime
+evidence, and runtime assessment. It converts the same
 nine module slots into an action DAG, preserves their dependency edges, records
 direct missing-evidence and upstream blockers separately, and terminates in
 four gates: control artifacts reverified, all modules runtime-qualified, owner

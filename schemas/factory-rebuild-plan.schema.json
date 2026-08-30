@@ -1,13 +1,13 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.9.0/schemas/factory-rebuild-plan.schema.json",
+  "$id": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.10.0/schemas/factory-rebuild-plan.schema.json",
   "title": "Zaibatsu deterministic factory rebuild plan",
   "type": "object",
   "additionalProperties": false,
   "required": ["contract_schema", "schema_version", "factory", "source", "actions", "gates", "summary", "rebuild_boundary", "factory_rebuild_plan_sha256"],
   "properties": {
-    "contract_schema": {"const": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.9.0/schemas/factory-rebuild-plan.schema.json"},
-    "schema_version": {"const": "zaibatsu.factory-rebuild-plan.v2"},
+    "contract_schema": {"const": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.10.0/schemas/factory-rebuild-plan.schema.json"},
+    "schema_version": {"const": "zaibatsu.factory-rebuild-plan.v3"},
     "factory": {
       "type": "object",
       "additionalProperties": false,
@@ -20,7 +20,7 @@
     "source": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["bundle_sha256", "factory_plan_sha256", "module_catalog_sha256", "factory_source_lock_sha256", "control_source_release_tag", "control_source_commit_oid", "qualification_policy_id", "qualification_policy_sha256", "qualification_plan_sha256", "contract_qualification_evidence_sha256", "runtime_evidence_set_sha256", "verifier_registry_sha256", "runtime_assessment_sha256", "qualification_scope", "evaluated_at", "module_api_version"],
+      "required": ["bundle_sha256", "factory_plan_sha256", "module_catalog_sha256", "factory_source_lock_sha256", "control_source_release_tag", "control_source_commit_oid", "qualification_policy_id", "qualification_policy_sha256", "qualification_plan_sha256", "contract_qualification_evidence_sha256", "runtime_evidence_set_sha256", "runtime_evidence_pack_sha256", "verifier_registry_sha256", "runtime_assessment_sha256", "qualification_scope", "evaluated_at", "module_api_version"],
       "properties": {
         "bundle_sha256": {"$ref": "#/$defs/sha256"},
         "factory_plan_sha256": {"$ref": "#/$defs/sha256"},
@@ -33,6 +33,7 @@
         "qualification_plan_sha256": {"$ref": "#/$defs/sha256"},
         "contract_qualification_evidence_sha256": {"$ref": "#/$defs/sha256"},
         "runtime_evidence_set_sha256": {"$ref": "#/$defs/sha256"},
+        "runtime_evidence_pack_sha256": {"$ref": "#/$defs/sha256"},
         "verifier_registry_sha256": {"$ref": "#/$defs/sha256"},
         "runtime_assessment_sha256": {"$ref": "#/$defs/sha256"},
         "qualification_scope": {"enum": ["factory_runtime", "public_test_fixture"]},
@@ -105,12 +106,16 @@
     "rebuild_boundary": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["plan_only", "control_inputs_reverified", "runtime_evidence_signatures_reverified", "trusted_verifier_assertions_reexecuted", "remote_repository_contacted", "contains_runtime_implementations", "executes_rebuild_actions", "reads_or_materializes_secrets", "runs_ansible", "realizes_nix", "installs_or_enables_scheduler", "invokes_model", "grants_qualification_evidence", "grants_owner_approval", "activation_authorized", "deploys_infrastructure", "proves_runtime_recovery"],
+      "required": ["plan_only", "control_inputs_reverified", "runtime_evidence_signatures_reverified", "runtime_evidence_pack_reverified", "evidence_artifacts_retrieved", "verifier_implementation_materials_retrieved", "trusted_verifier_assertions_reexecuted", "artifact_semantic_truth_verified", "remote_repository_contacted", "contains_runtime_implementations", "executes_rebuild_actions", "reads_or_materializes_secrets", "runs_ansible", "realizes_nix", "installs_or_enables_scheduler", "invokes_model", "grants_qualification_evidence", "grants_owner_approval", "activation_authorized", "deploys_infrastructure", "proves_runtime_recovery"],
       "properties": {
         "plan_only": {"const": true},
         "control_inputs_reverified": {"const": true},
         "runtime_evidence_signatures_reverified": {"const": true},
+        "runtime_evidence_pack_reverified": {"const": true},
+        "evidence_artifacts_retrieved": {"const": true},
+        "verifier_implementation_materials_retrieved": {"const": true},
         "trusted_verifier_assertions_reexecuted": {"const": false},
+        "artifact_semantic_truth_verified": {"const": false},
         "remote_repository_contacted": {"const": false},
         "contains_runtime_implementations": {"const": false},
         "executes_rebuild_actions": {"const": false},

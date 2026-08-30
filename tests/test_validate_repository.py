@@ -24,6 +24,7 @@ validator = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(validator)
 import factory_bundle as bundler
 import factory_composer as composer
+import factory_evidence_pack as evidence_pack
 import factory_qualification as qualification
 import factory_rebuild as rebuild
 import factory_runtime_evidence as runtime_evidence
@@ -1205,6 +1206,33 @@ class FactoryBundleTests(unittest.TestCase):
         errors, _ = bundler.verify_factory_bundle(self.bundle + b"unexpected")
         self.assertTrue(any("not canonical" in error for error in errors))
 
+    def test_bundle_manifest_scalar_confusion_is_rejected(self) -> None:
+        payloads, read_errors = bundler._read_archive_payloads(self.bundle)
+        self.assertEqual([], read_errors)
+        manifest = composer.load_json_bytes(payloads[bundler.MANIFEST_PATH])
+        manifest["rebuild_claim"]["deploys_infrastructure"] = 0
+        payloads[bundler.MANIFEST_PATH] = composer.canonical_json_bytes(manifest)
+        errors, verified = bundler.verify_factory_bundle(
+            bundler.canonical_tar_bytes(payloads)
+        )
+        self.assertTrue(any("does not exactly match" in error for error in errors))
+        self.assertIsNone(verified)
+        malformed = copy.deepcopy(self.manifest)
+        malformed["rebuild_claim"]["deploys_infrastructure"] = {False}
+        self.assertTrue(
+            bundler.validate_bundle_manifest(
+                malformed,
+                self.factory,
+                self.catalog,
+                self.plan,
+                {
+                    path: value
+                    for path, value in payloads.items()
+                    if path != bundler.MANIFEST_PATH
+                },
+            )
+        )
+
     def test_bundle_path_traversal_is_rejected(self) -> None:
         malicious = bundler.canonical_tar_bytes({"../escape.json": b"{}\n"})
         errors, _ = bundler.verify_factory_bundle(malicious)
@@ -1820,6 +1848,31 @@ class FactoryRebuildPlanTests(unittest.TestCase):
         self.evidence = qualification.load_qualification_evidence()
         self.runtime_evidence = runtime_evidence.load_runtime_evidence()
         self.registry = runtime_evidence.load_verifier_registry()
+        fixture_artifact = composer.load_json_file(
+            validator.ROOT
+            / "examples"
+            / "runtime-evidence"
+            / "source-revision-fixture.json"
+        )
+        fixture_method = composer.load_json_file(
+            validator.ROOT
+            / "examples"
+            / "runtime-evidence"
+            / "fixture-verifier-method.json"
+        )
+        pack_errors, self.runtime_pack, _ = (
+            evidence_pack.runtime_evidence_pack_for_bundle(
+                self.runtime_evidence,
+                self.registry,
+                {composer.sha256_json(fixture_artifact): fixture_artifact},
+                {composer.sha256_json(fixture_method): fixture_method},
+                self.qualification_plan,
+                self.bundle,
+                self.policy,
+            )
+        )
+        self.assertEqual([], pack_errors)
+        self.assertIsNotNone(self.runtime_pack)
         self.assessment = runtime_evidence.load_runtime_assessment()
         self.rebuild_plan = rebuild.load_rebuild_plan()
 
@@ -1841,12 +1894,11 @@ class FactoryRebuildPlanTests(unittest.TestCase):
             document,
             self.source_lock if source_document is None else source_document,
             self.assessment if assessment is None else assessment,
-            self.runtime_evidence,
+            self.runtime_pack,
             self.evidence,
             self.qualification_plan,
             self.bundle if bundle is None else bundle,
             self.policy,
-            self.registry,
             validator.ROOT if repository is None else repository,
         )
 
@@ -1854,12 +1906,11 @@ class FactoryRebuildPlanTests(unittest.TestCase):
         errors, generated = rebuild.factory_rebuild_plan_for_bundle(
             self.source_lock,
             self.assessment,
-            self.runtime_evidence,
+            self.runtime_pack,
             self.evidence,
             self.qualification_plan,
             self.bundle,
             self.policy,
-            self.registry,
             validator.ROOT,
         )
         self.assertEqual([], errors)
@@ -1911,11 +1962,19 @@ class FactoryRebuildPlanTests(unittest.TestCase):
         boundary = self.rebuild_plan["rebuild_boundary"]
         self.assertTrue(boundary["plan_only"])
         self.assertTrue(boundary["control_inputs_reverified"])
+        self.assertTrue(boundary["runtime_evidence_pack_reverified"])
         self.assertTrue(boundary["runtime_evidence_signatures_reverified"])
+        self.assertTrue(boundary["evidence_artifacts_retrieved"])
+        self.assertTrue(
+            boundary["verifier_implementation_materials_retrieved"]
+        )
         for denied in set(boundary) - {
             "plan_only",
             "control_inputs_reverified",
+            "runtime_evidence_pack_reverified",
             "runtime_evidence_signatures_reverified",
+            "evidence_artifacts_retrieved",
+            "verifier_implementation_materials_retrieved",
         }:
             self.assertFalse(boundary[denied])
 
@@ -1993,12 +2052,11 @@ class FactoryRebuildPlanTests(unittest.TestCase):
         errors, generated = rebuild.factory_rebuild_plan_for_bundle(
             forged_source,
             self.assessment,
-            self.runtime_evidence,
+            self.runtime_pack,
             self.evidence,
             self.qualification_plan,
             self.bundle,
             self.policy,
-            self.registry,
             validator.ROOT,
         )
         self.assertIsNone(generated)
@@ -2013,12 +2071,11 @@ class FactoryRebuildPlanTests(unittest.TestCase):
         errors, generated = rebuild.factory_rebuild_plan_for_bundle(
             self.source_lock,
             forged_assessment,
-            self.runtime_evidence,
+            self.runtime_pack,
             self.evidence,
             self.qualification_plan,
             self.bundle,
             self.policy,
-            self.registry,
             validator.ROOT,
         )
         self.assertIsNone(generated)
@@ -2037,12 +2094,11 @@ class FactoryRebuildPlanTests(unittest.TestCase):
             errors, generated = rebuild.factory_rebuild_plan_for_bundle(
                 malformed_source,
                 malformed_assessment,
-                self.runtime_evidence,
+                self.runtime_pack,
                 self.evidence,
                 self.qualification_plan,
                 self.bundle,
                 self.policy,
-                self.registry,
                 validator.ROOT,
             )
             self.assertIsNone(generated)
@@ -2076,12 +2132,17 @@ class FactoryRebuildPlanTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary_directory:
             root = Path(temporary_directory)
             bundle_path = root / "factory.tar"
+            pack_path = root / "runtime-evidence.tar"
             plan_path = root / "rebuild-plan.json"
             bundle_path.write_bytes(self.bundle)
+            assert self.runtime_pack is not None
+            pack_path.write_bytes(self.runtime_pack)
             cli = [sys.executable, str(validator.ROOT / "scripts" / "zaibatsu.py")]
             command = cli + [
                 "rebuild-plan",
                 str(bundle_path),
+                "--runtime-evidence-pack",
+                str(pack_path),
                 "--repository",
                 str(validator.ROOT),
                 "--output",
@@ -2105,6 +2166,8 @@ class FactoryRebuildPlanTests(unittest.TestCase):
                     "verify-rebuild-plan",
                     str(plan_path),
                     str(bundle_path),
+                    "--runtime-evidence-pack",
+                    str(pack_path),
                     "--repository",
                     str(validator.ROOT),
                 ],
@@ -2137,6 +2200,8 @@ class FactoryRebuildPlanTests(unittest.TestCase):
                     "verify-rebuild-plan",
                     str(deeply_nested),
                     str(bundle_path),
+                    "--runtime-evidence-pack",
+                    str(pack_path),
                     "--repository",
                     str(validator.ROOT),
                 ],
@@ -2148,6 +2213,413 @@ class FactoryRebuildPlanTests(unittest.TestCase):
             self.assertIn(malformed.returncode, (1, 2))
             self.assertTrue(malformed.stderr.strip())
             self.assertNotIn("Traceback", malformed.stderr)
+
+
+class RuntimeEvidencePackTests(unittest.TestCase):
+    def setUp(self) -> None:
+        factory = validator.load_factory_definition()
+        catalog = composer.load_module_catalog()
+        artifacts, errors = composer.load_module_artifacts(catalog)
+        self.assertEqual([], errors)
+        self.bundle, _ = bundler.build_factory_bundle(factory, catalog, artifacts)
+        self.plan = qualification.load_qualification_plan()
+        self.policy = qualification.load_qualification_policy()
+        self.registry = runtime_evidence.load_verifier_registry()
+        self.evidence = runtime_evidence.load_runtime_evidence()
+        self.artifact = composer.load_json_file(
+            validator.ROOT
+            / "examples"
+            / "runtime-evidence"
+            / "source-revision-fixture.json"
+        )
+        self.implementation = composer.load_json_file(
+            validator.ROOT
+            / "examples"
+            / "runtime-evidence"
+            / "fixture-verifier-method.json"
+        )
+        errors, self.pack, self.manifest = (
+            evidence_pack.runtime_evidence_pack_for_bundle(
+                self.evidence,
+                self.registry,
+                {composer.sha256_json(self.artifact): self.artifact},
+                {
+                    composer.sha256_json(
+                        self.implementation
+                    ): self.implementation
+                },
+                self.plan,
+                self.bundle,
+                self.policy,
+            )
+        )
+        self.assertEqual([], errors)
+        self.assertIsNotNone(self.pack)
+        self.assertIsNotNone(self.manifest)
+        assert self.pack is not None
+        assert self.manifest is not None
+
+    def _payloads(self) -> dict[str, bytes]:
+        payloads, errors = bundler.read_bounded_archive_payloads(
+            self.pack,
+            label="runtime-evidence pack",
+            max_archive_bytes=evidence_pack.MAX_PACK_BYTES,
+            max_member_bytes=evidence_pack.MAX_MEMBER_BYTES,
+            max_members=evidence_pack.MAX_MEMBERS,
+        )
+        self.assertEqual([], errors)
+        return payloads
+
+    def _verify(
+        self,
+        pack: bytes,
+        bundle: bytes | None = None,
+        policy: object | None = None,
+    ) -> tuple[list[str], dict[str, object] | None]:
+        return evidence_pack.verify_runtime_evidence_pack_for_bundle(
+            pack,
+            self.plan,
+            self.bundle if bundle is None else bundle,
+            self.policy if policy is None else policy,
+        )
+
+    def test_repository_pack_manifest_and_bytes_are_exact(self) -> None:
+        self.assertEqual(
+            evidence_pack.load_pack_manifest(),
+            self.manifest,
+        )
+        repeated, repeated_manifest = evidence_pack.build_runtime_evidence_pack(
+            self.evidence,
+            self.registry,
+            {composer.sha256_json(self.artifact): self.artifact},
+            {composer.sha256_json(self.implementation): self.implementation},
+        )
+        self.assertEqual(self.pack, repeated)
+        self.assertEqual(self.manifest, repeated_manifest)
+        errors, verified = self._verify(self.pack)
+        self.assertEqual([], errors)
+        self.assertIsNotNone(verified)
+        assert verified is not None
+        self.assertEqual(bundler.sha256_bytes(self.pack), verified["runtime_evidence_pack_sha256"])
+        self.assertEqual(self.artifact, next(iter(verified["evidence_artifacts"].values())))
+        self.assertEqual(
+            self.implementation,
+            next(iter(verified["verifier_implementations"].values())),
+        )
+
+    def test_pack_metadata_and_boundary_are_canonical_and_non_authorizing(self) -> None:
+        with tarfile.open(fileobj=io.BytesIO(self.pack), mode="r:") as archive:
+            members = archive.getmembers()
+        self.assertEqual(
+            sorted(member.name for member in members),
+            [member.name for member in members],
+        )
+        for member in members:
+            self.assertTrue(member.isfile())
+            self.assertEqual((0o644, 0, 0, 0, "", ""), (
+                member.mode,
+                member.mtime,
+                member.uid,
+                member.gid,
+                member.uname,
+                member.gname,
+            ))
+        boundary = self.manifest["pack_boundary"]
+        for field in (
+            "canonical_archive",
+            "runtime_evidence_signatures_reverified",
+            "evidence_artifacts_embedded",
+            "evidence_artifact_digests_verified",
+            "verifier_implementation_materials_embedded",
+            "verifier_implementation_digests_verified",
+        ):
+            self.assertTrue(boundary[field])
+        for field in set(boundary) - {
+            "canonical_archive",
+            "runtime_evidence_signatures_reverified",
+            "evidence_artifacts_embedded",
+            "evidence_artifact_digests_verified",
+            "verifier_implementation_materials_embedded",
+            "verifier_implementation_digests_verified",
+        }:
+            self.assertFalse(boundary[field])
+
+    def test_material_or_packed_schema_tampering_fails_after_manifest_rebuild(self) -> None:
+        for target in ("artifact", "schema"):
+            with self.subTest(target=target):
+                payloads = self._payloads()
+                if target == "artifact":
+                    artifact_path = next(
+                        path for path in payloads if path.startswith("artifacts/")
+                    )
+                    payloads[artifact_path] = composer.canonical_json_bytes(
+                        {"attacker_controlled": True}
+                    )
+                else:
+                    schema = composer.load_json_bytes(
+                        payloads[evidence_pack.PACKED_SCHEMA_PATH]
+                    )
+                    schema["description"] = "attacker-controlled rule change"
+                    payloads[evidence_pack.PACKED_SCHEMA_PATH] = (
+                        composer.canonical_json_bytes(schema)
+                    )
+                content = {
+                    path: value
+                    for path, value in payloads.items()
+                    if path != evidence_pack.MANIFEST_PATH
+                }
+                payloads[evidence_pack.MANIFEST_PATH] = composer.canonical_json_bytes(
+                    evidence_pack.build_pack_manifest(self.evidence, content)
+                )
+                errors, verified = self._verify(
+                    bundler.canonical_tar_bytes(payloads)
+                )
+                self.assertTrue(errors)
+                self.assertIsNone(verified)
+                if target == "schema":
+                    with self.assertRaisesRegex(ValueError, "schema is invalid"):
+                        evidence_pack.build_runtime_evidence_pack(
+                            self.evidence,
+                            self.registry,
+                            {composer.sha256_json(self.artifact): self.artifact},
+                            {
+                                composer.sha256_json(
+                                    self.implementation
+                                ): self.implementation
+                            },
+                            schema=schema,
+                        )
+
+    def test_manifest_authority_inflation_and_scalar_confusion_fail_closed(self) -> None:
+        for field, value in (
+            ("execution_authorized", True),
+            ("activation_authorized", 0),
+            ("pack_grants_runtime_eligibility", True),
+            ("artifact_semantic_truth_verified", True),
+            ("verifier_assertions_reexecuted", True),
+        ):
+            with self.subTest(field=field, value=value):
+                payloads = self._payloads()
+                manifest = copy.deepcopy(self.manifest)
+                manifest["pack_boundary"][field] = value
+                payloads[evidence_pack.MANIFEST_PATH] = composer.canonical_json_bytes(
+                    manifest
+                )
+                errors, verified = self._verify(
+                    bundler.canonical_tar_bytes(payloads)
+                )
+                self.assertTrue(errors)
+                self.assertIsNone(verified)
+
+    def test_archive_traversal_duplicate_special_extra_and_trailing_data_fail(self) -> None:
+        attacks: list[tuple[str, bytes, str]] = []
+        attacks.append(
+            (
+                "traversal",
+                bundler.canonical_tar_bytes({"../escape.json": b"{}\n"}),
+                "unsafe",
+            )
+        )
+        attacks.append(("trailing", self.pack + b"unexpected", "canonical"))
+        payloads = self._payloads()
+        payloads["unexpected.json"] = b"{}\n"
+        attacks.append(
+            ("extra", bundler.canonical_tar_bytes(payloads), "unexpected")
+        )
+        metadata_payloads = self._payloads()
+        output = io.BytesIO()
+        with tarfile.open(
+            fileobj=output, mode="w", format=tarfile.USTAR_FORMAT
+        ) as archive:
+            for index, path in enumerate(sorted(metadata_payloads)):
+                member = tarfile.TarInfo(path)
+                member.size = len(metadata_payloads[path])
+                member.mode = 0o600 if index == 0 else 0o644
+                member.mtime = 0
+                archive.addfile(member, io.BytesIO(metadata_payloads[path]))
+        attacks.append(("metadata", output.getvalue(), "metadata"))
+        for kind, member_type in (
+            ("symlink", tarfile.SYMTYPE),
+            ("character-device", tarfile.CHRTYPE),
+        ):
+            output = io.BytesIO()
+            with tarfile.open(
+                fileobj=output, mode="w", format=tarfile.USTAR_FORMAT
+            ) as archive:
+                member = tarfile.TarInfo("unsafe-member")
+                member.type = member_type
+                member.mode = 0o644
+                member.mtime = 0
+                if member_type == tarfile.SYMTYPE:
+                    member.linkname = "outside"
+                archive.addfile(member)
+            attacks.append((kind, output.getvalue(), "regular file"))
+        output = io.BytesIO()
+        with tarfile.open(
+            fileobj=output, mode="w", format=tarfile.USTAR_FORMAT
+        ) as archive:
+            for _ in range(2):
+                member = tarfile.TarInfo(evidence_pack.MANIFEST_PATH)
+                member.size = 3
+                member.mode = 0o644
+                member.mtime = 0
+                archive.addfile(member, io.BytesIO(b"{}\n"))
+        attacks.append(("duplicate", output.getvalue(), "duplicate"))
+        for name, attack, message in attacks:
+            with self.subTest(name=name):
+                errors, verified = self._verify(attack)
+                self.assertTrue(any(message in error for error in errors), errors)
+                self.assertIsNone(verified)
+
+    def test_noncanonical_json_reordered_archive_and_size_limits_fail(self) -> None:
+        payloads = self._payloads()
+        payloads[evidence_pack.VERIFIER_REGISTRY_PATH] += b" "
+        errors, verified = self._verify(bundler.canonical_tar_bytes(payloads))
+        self.assertTrue(any("not canonical JSON" in error for error in errors))
+        self.assertIsNone(verified)
+
+        payloads = self._payloads()
+        output = io.BytesIO()
+        with tarfile.open(
+            fileobj=output, mode="w", format=tarfile.USTAR_FORMAT
+        ) as archive:
+            for path in reversed(sorted(payloads)):
+                member = tarfile.TarInfo(path)
+                member.size = len(payloads[path])
+                member.mode = 0o644
+                member.mtime = 0
+                archive.addfile(member, io.BytesIO(payloads[path]))
+        errors, verified = self._verify(output.getvalue())
+        self.assertTrue(any("canonical" in error for error in errors))
+        self.assertIsNone(verified)
+
+        with mock.patch.object(evidence_pack, "MAX_MEMBER_BYTES", 1):
+            errors, verified = self._verify(self.pack)
+        self.assertTrue(any("member size is invalid" in error for error in errors))
+        self.assertIsNone(verified)
+        with mock.patch.object(evidence_pack, "MAX_MEMBER_BYTES", 1):
+            with self.assertRaisesRegex(ValueError, "member size"):
+                evidence_pack.build_runtime_evidence_pack(
+                    self.evidence,
+                    self.registry,
+                    {composer.sha256_json(self.artifact): self.artifact},
+                    {
+                        composer.sha256_json(
+                            self.implementation
+                        ): self.implementation
+                    },
+                )
+        with mock.patch.object(evidence_pack, "MAX_MEMBERS", 1):
+            errors, verified = self._verify(self.pack)
+        self.assertTrue(any("member count" in error for error in errors))
+        self.assertIsNone(verified)
+
+    def test_factory_policy_and_signed_evidence_replay_fail_closed(self) -> None:
+        cron_factory = composer.load_json_file(
+            validator.ROOT / "examples" / "economic-factory-cron.json"
+        )
+        cron_bundle, _ = bundler.build_factory_bundle(
+            cron_factory,
+            composer.load_module_catalog(),
+            composer.load_module_artifacts(composer.load_module_catalog())[0],
+        )
+        errors, verified = self._verify(self.pack, bundle=cron_bundle)
+        self.assertTrue(errors)
+        self.assertIsNone(verified)
+
+        stronger_policy = copy.deepcopy(self.policy)
+        stronger_policy["base_requirements"].append("additional_runtime_receipt")
+        stronger_policy["base_requirements"].sort()
+        errors, verified = self._verify(self.pack, policy=stronger_policy)
+        self.assertTrue(errors)
+        self.assertIsNone(verified)
+
+        payloads = self._payloads()
+        evidence = composer.load_json_bytes(
+            payloads[evidence_pack.RUNTIME_EVIDENCE_PATH]
+        )
+        evidence["factory"]["id"] = "replayed-factory"
+        payloads[evidence_pack.RUNTIME_EVIDENCE_PATH] = (
+            composer.canonical_json_bytes(evidence)
+        )
+        errors, verified = self._verify(bundler.canonical_tar_bytes(payloads))
+        self.assertTrue(errors)
+        self.assertIsNone(verified)
+
+    def test_malformed_pack_and_cli_round_trip_fail_cleanly(self) -> None:
+        for malformed in (b"", b"not a tar", b"\0" * 512, b"x" * 1024):
+            with self.subTest(size=len(malformed)):
+                errors, verified = self._verify(malformed)
+                self.assertTrue(errors)
+                self.assertIsNone(verified)
+
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            bundle_path = root / "factory.tar"
+            pack_path = root / "evidence.tar"
+            manifest_path = root / "manifest.json"
+            bundle_path.write_bytes(self.bundle)
+            cli = [sys.executable, str(validator.ROOT / "scripts" / "zaibatsu.py")]
+            command = cli + [
+                "evidence-pack",
+                str(runtime_evidence.EXAMPLE_RUNTIME_EVIDENCE_PATH),
+                str(bundle_path),
+                "--evidence-artifact",
+                str(
+                    validator.ROOT
+                    / "examples"
+                    / "runtime-evidence"
+                    / "source-revision-fixture.json"
+                ),
+                "--verifier-implementation",
+                str(
+                    validator.ROOT
+                    / "examples"
+                    / "runtime-evidence"
+                    / "fixture-verifier-method.json"
+                ),
+                "--output",
+                str(pack_path),
+            ]
+            built = subprocess.run(
+                command,
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(0, built.returncode, built.stderr)
+            self.assertEqual(self.pack, pack_path.read_bytes())
+            verified = subprocess.run(
+                cli
+                + [
+                    "verify-evidence-pack",
+                    str(pack_path),
+                    str(bundle_path),
+                    "--manifest-output",
+                    str(manifest_path),
+                ],
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(0, verified.returncode, verified.stderr)
+            self.assertIn("signed receipts: 1", verified.stdout)
+            self.assertIn("artifact semantic truth verified: false", verified.stdout)
+            self.assertEqual(
+                self.manifest,
+                json.loads(manifest_path.read_text(encoding="utf-8")),
+            )
+            repeated = subprocess.run(
+                command,
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(2, repeated.returncode)
+            self.assertIn("refusing to overwrite", repeated.stderr)
 
 
 class SignedRuntimeEvidenceTests(unittest.TestCase):
@@ -2171,6 +2643,31 @@ class SignedRuntimeEvidenceTests(unittest.TestCase):
         self.contract_evidence = qualification.load_qualification_evidence()
         self.registry = runtime_evidence.load_verifier_registry()
         self.evidence = runtime_evidence.load_runtime_evidence()
+        fixture_artifact = composer.load_json_file(
+            validator.ROOT
+            / "examples"
+            / "runtime-evidence"
+            / "source-revision-fixture.json"
+        )
+        fixture_method = composer.load_json_file(
+            validator.ROOT
+            / "examples"
+            / "runtime-evidence"
+            / "fixture-verifier-method.json"
+        )
+        pack_errors, self.runtime_pack, self.pack_manifest = (
+            evidence_pack.runtime_evidence_pack_for_bundle(
+                self.evidence,
+                self.registry,
+                {composer.sha256_json(fixture_artifact): fixture_artifact},
+                {composer.sha256_json(fixture_method): fixture_method},
+                self.plan,
+                self.bundle,
+                self.policy,
+            )
+        )
+        self.assertEqual([], pack_errors)
+        self.assertIsNotNone(self.runtime_pack)
         self.assessment = runtime_evidence.load_runtime_assessment()
 
     @staticmethod
@@ -2250,7 +2747,12 @@ class SignedRuntimeEvidenceTests(unittest.TestCase):
             for requirement in source_module["required_evidence"]
             if requirement != "contract_conformance_receipt"
         )
-        implementation_digest = "d" * 64
+        implementation_document = {
+            "fixture_only": True,
+            "method": "source_runtime_verification",
+            "runtime_assertion_performed": False,
+        }
+        implementation_digest = composer.sha256_json(implementation_document)
         with tempfile.TemporaryDirectory() as temporary_directory:
             root = Path(temporary_directory)
             key_path, public_key = self._generate_key(root)
@@ -2368,6 +2870,41 @@ class SignedRuntimeEvidenceTests(unittest.TestCase):
         self._refresh_digest(evidence, "runtime_evidence_set_sha256")
         return registry, evidence
 
+    def _pack_for(
+        self,
+        evidence: dict[str, object],
+        registry: dict[str, object],
+    ) -> bytes:
+        evidence_artifacts = {}
+        for receipt in evidence["receipts"]:
+            payload = receipt["payload"]
+            document = {
+                "requirement": payload["requirement"],
+                "test_fixture": True,
+            }
+            evidence_artifacts[composer.sha256_json(document)] = document
+        implementation_document = {
+            "fixture_only": True,
+            "method": "source_runtime_verification",
+            "runtime_assertion_performed": False,
+        }
+        verifier_implementations = {
+            composer.sha256_json(implementation_document): implementation_document
+        }
+        errors, pack, _ = evidence_pack.runtime_evidence_pack_for_bundle(
+            evidence,
+            registry,
+            evidence_artifacts,
+            verifier_implementations,
+            self.plan,
+            self.bundle,
+            self.policy,
+        )
+        self.assertEqual([], errors)
+        self.assertIsNotNone(pack)
+        assert pack is not None
+        return pack
+
     def _validate(
         self,
         evidence: object | None = None,
@@ -2392,11 +2929,10 @@ class SignedRuntimeEvidenceTests(unittest.TestCase):
             runtime_evidence.verify_runtime_assessment_for_bundle(
                 self.assessment,
                 self.contract_evidence,
-                self.evidence,
+                self.runtime_pack,
                 self.plan,
                 self.bundle,
                 self.policy,
-                self.registry,
             ),
         )
         fixture_method = composer.load_json_file(
@@ -2467,6 +3003,19 @@ class SignedRuntimeEvidenceTests(unittest.TestCase):
         self.assertTrue(
             self.assessment["assessment_boundary"][
                 "evaluation_time_externally_supplied"
+            ]
+        )
+        self.assertTrue(
+            self.assessment["assessment_boundary"]["evidence_artifacts_retrieved"]
+        )
+        self.assertTrue(
+            self.assessment["assessment_boundary"][
+                "verifier_implementation_materials_retrieved"
+            ]
+        )
+        self.assertFalse(
+            self.assessment["assessment_boundary"][
+                "artifact_semantic_truth_verified"
             ]
         )
         self.assertFalse(
@@ -2598,11 +3147,10 @@ class SignedRuntimeEvidenceTests(unittest.TestCase):
     def test_freshness_is_explicit_deterministic_and_exclusive(self) -> None:
         errors, fresh = runtime_evidence.runtime_assessment_for_bundle(
             self.contract_evidence,
-            self.evidence,
+            self.runtime_pack,
             self.plan,
             self.bundle,
             self.policy,
-            self.registry,
             "2026-08-31T22:39:59Z",
         )
         self.assertEqual([], errors)
@@ -2613,11 +3161,10 @@ class SignedRuntimeEvidenceTests(unittest.TestCase):
 
         errors, expired = runtime_evidence.runtime_assessment_for_bundle(
             self.contract_evidence,
-            self.evidence,
+            self.runtime_pack,
             self.plan,
             self.bundle,
             self.policy,
-            self.registry,
             "2026-08-31T22:40:00Z",
         )
         self.assertEqual([], errors)
@@ -2683,6 +3230,7 @@ class SignedRuntimeEvidenceTests(unittest.TestCase):
                 self.plan,
                 self.policy,
                 self.registry,
+                bundler.sha256_bytes(self.runtime_pack),
             )
         )
 
@@ -2690,8 +3238,11 @@ class SignedRuntimeEvidenceTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary_directory:
             root = Path(temporary_directory)
             bundle_path = root / "factory.tar"
+            pack_path = root / "runtime-evidence.tar"
             assessment_path = root / "runtime-assessment.json"
             bundle_path.write_bytes(self.bundle)
+            assert self.runtime_pack is not None
+            pack_path.write_bytes(self.runtime_pack)
             cli = [sys.executable, str(validator.ROOT / "scripts" / "zaibatsu.py")]
             verified = subprocess.run(
                 cli
@@ -2711,7 +3262,7 @@ class SignedRuntimeEvidenceTests(unittest.TestCase):
 
             command = cli + [
                 "runtime-assessment",
-                str(runtime_evidence.EXAMPLE_RUNTIME_EVIDENCE_PATH),
+                str(pack_path),
                 str(qualification.EXAMPLE_QUALIFICATION_EVIDENCE_PATH),
                 str(qualification.EXAMPLE_QUALIFICATION_PLAN_PATH),
                 str(bundle_path),
@@ -2737,7 +3288,7 @@ class SignedRuntimeEvidenceTests(unittest.TestCase):
                 + [
                     "verify-runtime-assessment",
                     str(assessment_path),
-                    str(runtime_evidence.EXAMPLE_RUNTIME_EVIDENCE_PATH),
+                    str(pack_path),
                     str(qualification.EXAMPLE_QUALIFICATION_EVIDENCE_PATH),
                     str(qualification.EXAMPLE_QUALIFICATION_PLAN_PATH),
                     str(bundle_path),
@@ -2761,13 +3312,13 @@ class SignedRuntimeEvidenceTests(unittest.TestCase):
 
     def test_ephemeral_runtime_signer_can_qualify_one_module_without_authority(self) -> None:
         registry, evidence = self._signed_source_evidence()
+        runtime_pack = self._pack_for(evidence, registry)
         errors, assessment = runtime_evidence.runtime_assessment_for_bundle(
             self.contract_evidence,
-            evidence,
+            runtime_pack,
             self.plan,
             self.bundle,
             self.policy,
-            registry,
             "2026-08-30T23:15:00Z",
         )
         self.assertEqual([], errors)
@@ -2782,12 +3333,11 @@ class SignedRuntimeEvidenceTests(unittest.TestCase):
         errors, plan = rebuild.factory_rebuild_plan_for_bundle(
             source_lock.load_source_lock(),
             assessment,
-            evidence,
+            runtime_pack,
             self.contract_evidence,
             self.plan,
             self.bundle,
             self.policy,
-            registry,
             validator.ROOT,
         )
         self.assertEqual([], errors)

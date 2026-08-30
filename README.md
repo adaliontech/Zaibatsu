@@ -115,6 +115,7 @@ The target stack is intentionally boring at authority boundaries:
 | Recursive improvement | Return evidence and improve shared factory patterns | Evidence return is bounded and operational; shared automatic promotion remains designed and owner-gated |
 | Qualification planner | Bind a verified control bundle to mandatory runtime evidence requirements | Implemented and tested; the public plan contains no qualification evidence and grants no eligibility or activation |
 | Signed runtime-evidence assessment | Combine bundle-derived contract receipts with fresh, allowlisted OpenSSH-signed verifier assertions | The public fixture verifies one signature in test-only scope: 10 of 67 bindings verified, 57 missing, zero runtime-eligible modules, and no activation or execution authority |
+| Canonical runtime-evidence pack | Carry the signed evidence, verifier registry, exact evidence artifacts, verifier descriptors, and manifest schema as one reproducible archive | Implemented and tested; byte and digest integrity are verified, but verifier assertions are not rerun and artifact truth is not inferred |
 | Annotated-release source lock | Bind one verified control bundle to exact versioned source inputs | Sixteen Git blobs from immutable v1.6.0 rebuild the byte-identical bundle; no remote, signature, runtime-source, qualification, eligibility, or activation proof is claimed |
 | Deterministic rebuild DAG | Join verified control provenance, module dependencies, qualification gaps, and activation gates | Implemented and tested as an inert nine-action plan; zero actions are qualification-ready, all nine remain blocked, and no execution or effect authority is granted |
 
@@ -361,14 +362,25 @@ runtime-eligible. They include no implementation, environment, isolation,
 recovery, independent external-verifier, activation, or deployment proof.
 
 Add externally supplied signed assertions through a separately hashed verifier
-registry, then evaluate freshness at an explicit timestamp:
+registry, package the exact referenced materials, then evaluate freshness at an
+explicit timestamp:
 
 ```bash
 python3 scripts/zaibatsu.py verify-runtime-evidence \
   examples/economic-factory.runtime-evidence.json \
   /tmp/example-product.factory.tar
-python3 scripts/zaibatsu.py runtime-assessment \
+python3 scripts/zaibatsu.py evidence-pack \
   examples/economic-factory.runtime-evidence.json \
+  /tmp/example-product.factory.tar \
+  --evidence-artifact examples/runtime-evidence/source-revision-fixture.json \
+  --verifier-implementation examples/runtime-evidence/fixture-verifier-method.json \
+  --output /tmp/example-product.runtime-evidence.tar
+python3 scripts/zaibatsu.py verify-evidence-pack \
+  /tmp/example-product.runtime-evidence.tar \
+  /tmp/example-product.factory.tar \
+  --manifest-output /tmp/example-product.runtime-evidence-pack-manifest.json
+python3 scripts/zaibatsu.py runtime-assessment \
+  /tmp/example-product.runtime-evidence.tar \
   examples/economic-factory.qualification-evidence.json \
   examples/economic-factory.qualification-plan.json \
   /tmp/example-product.factory.tar \
@@ -376,7 +388,7 @@ python3 scripts/zaibatsu.py runtime-assessment \
   --output /tmp/example-product.runtime-assessment.json
 python3 scripts/zaibatsu.py verify-runtime-assessment \
   /tmp/example-product.runtime-assessment.json \
-  examples/economic-factory.runtime-evidence.json \
+  /tmp/example-product.runtime-evidence.tar \
   examples/economic-factory.qualification-evidence.json \
   examples/economic-factory.qualification-plan.json \
   /tmp/example-product.factory.tar
@@ -388,7 +400,10 @@ verifier-implementation digest, and a maximum validity interval. Its one signed
 [runtime-evidence receipt](examples/economic-factory.runtime-evidence.json) is
 deliberately restricted to `public_test_fixture`; it demonstrates signature,
 provenance, allowlist, replay, and freshness checks but can never make a module
-runtime-eligible. The resulting [runtime
+runtime-eligible. The [checked pack
+manifest](examples/economic-factory.runtime-evidence-pack-manifest.json) binds
+that evidence and registry to the exact fixture artifact, verifier-method
+descriptor, and manifest schema carried in the canonical archive. The resulting [runtime
 assessment](examples/economic-factory.runtime-assessment.json) records 10 of 67
 bindings verified, 57 missing, and zero eligible modules.
 
@@ -396,12 +411,19 @@ This trust boundary is intentionally narrow. The registry is an explicit
 evaluator-selected trust input; its content digest proves which keys and rules
 were selected, not who owns a key or whether its operator is organizationally
 independent. A valid signature authenticates the exact assertion payload, not
-the assertion's semantic truth. Zaibatsu v1.9 does not rerun the named verifier
-or retrieve the evidence artifact. A production `factory_runtime` assessment
+the assertion's semantic truth. Zaibatsu retrieves the exact referenced
+artifact and verifier descriptor from the verified pack, but does not rerun
+the named verifier or infer that the artifact makes its assertion true. A production `factory_runtime` assessment
 therefore requires a separately reviewed and pinned registry, a trusted
 verifier allowed for every exact binding, and a current externally chosen
 `--as-of` time. Even complete runtime qualification grants no activation,
 execution, secret, deployment, or side-effect authority.
+
+The v1 pack format accepts canonical JSON-object materials only, capped at
+256 KiB per member, 16 MiB per archive, 256 receipts, and 516 archive members.
+Binary artifacts or executable verifier implementations need a future typed
+format; this release embeds JSON evidence and verifier descriptors, not code it
+can execute.
 
 ## Plan the factory rebuild
 
@@ -411,15 +433,17 @@ machine-readable rebuild graph:
 ```bash
 python3 scripts/zaibatsu.py rebuild-plan \
   /tmp/example-product.factory.tar \
+  --runtime-evidence-pack /tmp/example-product.runtime-evidence.tar \
   --output /tmp/example-product.rebuild-plan.json
 python3 scripts/zaibatsu.py verify-rebuild-plan \
   /tmp/example-product.rebuild-plan.json \
-  /tmp/example-product.factory.tar
+  /tmp/example-product.factory.tar \
+  --runtime-evidence-pack /tmp/example-product.runtime-evidence.tar
 ```
 
 Both commands fully reverify the bundle, annotated-release source lock,
-qualification policy and plan, bundle-derived evidence, signed runtime
-evidence, verifier registry, and runtime assessment. The resulting [rebuild
+qualification policy and plan, bundle-derived evidence, signed runtime-evidence
+pack, embedded materials, verifier registry, and runtime assessment. The resulting [rebuild
 plan](examples/economic-factory.rebuild-plan.json) binds their exact digests
 and expresses the nine module slots as a dependency-ordered action DAG. Each
 node records its intended operation, verified evidence, direct missing
@@ -487,10 +511,12 @@ and the complete repository suite was rerun independently.
   — reproducible contract-only receipts, exact remaining gaps, and no runtime
   eligibility or activation authority.
 - [Runtime verifier registry](policies/runtime-evidence-verifiers-v1.json),
-  [signed evidence](examples/economic-factory.runtime-evidence.json), and
+  [signed evidence](examples/economic-factory.runtime-evidence.json), [pack
+  manifest](examples/economic-factory.runtime-evidence-pack-manifest.json), and
   [runtime assessment](examples/economic-factory.runtime-assessment.json) —
-  exact public keys, allowlists, provenance, freshness, remaining gaps, and an
-  explicitly fixture-only non-authorizing signature example.
+  exact public keys, allowlists, provenance, freshness, embedded artifact and
+  verifier-material digests, remaining gaps, and an explicitly fixture-only
+  non-authorizing signature example.
 - [Factory rebuild plan](examples/economic-factory.rebuild-plan.json) — the
   exact nine-action dependency graph, evidence blockers, and four
   non-authorizing gates derived from fully reverified control inputs.
@@ -576,7 +602,10 @@ release uses annotated tag object `8667e6a104fa0e9fd44568847015d37de3c3e442`
 over evidence roof `6502a2e6ade2ef3a6c6d6c4ad6656dbf8d7b889c`;
 roof and tag CI, a credential-disabled full-history tag clone, four live-schema
 byte checks, exact regeneration, and strict external schema validation all
-passed. GitHub reports the release as immutable.
+passed. GitHub reports the release as immutable. The v1.10 working candidate
+adds the canonical runtime-evidence pack and currently passes 203 tests and
+90-file validation locally; clean-clone, CI, tag, and immutable-release proof
+are not claimed until those gates run.
 
 Zaibatsu is an independent project and is not affiliated with or endorsed by
 Factory AI.

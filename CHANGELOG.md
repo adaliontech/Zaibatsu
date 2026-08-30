@@ -1,5 +1,32 @@
 # Changelog
 
+## 1.10.0 - 2026-08-30
+
+- Added a canonical, self-verifying runtime-evidence pack that embeds the
+  signed evidence set, verifier registry, every content-addressed evidence
+  artifact, every referenced verifier-implementation descriptor, and its
+  immutable manifest schema.
+- Added `evidence-pack` and `verify-evidence-pack` CLI workflows. Pack
+  verification rechecks archive safety and byte reproducibility, JSON
+  canonicalization, schema identity and digest, exact member inventory,
+  material digests, registry rules, and every OpenSSH signature.
+- Upgraded runtime assessments to v2 and rebuild plans to v3. Both now bind and
+  reverify the exact pack rather than accepting detached evidence and registry
+  inputs; rebuild planning retrieves the signed materials before compiling its
+  still-inert nine-action DAG.
+- Preserved the trust boundary: embedded bytes and digests are verified, but
+  verifier assertions are not reexecuted, artifact semantic truth is not
+  inferred, key ownership and independence are not proved, and a pack alone
+  grants no runtime eligibility, activation, execution, or side-effect
+  authority.
+- Extracted the bounded canonical archive reader for bundle and evidence-pack
+  verification, made builders reject archives their verifiers would reject,
+  and covered the full 256-receipt/516-member contract ceiling.
+- Added traversal, link, special-file, duplicate, extra-member, metadata,
+  trailing-byte, noncanonical-JSON, schema/material tamper, replay, size,
+  authority-inflation, scalar-confusion, malformed-input, and CLI tests. The
+  integrated suite now contains 203 tests and the validator requires 90 files.
+
 ## 1.9.0 - 2026-08-30
 
 - Added OpenSSH Ed25519 verification for externally supplied runtime-evidence

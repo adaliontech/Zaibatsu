@@ -15,11 +15,9 @@ from urllib.parse import urlsplit
 from factory_bundle import (
     CONTRACT_SCHEMAS,
     build_factory_bundle,
-    sha256_bytes,
     verify_factory_bundle,
 )
 from factory_composer import (
-    MODULE_API_VERSION,
     build_factory_plan,
     canonical_json_bytes,
     load_json_bytes,

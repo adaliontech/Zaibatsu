@@ -226,40 +226,54 @@ def validate_bundle_manifest(
         expected = build_bundle_manifest(definition, catalog, plan, payloads)
     except (KeyError, TypeError, ValueError) as exc:
         return [f"cannot derive expected bundle manifest: {exc}"]
-    if manifest != expected:
+    try:
+        exact_match = canonical_json_bytes(manifest) == canonical_json_bytes(
+            expected
+        )
+    except (RecursionError, TypeError, ValueError) as exc:
+        return [f"cannot compare bundle manifest exactly: {exc}"]
+    if not exact_match:
         return ["bundle manifest does not exactly match its content-addressed payloads"]
     return []
 
 
-def _read_archive_payloads(bundle: bytes) -> tuple[dict[str, bytes], list[str]]:
+def read_bounded_archive_payloads(
+    archive_bytes: bytes,
+    *,
+    label: str,
+    max_archive_bytes: int,
+    max_member_bytes: int,
+    max_members: int,
+) -> tuple[dict[str, bytes], list[str]]:
+    """Read regular files from a bounded archive without trusting extraction."""
     errors: list[str] = []
     payloads: dict[str, bytes] = {}
-    if not isinstance(bundle, bytes):
-        return {}, ["factory bundle must be bytes"]
-    if not bundle or len(bundle) > MAX_BUNDLE_BYTES:
-        return {}, ["factory bundle size is outside the accepted boundary"]
+    if not isinstance(archive_bytes, bytes):
+        return {}, [f"{label} must be bytes"]
+    if not archive_bytes or len(archive_bytes) > max_archive_bytes:
+        return {}, [f"{label} size is outside the accepted boundary"]
     try:
-        with tarfile.open(fileobj=io.BytesIO(bundle), mode="r:") as archive:
+        with tarfile.open(fileobj=io.BytesIO(archive_bytes), mode="r:") as archive:
             if archive.pax_headers:
-                errors.append("factory bundle must not contain global PAX metadata")
+                errors.append(f"{label} must not contain global PAX metadata")
             members = archive.getmembers()
-            if not members or len(members) > MAX_MEMBERS:
-                errors.append("factory bundle member count is outside the accepted boundary")
+            if not members or len(members) > max_members:
+                errors.append(f"{label} member count is outside the accepted boundary")
             seen: set[str] = set()
             for member in members:
                 name = member.name
                 if not _safe_member_name(name):
-                    errors.append(f"unsafe factory bundle member path: {name!r}")
+                    errors.append(f"unsafe {label} member path: {name!r}")
                     continue
                 if name in seen:
-                    errors.append(f"duplicate factory bundle member: {name}")
+                    errors.append(f"duplicate {label} member: {name}")
                     continue
                 seen.add(name)
                 if not member.isfile():
-                    errors.append(f"factory bundle member must be a regular file: {name}")
+                    errors.append(f"{label} member must be a regular file: {name}")
                     continue
-                if member.size <= 0 or member.size > MAX_MEMBER_BYTES:
-                    errors.append(f"factory bundle member size is invalid: {name}")
+                if member.size <= 0 or member.size > max_member_bytes:
+                    errors.append(f"{label} member size is invalid: {name}")
                     continue
                 if (
                     member.mode != 0o644
@@ -270,19 +284,29 @@ def _read_archive_payloads(bundle: bytes) -> tuple[dict[str, bytes], list[str]]:
                     or member.gname
                     or member.pax_headers
                 ):
-                    errors.append(f"factory bundle member metadata is not canonical: {name}")
+                    errors.append(f"{label} member metadata is not canonical: {name}")
                 extracted = archive.extractfile(member)
                 if extracted is None:
-                    errors.append(f"cannot read factory bundle member: {name}")
+                    errors.append(f"cannot read {label} member: {name}")
                     continue
-                data = extracted.read(MAX_MEMBER_BYTES + 1)
+                data = extracted.read(max_member_bytes + 1)
                 if len(data) != member.size:
-                    errors.append(f"factory bundle member length is inconsistent: {name}")
+                    errors.append(f"{label} member length is inconsistent: {name}")
                     continue
                 payloads[name] = data
     except (tarfile.TarError, EOFError, OSError, ValueError) as exc:
-        return {}, [f"cannot read factory bundle: {exc}"]
+        return {}, [f"cannot read {label}: {exc}"]
     return payloads, errors
+
+
+def _read_archive_payloads(bundle: bytes) -> tuple[dict[str, bytes], list[str]]:
+    return read_bounded_archive_payloads(
+        bundle,
+        label="factory bundle",
+        max_archive_bytes=MAX_BUNDLE_BYTES,
+        max_member_bytes=MAX_MEMBER_BYTES,
+        max_members=MAX_MEMBERS,
+    )
 
 
 def verify_factory_bundle(bundle: bytes) -> tuple[list[str], dict[str, Any] | None]:

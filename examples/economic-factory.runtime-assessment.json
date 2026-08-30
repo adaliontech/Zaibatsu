@@ -1,6 +1,6 @@
 {
-  "contract_schema": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.9.0/schemas/factory-runtime-assessment.schema.json",
-  "schema_version": "zaibatsu.factory-runtime-assessment.v1",
+  "contract_schema": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.10.0/schemas/factory-runtime-assessment.schema.json",
+  "schema_version": "zaibatsu.factory-runtime-assessment.v2",
   "factory": {
     "class": "economic_factory",
     "id": "example-product"
@@ -14,6 +14,7 @@
     "module_api_version": "zaibatsu.module.v1",
     "qualification_evidence_sha256": "a19e1f82e13f6a7e07011c6e80e112d4981740e9188805e615ee57e12c9d1963",
     "runtime_evidence_set_sha256": "d084a11b7cda2ec8615f583a07ba6b219913249e35cd6d54c0dea191809eba77",
+    "runtime_evidence_pack_sha256": "92357de9906842bdfaa14d2056173f24113f686e108d74ce44e7685d4b344759",
     "evaluated_at": "2026-08-30T23:00:00Z",
     "qualification_scope": "public_test_fixture"
   },
@@ -364,7 +365,9 @@
     "verifier_key_ownership_verified": false,
     "verifier_independence_verified": false,
     "trusted_verifier_assertions_reexecuted": false,
-    "evidence_artifacts_retrieved": false,
+    "evidence_artifacts_retrieved": true,
+    "verifier_implementation_materials_retrieved": true,
+    "artifact_semantic_truth_verified": false,
     "evaluation_time_externally_supplied": true,
     "trusted_current_clock_enforced": false,
     "self_attestation_accepted": false,
@@ -374,5 +377,5 @@
     "execution_authorized": false,
     "fixture_scope_only": true
   },
-  "runtime_assessment_sha256": "4eb09dd60ad709b849602a0768165fade53cfb5800a00d0c6769f676a7f6ac26"
+  "runtime_assessment_sha256": "07076a30f1bffe83527d7c80ce6c93627d87a592cb9392b6af13dcdc7feab9f0"
 }

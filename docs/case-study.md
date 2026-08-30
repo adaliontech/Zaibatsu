@@ -225,6 +225,10 @@ reusable contracts while preserving evidence and limitations:
   OpenSSH under content-addressed key/factory/scope/requirement/method/time
   allowlists, and `runtime-assessment` combines only fresh assertions with the
   bundle-derived receipts at an explicit evaluation time;
+- `evidence-pack` makes the exact signed set, verifier registry, evidence
+  artifacts, verifier descriptors, and manifest schema portable as canonical
+  USTAR; verification proves byte integrity and availability without rerunning
+  verifier assertions or claiming artifact semantic truth;
 - the checked signature is fixture-only: it raises the verified count to 10,
   leaves 57 missing, and cannot create runtime eligibility; generated-key tests
   separately prove that complete `factory_runtime` evidence can reach

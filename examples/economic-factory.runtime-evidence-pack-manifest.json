@@ -1,0 +1,81 @@
+{
+  "contract_schema": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.10.0/schemas/runtime-evidence-pack-manifest.schema.json",
+  "factory": {
+    "class": "economic_factory",
+    "id": "example-product"
+  },
+  "files": [
+    {
+      "path": "artifacts/5318c7217cd3fb378e54fb743147562a6b49efcfe28f1170d527511e8595fee1.json",
+      "role": "evidence_artifact",
+      "sha256": "5318c7217cd3fb378e54fb743147562a6b49efcfe28f1170d527511e8595fee1",
+      "size": 382
+    },
+    {
+      "path": "runtime-evidence.json",
+      "role": "runtime_evidence",
+      "sha256": "14d66ce9d19286d6555fec62f4c87725484636a3ca9460ce77edb1d8ca12e056",
+      "size": 3166
+    },
+    {
+      "path": "schemas/runtime-evidence-pack-manifest.schema.json",
+      "role": "contract_schema",
+      "sha256": "1f843c1883dad7cd956ab29d255a48a7736e6b75d31f7baaf46c403635fea0f2",
+      "size": 4533
+    },
+    {
+      "path": "verifier-implementations/6aea669ddf506f0c7ba59ebcc573bd78b1e647e8921bfafd29c700304d637d8a.json",
+      "role": "verifier_implementation",
+      "sha256": "6aea669ddf506f0c7ba59ebcc573bd78b1e647e8921bfafd29c700304d637d8a",
+      "size": 421
+    },
+    {
+      "path": "verifier-registry.json",
+      "role": "verifier_registry",
+      "sha256": "120aa5ba2796c52870c4088b5587c11e6f6941cfb04abdba6d6dd5519399c71e",
+      "size": 1204
+    }
+  ],
+  "pack_boundary": {
+    "activation_authorized": false,
+    "artifact_semantic_truth_verified": false,
+    "canonical_archive": true,
+    "evidence_artifact_digests_verified": true,
+    "evidence_artifacts_embedded": true,
+    "execution_authorized": false,
+    "pack_grants_runtime_eligibility": false,
+    "runtime_evidence_signatures_reverified": true,
+    "verifier_assertions_reexecuted": false,
+    "verifier_implementation_digests_verified": true,
+    "verifier_implementation_materials_embedded": true,
+    "verifier_independence_verified": false,
+    "verifier_key_ownership_verified": false
+  },
+  "receipts": [
+    {
+      "evidence_artifact_path": "artifacts/5318c7217cd3fb378e54fb743147562a6b49efcfe28f1170d527511e8595fee1.json",
+      "evidence_artifact_sha256": "5318c7217cd3fb378e54fb743147562a6b49efcfe28f1170d527511e8595fee1",
+      "module": "git-source",
+      "module_position": 0,
+      "payload_sha256": "ef459d960e54060b94c4255b0e712cbc5e8162ddaccdb3c249a8678c60bf9873",
+      "position": 0,
+      "requirement": "source_revision",
+      "slot": "source_versioning",
+      "verification_method": "fixture_source_revision_check",
+      "verifier_id": "public-fixture-verifier",
+      "verifier_implementation_path": "verifier-implementations/6aea669ddf506f0c7ba59ebcc573bd78b1e647e8921bfafd29c700304d637d8a.json",
+      "verifier_implementation_sha256": "6aea669ddf506f0c7ba59ebcc573bd78b1e647e8921bfafd29c700304d637d8a"
+    }
+  ],
+  "schema_version": "zaibatsu.runtime-evidence-pack-manifest.v1",
+  "source": {
+    "bundle_sha256": "d4918fd16f55b907a0b2b9734422d7106d3030a511e5cae5d6efc1cb7b253aba",
+    "module_api_version": "zaibatsu.module.v1",
+    "qualification_plan_sha256": "a9419341bf0806e1a6fc3769354e46ac6eb1c29043042ddd7eec35cca1a8ff81",
+    "qualification_policy_id": "runtime-eligibility-default",
+    "qualification_policy_sha256": "4fd359cc6dfe3eb3b555eb26a3453939fde34efd8d65a281a81dd34041468e9a",
+    "qualification_scope": "public_test_fixture",
+    "runtime_evidence_set_sha256": "d084a11b7cda2ec8615f583a07ba6b219913249e35cd6d54c0dea191809eba77",
+    "verifier_registry_sha256": "9196fd8a8afbb161bdc8f5d2fad1a28bef467ff6786c3f732d2d4c187079bff6"
+  }
+}
