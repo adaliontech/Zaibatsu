@@ -136,8 +136,8 @@ The intended format is an **open-source project** backed by a technical article
 and short demo. Factory’s Guild asks builders to build with Factory, publish the
 work, and submit a public link. The bounded local-Qwen Droid contribution is
 complete and independently validated. The repository is public; the hardened
-`v1.0.1` candidate must pass its credential-free clone gate before the final
-demo. Applicant-owned form materials remain explicit gates in
+`v1.0.1` candidate passed its credential-free clone gate. The final demo and
+applicant-owned form materials remain explicit gates in
 [Submission readiness](architecture/submission-readiness.json).
 
 Zaibatsu is an independent project and is not affiliated with or endorsed by

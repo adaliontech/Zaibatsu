@@ -63,7 +63,7 @@ path.
 | Real public project | This repository | Public and anonymously reachable |
 | Clear README | [`README.md`](../README.md) | Complete |
 | License | [`LICENSE`](../LICENSE) | Complete |
-| Runnable quickstart | [`docs/reproducibility.md`](reproducibility.md) | v1.0.0 proof complete; hardened v1.0.1 clone refresh pending without Droid |
+| Runnable quickstart | [`docs/reproducibility.md`](reproducibility.md) | Hardened v1.0.1 candidate passed from a credential-free clone without Droid |
 | Explain Factory/Droid role | [`docs/droid-session.md`](droid-session.md) | Authenticated session, scoped diff, and independent validation recorded |
 | End-to-end case study | [`docs/case-study.md`](case-study.md) | Architecture narrative and real Droid result complete |
 | Exact command/setup | [`docs/droid-session.md`](droid-session.md) | Local-Qwen command, prompt, and redacted credential boundaries recorded |
@@ -81,5 +81,5 @@ public clean-clone proof. The exact release checklist is in
 
 The bounded local-Qwen Droid run now supplies reviewable “build something with
 Factory” evidence. The public repository is complete. The hardened v1.0.1
-clean-clone proof, final clip, and applicant-owned form materials are still
-required before submission.
+clean-clone proof passed. The final clip and applicant-owned form materials are
+still required before submission.

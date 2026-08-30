@@ -42,8 +42,8 @@ and redacted status ledger without receiving production access.
 | Factory/Droid contribution | Passed and reviewed | Session `46f941a9-82f8-4df3-a45c-b8158996360b`; two scoped files; 15 turns; zero Factory credits; sanitized receipt in [`evidence/droid-contribution-v1.json`](../evidence/droid-contribution-v1.json) |
 | Pre-change adversarial proof | Passed | Moving `policy_decision` before `verify` produced no ordering error under the original validator |
 | Independent contribution validation | Passed | The accepted two-file diff passed 36 tests, the standalone validator, and `git diff --check` |
-| Fresh-clone reproduction | v1.0.0 passed; v1.0.1 refresh pending | Candidate `44cc3c1f3811a77f0fddf71d6a34ba565d8331e7` retains its 46-test proof; the hardened v1.0.1 candidate must independently pass the 59-test suite and both Gitleaks modes before recording |
-| Demo recording | Blocked on v1.0.1 clone proof | See [Demo script](demo-script.md) |
+| Fresh-clone reproduction | Hardened v1.0.1 candidate passed | Credential-free public clone of `3cf2d53f46e8531837acca7f5b3afacdfb12f35a` passed all 59 tests, repository validation, workflow linting, strict Git checks, symlink denial, and Gitleaks `8.30.1` history/tree scans; GitHub Actions run `33283633785` also passed |
+| Demo recording | Ready for owner recording from the immutable v1.0.1 release | See [Demo script](demo-script.md) |
 
 ## Architecture claims
 
@@ -91,6 +91,6 @@ does not represent private implementation as publicly reproducible.
 
 ## Evidence still required before external submission
 
-The application is not represented as submitted until the v1.0.1 public-clone
-proof passes, a demo or screenshot is published, and the required applicant
-resume is attached. These are tracked in [Guild application](guild-application.md).
+The application is not represented as submitted until a demo or screenshot is
+published and the required applicant resume is attached. These are tracked in
+[Guild application](guild-application.md).

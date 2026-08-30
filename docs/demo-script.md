@@ -1,8 +1,8 @@
 # Demo script
 
 The demo has two cuts. The architecture cut and factual Droid narration are
-ready; recording remains blocked until the hardened v1.0.1 tag passes its
-credential-free clone and immutable-release gates.
+ready for owner recording from the immutable v1.0.1 release. Its hardened
+candidate passed the credential-free clone gate before publication.
 
 The demo uses only the public repository. Do not open terminals, tabs, history,
 or files containing private infrastructure, model credentials, or personal

@@ -8,8 +8,8 @@
 
 The application is prepared but must not be submitted yet. The official Guild
 path requires real Factory work and a public link. The public repository is
-complete; the hardened v1.0.1 fresh-clone proof, final demo, and applicant
-materials remain explicit gates in
+complete and the hardened v1.0.1 fresh-clone proof passed. The final demo and
+applicant materials remain explicit gates in
 [`architecture/submission-readiness.json`](../architecture/submission-readiness.json).
 
 ## Current project description
@@ -132,7 +132,7 @@ the public repository:
 - [x] Factory contribution maturity changes from `pending_evidence` only after
       the receipt exists.
 - [x] Repository is published under the intended owner with an MIT license.
-- [ ] Hardened v1.0.1 release candidate passes `make validate` from a credential-free
+- [x] Hardened v1.0.1 release candidate passes `make validate` from a credential-free
       clone.
 - [x] Public repository and article links resolve without authentication.
 - [ ] Demo clip or screenshots show a real Factory task and validation result.

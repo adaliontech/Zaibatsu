@@ -49,18 +49,15 @@
     },
     {
       "id": "fresh_clone_reproduction",
-      "status": "pending_external",
+      "status": "complete",
       "required_for_submission": true,
-      "evidence": "The v1.0.0 clone proof remains recorded; the hardened v1.0.1 candidate must pass all 59 tests, repository validation, workflow linting, strict Git checks, and history/tree secret scans from the public remote"
+      "evidence": "Credential-free public clone of hardened candidate 3cf2d53f46e8531837acca7f5b3afacdfb12f35a passed all 59 tests, repository validation, workflow linting, strict Git checks, symlink denial, and Gitleaks 8.30.1 history/tree scans; its GitHub Actions run 33283633785 also passed"
     },
     {
       "id": "public_demo",
-      "status": "blocked_by_dependency",
+      "status": "pending_external",
       "required_for_submission": true,
-      "evidence": "Public URL and final Guild narration are ready; recording waits for the hardened v1.0.1 fresh-clone gate",
-      "blocked_by": [
-        "fresh_clone_reproduction"
-      ]
+      "evidence": "Public URL, hardened clone proof, and final Guild narration are ready; owner records and publishes the final clip or screenshots from the immutable v1.0.1 release"
     },
     {
       "id": "applicant_materials",
