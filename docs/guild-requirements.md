@@ -63,7 +63,7 @@ path.
 | Real public project | This repository | Public and anonymously reachable |
 | Clear README | [`README.md`](../README.md) | Complete |
 | License | [`LICENSE`](../LICENSE) | Complete |
-| Runnable quickstart | [`docs/reproducibility.md`](reproducibility.md) | The v1.7.0 source-lock candidate passed its 173-test full-history clone, independent CI, Gitleaks, schema, and deterministic-artifact proof; immutable release proof remains |
+| Runnable quickstart | [`docs/reproducibility.md`](reproducibility.md) | Immutable v1.7.0 passed its 173-test full-history candidate and tag clones, independent CI, Gitleaks, tagged-schema, and deterministic-artifact proof |
 | Reusable value | [`examples/economic-factory.json`](../examples/economic-factory.json), [cron variant](../examples/economic-factory-cron.json), [`catalog/modules.json`](../catalog/modules.json), [source lock](../examples/economic-factory.source-lock.json), [qualification policy](../policies/runtime-qualification-v1.json), [partial assessment](../examples/economic-factory.qualification-assessment.json), and [`scripts/zaibatsu.py`](../scripts/zaibatsu.py) | Another project can scaffold a fail-closed definition, reproduce and inspect a self-verifying control bundle, bind it to exact annotated-release control sources, compare a policy-compatible module substitution, generate a missing-evidence plan, derive bundle-proven contract receipts, and assess the exact remaining qualification gaps offline |
 | Explain Factory/Droid role | [`docs/droid-session.md`](droid-session.md) | Authenticated session, scoped diff, and independent validation recorded |
 | End-to-end case study | [`docs/case-study.md`](case-study.md) | Factory-of-software-factories narrative and real Droid result complete |
@@ -86,6 +86,5 @@ clean-clone gates, and v1.4.0 is now an immutable public release. The v1.5.0
 qualification-planning candidate and immutable release passed the same public
 proof. The v1.6.0 bundle-derived qualification-evidence candidate passed that
 proof, and its immutable release passed tag CI and clone reproduction. The
-v1.7.0 source-lock candidate passed its independent public-clone and CI proof;
-immutable release proof, the final clip, and applicant-owned form submission
-remain.
+v1.7.0 source-lock candidate and immutable release passed the complete public
+boundary. The final clip and applicant-owned form submission remain.

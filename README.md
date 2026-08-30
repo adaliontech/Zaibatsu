@@ -468,7 +468,8 @@ same 163-test credential-disabled clone and independent-CI boundary; immutable
 applicant-owned form materials remain external submission gates. The `v1.7.0`
 annotated-release control-source-lock candidate passed its own 173-test
 full-history clone, schema, secret-scan, determinism, and independent-CI
-boundary; immutable release proof remains next.
+boundary; immutable `v1.7.0` and its full-history tag clone passed the complete
+release proof.
 
 Zaibatsu is an independent project and is not affiliated with or endorsed by
 Factory AI.

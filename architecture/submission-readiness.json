@@ -105,7 +105,7 @@
       "id": "public_demo",
       "status": "pending_external",
       "required_for_submission": true,
-      "evidence": "The source-lock candidate passed fresh-clone proof; record and publish the final clip only after immutable v1.7.0 passes its release proof"
+      "evidence": "Immutable v1.7.0 passed roof CI, tag CI, tagged-schema byte checks, and full-history credential-disabled tag-clone reproduction; record and publish the final clip from that tag"
     },
     {
       "id": "applicant_materials",
