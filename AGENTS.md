@@ -10,6 +10,8 @@
 - Byte-stable rebuild: `python3 scripts/zaibatsu.py rebuild-check examples/economic-factory.json`
 - Portable bundle: `python3 scripts/zaibatsu.py bundle examples/economic-factory.json --output /tmp/example-product.factory.tar`
 - Bundle proof: `python3 scripts/zaibatsu.py verify-bundle /tmp/example-product.factory.tar`
+- Bundle inspection: `python3 scripts/zaibatsu.py inspect-bundle /tmp/example-product.factory.tar`
+- Module-change comparison: build the cron example, then run `python3 scripts/zaibatsu.py compare-bundles /tmp/example-product.factory.tar /tmp/example-product-cron.factory.tar`
 - Tests only: `python3 -m unittest discover -s tests -v`
 - Deferred local-model preflight: `make droid-preflight`
 

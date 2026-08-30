@@ -28,8 +28,8 @@ and redacted status ledger without receiving production access.
 
 | Evidence | Status | Receipt |
 | --- | --- | --- |
-| Architecture validator | Passed locally and from the public candidate | 60 required files, 13 components, 3 current software factories, 1 portable definition, 10 catalog modules and content-addressed artifacts, 1 resolved plan and bundle manifest, 11 meta-factory capabilities, 4 evidence receipts, 9 meta-factory invariants, 8 component invariants, and 10 submission gates checked |
-| Adversarial unit tests | Passed locally and from the public candidate | 136 of 136 tests passed locally, in a credential-disabled public clone, and in independent GitHub Actions |
+| Architecture validator | Passed locally after bundle-comparison expansion | 63 required files, 13 components, 3 current software factories, 2 portable definition variants, 10 catalog modules and content-addressed artifacts, 1 resolved plan and bundle manifest, 2 inspection/comparison schemas, 11 meta-factory capabilities, 4 evidence receipts, 9 meta-factory invariants, 8 component invariants, and 10 submission gates checked; current candidate reproduction remains pending |
+| Adversarial unit tests | Passed locally after bundle-comparison expansion | 143 of 143 tests passed; current candidate CI and credential-disabled fresh-clone proof remain pending |
 | Broken-link and public-safety scan | Passed after release hardening | Git-tracked and non-ignored files are inspected; force-added ignored paths, directory-name bypasses, all symlinks, Git submodules, Linux/macOS/Windows home paths, tailnet DNS, IPv4/IPv6, credential patterns, opaque content regardless of media suffix, invalid UTF-8, and local links fail closed |
 | Malformed-input robustness | Passed 2026-08-30 | 5,000 seeded JSON-like cases produced 50,000 calls across architecture, factory, readiness, consistency, and all four evidence validators with zero unhandled exceptions (seed `20260830`) |
 | Module-composition malformed-input robustness | Passed locally 2026-08-30 | 10,000 seeded JSON-like cases produced 40,000 calls across catalog, binding, plan, and portable-factory validators with zero unhandled exceptions (seed `20260830`) |
@@ -50,7 +50,8 @@ and redacted status ledger without receiving production access.
 | Fresh-clone reproduction | Passed for v1.1.2 candidate | Credential-disabled public clone of `03d325241c81dec4c83629d36dd4aff3b5e2cf92` passed all 95 tests, schema and receipt contracts, strict Git checks, and Gitleaks 8.30.1 history/tree scans; [GitHub Actions run 33319815603](https://github.com/adaliontech/Zaibatsu/actions/runs/33319815603) independently passed |
 | v1.2.0 candidate proof | Passed | Credential-disabled public clone of `d42831e7d6fa367f225fb4a6e489391ad3856e9a` passed all 114 tests, schema and receipt contracts, strict Git checks, and Gitleaks 8.30.1 history/tree scans; [GitHub Actions run 33332863314](https://github.com/adaliontech/Zaibatsu/actions/runs/33332863314) independently passed |
 | v1.3.0 candidate proof | Passed | Credential-disabled public clone of `373666ca1d107bc326e01dc8bf9d41037af53089` passed all 136 tests, schema and receipt contracts, strict Git checks, Gitleaks 8.30.1 history/tree scans, and two byte-identical bundle builds with SHA-256 `d4918fd16f55b907a0b2b9734422d7106d3030a511e5cae5d6efc1cb7b253aba`; [GitHub Actions run 33333876277](https://github.com/adaliontech/Zaibatsu/actions/runs/33333876277) independently passed |
-| Demo recording | Pending applicant action | Immutable v1.3.0 is public; record from that tag using the [Demo script](demo-script.md) |
+| v1.4.0 candidate proof | Pending | Verified inspection, semantic comparison, and the public systemd/cron substitution require candidate CI, strict Git checks, Gitleaks, and a credential-disabled clone before release |
+| Demo recording | Blocked on the current immutable release; applicant action follows | Record from the final released tag using the [Demo script](demo-script.md) |
 
 ## Architecture claims
 

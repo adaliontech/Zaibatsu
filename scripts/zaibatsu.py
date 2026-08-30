@@ -5,11 +5,20 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
+import stat
 import sys
 from pathlib import Path
 from typing import Any
 
-from factory_bundle import build_factory_bundle, sha256_bytes, verify_factory_bundle
+from factory_bundle import (
+    build_factory_bundle,
+    compare_factory_bundles,
+    inspect_factory_bundle,
+    MAX_BUNDLE_BYTES,
+    sha256_bytes,
+    verify_factory_bundle,
+)
 from factory_composer import (
     MODULE_CATALOG_PATH,
     build_factory_plan,
@@ -91,24 +100,51 @@ def write_document(document: dict[str, Any], output: str | None) -> int:
         sys.stdout.write(rendered)
         return 0
     path = Path(output)
-    if path.exists() or path.is_symlink():
-        print(f"refusing to overwrite existing path: {path}", file=sys.stderr)
+    descriptor = new_output_descriptor(path)
+    if descriptor is None:
         return 2
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(rendered, encoding="utf-8")
+    try:
+        with os.fdopen(descriptor, "w", encoding="utf-8") as stream:
+            stream.write(rendered)
+    except OSError as exc:
+        print(f"cannot write output path {path}: {exc}", file=sys.stderr)
+        return 2
     print(f"created {path}")
     return 0
 
 
 def write_binary(value: bytes, output: str) -> int:
     path = Path(output)
-    if path.exists() or path.is_symlink():
-        print(f"refusing to overwrite existing path: {path}", file=sys.stderr)
+    descriptor = new_output_descriptor(path)
+    if descriptor is None:
         return 2
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_bytes(value)
+    try:
+        with os.fdopen(descriptor, "wb") as stream:
+            stream.write(value)
+    except OSError as exc:
+        print(f"cannot write output path {path}: {exc}", file=sys.stderr)
+        return 2
     print(f"created {path}")
     return 0
+
+
+def new_output_descriptor(path: Path) -> int | None:
+    """Create a new output without a check-then-open overwrite race."""
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        return os.open(
+            path,
+            os.O_WRONLY
+            | os.O_CREAT
+            | os.O_EXCL
+            | getattr(os, "O_NOFOLLOW", 0),
+            0o644,
+        )
+    except FileExistsError:
+        print(f"refusing to overwrite existing path: {path}", file=sys.stderr)
+    except OSError as exc:
+        print(f"cannot create output path {path}: {exc}", file=sys.stderr)
+    return None
 
 
 def load_json_document(path: str, label: str) -> Any | None:
@@ -240,13 +276,36 @@ def command_bundle(path: str, catalog_path: str, output: str) -> int:
     return result
 
 
-def command_verify_bundle(path: str) -> int:
+def load_bundle(path: str, label: str) -> bytes | None:
     bundle_path = Path(path)
+    descriptor: int | None = None
     try:
-        bundle = bundle_path.read_bytes()
+        flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0)
+        descriptor = os.open(bundle_path, flags)
+        metadata = os.fstat(descriptor)
+        if not stat.S_ISREG(metadata.st_mode):
+            raise OSError("input must be a regular file")
+        if metadata.st_size <= 0 or metadata.st_size > MAX_BUNDLE_BYTES:
+            raise OSError("input size is outside the accepted bundle boundary")
+        with os.fdopen(descriptor, "rb") as stream:
+            descriptor = None
+            bundle = stream.read(MAX_BUNDLE_BYTES + 1)
+        if len(bundle) != metadata.st_size:
+            raise OSError("input changed while it was being read")
     except OSError as exc:
-        print(f"cannot load factory bundle: {exc}", file=sys.stderr)
+        print(f"cannot load {label}: {exc}", file=sys.stderr)
+        return None
+    finally:
+        if descriptor is not None:
+            os.close(descriptor)
+    return bundle
+
+
+def command_verify_bundle(path: str) -> int:
+    bundle = load_bundle(path, "factory bundle")
+    if bundle is None:
         return 2
+    bundle_path = Path(path)
     errors, result = verify_factory_bundle(bundle)
     if errors or result is None:
         print(f"factory bundle failed: {bundle_path}", file=sys.stderr)
@@ -258,6 +317,37 @@ def command_verify_bundle(path: str) -> int:
     print(f"plan sha256: {result['plan_sha256']}")
     print(f"bundle sha256: {result['bundle_sha256']}")
     return 0
+
+
+def command_inspect_bundle(path: str, output: str | None) -> int:
+    bundle = load_bundle(path, "factory bundle")
+    if bundle is None:
+        return 2
+    errors, inspection = inspect_factory_bundle(bundle)
+    if errors or inspection is None:
+        print(f"factory bundle failed: {path}", file=sys.stderr)
+        for error in errors:
+            print(f"- {error}", file=sys.stderr)
+        return 1
+    return write_document(inspection, output)
+
+
+def command_compare_bundles(
+    before_path: str,
+    after_path: str,
+    output: str | None,
+) -> int:
+    before = load_bundle(before_path, "before factory bundle")
+    after = load_bundle(after_path, "after factory bundle")
+    if before is None or after is None:
+        return 2
+    errors, comparison = compare_factory_bundles(before, after)
+    if errors or comparison is None:
+        print("factory bundle comparison failed", file=sys.stderr)
+        for error in errors:
+            print(f"- {error}", file=sys.stderr)
+        return 1
+    return write_document(comparison, output)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -308,6 +398,21 @@ def build_parser() -> argparse.ArgumentParser:
     )
     verify_bundle.add_argument("path")
 
+    inspect_bundle = commands.add_parser(
+        "inspect-bundle", help="inspect a verified factory control bundle"
+    )
+    inspect_bundle.add_argument("path")
+    inspect_bundle.add_argument("--output", help="write inspection JSON to a new file")
+
+    compare_bundles = commands.add_parser(
+        "compare-bundles", help="compare two verified factory control bundles"
+    )
+    compare_bundles.add_argument("before_path")
+    compare_bundles.add_argument("after_path")
+    compare_bundles.add_argument(
+        "--output", help="write comparison JSON to a new file"
+    )
+
     scaffold = commands.add_parser("scaffold", help="create a safe factory skeleton")
     scaffold.add_argument("--id", required=True, dest="factory_id")
     scaffold.add_argument(
@@ -340,6 +445,14 @@ def main() -> int:
         return command_bundle(arguments.path, arguments.catalog, arguments.output)
     if arguments.command == "verify-bundle":
         return command_verify_bundle(arguments.path)
+    if arguments.command == "inspect-bundle":
+        return command_inspect_bundle(arguments.path, arguments.output)
+    if arguments.command == "compare-bundles":
+        return command_compare_bundles(
+            arguments.before_path,
+            arguments.after_path,
+            arguments.output,
+        )
     document = factory_template(
         arguments.factory_id,
         arguments.factory_class,

@@ -13,7 +13,9 @@ v1.1.1 independently passed the same public boundary. The bounded v1.1.2
 portable-schema correction and v1.2.0 deterministic module-composition release
 passed their own public clone and CI proofs. The v1.3.0 portable-bundle
 candidate passed the same proof and is now an immutable public release; the
-final demo and applicant materials remain explicit gates in
+v1.4.0 verified-inspection and semantic-comparison follow-up now requires its
+own public proof. The final demo and applicant materials remain explicit gates
+in
 [`architecture/submission-readiness.json`](../architecture/submission-readiness.json).
 
 ## Current project description
@@ -49,7 +51,7 @@ new test moves `policy_decision` before `verify`; the pre-change validator
 accepted that unsafe ordering, while the shipped validator rejects it with a
 deterministic adjacent-stage error. Droid reported 36 passing tests, and an
 independent run reproduced all 36 before later integration, branding, release,
-and meta-factory checks brought the package to 136 passing tests. No model or
+and meta-factory checks brought the package to 143 passing tests. No model or
 Factory credential is published.
 
 ## One-line description
@@ -159,6 +161,8 @@ the public repository:
       credential-free public clone.
 - [x] Portable-bundle v1.3.0 candidate passes 136 tests, Gitleaks, byte-stable
       bundle reproduction, and independent CI from the public boundary.
+- [ ] Bundle-inspection v1.4.0 candidate passes 143 tests, semantic
+      systemd/cron comparison, Gitleaks, and independent public CI.
 - [x] Public repository and article links resolve without authentication.
 - [ ] Demo clip or screenshots show a real Factory task and validation result.
 - [x] No private host, credential, recovery, or deployment detail is exposed.

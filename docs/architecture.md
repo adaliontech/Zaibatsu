@@ -77,6 +77,14 @@ reads it entirely in memory and refuses traversal paths, links, special files,
 duplicates, extras, noncanonical metadata or JSON, payload drift, schema drift,
 and trailing bytes. It then reproduces the exact archive bytes.
 
+`inspect-bundle` exposes only a stable projection of a fully verified bundle:
+factory identity, source digests, selected modules, rebuild claims, and the
+explicit reason it is not runtime-eligible. `compare-bundles` verifies both
+archives before reporting definition, catalog, plan, module, or schema
+changes. The public systemd and cron variants demonstrate that scheduler
+selection is modular while leaving the shared catalog, schemas, and
+least-authority boundary unchanged.
+
 This boundary is deliberately narrower than infrastructure reproduction. The
 plan and bundle own no side-effect authority and explicitly state that they
 contain no runtime implementations, deploy no infrastructure, and prove no

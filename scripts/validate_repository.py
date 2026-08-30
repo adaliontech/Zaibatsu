@@ -68,6 +68,7 @@ REQUIRED_FILES = (
     "catalog/modules.json",
     *MODULE_ARTIFACT_RELATIVES,
     "examples/economic-factory.json",
+    "examples/economic-factory-cron.json",
     "examples/economic-factory.bundle-manifest.json",
     "examples/economic-factory.plan.json",
     "evidence/dispatcher-validation-v1.json",
@@ -88,6 +89,8 @@ REQUIRED_FILES = (
     "schemas/dispatcher-validation-receipt.schema.json",
     "schemas/droid-contribution-receipt.schema.json",
     "schemas/factory-definition.schema.json",
+    "schemas/factory-bundle-comparison.schema.json",
+    "schemas/factory-bundle-inspection.schema.json",
     "schemas/factory-bundle-manifest.schema.json",
     "schemas/factory-plan.schema.json",
     "schemas/factory-model.schema.json",
@@ -121,7 +124,7 @@ ARCHITECTURE_SCHEMA_VERSION = "zaibatsu.architecture.v1"
 FACTORY_MODEL_SCHEMA_VERSION = "zaibatsu.factory-model.v1"
 READINESS_SCHEMA_VERSION = "zaibatsu.submission-readiness.v1"
 FACTORY_DEFINITION_SCHEMA_VERSION = "zaibatsu.factory-definition.v2"
-INTEGRATED_TEST_COUNT = 136
+INTEGRATED_TEST_COUNT = 143
 DROID_FACTORY_CLI_VERSION = "0.206.0"
 DROID_SESSION_REFERENCE = "46f941a9-82f8-4df3-a45c-b8158996360b"
 PUBLIC_REPOSITORY_URL = "https://github.com/adaliontech/Zaibatsu"
@@ -164,6 +167,7 @@ CONTRACT_SCHEMA_REFERENCES = {
         for relative in MODULE_ARTIFACT_RELATIVES
     },
     "examples/economic-factory.json": PORTABLE_FACTORY_SCHEMA_REFERENCE,
+    "examples/economic-factory-cron.json": PORTABLE_FACTORY_SCHEMA_REFERENCE,
     "examples/economic-factory.bundle-manifest.json": BUNDLE_MANIFEST_SCHEMA_REFERENCE,
     "examples/economic-factory.plan.json": FACTORY_PLAN_SCHEMA_REFERENCE,
     "evidence/dispatcher-validation-v1.json": "../schemas/dispatcher-validation-receipt.schema.json",
@@ -179,6 +183,7 @@ REMOTE_SCHEMA_LOCAL_PATHS = {
         for relative in MODULE_ARTIFACT_RELATIVES
     },
     "examples/economic-factory.json": "schemas/factory-definition.schema.json",
+    "examples/economic-factory-cron.json": "schemas/factory-definition.schema.json",
     "examples/economic-factory.bundle-manifest.json": (
         "schemas/factory-bundle-manifest.schema.json"
     ),
@@ -1256,6 +1261,7 @@ def validate_submission_readiness(data: Any) -> list[str]:
                     "architecture/submission-readiness.json",
                     "catalog/modules.json",
                     "examples/economic-factory.json",
+                    "examples/economic-factory-cron.json",
                     "examples/economic-factory.bundle-manifest.json",
                     "examples/economic-factory.plan.json",
                 }
@@ -1834,8 +1840,8 @@ def main() -> int:
         f"{len(factory_model['capabilities'])} meta-factory capabilities checked"
     )
     print(
-        "- reusable factory definition, content-addressed modules, control plan, "
-        "and bundle manifest checked"
+        "- 2 reusable factory definitions, content-addressed modules, control "
+        "plan, bundle manifest, and inspection schemas checked"
     )
     print(f"- {len(EVIDENCE_CONTRACTS)} evidence receipts checked")
     print(f"- {len(REQUIRED_FACTORY_INVARIANTS)} meta-factory invariants checked")

@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.4.0/schemas/factory-bundle-comparison.schema.json",
+  "title": "Zaibatsu verified factory-bundle comparison",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_schema", "schema_version", "changed", "before", "after", "changes", "runtime_boundary_preserved"],
+  "properties": {
+    "contract_schema": {"const": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.4.0/schemas/factory-bundle-comparison.schema.json"},
+    "schema_version": {"const": "zaibatsu.factory-bundle-comparison.v1"},
+    "changed": {"type": "boolean"},
+    "before": {"$ref": "factory-bundle-inspection.schema.json"},
+    "after": {"$ref": "factory-bundle-inspection.schema.json"},
+    "changes": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["factory_identity_changed", "factory_definition_changed", "module_catalog_changed", "factory_plan_changed", "modules", "schemas"],
+      "properties": {
+        "factory_identity_changed": {"type": "boolean"},
+        "factory_definition_changed": {"type": "boolean"},
+        "module_catalog_changed": {"type": "boolean"},
+        "factory_plan_changed": {"type": "boolean"},
+        "modules": {
+          "type": "array",
+          "maxItems": 9,
+          "items": {"$ref": "#/$defs/moduleChange"}
+        },
+        "schemas": {
+          "type": "array",
+          "maxItems": 7,
+          "items": {"$ref": "#/$defs/schemaChange"}
+        }
+      }
+    },
+    "runtime_boundary_preserved": {"const": true}
+  },
+  "$defs": {
+    "nullableSha256": {
+      "anyOf": [
+        {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        {"type": "null"}
+      ]
+    },
+    "nullableModule": {
+      "anyOf": [
+        {"$ref": "factory-bundle-inspection.schema.json#/$defs/selectedModule"},
+        {"type": "null"}
+      ]
+    },
+    "moduleChange": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["slot", "change", "before", "after"],
+      "properties": {
+        "slot": {"enum": ["source_versioning", "static_secrets", "runtime_secrets", "host_reproduction", "worker_environment", "scheduling", "execution", "verification", "feedback"]},
+        "change": {"enum": ["added", "removed", "implementation_replaced", "artifact_changed"]},
+        "before": {"$ref": "#/$defs/nullableModule"},
+        "after": {"$ref": "#/$defs/nullableModule"}
+      }
+    },
+    "schemaChange": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "before_sha256", "after_sha256"],
+      "properties": {
+        "path": {"type": "string", "pattern": "^schemas/[a-z0-9-]+\\.schema\\.json$"},
+        "before_sha256": {"$ref": "#/$defs/nullableSha256"},
+        "after_sha256": {"$ref": "#/$defs/nullableSha256"}
+      }
+    }
+  }
+}

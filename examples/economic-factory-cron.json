@@ -1,0 +1,57 @@
+{
+  "contract_schema": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.2.0/schemas/factory-definition.schema.json",
+  "schema_version": "zaibatsu.factory-definition.v2",
+  "factory": {
+    "id": "example-product",
+    "class": "economic_factory",
+    "maturity": "planned",
+    "purpose": "Produce a bounded software product without inheriting another factory's authority"
+  },
+  "versioning_policy": {
+    "source_and_intended_state": "git",
+    "encrypted_static_secrets": "sops_age",
+    "runtime_secrets": "bounded_secret_manager",
+    "plaintext_secrets_in_git": false
+  },
+  "reproducibility_policy": {
+    "host_configuration": "ansible",
+    "worker_environments": "nix",
+    "nix_maturity": "planned",
+    "nix_cross_node_proof": false
+  },
+  "scheduling_policy": {
+    "scheduler_of_record": "cron",
+    "one_scheduler_of_record_per_workload": true
+  },
+  "agent_policy": {
+    "skeleton_status": "planned",
+    "harness_binding": "model_independent_typed_ports",
+    "deterministic_gates": [
+      "schemas",
+      "linters",
+      "tests",
+      "hashes",
+      "policy",
+      "receipts",
+      "owner_approval"
+    ],
+    "model_may_authorize_external_effect": false
+  },
+  "feedback_policy": {
+    "return_evidence": true,
+    "promotion_authority": "reviewed_deterministic_policy_and_owner_gate",
+    "factory_may_self_promote": false
+  },
+  "module_bindings": [
+    {"slot": "source_versioning", "module": "git-source"},
+    {"slot": "static_secrets", "module": "sops-age-static-secrets"},
+    {"slot": "runtime_secrets", "module": "bounded-runtime-secrets"},
+    {"slot": "host_reproduction", "module": "ansible-host-reproduction"},
+    {"slot": "worker_environment", "module": "nix-worker-environment"},
+    {"slot": "scheduling", "module": "cron-scheduler"},
+    {"slot": "execution", "module": "typed-agent-execution"},
+    {"slot": "verification", "module": "deterministic-verification"},
+    {"slot": "feedback", "module": "owner-gated-feedback"}
+  ],
+  "evidence_bindings": []
+}

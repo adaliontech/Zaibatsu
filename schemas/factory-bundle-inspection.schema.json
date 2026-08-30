@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.4.0/schemas/factory-bundle-inspection.schema.json",
+  "title": "Zaibatsu verified factory-bundle inspection",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_schema", "schema_version", "bundle_sha256", "factory", "source", "selected_modules", "rebuild_claim", "runtime_eligibility"],
+  "properties": {
+    "contract_schema": {"const": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.4.0/schemas/factory-bundle-inspection.schema.json"},
+    "schema_version": {"const": "zaibatsu.factory-bundle-inspection.v1"},
+    "bundle_sha256": {"$ref": "#/$defs/sha256"},
+    "factory": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "class"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+        "class": {"enum": ["control_factory", "economic_factory"]}
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["factory_definition_sha256", "module_catalog_sha256", "factory_plan_sha256", "module_api_version"],
+      "properties": {
+        "factory_definition_sha256": {"$ref": "#/$defs/sha256"},
+        "module_catalog_sha256": {"$ref": "#/$defs/sha256"},
+        "factory_plan_sha256": {"$ref": "#/$defs/sha256"},
+        "module_api_version": {"const": "zaibatsu.module.v1"}
+      }
+    },
+    "selected_modules": {
+      "type": "array",
+      "minItems": 9,
+      "maxItems": 9,
+      "items": {"$ref": "#/$defs/selectedModule"}
+    },
+    "rebuild_claim": {"$ref": "#/$defs/rebuildClaim"},
+    "runtime_eligibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["eligible", "reason"],
+      "properties": {
+        "eligible": {"const": false},
+        "reason": {"const": "control_bundle_contains_no_runtime_implementations"}
+      }
+    }
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "selectedModule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["position", "slot", "module", "artifact_sha256"],
+      "properties": {
+        "position": {"type": "integer", "minimum": 0, "maximum": 8},
+        "slot": {"enum": ["source_versioning", "static_secrets", "runtime_secrets", "host_reproduction", "worker_environment", "scheduling", "execution", "verification", "feedback"]},
+        "module": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+        "artifact_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "rebuildClaim": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["scope", "byte_reproducible", "contains_selected_module_contracts", "contains_contract_schemas", "contains_runtime_implementations", "deploys_infrastructure", "proves_runtime_recovery"],
+      "properties": {
+        "scope": {"const": "portable_control_bundle"},
+        "byte_reproducible": {"const": true},
+        "contains_selected_module_contracts": {"const": true},
+        "contains_contract_schemas": {"const": true},
+        "contains_runtime_implementations": {"const": false},
+        "deploys_infrastructure": {"const": false},
+        "proves_runtime_recovery": {"const": false}
+      }
+    }
+  }
+}

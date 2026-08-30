@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.4.0 - Unreleased
+
+- Added stable `inspect-bundle` output for verified bundle identity, source
+  digests, selected modules, rebuild claims, and explicit runtime ineligibility.
+- Added `compare-bundles` semantic comparison for factory, input, module, and
+  schema changes. Both inputs must pass full canonical bundle verification.
+- Added a public cron-scheduled variant of the example factory. Comparing it
+  with the systemd variant reports one scheduling implementation replacement,
+  an unchanged catalog and schemas, and the preserved no-runtime boundary.
+- Bounded bundle reads before allocation and rejected symlink, non-regular,
+  changing, empty, or oversized CLI inputs.
+- Made CLI output creation OS-exclusive so existing paths cannot be overwritten
+  through a check-then-open race.
+- Expanded the public adversarial suite from 136 to 143 tests.
+
 ## 1.3.0 - 2026-08-30
 
 - Added individually content-addressed module contract artifacts for every

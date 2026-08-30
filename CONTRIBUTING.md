@@ -34,6 +34,9 @@ must also update the catalog, regenerate the example plan, and add a drift or
 compatibility test. Regenerate the example bundle manifest and exercise
 `bundle` plus `verify-bundle` whenever a selected artifact, plan, or bundled
 schema changes; do not commit generated tar archives.
+Changes to inspection or comparison behavior must prove that invalid bundles
+are rejected before a semantic result is emitted and that the result preserves
+the bundle's non-authorizing runtime boundary.
 
 ## Pull request evidence
 

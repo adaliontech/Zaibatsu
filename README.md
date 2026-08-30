@@ -233,6 +233,8 @@ python3 scripts/zaibatsu.py bundle examples/economic-factory.json \
   --output /tmp/example-product.factory.tar
 python3 scripts/zaibatsu.py verify-bundle \
   /tmp/example-product.factory.tar
+python3 scripts/zaibatsu.py inspect-bundle \
+  /tmp/example-product.factory.tar
 ```
 
 The uncompressed USTAR bundle is byte-reproducible and includes the canonical
@@ -243,6 +245,23 @@ members, noncanonical metadata or JSON, schema or payload tampering, and
 trailing data. The bundle contains **contracts, not runtimes**: every module
 artifact explicitly says that no implementation, entrypoint, environment lock,
 deployment authority, or runtime-recovery proof is included.
+
+To inspect a real module substitution, build the cron-scheduled public variant
+and compare the two verified bundles:
+
+```bash
+python3 scripts/zaibatsu.py bundle examples/economic-factory-cron.json \
+  --output /tmp/example-product-cron.factory.tar
+python3 scripts/zaibatsu.py compare-bundles \
+  /tmp/example-product.factory.tar \
+  /tmp/example-product-cron.factory.tar
+```
+
+The comparison reports one `scheduling` implementation replacement from
+`systemd-scheduler` to `cron-scheduler`. The module catalog and five schemas
+remain unchanged, while the factory definition and resolved plan receive new
+content digests. Both sides still report runtime ineligible: comparison proves
+a modular control-contract change, not scheduler activation.
 
 ## Factory AI and local Qwen
 
@@ -271,8 +290,9 @@ and the complete repository suite was rerun independently.
   feedback.
 - [Component architecture](architecture/system.json) — planes, components,
   task flow, and fail-closed invariants.
-- [Portable factory definition](examples/economic-factory.json) — reusable
-  contract for a new control or economic factory.
+- [Portable factory definitions](examples/economic-factory.json) — reusable
+  systemd and [cron](examples/economic-factory-cron.json) contract variants
+  for a new control or economic factory.
 - [Reusable module catalog](catalog/modules.json), [module contract
   artifacts](catalog/modules/), [example control
   plan](examples/economic-factory.plan.json), and [bundle

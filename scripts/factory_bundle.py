@@ -6,6 +6,7 @@ from __future__ import annotations
 import hashlib
 import io
 import tarfile
+from copy import deepcopy
 from pathlib import Path, PurePosixPath
 from typing import Any
 
@@ -24,6 +25,16 @@ from factory_composer import (
 
 
 BUNDLE_MANIFEST_SCHEMA_VERSION = "zaibatsu.factory-bundle-manifest.v1"
+BUNDLE_INSPECTION_SCHEMA_VERSION = "zaibatsu.factory-bundle-inspection.v1"
+BUNDLE_COMPARISON_SCHEMA_VERSION = "zaibatsu.factory-bundle-comparison.v1"
+BUNDLE_INSPECTION_SCHEMA_REFERENCE = (
+    "https://raw.githubusercontent.com/adaliontech/Zaibatsu/"
+    "v1.4.0/schemas/factory-bundle-inspection.schema.json"
+)
+BUNDLE_COMPARISON_SCHEMA_REFERENCE = (
+    "https://raw.githubusercontent.com/adaliontech/Zaibatsu/"
+    "v1.4.0/schemas/factory-bundle-comparison.schema.json"
+)
 BUNDLE_MANIFEST_SCHEMA_REFERENCE = (
     "https://raw.githubusercontent.com/adaliontech/Zaibatsu/"
     "v1.3.0/schemas/factory-bundle-manifest.schema.json"
@@ -374,3 +385,154 @@ def verify_factory_bundle(bundle: bytes) -> tuple[list[str], dict[str, Any] | No
         "factory_id": definition["factory"]["id"],
         "manifest": manifest,
     }
+
+
+def inspect_verified_bundle(result: dict[str, Any]) -> dict[str, Any]:
+    """Project a verified bundle into a stable, non-authorizing summary."""
+    manifest = result["manifest"]
+    claim = manifest["rebuild_claim"]
+    return {
+        "contract_schema": BUNDLE_INSPECTION_SCHEMA_REFERENCE,
+        "schema_version": BUNDLE_INSPECTION_SCHEMA_VERSION,
+        "bundle_sha256": result["bundle_sha256"],
+        "factory": deepcopy(manifest["factory"]),
+        "source": deepcopy(manifest["source"]),
+        "selected_modules": deepcopy(manifest["selected_modules"]),
+        "rebuild_claim": deepcopy(claim),
+        "runtime_eligibility": {
+            "eligible": False,
+            "reason": "control_bundle_contains_no_runtime_implementations",
+        },
+    }
+
+
+def inspect_factory_bundle(
+    bundle: bytes,
+) -> tuple[list[str], dict[str, Any] | None]:
+    errors, result = verify_factory_bundle(bundle)
+    if errors or result is None:
+        return errors, None
+    return [], inspect_verified_bundle(result)
+
+
+def _selected_modules_by_slot(
+    inspection: dict[str, Any],
+) -> dict[str, dict[str, Any]]:
+    return {module["slot"]: module for module in inspection["selected_modules"]}
+
+
+def _changed_modules(
+    before: dict[str, Any], after: dict[str, Any]
+) -> list[dict[str, Any]]:
+    before_modules = _selected_modules_by_slot(before)
+    after_modules = _selected_modules_by_slot(after)
+    positions = {
+        module["slot"]: module["position"]
+        for module in before["selected_modules"] + after["selected_modules"]
+    }
+    changed: list[dict[str, Any]] = []
+    for slot in sorted(set(before_modules) | set(after_modules), key=positions.get):
+        prior = before_modules.get(slot)
+        current = after_modules.get(slot)
+        if prior == current:
+            continue
+        if prior is None:
+            change = "added"
+        elif current is None:
+            change = "removed"
+        elif prior["module"] != current["module"]:
+            change = "implementation_replaced"
+        else:
+            change = "artifact_changed"
+        changed.append(
+            {
+                "slot": slot,
+                "change": change,
+                "before": deepcopy(prior),
+                "after": deepcopy(current),
+            }
+        )
+    return changed
+
+
+def _schema_digests(manifest: dict[str, Any]) -> dict[str, str]:
+    return {
+        item["path"]: item["sha256"]
+        for item in manifest["files"]
+        if item["path"].startswith("schemas/")
+    }
+
+
+def _changed_schemas(
+    before_result: dict[str, Any], after_result: dict[str, Any]
+) -> list[dict[str, Any]]:
+    before = _schema_digests(before_result["manifest"])
+    after = _schema_digests(after_result["manifest"])
+    return [
+        {
+            "path": path,
+            "before_sha256": before.get(path),
+            "after_sha256": after.get(path),
+        }
+        for path in sorted(set(before) | set(after))
+        if before.get(path) != after.get(path)
+    ]
+
+
+def _has_non_authorizing_boundary(inspection: dict[str, Any]) -> bool:
+    claim = inspection["rebuild_claim"]
+    return (
+        inspection["runtime_eligibility"]["eligible"] is False
+        and claim["contains_runtime_implementations"] is False
+        and claim["deploys_infrastructure"] is False
+        and claim["proves_runtime_recovery"] is False
+    )
+
+
+def compare_verified_bundles(
+    before_result: dict[str, Any], after_result: dict[str, Any]
+) -> dict[str, Any]:
+    """Return one stable semantic comparison of two verified bundles."""
+    before = inspect_verified_bundle(before_result)
+    after = inspect_verified_bundle(after_result)
+    before_source = before["source"]
+    after_source = after["source"]
+    return {
+        "contract_schema": BUNDLE_COMPARISON_SCHEMA_REFERENCE,
+        "schema_version": BUNDLE_COMPARISON_SCHEMA_VERSION,
+        "changed": before["bundle_sha256"] != after["bundle_sha256"],
+        "before": before,
+        "after": after,
+        "changes": {
+            "factory_identity_changed": before["factory"] != after["factory"],
+            "factory_definition_changed": (
+                before_source["factory_definition_sha256"]
+                != after_source["factory_definition_sha256"]
+            ),
+            "module_catalog_changed": (
+                before_source["module_catalog_sha256"]
+                != after_source["module_catalog_sha256"]
+            ),
+            "factory_plan_changed": (
+                before_source["factory_plan_sha256"]
+                != after_source["factory_plan_sha256"]
+            ),
+            "modules": _changed_modules(before, after),
+            "schemas": _changed_schemas(before_result, after_result),
+        },
+        "runtime_boundary_preserved": _has_non_authorizing_boundary(
+            before
+        ) and _has_non_authorizing_boundary(after),
+    }
+
+
+def compare_factory_bundles(
+    before_bundle: bytes, after_bundle: bytes
+) -> tuple[list[str], dict[str, Any] | None]:
+    before_errors, before_result = verify_factory_bundle(before_bundle)
+    after_errors, after_result = verify_factory_bundle(after_bundle)
+    errors = [f"before bundle: {error}" for error in before_errors]
+    errors.extend(f"after bundle: {error}" for error in after_errors)
+    if errors or before_result is None or after_result is None:
+        return errors, None
+    return [], compare_verified_bundles(before_result, after_result)

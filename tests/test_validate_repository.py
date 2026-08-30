@@ -983,6 +983,9 @@ class ModuleCompositionTests(unittest.TestCase):
 class FactoryBundleTests(unittest.TestCase):
     def setUp(self) -> None:
         self.factory = validator.load_factory_definition()
+        self.cron_factory = composer.load_json_file(
+            validator.ROOT / "examples" / "economic-factory-cron.json"
+        )
         self.catalog = composer.load_module_catalog()
         self.plan = composer.load_factory_plan()
         self.artifacts, errors = composer.load_module_artifacts(self.catalog)
@@ -990,6 +993,28 @@ class FactoryBundleTests(unittest.TestCase):
         self.bundle, self.manifest = bundler.build_factory_bundle(
             self.factory, self.catalog, self.artifacts
         )
+
+    def _alternate_source_bundle(self) -> bytes:
+        factory = copy.deepcopy(self.factory)
+        catalog = copy.deepcopy(self.catalog)
+        artifacts = copy.deepcopy(self.artifacts)
+        module = next(item for item in catalog["modules"] if item["id"] == "git-source")
+        module["id"] = "alternate-git-source"
+        module["artifact"]["path"] = (
+            "modules/alternate-git-source/module.json"
+        )
+        artifact = composer.expected_module_artifact(module)
+        module["artifact"]["sha256"] = composer.sha256_json(artifact)
+        binding = next(
+            item
+            for item in factory["module_bindings"]
+            if item["slot"] == "source_versioning"
+        )
+        binding["module"] = "alternate-git-source"
+        artifacts.pop("git-source")
+        artifacts["alternate-git-source"] = artifact
+        bundle, _ = bundler.build_factory_bundle(factory, catalog, artifacts)
+        return bundle
 
     def test_bundle_round_trip_passes(self) -> None:
         errors, result = bundler.verify_factory_bundle(self.bundle)
@@ -1012,6 +1037,107 @@ class FactoryBundleTests(unittest.TestCase):
     def test_repository_bundle_manifest_matches_builder(self) -> None:
         recorded = composer.load_json_file(validator.EXAMPLE_BUNDLE_MANIFEST_PATH)
         self.assertEqual(self.manifest, recorded)
+
+    def test_bundle_inspection_is_stable_and_non_authorizing(self) -> None:
+        errors, inspection = bundler.inspect_factory_bundle(self.bundle)
+        self.assertEqual([], errors)
+        self.assertIsNotNone(inspection)
+        assert inspection is not None
+        second_errors, second = bundler.inspect_factory_bundle(self.bundle)
+        self.assertEqual([], second_errors)
+        self.assertEqual(inspection, second)
+        self.assertEqual(
+            bundler.BUNDLE_INSPECTION_SCHEMA_VERSION,
+            inspection["schema_version"],
+        )
+        schema = composer.load_json_file(
+            validator.ROOT / "schemas" / "factory-bundle-inspection.schema.json"
+        )
+        self.assertEqual(bundler.BUNDLE_INSPECTION_SCHEMA_REFERENCE, schema["$id"])
+        self.assertEqual(
+            bundler.BUNDLE_INSPECTION_SCHEMA_REFERENCE,
+            inspection["contract_schema"],
+        )
+        self.assertEqual(set(schema["required"]), set(inspection))
+        self.assertEqual(self.manifest["selected_modules"], inspection["selected_modules"])
+        self.assertFalse(inspection["runtime_eligibility"]["eligible"])
+        self.assertFalse(inspection["rebuild_claim"]["deploys_infrastructure"])
+
+    def test_same_bundle_comparison_has_no_changes(self) -> None:
+        errors, comparison = bundler.compare_factory_bundles(
+            self.bundle, self.bundle
+        )
+        self.assertEqual([], errors)
+        self.assertIsNotNone(comparison)
+        assert comparison is not None
+        self.assertFalse(comparison["changed"])
+        self.assertEqual([], comparison["changes"]["modules"])
+        self.assertEqual([], comparison["changes"]["schemas"])
+        self.assertFalse(comparison["changes"]["factory_identity_changed"])
+        self.assertFalse(comparison["changes"]["factory_definition_changed"])
+        self.assertFalse(comparison["changes"]["module_catalog_changed"])
+        self.assertFalse(comparison["changes"]["factory_plan_changed"])
+        self.assertTrue(comparison["runtime_boundary_preserved"])
+        schema = composer.load_json_file(
+            validator.ROOT / "schemas" / "factory-bundle-comparison.schema.json"
+        )
+        self.assertEqual(bundler.BUNDLE_COMPARISON_SCHEMA_REFERENCE, schema["$id"])
+        self.assertEqual(
+            bundler.BUNDLE_COMPARISON_SCHEMA_REFERENCE,
+            comparison["contract_schema"],
+        )
+        self.assertEqual(set(schema["required"]), set(comparison))
+
+    def test_compatible_substitution_comparison_is_narrow(self) -> None:
+        alternate = self._alternate_source_bundle()
+        errors, comparison = bundler.compare_factory_bundles(self.bundle, alternate)
+        self.assertEqual([], errors)
+        self.assertIsNotNone(comparison)
+        assert comparison is not None
+        self.assertTrue(comparison["changed"])
+        self.assertFalse(comparison["changes"]["factory_identity_changed"])
+        self.assertTrue(comparison["changes"]["factory_definition_changed"])
+        self.assertTrue(comparison["changes"]["module_catalog_changed"])
+        self.assertTrue(comparison["changes"]["factory_plan_changed"])
+        self.assertEqual([], comparison["changes"]["schemas"])
+        self.assertEqual(1, len(comparison["changes"]["modules"]))
+        module_change = comparison["changes"]["modules"][0]
+        self.assertEqual("source_versioning", module_change["slot"])
+        self.assertEqual("implementation_replaced", module_change["change"])
+        self.assertEqual("git-source", module_change["before"]["module"])
+        self.assertEqual("alternate-git-source", module_change["after"]["module"])
+        self.assertTrue(comparison["runtime_boundary_preserved"])
+
+    def test_public_scheduler_variant_comparison_is_narrow(self) -> None:
+        cron_bundle, _ = bundler.build_factory_bundle(
+            self.cron_factory,
+            self.catalog,
+            self.artifacts,
+        )
+        errors, comparison = bundler.compare_factory_bundles(
+            self.bundle, cron_bundle
+        )
+        self.assertEqual([], errors)
+        self.assertIsNotNone(comparison)
+        assert comparison is not None
+        self.assertTrue(comparison["changes"]["factory_definition_changed"])
+        self.assertFalse(comparison["changes"]["module_catalog_changed"])
+        self.assertTrue(comparison["changes"]["factory_plan_changed"])
+        self.assertEqual([], comparison["changes"]["schemas"])
+        self.assertEqual(1, len(comparison["changes"]["modules"]))
+        module_change = comparison["changes"]["modules"][0]
+        self.assertEqual("scheduling", module_change["slot"])
+        self.assertEqual("systemd-scheduler", module_change["before"]["module"])
+        self.assertEqual("cron-scheduler", module_change["after"]["module"])
+        self.assertTrue(comparison["runtime_boundary_preserved"])
+
+    def test_bundle_comparison_rejects_a_tampered_side(self) -> None:
+        tampered = self.bundle.replace(b"Git lineage", b"Git lineagf", 1)
+        errors, comparison = bundler.compare_factory_bundles(
+            self.bundle, tampered
+        )
+        self.assertTrue(any(error.startswith("after bundle:") for error in errors))
+        self.assertIsNone(comparison)
 
     def test_bundle_tar_metadata_and_order_are_canonical(self) -> None:
         with tarfile.open(fileobj=io.BytesIO(self.bundle), mode="r:") as archive:
@@ -1151,6 +1277,75 @@ class FactoryBundleTests(unittest.TestCase):
             self.assertEqual(0, verified.returncode, verified.stderr)
             self.assertIn(bundler.sha256_bytes(self.bundle), verified.stdout)
 
+    def test_cli_inspect_and_compare_bundle_round_trip(self) -> None:
+        alternate = self._alternate_source_bundle()
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            before_path = root / "before.tar"
+            after_path = root / "after.tar"
+            inspection_path = root / "inspection.json"
+            comparison_path = root / "comparison.json"
+            before_path.write_bytes(self.bundle)
+            after_path.write_bytes(alternate)
+            cli = [sys.executable, str(validator.ROOT / "scripts" / "zaibatsu.py")]
+            inspected = subprocess.run(
+                cli
+                + [
+                    "inspect-bundle",
+                    str(before_path),
+                    "--output",
+                    str(inspection_path),
+                ],
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            compared = subprocess.run(
+                cli
+                + [
+                    "compare-bundles",
+                    str(before_path),
+                    str(after_path),
+                    "--output",
+                    str(comparison_path),
+                ],
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(0, inspected.returncode, inspected.stderr)
+            self.assertEqual(0, compared.returncode, compared.stderr)
+            for command in (
+                [
+                    "inspect-bundle",
+                    str(before_path),
+                    "--output",
+                    str(inspection_path),
+                ],
+                [
+                    "compare-bundles",
+                    str(before_path),
+                    str(after_path),
+                    "--output",
+                    str(comparison_path),
+                ],
+            ):
+                repeated = subprocess.run(
+                    cli + command,
+                    check=False,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True,
+                )
+                self.assertEqual(2, repeated.returncode)
+                self.assertIn("refusing to overwrite", repeated.stderr)
+            inspection = json.loads(inspection_path.read_text(encoding="utf-8"))
+            comparison = json.loads(comparison_path.read_text(encoding="utf-8"))
+        self.assertEqual(bundler.sha256_bytes(self.bundle), inspection["bundle_sha256"])
+        self.assertEqual(1, len(comparison["changes"]["modules"]))
+
     def test_cli_bundle_refuses_dangling_output_symlink(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:
             root = Path(temporary_directory)
@@ -1174,6 +1369,31 @@ class FactoryBundleTests(unittest.TestCase):
         self.assertEqual(2, result.returncode)
         self.assertIn("refusing to overwrite", result.stderr)
         self.assertFalse(target.exists())
+
+    def test_cli_bundle_readers_reject_symlinks_and_oversized_inputs(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            valid = root / "valid.tar"
+            linked = root / "linked.tar"
+            oversized = root / "oversized.tar"
+            valid.write_bytes(self.bundle)
+            linked.symlink_to(valid)
+            oversized.write_bytes(b"x" * (bundler.MAX_BUNDLE_BYTES + 1))
+            cli = [sys.executable, str(validator.ROOT / "scripts" / "zaibatsu.py")]
+            for command, path in (
+                ("verify-bundle", linked),
+                ("inspect-bundle", oversized),
+            ):
+                with self.subTest(command=command):
+                    result = subprocess.run(
+                        cli + [command, str(path)],
+                        check=False,
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE,
+                        text=True,
+                    )
+                    self.assertEqual(2, result.returncode)
+                    self.assertIn("cannot load", result.stderr)
 
 
 class EvidenceReceiptTests(unittest.TestCase):

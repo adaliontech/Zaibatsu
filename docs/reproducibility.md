@@ -77,6 +77,9 @@ The validator confirms:
 25. the portable bundle includes all selected module contracts and five
     schemas, rejects unsafe or ambiguous archive forms without extraction, and
     reproduces identical canonical USTAR bytes.
+26. inspection and comparison accept only fully verified canonical bundles,
+    report a scheduler substitution at the module slot, and preserve the
+    explicit no-runtime and no-deployment boundary.
 
 The adversarial tests mutate valid architecture data and prove that the
 validator rejects meta-factory role drift, a missing or reclassified factory,
@@ -100,6 +103,13 @@ python3 scripts/zaibatsu.py bundle examples/economic-factory.json \
   --output /tmp/example-product.factory.tar
 python3 scripts/zaibatsu.py verify-bundle \
   /tmp/example-product.factory.tar
+python3 scripts/zaibatsu.py inspect-bundle \
+  /tmp/example-product.factory.tar
+python3 scripts/zaibatsu.py bundle examples/economic-factory-cron.json \
+  --output /tmp/example-product-cron.factory.tar
+python3 scripts/zaibatsu.py compare-bundles \
+  /tmp/example-product.factory.tar \
+  /tmp/example-product-cron.factory.tar
 ```
 
 To create a new definition, run `python3 scripts/zaibatsu.py scaffold --help`.
@@ -157,7 +167,7 @@ release reproduction, clone the named tag rather than the moving default
 branch:
 
 ```bash
-git clone --depth 1 --branch v1.3.0 https://github.com/adaliontech/Zaibatsu.git
+git clone --depth 1 --branch v1.4.0 https://github.com/adaliontech/Zaibatsu.git
 cd Zaibatsu
 make validate
 ```

@@ -103,7 +103,7 @@ See [`.factory/prompts/review.md`](../.factory/prompts/review.md).
 | Focused contribution | Enforce `persist < execute_in_sandbox < verify < policy_decision < controlled_side_effect` |
 | Adversarial test | Move `policy_decision` before `verify`; the pre-change validator accepted this mutation |
 | Droid-reported validation | 36 tests and standalone validator passed; `git diff --check` clean |
-| Independent validation | Same two-file diff passed 36 tests; integrated Zaibatsu package later passed 136 tests |
+| Independent validation | Same two-file diff passed 36 tests; integrated Zaibatsu package later passed 143 tests |
 | Reviewed diff | 21 insertions, 9 deletions in the accepted two-file contribution |
 
 ## Promotion rule

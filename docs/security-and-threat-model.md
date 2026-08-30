@@ -47,7 +47,7 @@ source-only skeleton != deployed agent
 | Unknown or forged factory enters the registry | Closed machine-readable registry; unknown identity, repository, credential, scheduler, and worker routing fail closed |
 | Hallucinated success | Terminal success requires machine evidence; model text alone is rejected |
 | Model or harness implementation is substituted | Typed ports, exact implementation/profile bindings, qualification evidence, hashes, and no default fallback |
-| Portable module or factory bundle is tampered with | Canonical content digests, immutable schema-body digests, module-local paths, exact catalog/plan binding, strict JSON, in-memory USTAR verification, and rejection of traversal, links, special files, duplicate/extra members, metadata drift, and trailing bytes |
+| Portable module or factory bundle is tampered with | Canonical content digests, immutable schema-body digests, module-local paths, exact catalog/plan binding, strict JSON, in-memory USTAR verification, and rejection of traversal, links, special files, duplicate/extra members, metadata drift, and trailing bytes; inspection and comparison emit no result until every input passes the same verifier |
 | Duplicate workers execute the same job | Transactional leases, expiry, attempt numbers, and idempotency keys |
 | cron and systemd both own one workload | Scheduler-of-record inventory, duplicate-authority denial, and receipt-bound migration |
 | Agent publishes or deploys directly | Workers return artifacts; a separate deterministic policy gate owns side effects |

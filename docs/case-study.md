@@ -209,6 +209,9 @@ reusable contracts while preserving evidence and limitations:
 - `zaibatsu bundle` and `verify-bundle` package and reproduce the definition,
   catalog, plan, selected module contracts, and schemas as canonical USTAR
   bytes without extracting untrusted archive members;
+- `zaibatsu inspect-bundle` and `compare-bundles` expose the exact semantic
+  delta between the public systemd and cron variants only after both bundles
+  pass complete verification;
 - project-owned JSON Schemas describe the architecture, factory, readiness,
   and evidence documents;
 - `scripts/validate_repository.py` checks all contracts, evidence semantics,
