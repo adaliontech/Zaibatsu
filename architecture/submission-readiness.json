@@ -49,18 +49,15 @@
     },
     {
       "id": "fresh_clone_reproduction",
-      "status": "pending_external",
+      "status": "complete",
       "required_for_submission": true,
-      "evidence": "The immutable v1.0.1 proof remains recorded; the congruent meta-factory v1.1.0 candidate must pass all 70 tests, both machine-readable contracts, workflow linting, strict Git checks, symlink denial, and Gitleaks 8.30.1 history/tree scans from the public remote"
+      "evidence": "Credential-disabled public clone of candidate b9a628a7d9a4910c0e5456c2930b260a96c7d864 passed all 70 tests, both machine-readable contracts, workflow linting, strict Git checks, symlink denial, and Gitleaks 8.30.1 history/tree scans; GitHub Actions run 33291506370 independently passed"
     },
     {
       "id": "public_demo",
-      "status": "blocked_by_dependency",
+      "status": "pending_external",
       "required_for_submission": true,
-      "evidence": "The revised meta-factory narration is ready; recording waits for the immutable v1.1.0 fresh-clone gate",
-      "blocked_by": [
-        "fresh_clone_reproduction"
-      ]
+      "evidence": "The revised meta-factory narration and verified public release candidate are ready; the applicant must record and publish the final clip from the immutable v1.1.0 tag"
     },
     {
       "id": "applicant_materials",

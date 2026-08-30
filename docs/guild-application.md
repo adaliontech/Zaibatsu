@@ -7,9 +7,9 @@
 **Link to submission:** `https://github.com/adaliontech/Zaibatsu`
 
 The application is prepared but must not be submitted yet. The official Guild
-path requires real Factory work and a public link. The prior v1.0.1 proof
-passed; the meta-factory correction requires a new v1.1.0 public-clone proof.
-The final demo and applicant materials remain explicit gates in
+path requires real Factory work and a public link. The meta-factory v1.1.0
+candidate passed its credential-disabled public-clone proof and independent
+GitHub CI. The final demo and applicant materials remain explicit gates in
 [`architecture/submission-readiness.json`](../architecture/submission-readiness.json).
 
 ## Current project description
@@ -140,7 +140,7 @@ the public repository:
 - [x] Factory contribution maturity changes from `pending_evidence` only after
       the receipt exists.
 - [x] Repository is published under the intended owner with an MIT license.
-- [ ] Meta-factory v1.1.0 release candidate passes `make validate` from a
+- [x] Meta-factory v1.1.0 release candidate passes `make validate` from a
       credential-free clone.
 - [x] Public repository and article links resolve without authentication.
 - [ ] Demo clip or screenshots show a real Factory task and validation result.

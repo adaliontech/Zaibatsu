@@ -1,7 +1,7 @@
 # Demo script
 
-The final demo must use the immutable `v1.1.0` release after its
-credential-free clone proof passes. Use only the public repository. Do not show
+The final demo must use the immutable `v1.1.0` release. Its candidate passed the
+credential-free clone proof. Use only the public repository. Do not show
 private terminals, history, settings, infrastructure, model credentials, or
 personal data.
 

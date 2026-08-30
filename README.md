@@ -241,9 +241,9 @@ and the complete repository suite was rerun independently.
 ## Factory Guild submission
 
 The intended submission is an open-source project plus technical article and
-short demo. The repository and prior `v1.0.1` evidence are public; this
-meta-factory correction is being prepared as `v1.1.0`. A new credential-free
-clone proof must pass before the final demo is recorded.
+short demo. The meta-factory `v1.1.0` candidate passed a credential-disabled
+public-clone proof and independent GitHub CI. The final demo and
+applicant-owned form materials remain external submission gates.
 
 Zaibatsu is an independent project and is not affiliated with or endorsed by
 Factory AI.

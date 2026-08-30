@@ -63,7 +63,7 @@ path.
 | Real public project | This repository | Public and anonymously reachable |
 | Clear README | [`README.md`](../README.md) | Complete |
 | License | [`LICENSE`](../LICENSE) | Complete |
-| Runnable quickstart | [`docs/reproducibility.md`](reproducibility.md) | v1.0.1 proof retained; congruent meta-factory v1.1.0 clone refresh pending without Droid |
+| Runnable quickstart | [`docs/reproducibility.md`](reproducibility.md) | v1.1.0 candidate passed from a credential-disabled public clone without Droid |
 | Explain Factory/Droid role | [`docs/droid-session.md`](droid-session.md) | Authenticated session, scoped diff, and independent validation recorded |
 | End-to-end case study | [`docs/case-study.md`](case-study.md) | Factory-of-software-factories narrative and real Droid result complete |
 | Exact command/setup | [`docs/droid-session.md`](droid-session.md) | Local-Qwen command, prompt, and redacted credential boundaries recorded |
@@ -80,6 +80,6 @@ public clean-clone proof. The exact release checklist is in
 [Guild application](guild-application.md).
 
 The bounded local-Qwen Droid run supplies reviewable “build something with
-Factory” evidence. The public meta-factory correction is complete locally but
-requires its v1.1.0 clean-clone proof. The final clip and applicant-owned form
-materials are still required before submission.
+Factory” evidence. The public meta-factory correction passed its v1.1.0
+clean-clone gate. The final clip and applicant-owned form materials are still
+required before submission.

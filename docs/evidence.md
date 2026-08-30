@@ -32,7 +32,7 @@ and redacted status ledger without receiving production access.
 | Adversarial unit tests | Passed after meta-factory correction | 70 of 70 tests passed |
 | Broken-link and public-safety scan | Passed after release hardening | Every repository file is inspected or rejected; exact placeholder matching, all symlinks, Linux/macOS/Windows home paths, tailnet DNS, IPv4/IPv6, credential patterns, approved binary formats, and local links are checked |
 | Malformed-input robustness | Passed 2026-08-28 | 5,000 seeded JSON-like cases produced 20,000 validation calls across architecture, readiness, consistency, and preflight with zero unhandled exceptions |
-| Independent secret scan | v1.0.1 passed; v1.1.0 refresh pending | Checksum-pinned Gitleaks `8.30.1` scans full public Git history and the release tree; GitHub secret scanning and push protection provide a separate repository guard |
+| Independent secret scan | Passed on v1.1.0 candidate | Checksum-pinned Gitleaks `8.30.1` found no leaks in the full public Git history or candidate tree; GitHub secret scanning and push protection provide a separate repository guard |
 | Official external links | Resolved 2026-08-28 | 5 of 5 Factory documentation and Guild links resolved successfully |
 | Droid CLI availability | Observed | Local version `0.206.0` returned a version receipt |
 | First headless Droid attempt | Stopped before model work | Factory authentication failed, zero model turns, and no repository changes |
@@ -43,8 +43,8 @@ and redacted status ledger without receiving production access.
 | Factory/Droid contribution | Passed and reviewed | Session `46f941a9-82f8-4df3-a45c-b8158996360b`; two scoped files; 15 turns; zero Factory credits; sanitized receipt in [`evidence/droid-contribution-v1.json`](../evidence/droid-contribution-v1.json) |
 | Pre-change adversarial proof | Passed | Moving `policy_decision` before `verify` produced no ordering error under the original validator |
 | Independent contribution validation | Passed | The accepted two-file diff passed 36 tests, the standalone validator, and `git diff --check` |
-| Fresh-clone reproduction | v1.0.1 passed; v1.1.0 refresh pending | The prior immutable release retains its proof; the meta-factory release must independently pass all 70 tests, repository validation, workflow linting, strict Git checks, symlink denial, and both Gitleaks modes |
-| Demo recording | Blocked on immutable v1.1.0 clone proof | See [Demo script](demo-script.md) |
+| Fresh-clone reproduction | Passed on v1.1.0 candidate | Credential-disabled public clone of `b9a628a7d9a4910c0e5456c2930b260a96c7d864` passed all 70 tests, both contracts, workflow linting, strict Git checks, symlink denial, and both Gitleaks modes; [GitHub Actions run 33291506370](https://github.com/adaliontech/Zaibatsu/actions/runs/33291506370) independently passed |
+| Demo recording | Ready; applicant action pending | Record from the immutable v1.1.0 tag using the [Demo script](demo-script.md) |
 
 ## Architecture claims
 
