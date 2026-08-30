@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.2.0 - Unreleased
+## 1.2.0 - 2026-08-30
 
 - Added a versioned reusable module catalog and policy-compatible module
   bindings for Git, SOPS/age, bounded runtime secrets, Ansible, Nix,

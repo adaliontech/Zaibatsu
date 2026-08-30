@@ -15,8 +15,8 @@ changes.
 - publish sanitized evidence and adversarial tests;
 - preserve the immutable `v1.1.0` and `v1.1.1` proofs and reproduce corrected
   `v1.1.2` from a credential-free clone;
-- reproduce the `v1.2.0` module-composition candidate before recording its
-  demo;
+- preserve the reproduced `v1.2.0` module-composition candidate and record its
+  demo from the immutable tag;
 - record the Guild demo and complete applicant-owned submission materials.
 
 Exit: the public narrative, architecture, portable factory, module catalog,

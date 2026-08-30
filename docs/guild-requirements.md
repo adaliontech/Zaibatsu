@@ -63,7 +63,7 @@ path.
 | Real public project | This repository | Public and anonymously reachable |
 | Clear README | [`README.md`](../README.md) | Complete |
 | License | [`LICENSE`](../LICENSE) | Complete |
-| Runnable quickstart | [`docs/reproducibility.md`](reproducibility.md) | Immutable v1.1.0–v1.1.2 proofs remain historical; the v1.2.0 candidate requires a new credential-disabled clone proof |
+| Runnable quickstart | [`docs/reproducibility.md`](reproducibility.md) | Immutable v1.1.0–v1.1.2 proofs remain historical; the v1.2.0 candidate passed a new credential-disabled clone proof |
 | Reusable value | [`examples/economic-factory.json`](../examples/economic-factory.json), [`catalog/modules.json`](../catalog/modules.json), and [`scripts/zaibatsu.py`](../scripts/zaibatsu.py) | Another project can scaffold and validate a fail-closed definition, substitute a policy-compatible module, and reproduce a content-addressed control plan offline |
 | Explain Factory/Droid role | [`docs/droid-session.md`](droid-session.md) | Authenticated session, scoped diff, and independent validation recorded |
 | End-to-end case study | [`docs/case-study.md`](case-study.md) | Factory-of-software-factories narrative and real Droid result complete |

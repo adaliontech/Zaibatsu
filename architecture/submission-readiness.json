@@ -84,18 +84,21 @@
     },
     {
       "id": "fresh_clone_reproduction",
-      "status": "pending_external",
+      "status": "complete",
       "required_for_submission": true,
-      "evidence": "The prior v1.1.2 clone proof remains historical; the new v1.2.0 module-composition candidate requires its own credential-disabled clone, 114-test, schema, strict-Git, Gitleaks, and CI proof"
+      "evidence": "Credential-disabled public clone of v1.2.0 candidate d42831e7d6fa367f225fb4a6e489391ad3856e9a passed all 114 tests, schema and receipt contracts, strict Git checks, and Gitleaks 8.30.1 history/tree scans; GitHub Actions run 33332863314 independently passed",
+      "proof": {
+        "candidate_commit": "d42831e7d6fa367f225fb4a6e489391ad3856e9a",
+        "tests_passed": 114,
+        "gitleaks_version": "8.30.1",
+        "github_actions_run": "https://github.com/adaliontech/Zaibatsu/actions/runs/33332863314"
+      }
     },
     {
       "id": "public_demo",
-      "status": "blocked_by_dependency",
+      "status": "pending_external",
       "required_for_submission": true,
-      "evidence": "Record and publish the final clip only after the v1.2.0 candidate passes fresh-clone proof and is released as an immutable tag",
-      "blocked_by": [
-        "fresh_clone_reproduction"
-      ]
+      "evidence": "The v1.2.0 candidate passed CI and credential-disabled fresh-clone proof; record and publish the final clip from the immutable release tag"
     },
     {
       "id": "applicant_materials",
