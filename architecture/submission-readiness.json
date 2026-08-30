@@ -90,18 +90,21 @@
     },
     {
       "id": "fresh_clone_reproduction",
-      "status": "pending_external",
+      "status": "complete",
       "required_for_submission": true,
-      "evidence": "The immutable v1.5.0 proof remains historical; the v1.6.0 bundle-derived qualification-evidence and partial-assessment candidate requires its own credential-disabled clone, 163-test, strict-Git, Gitleaks, schema, determinism, and CI proof"
+      "evidence": "Credential-disabled public clone of the v1.6.0 candidate passed 163 tests, 72-file validation, strict Git checks, Gitleaks 8.30.1 history/tree scans, deterministic artifact reproduction, exact non-authorizing semantic assertions, isolated Draft 2020-12 schema validation with negative controls, and independent GitHub Actions",
+      "proof": {
+        "candidate_commit": "25f8be0fd4e042f2f723d911ff716c936ef1393a",
+        "tests_passed": 163,
+        "gitleaks_version": "8.30.1",
+        "github_actions_run": "https://github.com/adaliontech/Zaibatsu/actions/runs/33337170136"
+      }
     },
     {
       "id": "public_demo",
-      "status": "blocked_by_dependency",
+      "status": "pending_external",
       "required_for_submission": true,
-      "evidence": "Record and publish the final clip only after the current qualification-evidence candidate passes fresh-clone proof and is released",
-      "blocked_by": [
-        "fresh_clone_reproduction"
-      ]
+      "evidence": "The v1.6.0 candidate passed fresh-clone proof; publish the immutable release, then record and publish the final clip from its tag"
     },
     {
       "id": "applicant_materials",

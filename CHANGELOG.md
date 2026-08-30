@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.6.0 - Unreleased
+## 1.6.0 - 2026-08-30
 
 - Added deterministic bundle-derived contract-conformance receipts for every
   selected module in a fully verified factory bundle.
