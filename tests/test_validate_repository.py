@@ -404,32 +404,18 @@ class ArchitectureValidationTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary_directory:
             root = Path(temporary_directory)
             subprocess.run(["git", "init", "-q", str(root)], check=True)
-            nested = root / "module"
-            subprocess.run(["git", "init", "-q", str(nested)], check=True)
-            (nested / "README.md").write_text("nested\n", encoding="utf-8")
-            subprocess.run(["git", "-C", str(nested), "add", "README.md"], check=True)
             subprocess.run(
                 [
                     "git",
                     "-C",
-                    str(nested),
-                    "-c",
-                    "user.name=Test",
-                    "-c",
-                    "user.email=test@example.invalid",
-                    "commit",
-                    "-qm",
-                    "nested",
+                    str(root),
+                    "update-index",
+                    "--add",
+                    "--cacheinfo",
+                    "160000,1111111111111111111111111111111111111111,module",
                 ],
                 check=True,
             )
-            subprocess.run(
-                ["git", "-C", str(root), "add", "module"],
-                check=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-            )
-            shutil.rmtree(nested)
             errors = validator.validate_public_paths(root)
         self.assertTrue(any("submodules" in error for error in errors))
 
