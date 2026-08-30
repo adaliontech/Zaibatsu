@@ -33,7 +33,9 @@ proof. Immutable v1.8.0 and its full-history tag clone passed the complete
 release proof. The v1.9.0 signed runtime-evidence candidate passed its 194-test,
 87-file credential-disabled full-history clone, Gitleaks, strict-schema,
 exact-regeneration, signature, non-authorizing semantic, and independent-CI
-proof; its immutable tag proof remains pending. The final demo and
+proof. Its immutable release and full-history tag clone passed roof/tag CI,
+four live-schema byte checks, strict external validation, exact regeneration,
+and both Gitleaks modes. The final demo and
 applicant materials remain explicit gates in
 [`architecture/submission-readiness.json`](../architecture/submission-readiness.json).
 
@@ -235,7 +237,7 @@ the public repository:
       allowlist/replay/freshness/type/authority adversarial checks, four strict
       schemas, exact regeneration, Gitleaks, and independent public CI from a
       full-history clone.
-- [ ] Immutable v1.9.0 passes roof and tag CI, four tagged-schema byte checks,
+- [x] Immutable v1.9.0 passes roof and tag CI, four tagged-schema byte checks,
       and the full credential-disabled tag-clone reproduction.
 - [x] Public repository and article links resolve without authentication.
 - [ ] Demo clip or screenshots show a real Factory task and validation result.

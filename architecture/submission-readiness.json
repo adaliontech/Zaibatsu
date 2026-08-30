@@ -97,23 +97,26 @@
       "id": "fresh_clone_reproduction",
       "status": "complete",
       "required_for_submission": true,
-      "evidence": "Credential-disabled full-history clone of v1.9.0 candidate dbc84a07aa4e18954b68bc41ec30e052d78877a4 passed 194 tests, 87-file validation, strict Git, both checksum-pinned Gitleaks modes, strict schema controls, exact signed-evidence and rebuild regeneration, non-authorizing assertions, and independent CI; immutable v1.8.0 remains the latest completed tag proof until v1.9.0 is tagged",
+      "evidence": "Credential-disabled full-history clones of v1.9.0 candidate dbc84a07aa4e18954b68bc41ec30e052d78877a4 and immutable tag v1.9.0 passed 194 tests, 87-file validation, strict Git, both checksum-pinned Gitleaks modes, four strict schemas, exact signed-evidence and rebuild regeneration, non-authorizing assertions, live tagged-schema byte verification, and independent candidate, roof, and tag CI",
       "proof": {
         "candidate_commit": "dbc84a07aa4e18954b68bc41ec30e052d78877a4",
         "tests_passed": 194,
         "gitleaks_version": "8.30.1",
         "github_actions_run": "https://github.com/adaliontech/Zaibatsu/actions/runs/33341233957",
-        "release_tag": "v1.8.0",
-        "tag_commit": "72cedaeaf2c749d770405f23c89c8f32ded6f762",
-        "tag_object": "02d7599f31f2eb1c3eefcb6ae637976707a5a676",
-        "tag_actions_run": "https://github.com/adaliontech/Zaibatsu/actions/runs/33339588039"
+        "roof_actions_run": "https://github.com/adaliontech/Zaibatsu/actions/runs/33341430217",
+        "release_tag": "v1.9.0",
+        "tag_commit": "6502a2e6ade2ef3a6c6d6c4ad6656dbf8d7b889c",
+        "tag_object": "8667e6a104fa0e9fd44568847015d37de3c3e442",
+        "tag_actions_run": "https://github.com/adaliontech/Zaibatsu/actions/runs/33341456078",
+        "release_url": "https://github.com/adaliontech/Zaibatsu/releases/tag/v1.9.0",
+        "release_immutable": true
       }
     },
     {
       "id": "public_demo",
       "status": "pending_external",
       "required_for_submission": true,
-      "evidence": "Record and publish the final clip from immutable v1.9.0 after its separate release proof passes"
+      "evidence": "The immutable v1.9.0 release proof passed; record and publish the final clip from that tag"
     },
     {
       "id": "applicant_materials",

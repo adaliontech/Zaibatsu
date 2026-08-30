@@ -63,7 +63,7 @@ path.
 | Real public project | This repository | Public and anonymously reachable |
 | Clear README | [`README.md`](../README.md) | Complete |
 | License | [`LICENSE`](../LICENSE) | Complete |
-| Runnable quickstart | [`docs/reproducibility.md`](reproducibility.md) | The v1.9.0 candidate passed its 194-test, 87-file credential-disabled full-history clone, independent CI, Gitleaks, strict schemas, exact signed-artifact regeneration, and non-authorizing semantic proof; immutable v1.8.0 remains the released baseline until v1.9.0 tag proof completes |
+| Runnable quickstart | [`docs/reproducibility.md`](reproducibility.md) | Immutable v1.9.0 passed 194-test, 87-file credential-disabled full-history candidate and tag clones, candidate/roof/tag CI, both Gitleaks modes, four live-schema byte checks, strict schemas, exact signed-artifact regeneration, and non-authorizing semantic proof |
 | Reusable value | [`examples/economic-factory.json`](../examples/economic-factory.json), [cron variant](../examples/economic-factory-cron.json), [`catalog/modules.json`](../catalog/modules.json), [source lock](../examples/economic-factory.source-lock.json), [qualification policy](../policies/runtime-qualification-v1.json), [signed runtime evidence](../examples/economic-factory.runtime-evidence.json), [runtime assessment](../examples/economic-factory.runtime-assessment.json), [rebuild plan](../examples/economic-factory.rebuild-plan.json), and [`scripts/zaibatsu.py`](../scripts/zaibatsu.py) | Another project can scaffold a fail-closed definition, reproduce and inspect a self-verifying control bundle, bind it to exact annotated-release control sources, compare a policy-compatible module substitution, generate a missing-evidence plan, verify scoped signed assertions, assess exact gaps and freshness, and compile those verified inputs into a non-executing rebuild DAG offline |
 | Explain Factory/Droid role | [`docs/droid-session.md`](droid-session.md) | Authenticated session, scoped diff, and independent validation recorded |
 | End-to-end case study | [`docs/case-study.md`](case-study.md) | Factory-of-software-factories narrative and real Droid result complete |
@@ -90,5 +90,6 @@ v1.7.0 source-lock candidate and immutable release passed the complete public
 boundary. The v1.8.0 rebuild-DAG candidate and immutable release passed the
 same complete public boundary. The v1.9.0 signed runtime-evidence candidate
 passed the 194-test clean-clone, schema, signature, exact-regeneration,
-Gitleaks, and independent-CI boundary; its immutable tag proof is next. The
+Gitleaks, and independent-CI boundary; its immutable release passed roof and
+tag CI, live-schema byte checks, and full-history tag-clone reproduction. The
 final clip and applicant-owned form submission remain.

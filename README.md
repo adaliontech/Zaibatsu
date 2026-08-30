@@ -572,7 +572,11 @@ release proof. The v1.9.0 signed runtime-evidence candidate passed its 194-test,
 87-file credential-disabled full-history clone, both Gitleaks modes, strict
 Draft 2020-12 schema validation, exact artifact regeneration, signature and
 non-authorizing semantic checks, and independent CI boundary. Its immutable
-tag proof remains pending.
+release uses annotated tag object `8667e6a104fa0e9fd44568847015d37de3c3e442`
+over evidence roof `6502a2e6ade2ef3a6c6d6c4ad6656dbf8d7b889c`;
+roof and tag CI, a credential-disabled full-history tag clone, four live-schema
+byte checks, exact regeneration, and strict external schema validation all
+passed. GitHub reports the release as immutable.
 
 Zaibatsu is an independent project and is not affiliated with or endorsed by
 Factory AI.
