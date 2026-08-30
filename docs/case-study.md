@@ -212,6 +212,9 @@ reusable contracts while preserving evidence and limitations:
 - `zaibatsu inspect-bundle` and `compare-bundles` expose the exact semantic
   delta between the public systemd and cron variants only after both bundles
   pass complete verification;
+- `zaibatsu source-lock` binds the verified systemd bundle to sixteen exact
+  blobs in an annotated Git release, records native object IDs and independent
+  SHA-256 hashes, and rebuilds the bundle without trusting checkout files;
 - the versioned qualification policy and `qualification-plan` workflow turn a
   verified bundle into 67 content-addressed missing-evidence bindings without
   accepting self-attestation or granting runtime eligibility or activation;
@@ -240,6 +243,8 @@ The public package can now reject claims or architectures in which:
 - cron and systemd both own the same workload;
 - a source-only skeleton is described as deployed;
 - a missing-evidence plan is presented as qualification or activation;
+- a local control-source lock is presented as remote ownership, signature
+  trust, runtime implementation source, or qualification evidence;
 - a content-addressed claim or contract-only receipt is presented as runtime
   implementation, independent-verifier, recovery, or activation evidence;
 - a model authorizes an external effect;

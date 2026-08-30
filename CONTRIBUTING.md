@@ -46,6 +46,12 @@ fully verified bundle, plan, and policy. Content addressing alone may not be
 called semantic verification; every credited binding must name the precise
 deterministic verifier and scope, and no partial result may grant eligibility
 or activation.
+Source-lock changes must read immutable Git objects rather than working-tree
+files, require an annotated semantic-version tag, dual-hash release objects,
+rebuild the exact verified bundle, and reject replacement-object or
+repository-redirection environment substitution.
+A source lock may not be presented as remote ownership, tag-signature,
+implementation-source, runtime-qualification, eligibility, or deployment proof.
 
 ## Pull request evidence
 

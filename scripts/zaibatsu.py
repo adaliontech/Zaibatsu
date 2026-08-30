@@ -38,6 +38,10 @@ from factory_qualification import (
     verify_qualification_evidence_for_bundle,
     verify_qualification_plan_for_bundle,
 )
+from factory_source_lock import (
+    source_lock_for_bundle,
+    verify_source_lock_for_bundle,
+)
 from validate_repository import (
     FACTORY_DEFINITION_SCHEMA_VERSION,
     PORTABLE_FACTORY_SCHEMA_REFERENCE,
@@ -359,6 +363,67 @@ def command_compare_bundles(
     return write_document(comparison, output)
 
 
+def command_source_lock(
+    factory_path: str,
+    bundle_path: str,
+    repository_path: str,
+    release_tag: str,
+    catalog_path: str,
+    repository_url: str,
+    output: str | None,
+) -> int:
+    bundle = load_bundle(bundle_path, "factory bundle")
+    if bundle is None:
+        return 2
+    errors, source_lock = source_lock_for_bundle(
+        Path(repository_path),
+        release_tag,
+        factory_path,
+        bundle,
+        catalog_path,
+        repository_url,
+    )
+    if errors or source_lock is None:
+        print("cannot build factory source lock", file=sys.stderr)
+        for error in errors:
+            print(f"- {error}", file=sys.stderr)
+        return 1
+    return write_document(source_lock, output)
+
+
+def command_verify_source_lock(
+    source_lock_path: str,
+    bundle_path: str,
+    repository_path: str,
+) -> int:
+    source_lock = load_json_document(source_lock_path, "factory source lock")
+    bundle = load_bundle(bundle_path, "factory bundle")
+    if source_lock is None or bundle is None:
+        return 2
+    errors = verify_source_lock_for_bundle(
+        source_lock,
+        Path(repository_path),
+        bundle,
+    )
+    if errors:
+        print(f"factory source lock failed: {source_lock_path}", file=sys.stderr)
+        for error in errors:
+            print(f"- {error}", file=sys.stderr)
+        return 1
+    print(f"factory source lock passed: {source_lock_path}")
+    print(
+        "factory source lock sha256: "
+        f"{source_lock['factory_source_lock_sha256']}"
+    )
+    print(f"release tag: {source_lock['repository']['release_tag']}")
+    print(f"release commit: {source_lock['repository']['commit_oid']}")
+    print(f"locked control inputs: {source_lock['rebuild']['input_count']}")
+    print("qualification evidence granted: false")
+    print("runtime eligible: false")
+    print("activation authorized: false")
+    return 0
+
+
 def command_qualification_plan(
     bundle_path: str,
     policy_path: str,
@@ -596,6 +661,48 @@ def build_parser() -> argparse.ArgumentParser:
         "--output", help="write comparison JSON to a new file"
     )
 
+    source_lock = commands.add_parser(
+        "source-lock",
+        help="lock a verified bundle to exact sources in an annotated release",
+    )
+    source_lock.add_argument("factory_path")
+    source_lock.add_argument("bundle_path")
+    source_lock.add_argument(
+        "--repository",
+        default=".",
+        help="Git repository containing the release objects",
+    )
+    source_lock.add_argument(
+        "--release-tag",
+        required=True,
+        help="annotated vMAJOR.MINOR.PATCH tag to lock",
+    )
+    source_lock.add_argument(
+        "--catalog-path",
+        default="catalog/modules.json",
+        help="repository-relative module catalog path",
+    )
+    source_lock.add_argument(
+        "--repository-url",
+        default="https://github.com/adaliontech/Zaibatsu",
+        help="canonical credential-free HTTPS repository identity",
+    )
+    source_lock.add_argument(
+        "--output", help="write source-lock JSON to a new file"
+    )
+
+    verify_source_lock = commands.add_parser(
+        "verify-source-lock",
+        help="rebuild and verify a source lock from immutable Git objects",
+    )
+    verify_source_lock.add_argument("source_lock_path")
+    verify_source_lock.add_argument("bundle_path")
+    verify_source_lock.add_argument(
+        "--repository",
+        default=".",
+        help="Git repository containing the release objects",
+    )
+
     qualification_plan = commands.add_parser(
         "qualification-plan",
         help="list evidence required before bundle modules can be runtime-eligible",
@@ -719,6 +826,22 @@ def main() -> int:
             arguments.before_path,
             arguments.after_path,
             arguments.output,
+        )
+    if arguments.command == "source-lock":
+        return command_source_lock(
+            arguments.factory_path,
+            arguments.bundle_path,
+            arguments.repository,
+            arguments.release_tag,
+            arguments.catalog_path,
+            arguments.repository_url,
+            arguments.output,
+        )
+    if arguments.command == "verify-source-lock":
+        return command_verify_source_lock(
+            arguments.source_lock_path,
+            arguments.bundle_path,
+            arguments.repository,
         )
     if arguments.command == "qualification-plan":
         return command_qualification_plan(

@@ -24,9 +24,9 @@ The shared layer controls factory contracts. Each economic factory retains its
 own identity, data, credentials, repositories, schedules, acceptance rules,
 budgets, and production authority.
 
-## Seven machine-readable views
+## Eight machine-readable views
 
-Zaibatsu deliberately separates seven questions:
+Zaibatsu deliberately separates eight questions:
 
 | Contract | Question |
 | --- | --- |
@@ -35,6 +35,7 @@ Zaibatsu deliberately separates seven questions:
 | [`examples/economic-factory.json`](../examples/economic-factory.json) | Which policies and evidence bindings define one portable factory? |
 | [`catalog/modules.json`](../catalog/modules.json) plus [`examples/economic-factory.plan.json`](../examples/economic-factory.plan.json) | Which compatible module implementations resolve into its deterministic control plan? |
 | [`examples/economic-factory.bundle-manifest.json`](../examples/economic-factory.bundle-manifest.json) | Which exact definition, catalog, plan, selected module contracts, and schemas form its portable control bundle? |
+| [`examples/economic-factory.source-lock.json`](../examples/economic-factory.source-lock.json) | Which immutable annotated-release Git objects supplied the exact control files that reproduce that bundle? |
 | [`policies/runtime-qualification-v1.json`](../policies/runtime-qualification-v1.json) plus [`examples/economic-factory.qualification-plan.json`](../examples/economic-factory.qualification-plan.json) | Which content-addressed evidence bindings are still required before those contracts can become runtime-eligible? |
 | [`examples/economic-factory.qualification-evidence.json`](../examples/economic-factory.qualification-evidence.json) plus [`examples/economic-factory.qualification-assessment.json`](../examples/economic-factory.qualification-assessment.json) | Which requirements does the verified bundle itself actually prove, and exactly which runtime proofs remain missing? |
 
@@ -86,6 +87,19 @@ archives before reporting definition, catalog, plan, module, or schema
 changes. The public systemd and cron variants demonstrate that scheduler
 selection is modular while leaving the shared catalog, schemas, and
 least-authority boundary unchanged.
+
+`source-lock` reads an annotated semantic-version tag, commit, tree, and the
+sixteen bundle input blobs directly from local Git object storage with
+replacement objects disabled. It records repository-native object IDs plus
+SHA-256 hashes of the object content and canonical file content, rebuilds the
+bundle from those blobs, and requires byte identity. `verify-source-lock`
+repeats that derivation without trusting the working tree.
+
+The source lock terminates at the control-contract boundary. It does not
+contact or authenticate the stated remote, verify a tag signature, include
+runtime implementation source, satisfy a qualification binding, grant runtime
+eligibility or activation, or deploy infrastructure. Those stronger claims
+remain separate evidence problems.
 
 `qualification-plan` joins a fully verified bundle to a versioned minimum
 policy and emits a content-addressed list of missing implementation, source,

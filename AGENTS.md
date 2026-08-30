@@ -12,6 +12,8 @@
 - Bundle proof: `python3 scripts/zaibatsu.py verify-bundle /tmp/example-product.factory.tar`
 - Bundle inspection: `python3 scripts/zaibatsu.py inspect-bundle /tmp/example-product.factory.tar`
 - Module-change comparison: build the cron example, then run `python3 scripts/zaibatsu.py compare-bundles /tmp/example-product.factory.tar /tmp/example-product-cron.factory.tar`
+- Annotated-release source lock: `python3 scripts/zaibatsu.py source-lock examples/economic-factory.json /tmp/example-product.factory.tar --release-tag v1.6.0 --output /tmp/example-product.source-lock.json`
+- Source-lock proof: `python3 scripts/zaibatsu.py verify-source-lock /tmp/example-product.source-lock.json /tmp/example-product.factory.tar`
 - Qualification requirements: `python3 scripts/zaibatsu.py qualification-plan /tmp/example-product.factory.tar --output /tmp/example-product.qualification-plan.json`
 - Qualification-plan proof: `python3 scripts/zaibatsu.py verify-qualification-plan /tmp/example-product.qualification-plan.json /tmp/example-product.factory.tar`
 - Bundle-derived evidence: `python3 scripts/zaibatsu.py qualification-evidence /tmp/example-product.qualification-plan.json /tmp/example-product.factory.tar --output /tmp/example-product.qualification-evidence.json`
@@ -61,6 +63,11 @@ credentials, or bootstrap procedures.
   contract/catalog/schema/digest checks the bundle verifier reruns. It may not
   claim an external independent verifier, runtime implementation evidence,
   full qualification, eligibility, activation, or deployment.
+- Treat a factory source lock only as proof that exact JSON blobs in one local
+  annotated release rebuild the verified control bundle. It does not contact
+  or authenticate the named remote, verify a tag signature or repository
+  owner, include runtime implementation source, satisfy a qualification
+  binding, grant eligibility or activation, or deploy anything.
 - Treat every tracked or non-ignored path as public. Opaque files, symlinks,
   and Git submodules are outside the scanner's inspectable boundary and must
   fail closed.

@@ -20,6 +20,7 @@
           "examples/economic-factory-cron.json",
           "examples/economic-factory.bundle-manifest.json",
           "examples/economic-factory.plan.json",
+          "examples/economic-factory.source-lock.json",
           "examples/economic-factory.qualification-assessment.json",
           "examples/economic-factory.qualification-evidence.json",
           "examples/economic-factory.qualification-plan.json",
@@ -90,21 +91,18 @@
     },
     {
       "id": "fresh_clone_reproduction",
-      "status": "complete",
+      "status": "pending_external",
       "required_for_submission": true,
-      "evidence": "Credential-disabled public clone of the v1.6.0 candidate passed 163 tests, 72-file validation, strict Git checks, Gitleaks 8.30.1 history/tree scans, deterministic artifact reproduction, exact non-authorizing semantic assertions, isolated Draft 2020-12 schema validation with negative controls, and independent GitHub Actions",
-      "proof": {
-        "candidate_commit": "25f8be0fd4e042f2f723d911ff716c936ef1393a",
-        "tests_passed": 163,
-        "gitleaks_version": "8.30.1",
-        "github_actions_run": "https://github.com/adaliontech/Zaibatsu/actions/runs/33337170136"
-      }
+      "evidence": "Immutable v1.6.0 remains reproduced; the v1.7.0 annotated-release source-lock candidate requires its own full-history credential-disabled clone, 173-test, strict-Git, Gitleaks, schema, determinism, and CI proof"
     },
     {
       "id": "public_demo",
-      "status": "pending_external",
+      "status": "blocked_by_dependency",
       "required_for_submission": true,
-      "evidence": "Immutable v1.6.0 passed roof CI, tag CI, tagged-schema byte checks, and credential-disabled tag-clone reproduction; record and publish the final clip from that tag"
+      "evidence": "Record and publish the final clip only after the current source-lock candidate passes fresh-clone proof and is released",
+      "blocked_by": [
+        "fresh_clone_reproduction"
+      ]
     },
     {
       "id": "applicant_materials",

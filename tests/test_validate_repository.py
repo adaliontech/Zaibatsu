@@ -11,6 +11,7 @@ import tarfile
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 
 MODULE_PATH = Path(__file__).resolve().parents[1] / "scripts" / "validate_repository.py"
@@ -23,6 +24,7 @@ SPEC.loader.exec_module(validator)
 import factory_bundle as bundler
 import factory_composer as composer
 import factory_qualification as qualification
+import factory_source_lock as source_lock
 
 
 class ArchitectureValidationTests(unittest.TestCase):
@@ -1395,6 +1397,413 @@ class FactoryBundleTests(unittest.TestCase):
                     )
                     self.assertEqual(2, result.returncode)
                     self.assertIn("cannot load", result.stderr)
+
+
+class FactorySourceLockTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.factory = validator.load_factory_definition()
+        self.catalog = composer.load_module_catalog()
+        self.artifacts, errors = composer.load_module_artifacts(self.catalog)
+        self.assertEqual([], errors)
+        self.bundle, _ = bundler.build_factory_bundle(
+            self.factory,
+            self.catalog,
+            self.artifacts,
+        )
+        self.lock = source_lock.load_source_lock()
+
+    @staticmethod
+    def _refresh_digest(document: dict[str, object]) -> None:
+        without_digest = copy.deepcopy(document)
+        without_digest.pop("factory_source_lock_sha256")
+        document["factory_source_lock_sha256"] = composer.sha256_json(
+            without_digest
+        )
+
+    def test_repository_source_lock_and_schema_are_exact(self) -> None:
+        rebuilt = source_lock.build_source_lock(
+            validator.ROOT,
+            "v1.6.0",
+            "examples/economic-factory.json",
+            self.bundle,
+        )
+        self.assertEqual(self.lock, rebuilt)
+        self.assertEqual(
+            [],
+            source_lock.validate_source_lock(
+                self.lock,
+                validator.ROOT,
+                self.bundle,
+            ),
+        )
+        schema = composer.load_json_file(
+            validator.ROOT / "schemas" / "factory-source-lock.schema.json"
+        )
+        self.assertEqual(source_lock.SOURCE_LOCK_SCHEMA_REFERENCE, schema["$id"])
+        self.assertEqual(16, schema["properties"]["inputs"]["minItems"])
+        self.assertEqual(16, schema["properties"]["inputs"]["maxItems"])
+
+    def test_source_lock_is_content_addressed_and_control_only(self) -> None:
+        without_digest = copy.deepcopy(self.lock)
+        digest = without_digest.pop("factory_source_lock_sha256")
+        self.assertEqual(composer.sha256_json(without_digest), digest)
+        self.assertEqual(16, len(self.lock["inputs"]))
+        self.assertEqual(
+            sorted(item["path"] for item in self.lock["inputs"]),
+            [item["path"] for item in self.lock["inputs"]],
+        )
+        self.assertEqual(
+            len({item["path"] for item in self.lock["inputs"]}),
+            len(self.lock["inputs"]),
+        )
+        self.assertTrue(self.lock["repository"]["annotated_tag_verified"])
+        boundary = self.lock["source_lock_boundary"]
+        self.assertTrue(boundary["locks_control_sources_only"])
+        self.assertTrue(boundary["reads_immutable_git_objects_not_worktree"])
+        for denied in (
+            "remote_repository_contacted",
+            "repository_ownership_verified",
+            "tag_signature_verification_included",
+            "contains_runtime_implementation_source",
+            "grants_qualification_evidence",
+            "runtime_eligibility_granted",
+            "activation_authorized",
+            "deploys_infrastructure",
+        ):
+            self.assertFalse(boundary[denied])
+
+    def test_lock_reads_release_objects_not_dirty_worktree(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            clone = Path(temporary_directory) / "clone"
+            cloned = subprocess.run(
+                [
+                    "git",
+                    "clone",
+                    "--quiet",
+                    "--no-local",
+                    str(validator.ROOT),
+                    str(clone),
+                ],
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(0, cloned.returncode, cloned.stderr)
+            (clone / "examples" / "economic-factory.json").write_text(
+                "{}\n", encoding="utf-8"
+            )
+            rebuilt = source_lock.build_source_lock(
+                clone,
+                "v1.6.0",
+                "examples/economic-factory.json",
+                self.bundle,
+            )
+            self.assertEqual(self.lock, rebuilt)
+
+            configured = subprocess.run(
+                [
+                    "git",
+                    "-C",
+                    str(clone),
+                    "-c",
+                    "user.name=Zaibatsu Test",
+                    "-c",
+                    "user.email=test@example.invalid",
+                    "commit",
+                    "--all",
+                    "--message",
+                    "replacement-object adversarial fixture",
+                ],
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(0, configured.returncode, configured.stderr)
+            replaced = subprocess.run(
+                [
+                    "git",
+                    "-C",
+                    str(clone),
+                    "replace",
+                    self.lock["repository"]["commit_oid"],
+                    "HEAD",
+                ],
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(0, replaced.returncode, replaced.stderr)
+            rebuilt_with_replacement = source_lock.build_source_lock(
+                clone,
+                "v1.6.0",
+                "examples/economic-factory.json",
+                self.bundle,
+            )
+            self.assertEqual(self.lock, rebuilt_with_replacement)
+
+            foreign = Path(temporary_directory) / "foreign"
+            initialized = subprocess.run(
+                ["git", "init", "--quiet", str(foreign)],
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(0, initialized.returncode, initialized.stderr)
+            with mock.patch.dict(
+                "os.environ",
+                {
+                    "GIT_DIR": str(foreign / ".git"),
+                    "GIT_OBJECT_DIRECTORY": str(foreign / ".git" / "objects"),
+                },
+                clear=False,
+            ):
+                rebuilt_with_hostile_environment = source_lock.build_source_lock(
+                    clone,
+                    "v1.6.0",
+                    "examples/economic-factory.json",
+                    self.bundle,
+                )
+            self.assertEqual(self.lock, rebuilt_with_hostile_environment)
+
+    def test_moved_or_lightweight_tag_fails_closed(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            clone = Path(temporary_directory) / "clone"
+            cloned = subprocess.run(
+                ["git", "clone", "--quiet", str(validator.ROOT), str(clone)],
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(0, cloned.returncode, cloned.stderr)
+            moved = subprocess.run(
+                [
+                    "git",
+                    "-C",
+                    str(clone),
+                    "-c",
+                    "user.name=Zaibatsu Test",
+                    "-c",
+                    "user.email=test@example.invalid",
+                    "tag",
+                    "--force",
+                    "--annotate",
+                    "v1.6.0",
+                    "--message",
+                    "moved test tag",
+                ],
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(0, moved.returncode, moved.stderr)
+            errors = source_lock.verify_source_lock_for_bundle(
+                self.lock,
+                clone,
+                self.bundle,
+            )
+            self.assertTrue(any("does not exactly match" in error for error in errors))
+
+            lightweight = subprocess.run(
+                ["git", "-C", str(clone), "tag", "v9.9.9"],
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(0, lightweight.returncode, lightweight.stderr)
+            errors, generated = source_lock.source_lock_for_bundle(
+                clone,
+                "v9.9.9",
+                "examples/economic-factory.json",
+                self.bundle,
+            )
+            self.assertIsNone(generated)
+            self.assertTrue(errors)
+
+    def test_forged_or_reordered_inputs_fail_after_digest_refresh(self) -> None:
+        for mutation in ("blob", "file", "reorder", "duplicate"):
+            with self.subTest(mutation=mutation):
+                forged = copy.deepcopy(self.lock)
+                if mutation == "blob":
+                    forged["inputs"][0]["git_blob_oid"] = "a" * 40
+                elif mutation == "file":
+                    forged["inputs"][0]["file_sha256"] = "b" * 64
+                elif mutation == "reorder":
+                    forged["inputs"].reverse()
+                else:
+                    forged["inputs"][1] = copy.deepcopy(forged["inputs"][0])
+                self._refresh_digest(forged)
+                errors = source_lock.verify_source_lock_for_bundle(
+                    forged,
+                    validator.ROOT,
+                    self.bundle,
+                )
+                self.assertTrue(
+                    any("does not exactly match" in error for error in errors)
+                )
+
+    def test_source_lock_replay_against_cron_bundle_is_rejected(self) -> None:
+        cron_factory = composer.load_json_file(
+            validator.ROOT / "examples" / "economic-factory-cron.json"
+        )
+        cron_bundle, _ = bundler.build_factory_bundle(
+            cron_factory,
+            self.catalog,
+            self.artifacts,
+        )
+        errors = source_lock.verify_source_lock_for_bundle(
+            self.lock,
+            validator.ROOT,
+            cron_bundle,
+        )
+        self.assertTrue(
+            any("do not rebuild the exact bundle" in error for error in errors)
+        )
+
+    def test_boundary_inflation_and_type_confusion_are_rejected(self) -> None:
+        for field, unsafe in (
+            ("tag_signature_verification_included", True),
+            ("contains_runtime_implementation_source", True),
+            ("grants_qualification_evidence", True),
+            ("runtime_eligibility_granted", True),
+            ("activation_authorized", True),
+            ("deploys_infrastructure", True),
+            ("repository_ownership_verified", True),
+            ("remote_repository_contacted", True),
+            ("activation_authorized", 0),
+        ):
+            with self.subTest(field=field, unsafe=unsafe):
+                inflated = copy.deepcopy(self.lock)
+                inflated["source_lock_boundary"][field] = unsafe
+                errors = source_lock.verify_source_lock_for_bundle(
+                    inflated,
+                    validator.ROOT,
+                    self.bundle,
+                )
+                self.assertTrue(
+                    any("non-authorizing boundary" in error for error in errors)
+                )
+
+    def test_malformed_or_unsafe_source_lock_fails_cleanly(self) -> None:
+        for malformed in (None, [], "lock", 1, True, {}, {"repository": []}):
+            with self.subTest(malformed=malformed):
+                errors = source_lock.verify_source_lock_for_bundle(
+                    malformed,
+                    validator.ROOT,
+                    self.bundle,
+                )
+                self.assertTrue(errors)
+        errors, generated = source_lock.source_lock_for_bundle(
+            validator.ROOT,
+            "v1.6.0",
+            "../economic-factory.json",
+            self.bundle,
+        )
+        self.assertIsNone(generated)
+        self.assertTrue(any("unsafe" in error for error in errors))
+        for unsafe_path in (
+            "examples//economic-factory.json",
+            "examples/./economic-factory.json",
+            "examples/économic-factory.json",
+            "examples/economic-factory.json\0ignored",
+        ):
+            with self.subTest(unsafe_path=unsafe_path):
+                errors, generated = source_lock.source_lock_for_bundle(
+                    validator.ROOT,
+                    "v1.6.0",
+                    unsafe_path,
+                    self.bundle,
+                )
+                self.assertIsNone(generated)
+                self.assertTrue(any("unsafe" in error for error in errors))
+        self.assertTrue(
+            source_lock._valid_repository_url("https://github.com/example/repo")
+        )
+        for unsafe_url in (
+            "http://github.com/example/repo",
+            "https://user:secret@github.com/example/repo",
+            "https://github.com:443/example/repo",
+            "https://github..com/example/repo",
+            "https://github.com//example/repo",
+            "https://github.com/example/../repo",
+            "https://github.com/example/repo?token=secret",
+            "https://github.com/example/repo#main",
+            "https://gïthub.com/example/repo",
+        ):
+            with self.subTest(unsafe_url=unsafe_url):
+                self.assertFalse(source_lock._valid_repository_url(unsafe_url))
+
+    def test_cli_source_lock_round_trip_and_overwrite_refusal(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            bundle_path = root / "factory.tar"
+            lock_path = root / "source-lock.json"
+            bundle_path.write_bytes(self.bundle)
+            cli = [sys.executable, str(validator.ROOT / "scripts" / "zaibatsu.py")]
+            command = cli + [
+                "source-lock",
+                "examples/economic-factory.json",
+                str(bundle_path),
+                "--repository",
+                str(validator.ROOT),
+                "--release-tag",
+                "v1.6.0",
+                "--output",
+                str(lock_path),
+            ]
+            generated = subprocess.run(
+                command,
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(0, generated.returncode, generated.stderr)
+            self.assertEqual(
+                self.lock,
+                json.loads(lock_path.read_text(encoding="utf-8")),
+            )
+            verified = subprocess.run(
+                cli
+                + [
+                    "verify-source-lock",
+                    str(lock_path),
+                    str(bundle_path),
+                    "--repository",
+                    str(validator.ROOT),
+                ],
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(0, verified.returncode, verified.stderr)
+            self.assertIn("locked control inputs: 16", verified.stdout)
+            self.assertIn("qualification evidence granted: false", verified.stdout)
+            repeated = subprocess.run(
+                command,
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(2, repeated.returncode)
+            self.assertIn("refusing to overwrite", repeated.stderr)
+
+    def test_source_lock_does_not_satisfy_runtime_qualification(self) -> None:
+        assessment = qualification.load_qualification_assessment()
+        self.assertEqual(9, assessment["summary"]["verified_evidence_bindings"])
+        self.assertEqual(58, assessment["summary"]["missing_evidence_bindings"])
+        self.assertEqual(0, assessment["summary"]["runtime_eligible_modules"])
+        self.assertFalse(
+            self.lock["source_lock_boundary"]["grants_qualification_evidence"]
+        )
 
 
 class QualificationPlanningTests(unittest.TestCase):

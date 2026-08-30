@@ -26,12 +26,15 @@ changes.
   and content-addressed missing-evidence plan;
 - preserve the reproduced immutable `v1.6.0` bundle-derived contract evidence
   and partial qualification assessment before recording the final demo;
+- reproduce and release the `v1.7.0` annotated-release control-source lock from
+  a full-history credential-disabled clone without inflating it into runtime
+  implementation or qualification evidence;
 - record the Guild demo and complete applicant-owned submission materials.
 
 Exit: the public narrative, architecture, portable factory, module artifacts,
-control plan, bundle, qualification plan, partial assessment, readiness, and
-evidence contracts describe the same meta-factory without inflating
-source-only or planned capabilities.
+control plan, bundle, source lock, qualification plan, partial assessment,
+readiness, and evidence contracts describe the same meta-factory without
+inflating source-only or planned capabilities.
 
 ## Phase 1 — Factory identity and versioning
 
@@ -40,6 +43,7 @@ Current foundation:
 - closed `orchestrator`, `simbapool`, and `ffn` registry;
 - denied unknown-factory routing;
 - Git-reviewed source and immutable public releases;
+- a public control-bundle lock to exact annotated-release Git objects;
 - validated SOPS/age ciphertext and recipient policy;
 - bounded runtime machine-secret delivery.
 
@@ -47,7 +51,9 @@ Still required:
 
 - complete canonical private repository consolidation;
 - preserve histories and current dirty work through reviewed cutovers;
-- bind each factory definition to its repository and release lineage;
+- extend the public control-contract source lock into independently trusted
+  repository ownership, signed release policy, and actual per-factory runtime
+  implementation lineage;
 - prove factory-scoped static and runtime secret recovery.
 
 Exit: every factory has one canonical versioned definition, no plaintext secret

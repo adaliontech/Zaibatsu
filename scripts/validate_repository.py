@@ -48,6 +48,12 @@ from factory_qualification import (
     validate_qualification_plan,
     validate_qualification_policy,
 )
+from factory_source_lock import (
+    EXAMPLE_SOURCE_LOCK_PATH,
+    SOURCE_LOCK_SCHEMA_REFERENCE,
+    load_source_lock,
+    validate_source_lock,
+)
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -91,6 +97,7 @@ REQUIRED_FILES = (
     "examples/economic-factory-cron.json",
     "examples/economic-factory.bundle-manifest.json",
     "examples/economic-factory.plan.json",
+    "examples/economic-factory.source-lock.json",
     "examples/economic-factory.qualification-assessment.json",
     "examples/economic-factory.qualification-evidence.json",
     "examples/economic-factory.qualification-plan.json",
@@ -116,6 +123,7 @@ REQUIRED_FILES = (
     "schemas/factory-bundle-inspection.schema.json",
     "schemas/factory-bundle-manifest.schema.json",
     "schemas/factory-plan.schema.json",
+    "schemas/factory-source-lock.schema.json",
     "schemas/factory-qualification-assessment.schema.json",
     "schemas/factory-qualification-evidence.schema.json",
     "schemas/factory-qualification-plan.schema.json",
@@ -131,6 +139,7 @@ REQUIRED_FILES = (
     "scripts/factory_bundle.py",
     "scripts/factory_composer.py",
     "scripts/factory_qualification.py",
+    "scripts/factory_source_lock.py",
     "scripts/zaibatsu.py",
     "scripts/validate_repository.py",
     "tests/test_droid_preflight.py",
@@ -153,7 +162,7 @@ ARCHITECTURE_SCHEMA_VERSION = "zaibatsu.architecture.v1"
 FACTORY_MODEL_SCHEMA_VERSION = "zaibatsu.factory-model.v1"
 READINESS_SCHEMA_VERSION = "zaibatsu.submission-readiness.v1"
 FACTORY_DEFINITION_SCHEMA_VERSION = "zaibatsu.factory-definition.v2"
-INTEGRATED_TEST_COUNT = 163
+INTEGRATED_TEST_COUNT = 173
 DROID_FACTORY_CLI_VERSION = "0.206.0"
 DROID_SESSION_REFERENCE = "46f941a9-82f8-4df3-a45c-b8158996360b"
 PUBLIC_REPOSITORY_URL = "https://github.com/adaliontech/Zaibatsu"
@@ -199,6 +208,7 @@ CONTRACT_SCHEMA_REFERENCES = {
     "examples/economic-factory-cron.json": PORTABLE_FACTORY_SCHEMA_REFERENCE,
     "examples/economic-factory.bundle-manifest.json": BUNDLE_MANIFEST_SCHEMA_REFERENCE,
     "examples/economic-factory.plan.json": FACTORY_PLAN_SCHEMA_REFERENCE,
+    "examples/economic-factory.source-lock.json": SOURCE_LOCK_SCHEMA_REFERENCE,
     "examples/economic-factory.qualification-assessment.json": (
         QUALIFICATION_ASSESSMENT_SCHEMA_REFERENCE
     ),
@@ -227,6 +237,9 @@ REMOTE_SCHEMA_LOCAL_PATHS = {
         "schemas/factory-bundle-manifest.schema.json"
     ),
     "examples/economic-factory.plan.json": "schemas/factory-plan.schema.json",
+    "examples/economic-factory.source-lock.json": (
+        "schemas/factory-source-lock.schema.json"
+    ),
     "examples/economic-factory.qualification-assessment.json": (
         "schemas/factory-qualification-assessment.schema.json"
     ),
@@ -1315,6 +1328,7 @@ def validate_submission_readiness(data: Any) -> list[str]:
                     "examples/economic-factory-cron.json",
                     "examples/economic-factory.bundle-manifest.json",
                     "examples/economic-factory.plan.json",
+                    "examples/economic-factory.source-lock.json",
                     "examples/economic-factory.qualification-assessment.json",
                     "examples/economic-factory.qualification-evidence.json",
                     "examples/economic-factory.qualification-plan.json",
@@ -1733,7 +1747,9 @@ def validate_contract_schema_files(root: Path = ROOT) -> list[str]:
         if schema.get("$schema") != "https://json-schema.org/draft/2020-12/schema":
             errors.append(f"{relative}: project-owned schema must declare JSON Schema 2020-12")
         schema_release = (
-            "v1.6.0"
+            "v1.7.0"
+            if schema_path.name == "factory-source-lock.schema.json"
+            else "v1.6.0"
             if schema_path.name
             in {
                 "factory-qualification-assessment.schema.json",
@@ -1816,6 +1832,8 @@ def main() -> int:
     qualification_plan: Any = None
     qualification_evidence: Any = None
     qualification_assessment: Any = None
+    source_lock_document: Any = None
+    qualification_bundle: bytes | None = None
     verified_qualification_bundle: Any = None
     readiness: Any = None
     errors.extend(validate_public_paths())
@@ -1910,13 +1928,13 @@ def main() -> int:
             )
         ) and module_artifacts:
             try:
-                bundle, _ = build_factory_bundle(
+                qualification_bundle, _ = build_factory_bundle(
                     factory_definition,
                     module_catalog,
                     module_artifacts,
                 )
                 bundle_errors, verified_qualification_bundle = verify_factory_bundle(
-                    bundle
+                    qualification_bundle
                 )
             except (KeyError, TypeError, ValueError) as exc:
                 errors.append(f"cannot rebuild qualification input bundle: {exc}")
@@ -1947,6 +1965,19 @@ def main() -> int:
                     verified_qualification_bundle,
                     qualification_plan,
                     qualification_policy,
+                )
+            )
+    try:
+        source_lock_document = load_source_lock(EXAMPLE_SOURCE_LOCK_PATH)
+    except (OSError, ValueError) as exc:
+        errors.append(f"cannot load example factory source lock: {exc}")
+    else:
+        if qualification_bundle is not None:
+            errors.extend(
+                validate_source_lock(
+                    source_lock_document,
+                    ROOT,
+                    qualification_bundle,
                 )
             )
     try:
@@ -1993,8 +2024,8 @@ def main() -> int:
     )
     print(
         "- 2 reusable factory definitions, content-addressed modules, control "
-        "plan, bundle manifest, inspection schemas, qualification policy, "
-        "evidence, and assessment checked"
+        "plan, bundle manifest, source lock, inspection schemas, "
+        "qualification policy, evidence, and assessment checked"
     )
     print(f"- {len(EVIDENCE_CONTRACTS)} evidence receipts checked")
     print(f"- {len(REQUIRED_FACTORY_INVARIANTS)} meta-factory invariants checked")

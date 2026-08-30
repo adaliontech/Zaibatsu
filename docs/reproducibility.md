@@ -87,6 +87,10 @@ The validator confirms:
     rebuild from the verified bundle, plan, and policy; forged, replayed,
     duplicate, reordered, scope-inflated, or authority-inflated evidence fails
     closed.
+29. the annotated-release source lock resolves exact tag, commit, tree, and
+    blob objects with Git replacements disabled, reproduces the byte-identical
+    bundle, and preserves explicit remote-ownership, signature, runtime-source,
+    qualification, eligibility, activation, and deployment denials.
 
 The adversarial tests mutate valid architecture data and prove that the
 validator rejects meta-factory role drift, a missing or reclassified factory,
@@ -117,6 +121,14 @@ python3 scripts/zaibatsu.py bundle examples/economic-factory-cron.json \
 python3 scripts/zaibatsu.py compare-bundles \
   /tmp/example-product.factory.tar \
   /tmp/example-product-cron.factory.tar
+python3 scripts/zaibatsu.py source-lock \
+  examples/economic-factory.json \
+  /tmp/example-product.factory.tar \
+  --release-tag v1.6.0 \
+  --output /tmp/example-product.source-lock.json
+python3 scripts/zaibatsu.py verify-source-lock \
+  /tmp/example-product.source-lock.json \
+  /tmp/example-product.factory.tar
 python3 scripts/zaibatsu.py qualification-plan \
   /tmp/example-product.factory.tar \
   --output /tmp/example-product.qualification-plan.json
@@ -153,6 +165,14 @@ The rebuild check and portable bundle cover the deterministic contract layer.
 They are path-independent and offline, but do not run Ansible, realize Nix,
 activate cron/systemd, contact a model, deploy a service, or demonstrate
 recovery. Those are separate promotion gates.
+
+The source lock strengthens that contract-layer proof by ignoring the working
+tree and rebuilding from sixteen exact blobs reachable through an annotated
+release tag. It records both the repository's native Git object identifiers
+and SHA-256 hashes of the tag, commit, tree, and file object content. It does not
+contact a remote, authenticate repository ownership, verify a tag signature,
+contain runtime implementations, or satisfy qualification, activation,
+deployment, or recovery gates.
 
 The qualification plan closes none of those gates. It binds the control bundle
 and minimum policy by digest and enumerates missing evidence. The public
@@ -211,7 +231,12 @@ release reproduction, clone the named tag rather than the moving default
 branch:
 
 ```bash
-git clone --depth 1 --branch v1.6.0 https://github.com/adaliontech/Zaibatsu.git
+git clone --branch v1.7.0 https://github.com/adaliontech/Zaibatsu.git
 cd Zaibatsu
 make validate
 ```
+
+Use a full-history clone for `v1.7.0`: its checked source lock intentionally
+reproduces the `v1.6.0` control bundle and therefore requires that annotated
+tag and its objects. A shallow clone that omits the referenced release must
+fail instead of silently weakening the lineage proof.

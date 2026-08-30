@@ -1,8 +1,9 @@
 # Demo script
 
-Use only a fresh clone of immutable `v1.6.0` after its release proof passes. Do
-not show private terminals, history, settings, infrastructure, model
-credentials, notifications, or personal data. Lead with the real Factory
+Use only a full-history fresh clone of immutable `v1.7.0` after its release
+proof passes. Do not show private terminals, history, settings,
+infrastructure, model credentials, notifications, or personal data. Lead with
+the real Factory
 result; explain the larger architecture only after the reviewer sees working
 evidence.
 
@@ -64,6 +65,9 @@ python3 scripts/zaibatsu.py bundle examples/economic-factory.json \
   --output /tmp/example-product.factory.tar
 python3 scripts/zaibatsu.py verify-bundle \
   /tmp/example-product.factory.tar
+python3 scripts/zaibatsu.py verify-source-lock \
+  examples/economic-factory.source-lock.json \
+  /tmp/example-product.factory.tar
 python3 scripts/zaibatsu.py inspect-bundle \
   /tmp/example-product.factory.tar
 python3 scripts/zaibatsu.py bundle examples/economic-factory-cron.json \
@@ -96,8 +100,11 @@ python3 scripts/zaibatsu.py verify-qualification-assessment \
 > The factory definition selects policy-compatible reusable modules. The plan
 > binds the complete definition, catalog, and selected module contracts by
 > SHA-256 and rebuilds to the same bytes. The portable bundle also carries its
-> five schemas and verifies without extraction. This proves deterministic
-> contract packaging, not deployment or runtime recovery. The comparison
+> five schemas and verifies without extraction. The annotated-release source
+> lock then proves which sixteen immutable Git blobs reproduce those exact
+> bytes without trusting the checkout. That local control-source proof does not
+> authenticate GitHub, verify a tag signature, contain runtime source, or grant
+> qualification. The comparison
 > changes only the scheduling implementation from systemd to cron while the
 > catalog and schemas stay fixed, making modularity directly inspectable. The
 > qualification plan then lists 67 evidence bindings still missing across all
@@ -119,7 +126,7 @@ make validate
 > evidence, force-added ignored files, misleading media suffixes, and premature
 > readiness.
 
-Pause on the final 163-test pass and validator summary.
+Pause on the final 173-test pass and 75-file validator summary.
 
 ### 2:05–2:30 — Honest current boundary
 
@@ -135,8 +142,9 @@ Open `docs/implementation-status.md`.
 
 ## Before recording
 
-1. Clone the immutable `v1.6.0` tag into a new temporary directory after its
-   release proof passes.
+1. Clone the immutable `v1.7.0` tag with full history into a new temporary
+   directory after its release proof passes. Do not use `--depth 1`; source-lock
+   verification requires the referenced annotated `v1.6.0` tag and objects.
 2. Increase terminal font size and hide unrelated tabs and notifications.
 3. Run `make validate` once off camera.
 4. Prepare only the public prompt, sanitized receipt, focused diff, and status
@@ -145,17 +153,19 @@ Open `docs/implementation-status.md`.
 
 ## Capture checklist
 
-- [ ] Repository URL and `v1.6.0` tag visible once.
+- [ ] Repository URL and `v1.7.0` tag visible once.
 - [ ] Real Factory/Droid session receipt and shipped diff visible first.
 - [ ] Pre-change gap and adversarial post-change result are understandable.
 - [ ] Portable factory scaffold and validation succeed on screen.
 - [ ] Checked-in plan verification and byte-stable rebuild succeed on screen.
 - [ ] Portable bundle creation and in-memory verification succeed on screen.
+- [ ] Source-lock verification reports the annotated `v1.6.0` tag, sixteen
+      inputs, and false qualification, eligibility, and activation flags.
 - [ ] Qualification plan visibly leaves all nine modules runtime-ineligible.
 - [ ] Qualification assessment shows 9 verified contract bindings, 58 missing
       runtime bindings, and zero eligible modules.
 - [ ] “The factory of software factories” hierarchy is visible.
-- [ ] `make validate` shows all 163 tests and contract checks passing.
+- [ ] `make validate` shows all 173 tests and contract checks passing.
 - [ ] Maturity limits are stated explicitly.
 - [ ] No private history, addresses, credentials, local settings, or host details.
 - [ ] Captions are included.

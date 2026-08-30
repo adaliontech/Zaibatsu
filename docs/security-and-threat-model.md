@@ -48,6 +48,7 @@ source-only skeleton != deployed agent
 | Hallucinated success | Terminal success requires machine evidence; model text alone is rejected |
 | Model or harness implementation is substituted | Typed ports, exact implementation/profile bindings, qualification evidence, hashes, and no default fallback |
 | Portable module or factory bundle is tampered with | Canonical content digests, immutable schema-body digests, module-local paths, exact catalog/plan binding, strict JSON, in-memory USTAR verification, and rejection of traversal, links, special files, duplicate/extra members, metadata drift, and trailing bytes; inspection and comparison emit no result until every input passes the same verifier |
+| A checkout, moved tag, lightweight tag, Git replacement object, or repository-redirection environment variable lies about bundle lineage | The source lock requires an annotated semantic-version tag, disables replacement objects, sanitizes Git repository/config redirection, reads exact tag/commit/tree/blob objects rather than worktree files, records native object IDs and independent SHA-256 hashes of object content, enforces safe regular non-executable JSON paths, and rebuilds the byte-identical bundle; it explicitly does not claim remote ownership or signature trust |
 | A weak or self-authored qualification report is treated as runtime proof | The versioned minimum policy requires content-addressed base and slot evidence, rejects removed or duplicate requirements, and treats the deterministic qualification plan as missing-evidence inventory only; bundle-derived receipts credit only the exact contract checks rerun by the verifier, reject forgery/replay/false external-verifier scope, leave 58 bindings missing, and emit zero eligibility or activation authority |
 | Duplicate workers execute the same job | Transactional leases, expiry, attempt numbers, and idempotency keys |
 | cron and systemd both own one workload | Scheduler-of-record inventory, duplicate-authority denial, and receipt-bound migration |
@@ -115,6 +116,9 @@ The omission is part of the architecture, not missing documentation.
 - Encrypted Git history still depends on recipient and recovery-key governance.
 - Pattern-based secret detection can miss novel credential formats; native
   provider scanning and review remain independent layers.
+- Local Git-object lineage does not authenticate the named hosting account or
+  prove who signed a release; verified remote ownership and signature policy
+  would require separate trust anchors.
 
 Mitigation is layered verification, least privilege, explicit status, regular
 restore drills, independent review, and reversible rollout.

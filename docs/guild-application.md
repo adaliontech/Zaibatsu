@@ -23,7 +23,10 @@ its tag clone passed the same release boundary. The v1.6.0 bundle-derived
 qualification-evidence and partial-assessment candidate passed its own
 163-test credential-disabled clone, deterministic-artifact, Gitleaks, schema,
 and independent-CI proof. Immutable v1.6.0 and its tag clone passed the same
-release boundary. The final demo and applicant materials remain explicit gates in
+release boundary. The v1.7.0 annotated-release control-source-lock candidate
+must now pass a full-history 173-test clone, Gitleaks, schema, determinism, and
+independent-CI proof before release. The final demo and applicant materials
+remain explicit gates in
 [`architecture/submission-readiness.json`](../architecture/submission-readiness.json).
 
 ## Current project description
@@ -43,6 +46,10 @@ module while granting no eligibility or activation. Bundle verification also
 derives nine reproducible contract-conformance receipts; the partial assessment
 credits only those 9 of 67 bindings, leaves 58 missing, and grants no runtime
 eligibility or activation.
+An annotated-release source lock binds that control bundle to exact local Git
+objects without trusting the checkout. It does not authenticate repository
+ownership, verify a signature, contain runtime implementation source, or count
+as qualification evidence.
 
 The core repository works without a model or Droid credentials. For the Guild
 case study, authenticated Factory Droid used an owner-operated GGUF whose
@@ -64,7 +71,7 @@ new test moves `policy_decision` before `verify`; the pre-change validator
 accepted that unsafe ordering, while the shipped validator rejects it with a
 deterministic adjacent-stage error. Droid reported 36 passing tests, and an
 independent run reproduced all 36 before later integration, branding, release,
-and meta-factory checks brought the package to 163 passing tests. No model or
+and meta-factory checks brought the package to 173 passing tests. No model or
 Factory credential is published.
 
 ## One-line description
@@ -82,9 +89,10 @@ deterministic operational boundaries.
 I built Zaibatsu, the factory of software factories: an evidence-gated control
 layer for versioning, scheduling, verifying, and improving project-scoped
 software factories. It includes content-addressed module contracts and a
-byte-reproducible, self-verifying control bundle; Git/SOPS and Ansible have
-bounded evidence, Nix remains planned, and modular agent skeletons remain
-tested source rather than deployed authority.
+byte-reproducible, self-verifying control bundle with exact annotated-release
+source lineage; Git/SOPS and Ansible have bounded evidence, Nix remains
+planned, and modular agent skeletons remain tested source rather than deployed
+authority.
 Local-Qwen-backed Factory Droid strengthened and tested one deterministic
 gate-ordering invariant, with no direct model-to-production path.
 https://github.com/adaliontech/Zaibatsu @FactoryAI
@@ -100,7 +108,9 @@ harness-independent verification, feedback, and promotion. Anyone can clone
 it, scaffold a new factory definition, and validate the model and adversarial
 cases offline without access to my private fleet. They can substitute a
 policy-compatible hashed module artifact and reproduce the same canonical
-control bundle without granting it runtime or deployment authority.
+control bundle without granting it runtime or deployment authority. The source
+lock proves exact local Git-object lineage for those control contracts, not
+repository ownership, runtime source, qualification, or deployment.
 
 ### Why does it matter?
 
@@ -186,6 +196,12 @@ the public repository:
       validation, deterministic evidence/assessment reproduction, Gitleaks,
       and independent public CI.
 - [x] Immutable v1.6.0 passes roof and tag CI, tagged-schema byte checks, and
+      the full credential-disabled tag-clone reproduction.
+- [ ] Annotated-release source-lock v1.7.0 candidate passes 173 tests,
+      moved/lightweight-tag, worktree, replacement, replay, path, and authority
+      adversarial checks, isolated schema validation, exact bundle reproduction,
+      Gitleaks, and independent public CI from a full-history clone.
+- [ ] Immutable v1.7.0 passes roof and tag CI, tagged-schema byte checks, and
       the full credential-disabled tag-clone reproduction.
 - [x] Public repository and article links resolve without authentication.
 - [ ] Demo clip or screenshots show a real Factory task and validation result.

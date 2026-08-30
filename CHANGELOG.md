@@ -1,5 +1,25 @@
 # Changelog
 
+## 1.7.0 - Unreleased
+
+- Added deterministic `source-lock` and `verify-source-lock` workflows that
+  rebuild a verified control bundle entirely from an annotated release's Git
+  objects rather than the working tree.
+- Bound the factory definition, module catalog, nine selected module contracts,
+  and five bundled schemas to exact release tag, commit, tree, blob, raw-file,
+  canonical-JSON, and bundle identities.
+- Added SHA-256 digests for annotated-tag, commit, and tree object content in
+  addition to the repository's native Git object IDs, and disabled Git
+  replacement-object substitution and repository-redirection environment
+  overrides during verification.
+- Denied lightweight or moved tags, forged/reordered/duplicate inputs, bundle
+  replay, unsafe paths, credential-bearing repository URLs, overwrite races,
+  scalar type confusion, and authority inflation.
+- Kept the source lock outside runtime qualification: it contains control
+  sources only and grants no implementation evidence, eligibility, activation,
+  deployment, repository-ownership, remote-contact, or signature claim.
+- Expanded the public adversarial suite from 163 to 173 tests.
+
 ## 1.6.0 - 2026-08-30
 
 - Added deterministic bundle-derived contract-conformance receipts for every

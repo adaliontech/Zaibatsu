@@ -115,6 +115,7 @@ The target stack is intentionally boring at authority boundaries:
 | Recursive improvement | Return evidence and improve shared factory patterns | Evidence return is bounded and operational; shared automatic promotion remains designed and owner-gated |
 | Qualification planner | Bind a verified control bundle to mandatory runtime evidence requirements | Implemented and tested; the public plan contains no qualification evidence and grants no eligibility or activation |
 | Qualification evidence assessment | Derive and assess reproducible proof from verified control inputs | Contract-conformance evidence is verified for all nine public modules; 58 runtime evidence bindings remain missing, with zero eligibility or activation |
+| Annotated-release source lock | Bind one verified control bundle to exact versioned source inputs | Sixteen Git blobs from immutable v1.6.0 rebuild the byte-identical bundle; no remote, signature, runtime-source, qualification, eligibility, or activation proof is claimed |
 
 The machine-readable source of this hierarchy is
 [`architecture/factory-model.json`](architecture/factory-model.json). The
@@ -177,11 +178,11 @@ make validate
 
 `make validate` checks the project-owned schemas, architecture contracts,
 portable factory example, content-addressed module artifacts, resolved control
-plan, portable bundle manifest, qualification policy, plan, evidence and
-assessment, sanitized receipts, factory hierarchy and lifecycle, maturity
-boundaries, submission gates, public-safety rules, local links, and adversarial
-mutations. No model, network access, cloud account, secret, Nix installation,
-or production system is required.
+plan, portable bundle manifest, annotated-release source lock, qualification
+policy, plan, evidence and assessment, sanitized receipts, factory hierarchy
+and lifecycle, maturity boundaries, submission gates, public-safety rules,
+local links, and adversarial mutations. No model request, network access,
+cloud account, secret, Nix installation, or production system is required.
 
 ## Apply the contract to another factory
 
@@ -266,6 +267,38 @@ The comparison reports one `scheduling` implementation replacement from
 remain unchanged, while the factory definition and resolved plan receive new
 content digests. Both sides still report runtime ineligible: comparison proves
 a modular control-contract change, not scheduler activation.
+
+## Lock bundle sources to an immutable release
+
+Prove which exact versioned control inputs produced the verified bundle rather
+than trusting files in the current checkout:
+
+```bash
+python3 scripts/zaibatsu.py source-lock \
+  examples/economic-factory.json \
+  /tmp/example-product.factory.tar \
+  --release-tag v1.6.0 \
+  --output /tmp/example-product.source-lock.json
+python3 scripts/zaibatsu.py verify-source-lock \
+  /tmp/example-product.source-lock.json \
+  /tmp/example-product.factory.tar
+```
+
+The checked-in [source lock](examples/economic-factory.source-lock.json) binds
+the definition, catalog, nine selected module contracts, and five schemas to
+the annotated `v1.6.0` tag object, commit, tree, and individual Git blobs. It
+records each repository-native object ID and a SHA-256 digest of every Git
+object payload or file, rebuilds the bundle only from those immutable blobs,
+and requires byte-identical output. Dirty working-tree files and Git
+replacement objects cannot affect the result.
+
+This is deliberately **control-source provenance only**. It does not contact a
+remote repository, authenticate repository ownership, verify a tag signature,
+contain runtime implementation source, satisfy a runtime qualification
+binding, grant eligibility or activation, or deploy infrastructure. Because
+the checked lock references an earlier release, verification requires full Git
+history with the annotated `v1.6.0` tag available; a shallow `v1.7.0` clone is
+not sufficient.
 
 ## Plan runtime qualification
 
@@ -360,6 +393,10 @@ and the complete repository suite was rerun independently.
   manifest](examples/economic-factory.bundle-manifest.json) — independently
   hashed module contracts resolved and packaged into a dependency-ordered,
   reproducible control bundle.
+- [Annotated-release source lock](examples/economic-factory.source-lock.json)
+  — the exact Git tag, commit, tree, and sixteen blobs that reproduce the
+  verified control bundle, with explicit remote, signature, runtime,
+  qualification, activation, and deployment nonclaims.
 - [Qualification policy](policies/runtime-qualification-v1.json) and [example
   qualification plan](examples/economic-factory.qualification-plan.json) —
   content-addressed missing-evidence requirements with no runtime or activation
@@ -405,10 +442,12 @@ and the complete repository suite was rerun independently.
     eligibility, activation authority, or owner approval.
 11. Content addressing proves evidence identity, not truth; only the exact
     deterministic verifier scope may satisfy a qualification binding.
-12. Tests, schemas, linters, hashes, policy, receipts, and owner approval
+12. A source lock proves exact local Git-object lineage for control contracts;
+    it does not prove remote ownership, signature trust, or runtime source.
+13. Tests, schemas, linters, hashes, policy, receipts, and owner approval
     outrank model confidence.
-13. Feedback may propose shared improvement but cannot self-promote.
-14. Failed work remains inspectable, and the owner retains a recovery path
+14. Feedback may propose shared improvement but cannot self-promote.
+15. Failed work remains inspectable, and the owner retains a recovery path
     outside Dispatcher.
 
 ## Factory Guild submission
@@ -426,7 +465,10 @@ independent-CI boundary; immutable `v1.5.0` and its tag clone passed the full
 release proof. The bundle-derived qualification-evidence candidate passed the
 same 163-test credential-disabled clone and independent-CI boundary; immutable
 `v1.6.0` and its tag clone passed the full release proof. The final demo and
-applicant-owned form materials remain external submission gates.
+applicant-owned form materials remain external submission gates. The `v1.7.0`
+candidate adds annotated-release control-source locking and must pass its own
+173-test full-history clone, schema, secret-scan, determinism, and independent
+CI boundary before release.
 
 Zaibatsu is an independent project and is not affiliated with or endorsed by
 Factory AI.

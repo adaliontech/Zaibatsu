@@ -1,0 +1,138 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.7.0/schemas/factory-source-lock.schema.json",
+  "title": "Zaibatsu annotated-release factory source lock",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_schema", "schema_version", "factory", "repository", "source", "inputs", "rebuild", "source_lock_boundary", "factory_source_lock_sha256"],
+  "properties": {
+    "contract_schema": {"const": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.7.0/schemas/factory-source-lock.schema.json"},
+    "schema_version": {"const": "zaibatsu.factory-source-lock.v1"},
+    "factory": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "class"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+        "class": {"enum": ["control_factory", "economic_factory"]}
+      }
+    },
+    "repository": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["url", "object_format", "release_tag", "tag_object_oid", "tag_object_sha256", "commit_oid", "commit_object_sha256", "tree_oid", "tree_object_sha256", "annotated_tag_verified", "tag_signature_verification_included"],
+      "properties": {
+        "url": {"type": "string", "maxLength": 240, "pattern": "^https://[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?(?:\\.[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?)*\\/(?!\\.{1,2}(?:\\/|$))[A-Za-z0-9._~-]+(?:\\/(?!\\.{1,2}(?:\\/|$))[A-Za-z0-9._~-]+)*$"},
+        "object_format": {"enum": ["sha1", "sha256"]},
+        "release_tag": {"type": "string", "pattern": "^v[0-9]+\\.[0-9]+\\.[0-9]+$"},
+        "tag_object_oid": {"$ref": "#/$defs/gitOid"},
+        "tag_object_sha256": {"$ref": "#/$defs/sha256"},
+        "commit_oid": {"$ref": "#/$defs/gitOid"},
+        "commit_object_sha256": {"$ref": "#/$defs/sha256"},
+        "tree_oid": {"$ref": "#/$defs/gitOid"},
+        "tree_object_sha256": {"$ref": "#/$defs/sha256"},
+        "annotated_tag_verified": {"const": true},
+        "tag_signature_verification_included": {"const": false}
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["factory_definition_path", "module_catalog_path", "bundle_sha256", "factory_definition_sha256", "module_catalog_sha256", "factory_plan_sha256", "module_api_version"],
+      "properties": {
+        "factory_definition_path": {"$ref": "#/$defs/repositoryPath"},
+        "module_catalog_path": {"$ref": "#/$defs/repositoryPath"},
+        "bundle_sha256": {"$ref": "#/$defs/sha256"},
+        "factory_definition_sha256": {"$ref": "#/$defs/sha256"},
+        "module_catalog_sha256": {"$ref": "#/$defs/sha256"},
+        "factory_plan_sha256": {"$ref": "#/$defs/sha256"},
+        "module_api_version": {"const": "zaibatsu.module.v1"}
+      }
+    },
+    "inputs": {
+      "type": "array",
+      "minItems": 16,
+      "maxItems": 16,
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["path", "mode", "git_blob_oid", "file_sha256", "canonical_json_sha256"],
+        "properties": {
+          "path": {"$ref": "#/$defs/repositoryPath"},
+          "mode": {"const": "100644"},
+          "git_blob_oid": {"$ref": "#/$defs/gitOid"},
+          "file_sha256": {"$ref": "#/$defs/sha256"},
+          "canonical_json_sha256": {"$ref": "#/$defs/sha256"}
+        }
+      }
+    },
+    "rebuild": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["input_count", "selected_module_count", "bundle_rebuilt_byte_identically", "manifest_rebuilt_exactly"],
+      "properties": {
+        "input_count": {"const": 16},
+        "selected_module_count": {"const": 9},
+        "bundle_rebuilt_byte_identically": {"const": true},
+        "manifest_rebuilt_exactly": {"const": true}
+      }
+    },
+    "source_lock_boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["locks_control_sources_only", "reads_immutable_git_objects_not_worktree", "remote_repository_contacted", "repository_ownership_verified", "tag_signature_verification_included", "contains_runtime_implementation_source", "grants_qualification_evidence", "runtime_eligibility_granted", "activation_authorized", "deploys_infrastructure"],
+      "properties": {
+        "locks_control_sources_only": {"const": true},
+        "reads_immutable_git_objects_not_worktree": {"const": true},
+        "remote_repository_contacted": {"const": false},
+        "repository_ownership_verified": {"const": false},
+        "tag_signature_verification_included": {"const": false},
+        "contains_runtime_implementation_source": {"const": false},
+        "grants_qualification_evidence": {"const": false},
+        "runtime_eligibility_granted": {"const": false},
+        "activation_authorized": {"const": false},
+        "deploys_infrastructure": {"const": false}
+      }
+    },
+    "factory_source_lock_sha256": {"$ref": "#/$defs/sha256"}
+  },
+  "allOf": [
+    {
+      "if": {
+        "required": ["repository"],
+        "properties": {"repository": {"type": "object", "required": ["object_format"], "properties": {"object_format": {"const": "sha1"}}}}
+      },
+      "then": {
+        "properties": {
+          "repository": {"type": "object", "properties": {"tag_object_oid": {"$ref": "#/$defs/gitOidSha1"}, "commit_oid": {"$ref": "#/$defs/gitOidSha1"}, "tree_oid": {"$ref": "#/$defs/gitOidSha1"}}},
+          "inputs": {"type": "array", "items": {"type": "object", "properties": {"git_blob_oid": {"$ref": "#/$defs/gitOidSha1"}}}}
+        }
+      }
+    },
+    {
+      "if": {
+        "required": ["repository"],
+        "properties": {"repository": {"type": "object", "required": ["object_format"], "properties": {"object_format": {"const": "sha256"}}}}
+      },
+      "then": {
+        "properties": {
+          "repository": {"type": "object", "properties": {"tag_object_oid": {"$ref": "#/$defs/gitOidSha256"}, "commit_oid": {"$ref": "#/$defs/gitOidSha256"}, "tree_oid": {"$ref": "#/$defs/gitOidSha256"}}},
+          "inputs": {"type": "array", "items": {"type": "object", "properties": {"git_blob_oid": {"$ref": "#/$defs/gitOidSha256"}}}}
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "gitOid": {"type": "string", "pattern": "^(?:[0-9a-f]{40}|[0-9a-f]{64})$"},
+    "gitOidSha1": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "gitOidSha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "repositoryPath": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 240,
+      "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.?(?:/|$))(?!.*(?:^|/)\\.git(?:/|$))[A-Za-z0-9][A-Za-z0-9._/-]*$"
+    }
+  }
+}
