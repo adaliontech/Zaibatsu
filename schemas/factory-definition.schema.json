@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.1.2/schemas/factory-definition.schema.json",
+  "$id": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.2.0/schemas/factory-definition.schema.json",
   "title": "Zaibatsu portable software-factory definition",
   "type": "object",
   "additionalProperties": false,
@@ -13,11 +13,12 @@
     "scheduling_policy",
     "agent_policy",
     "feedback_policy",
+    "module_bindings",
     "evidence_bindings"
   ],
   "properties": {
-    "contract_schema": {"const": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.1.2/schemas/factory-definition.schema.json"},
-    "schema_version": {"const": "zaibatsu.factory-definition.v1"},
+    "contract_schema": {"const": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.2.0/schemas/factory-definition.schema.json"},
+    "schema_version": {"const": "zaibatsu.factory-definition.v2"},
     "factory": {
       "type": "object",
       "additionalProperties": false,
@@ -81,6 +82,20 @@
         "return_evidence": {"const": true},
         "promotion_authority": {"const": "reviewed_deterministic_policy_and_owner_gate"},
         "factory_may_self_promote": {"const": false}
+      }
+    },
+    "module_bindings": {
+      "type": "array",
+      "minItems": 9,
+      "maxItems": 9,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["slot", "module"],
+        "properties": {
+          "slot": {"enum": ["source_versioning", "static_secrets", "runtime_secrets", "host_reproduction", "worker_environment", "scheduling", "execution", "verification", "feedback"]},
+          "module": {"type": "string", "minLength": 1}
+        }
       }
     },
     "evidence_bindings": {

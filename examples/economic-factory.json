@@ -1,6 +1,6 @@
 {
-  "contract_schema": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.1.2/schemas/factory-definition.schema.json",
-  "schema_version": "zaibatsu.factory-definition.v1",
+  "contract_schema": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.2.0/schemas/factory-definition.schema.json",
+  "schema_version": "zaibatsu.factory-definition.v2",
   "factory": {
     "id": "example-product",
     "class": "economic_factory",
@@ -42,5 +42,16 @@
     "promotion_authority": "reviewed_deterministic_policy_and_owner_gate",
     "factory_may_self_promote": false
   },
+  "module_bindings": [
+    {"slot": "source_versioning", "module": "git-source"},
+    {"slot": "static_secrets", "module": "sops-age-static-secrets"},
+    {"slot": "runtime_secrets", "module": "bounded-runtime-secrets"},
+    {"slot": "host_reproduction", "module": "ansible-host-reproduction"},
+    {"slot": "worker_environment", "module": "nix-worker-environment"},
+    {"slot": "scheduling", "module": "systemd-scheduler"},
+    {"slot": "execution", "module": "typed-agent-execution"},
+    {"slot": "verification", "module": "deterministic-verification"},
+    {"slot": "feedback", "module": "owner-gated-feedback"}
+  ],
   "evidence_bindings": []
 }

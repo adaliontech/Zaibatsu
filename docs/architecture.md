@@ -24,18 +24,49 @@ The shared layer controls factory contracts. Each economic factory retains its
 own identity, data, credentials, repositories, schedules, acceptance rules,
 budgets, and production authority.
 
-## Two machine-readable views
+## Four machine-readable views
 
-Zaibatsu deliberately separates two questions:
+Zaibatsu deliberately separates four questions:
 
 | Contract | Question |
 | --- | --- |
 | [`architecture/factory-model.json`](../architecture/factory-model.json) | What is a software factory, how is it reproduced and improved, and which factory instances exist? |
 | [`architecture/system.json`](../architecture/system.json) | Which control-plane components execute the work, what is their maturity, and which invariants constrain them? |
+| [`examples/economic-factory.json`](../examples/economic-factory.json) | Which policies and evidence bindings define one portable factory? |
+| [`catalog/modules.json`](../catalog/modules.json) plus [`examples/economic-factory.plan.json`](../examples/economic-factory.plan.json) | Which compatible module implementations resolve into its deterministic control plan? |
 
 The validator requires the factory registry and shared component maturities to
 agree. A narrative edit cannot silently turn planned Nix reproduction or
 source-only agents into operational capability.
+
+## Deterministic module composition
+
+A portable factory selects exactly one implementation for each ordered slot:
+
+```text
+source versioning -> static secrets -> runtime secrets -> host reproduction
+  -> worker environment -> scheduling -> execution -> verification -> feedback
+```
+
+The catalog gives every module a stable ID, interface version, typed inputs and
+outputs, implementation boundary, dependency slots, and policy value. The
+factory does not depend on the bundled ID: a replacement ID is accepted when
+it belongs to the same slot and declares the same policy value. This keeps
+implementations interchangeable without allowing a module swap to weaken Git,
+SOPS/age, bounded runtime secrets, Ansible, Nix, scheduler, harness,
+verification, or promotion policy.
+
+The composer canonicalizes the complete factory definition and module catalog,
+hashes both, resolves selected modules in dependency order, and hashes the
+resulting plan. `verify-plan` rejects any definition drift, catalog drift,
+module-policy mismatch, order change, or digest edit. `rebuild-check` compiles
+the same inputs twice and requires identical canonical bytes.
+
+This boundary is deliberately narrower than infrastructure reproduction. The
+plan owns no side-effect authority and explicitly states that it neither
+deploys infrastructure nor proves runtime recovery. Ansible application, Nix
+realization, scheduler activation, model execution, effect authorization, and
+recovery each require their own evidence.
 
 ## Factory classes
 

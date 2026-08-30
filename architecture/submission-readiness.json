@@ -15,7 +15,9 @@
           "architecture/factory-model.json",
           "architecture/system.json",
           "architecture/submission-readiness.json",
-          "examples/economic-factory.json"
+          "catalog/modules.json",
+          "examples/economic-factory.json",
+          "examples/economic-factory.plan.json"
         ],
         "validator": "scripts/validate_repository.py"
       }
@@ -82,21 +84,18 @@
     },
     {
       "id": "fresh_clone_reproduction",
-      "status": "complete",
+      "status": "pending_external",
       "required_for_submission": true,
-      "evidence": "Credential-disabled public clone of v1.1.2 candidate 03d325241c81dec4c83629d36dd4aff3b5e2cf92 passed all 95 tests, schema and receipt contracts, strict Git checks, and Gitleaks 8.30.1 history/tree scans; GitHub Actions run 33319815603 independently passed",
-      "proof": {
-        "candidate_commit": "03d325241c81dec4c83629d36dd4aff3b5e2cf92",
-        "tests_passed": 95,
-        "gitleaks_version": "8.30.1",
-        "github_actions_run": "https://github.com/adaliontech/Zaibatsu/actions/runs/33319815603"
-      }
+      "evidence": "The prior v1.1.2 clone proof remains historical; the new v1.2.0 module-composition candidate requires its own credential-disabled clone, 114-test, schema, strict-Git, Gitleaks, and CI proof"
     },
     {
       "id": "public_demo",
-      "status": "pending_external",
+      "status": "blocked_by_dependency",
       "required_for_submission": true,
-      "evidence": "The v1.1.2 package and revised demo narration are ready; the applicant must record and publish the final clip from the immutable tag"
+      "evidence": "Record and publish the final clip only after the v1.2.0 candidate passes fresh-clone proof and is released as an immutable tag",
+      "blocked_by": [
+        "fresh_clone_reproduction"
+      ]
     },
     {
       "id": "applicant_materials",

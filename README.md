@@ -173,10 +173,11 @@ make validate
 ```
 
 `make validate` checks the project-owned schemas, architecture contracts,
-portable factory example, evidence receipts, factory hierarchy and lifecycle,
-maturity boundaries, submission gates, public-safety rules, local links, and
-adversarial mutations. No model, network access, cloud account, secret, Nix
-installation, or production system is required.
+portable factory example, reusable module catalog, content-addressed control
+plan, evidence receipts, factory hierarchy and lifecycle, maturity boundaries,
+submission gates, public-safety rules, local links, and adversarial mutations.
+No model, network access, cloud account, secret, Nix installation, or
+production system is required.
 
 ## Apply the contract to another factory
 
@@ -199,6 +200,29 @@ corresponding content-addressed, independently verified evidence binding
 exists; stronger factory and Nix maturity fail without it. A committed
 [`examples/economic-factory.json`](examples/economic-factory.json) is ready to
 inspect without creating a file.
+
+## Compose a factory control plan
+
+The versioned [`catalog/modules.json`](catalog/modules.json) describes reusable
+module implementations for the nine control slots. A binding is compatible
+when its declared policy value matches the factory policy; the implementation
+ID itself is replaceable. Resolve the example, verify the checked-in plan, and
+prove a second compilation is byte-identical:
+
+```bash
+python3 scripts/zaibatsu.py catalog-check
+python3 scripts/zaibatsu.py plan examples/economic-factory.json \
+  --output /tmp/example-product.plan.json
+python3 scripts/zaibatsu.py verify-plan \
+  /tmp/example-product.plan.json examples/economic-factory.json
+python3 scripts/zaibatsu.py rebuild-check examples/economic-factory.json
+```
+
+The plan records canonical SHA-256 digests for both inputs, resolves dependency
+order, preserves module implementation boundaries, and carries an explicit
+least-authority claim. It proves reproducible **control-plan composition only**.
+It does not install Ansible roles, build a Nix environment, create schedules,
+contact a model, deploy infrastructure, or prove runtime recovery.
 
 ## Factory AI and local Qwen
 
@@ -229,6 +253,9 @@ and the complete repository suite was rerun independently.
   task flow, and fail-closed invariants.
 - [Portable factory definition](examples/economic-factory.json) — reusable
   contract for a new control or economic factory.
+- [Reusable module catalog](catalog/modules.json) and [example control
+  plan](examples/economic-factory.plan.json) — policy-compatible implementations
+  resolved into a content-addressed, dependency-ordered plan.
 - [Project-owned schemas](schemas/) — JSON Schema contracts for architecture,
   readiness, portable factories, and sanitized evidence.
 - [Architecture guide](docs/architecture.md) — how the two models compose.
@@ -258,6 +285,8 @@ and the complete repository suite was rerun independently.
 6. Agent skeletons are modular contracts, not autonomous production authority.
 7. LLM harnesses are interchangeable workers behind deterministic entry and
    exit gates.
+8. Module IDs select implementations; declared policy compatibility decides
+   whether a module may fill a factory slot.
 8. Tests, schemas, linters, hashes, policy, receipts, and owner approval outrank
    model confidence.
 9. Feedback may propose shared improvement but cannot self-promote.

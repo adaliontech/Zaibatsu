@@ -198,6 +198,12 @@ reusable contracts while preserving evidence and limitations:
   order, and fail-closed invariants;
 - `examples/economic-factory.json` and `scripts/zaibatsu.py` let another
   project scaffold and validate a portable factory definition;
+- `catalog/modules.json` defines policy-compatible implementations for every
+  factory control slot, while `examples/economic-factory.plan.json` proves a
+  content-addressed, dependency-ordered composition;
+- `zaibatsu plan`, `verify-plan`, and `rebuild-check` reject module-policy
+  mismatch, definition or catalog drift, and plan tampering without claiming
+  infrastructure deployment or recovery;
 - project-owned JSON Schemas describe the architecture, factory, readiness,
   and evidence documents;
 - `scripts/validate_repository.py` checks all contracts, evidence semantics,

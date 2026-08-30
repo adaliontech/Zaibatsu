@@ -1,9 +1,10 @@
 # Demo script
 
-Use only a fresh clone of immutable `v1.1.2`. Do not show private terminals,
-history, settings, infrastructure, model credentials, notifications, or
-personal data. Lead with the real Factory result; explain the larger
-architecture only after the reviewer sees working evidence.
+Use only a fresh clone of immutable `v1.2.0` after its release proof passes. Do
+not show private terminals, history, settings, infrastructure, model
+credentials, notifications, or personal data. Lead with the real Factory
+result; explain the larger architecture only after the reviewer sees working
+evidence.
 
 ## Main cut — about 2 minutes 30 seconds
 
@@ -53,6 +54,19 @@ Show the README hierarchy and `architecture/factory-model.json`.
 > but never both. Nix is the planned worker-environment boundary and is not
 > presented as deployed.
 
+Then run:
+
+```bash
+python3 scripts/zaibatsu.py verify-plan \
+  examples/economic-factory.plan.json examples/economic-factory.json
+python3 scripts/zaibatsu.py rebuild-check examples/economic-factory.json
+```
+
+> The factory definition selects policy-compatible reusable modules. The plan
+> binds the complete definition and catalog by SHA-256 and rebuilds to the same
+> bytes. This proves deterministic control-plan composition, not deployment or
+> runtime recovery.
+
 ### 1:35–2:05 — Run every deterministic gate
 
 ```bash
@@ -66,7 +80,7 @@ make validate
 > evidence, force-added ignored files, misleading media suffixes, and premature
 > readiness.
 
-Pause on the final 95-test pass and validator summary.
+Pause on the final 114-test pass and validator summary.
 
 ### 2:05–2:30 — Honest current boundary
 
@@ -82,7 +96,8 @@ Open `docs/implementation-status.md`.
 
 ## Before recording
 
-1. Clone the immutable `v1.1.2` tag into a new temporary directory.
+1. Clone the immutable `v1.2.0` tag into a new temporary directory after its
+   release proof passes.
 2. Increase terminal font size and hide unrelated tabs and notifications.
 3. Run `make validate` once off camera.
 4. Prepare only the public prompt, sanitized receipt, focused diff, and status
@@ -91,12 +106,13 @@ Open `docs/implementation-status.md`.
 
 ## Capture checklist
 
-- [ ] Repository URL and `v1.1.2` tag visible once.
+- [ ] Repository URL and `v1.2.0` tag visible once.
 - [ ] Real Factory/Droid session receipt and shipped diff visible first.
 - [ ] Pre-change gap and adversarial post-change result are understandable.
 - [ ] Portable factory scaffold and validation succeed on screen.
+- [ ] Checked-in plan verification and byte-stable rebuild succeed on screen.
 - [ ] “The factory of software factories” hierarchy is visible.
-- [ ] `make validate` shows all 95 tests and contract checks passing.
+- [ ] `make validate` shows all 114 tests and contract checks passing.
 - [ ] Maturity limits are stated explicitly.
 - [ ] No private history, addresses, credentials, local settings, or host details.
 - [ ] Captions are included.

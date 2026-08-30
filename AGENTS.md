@@ -5,6 +5,9 @@
 - Full validation: `make validate`
 - Architecture contract only: `python3 scripts/validate_repository.py`
 - Portable example: `python3 scripts/zaibatsu.py validate examples/economic-factory.json`
+- Module catalog: `python3 scripts/zaibatsu.py catalog-check`
+- Plan proof: `python3 scripts/zaibatsu.py verify-plan examples/economic-factory.plan.json examples/economic-factory.json`
+- Byte-stable rebuild: `python3 scripts/zaibatsu.py rebuild-check examples/economic-factory.json`
 - Tests only: `python3 -m unittest discover -s tests -v`
 - Deferred local-model preflight: `make droid-preflight`
 

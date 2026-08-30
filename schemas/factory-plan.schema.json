@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.2.0/schemas/factory-plan.schema.json",
+  "title": "Zaibatsu deterministic factory control plan",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_schema", "schema_version", "factory", "source", "module_order", "modules", "deterministic_gates", "rebuild_claim", "plan_sha256"],
+  "properties": {
+    "contract_schema": {"const": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.2.0/schemas/factory-plan.schema.json"},
+    "schema_version": {"const": "zaibatsu.factory-plan.v1"},
+    "factory": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "class", "maturity", "purpose"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "class": {"enum": ["control_factory", "economic_factory"]},
+        "maturity": {"enum": ["operational", "validated_preproduction", "designed", "planned", "pending_evidence"]},
+        "purpose": {"type": "string", "minLength": 1}
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["factory_definition_sha256", "module_catalog_sha256", "module_api_version"],
+      "properties": {
+        "factory_definition_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "module_catalog_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "module_api_version": {"const": "zaibatsu.module.v1"}
+      }
+    },
+    "module_order": {
+      "const": ["source_versioning", "static_secrets", "runtime_secrets", "host_reproduction", "worker_environment", "scheduling", "execution", "verification", "feedback"]
+    },
+    "modules": {
+      "type": "array",
+      "minItems": 9,
+      "maxItems": 9,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["position", "slot", "module", "policy_value", "interface_version", "kind", "implementation_status", "side_effect_authority", "requires_slots", "provides", "rebuild_boundary"],
+        "properties": {
+          "position": {"type": "integer", "minimum": 0, "maximum": 8},
+          "slot": {"type": "string"},
+          "module": {"type": "string"},
+          "policy_value": {
+            "oneOf": [
+              {"type": "string", "minLength": 1},
+              {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}}
+            ]
+          },
+          "interface_version": {"const": "zaibatsu.module.v1"},
+          "kind": {"enum": ["deterministic", "probabilistic_adapter"]},
+          "implementation_status": {"enum": ["contract_only", "source_only", "planned"]},
+          "side_effect_authority": {"const": false},
+          "requires_slots": {"type": "array", "uniqueItems": true, "items": {"type": "string"}},
+          "provides": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+          "rebuild_boundary": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "deterministic_gates": {"const": ["schemas", "linters", "tests", "hashes", "policy", "receipts", "owner_approval"]},
+    "rebuild_claim": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["scope", "byte_reproducible", "deploys_infrastructure", "proves_runtime_recovery"],
+      "properties": {
+        "scope": {"const": "control_plan_only"},
+        "byte_reproducible": {"const": true},
+        "deploys_infrastructure": {"const": false},
+        "proves_runtime_recovery": {"const": false}
+      }
+    },
+    "plan_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  }
+}

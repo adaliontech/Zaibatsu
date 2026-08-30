@@ -8,16 +8,20 @@ changes.
 
 - define Zaibatsu as the control factory above economic software factories;
 - encode the closed factory registry and lifecycle;
+- publish the portable factory definition, reusable module catalog, and
+  content-addressed deterministic control plan;
 - represent Git/SOPS, Ansible/Nix, cron/systemd, modular skeletons, harnesses,
   deterministic gates, and recursive improvement at truthful maturity;
 - publish sanitized evidence and adversarial tests;
 - preserve the immutable `v1.1.0` and `v1.1.1` proofs and reproduce corrected
   `v1.1.2` from a credential-free clone;
+- reproduce the `v1.2.0` module-composition candidate before recording its
+  demo;
 - record the Guild demo and complete applicant-owned submission materials.
 
-Exit: the public narrative, architecture, portable factory, readiness, and
-evidence contracts describe the same meta-factory without inflating
-source-only or planned capabilities.
+Exit: the public narrative, architecture, portable factory, module catalog,
+control plan, readiness, and evidence contracts describe the same meta-factory
+without inflating source-only or planned capabilities.
 
 ## Phase 1 — Factory identity and versioning
 

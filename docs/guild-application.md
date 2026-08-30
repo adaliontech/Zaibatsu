@@ -45,7 +45,7 @@ new test moves `policy_decision` before `verify`; the pre-change validator
 accepted that unsafe ordering, while the shipped validator rejects it with a
 deterministic adjacent-stage error. Droid reported 36 passing tests, and an
 independent run reproduced all 36 before later integration, branding, release,
-and meta-factory checks brought the package to 95 passing tests. No model or
+and meta-factory checks brought the package to 114 passing tests. No model or
 Factory credential is published.
 
 ## One-line description

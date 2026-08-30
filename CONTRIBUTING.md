@@ -29,6 +29,9 @@ Changes to factory lifecycle, reproduction, versioning, scheduling, worker
 harnesses, verification, or feedback must keep
 [`architecture/factory-model.json`](architecture/factory-model.json) and
 [`architecture/system.json`](architecture/system.json) consistent.
+Changes to a module policy, dependency, interface, or implementation boundary
+must also update the catalog, regenerate the example plan, and add a drift or
+compatibility test.
 
 ## Pull request evidence
 

@@ -11,6 +11,17 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from factory_composer import (
+    FACTORY_PLAN_SCHEMA_REFERENCE,
+    MODULE_CATALOG_SCHEMA_REFERENCE,
+    load_json_file,
+    load_factory_plan,
+    load_module_catalog,
+    validate_factory_bindings,
+    validate_factory_plan,
+    validate_module_catalog,
+)
+
 
 ROOT = Path(__file__).resolve().parents[1]
 ARCHITECTURE_PATH = ROOT / "architecture" / "system.json"
@@ -31,7 +42,9 @@ REQUIRED_FILES = (
     "architecture/factory-model.json",
     "architecture/system.json",
     "architecture/submission-readiness.json",
+    "catalog/modules.json",
     "examples/economic-factory.json",
+    "examples/economic-factory.plan.json",
     "evidence/dispatcher-validation-v1.json",
     "evidence/droid-contribution-v1.json",
     "evidence/meta-factory-foundations-v1.json",
@@ -50,12 +63,15 @@ REQUIRED_FILES = (
     "schemas/dispatcher-validation-receipt.schema.json",
     "schemas/droid-contribution-receipt.schema.json",
     "schemas/factory-definition.schema.json",
+    "schemas/factory-plan.schema.json",
     "schemas/factory-model.schema.json",
     "schemas/meta-factory-foundations-receipt.schema.json",
+    "schemas/module-catalog.schema.json",
     "schemas/qwen-model-observation-receipt.schema.json",
     "schemas/submission-readiness.schema.json",
     "schemas/system.schema.json",
     "scripts/droid_preflight.py",
+    "scripts/factory_composer.py",
     "scripts/zaibatsu.py",
     "scripts/validate_repository.py",
     "tests/test_droid_preflight.py",
@@ -76,14 +92,14 @@ PROJECT_NAME = "Zaibatsu"
 ARCHITECTURE_SCHEMA_VERSION = "zaibatsu.architecture.v1"
 FACTORY_MODEL_SCHEMA_VERSION = "zaibatsu.factory-model.v1"
 READINESS_SCHEMA_VERSION = "zaibatsu.submission-readiness.v1"
-FACTORY_DEFINITION_SCHEMA_VERSION = "zaibatsu.factory-definition.v1"
-INTEGRATED_TEST_COUNT = 95
+FACTORY_DEFINITION_SCHEMA_VERSION = "zaibatsu.factory-definition.v2"
+INTEGRATED_TEST_COUNT = 114
 DROID_FACTORY_CLI_VERSION = "0.206.0"
 DROID_SESSION_REFERENCE = "46f941a9-82f8-4df3-a45c-b8158996360b"
 PUBLIC_REPOSITORY_URL = "https://github.com/adaliontech/Zaibatsu"
 PORTABLE_FACTORY_SCHEMA_REFERENCE = (
     "https://raw.githubusercontent.com/adaliontech/Zaibatsu/"
-    "v1.1.2/schemas/factory-definition.schema.json"
+    "v1.2.0/schemas/factory-definition.schema.json"
 )
 
 DISPATCHER_MIGRATIONS = {
@@ -114,11 +130,19 @@ CONTRACT_SCHEMA_REFERENCES = {
     "architecture/factory-model.json": "../schemas/factory-model.schema.json",
     "architecture/system.json": "../schemas/system.schema.json",
     "architecture/submission-readiness.json": "../schemas/submission-readiness.schema.json",
+    "catalog/modules.json": MODULE_CATALOG_SCHEMA_REFERENCE,
     "examples/economic-factory.json": PORTABLE_FACTORY_SCHEMA_REFERENCE,
+    "examples/economic-factory.plan.json": FACTORY_PLAN_SCHEMA_REFERENCE,
     "evidence/dispatcher-validation-v1.json": "../schemas/dispatcher-validation-receipt.schema.json",
     "evidence/droid-contribution-v1.json": "../schemas/droid-contribution-receipt.schema.json",
     "evidence/meta-factory-foundations-v1.json": "../schemas/meta-factory-foundations-receipt.schema.json",
     "evidence/qwen-model-observation-v1.json": "../schemas/qwen-model-observation-receipt.schema.json",
+}
+
+REMOTE_SCHEMA_LOCAL_PATHS = {
+    "catalog/modules.json": "schemas/module-catalog.schema.json",
+    "examples/economic-factory.json": "schemas/factory-definition.schema.json",
+    "examples/economic-factory.plan.json": "schemas/factory-plan.schema.json",
 }
 
 EVIDENCE_CONTRACTS = {
@@ -349,7 +373,7 @@ def load_factory_model(path: Path = FACTORY_MODEL_PATH) -> dict[str, Any]:
 
 
 def load_factory_definition(path: Path = EXAMPLE_FACTORY_PATH) -> dict[str, Any]:
-    return json.loads(path.read_text(encoding="utf-8"))
+    return load_json_file(path)
 
 
 def validate_factory_definition(data: Any) -> list[str]:
@@ -357,6 +381,19 @@ def validate_factory_definition(data: Any) -> list[str]:
     errors: list[str] = []
     if not isinstance(data, dict):
         return ["factory definition root must be an object"]
+    if set(data) != {
+        "contract_schema",
+        "schema_version",
+        "factory",
+        "versioning_policy",
+        "reproducibility_policy",
+        "scheduling_policy",
+        "agent_policy",
+        "feedback_policy",
+        "module_bindings",
+        "evidence_bindings",
+    }:
+        errors.append("factory definition contains missing or unexpected root fields")
 
     if data.get("contract_schema") != PORTABLE_FACTORY_SCHEMA_REFERENCE:
         errors.append("factory definition must reference its project-owned schema")
@@ -370,6 +407,8 @@ def validate_factory_definition(data: Any) -> list[str]:
     if not isinstance(factory, dict):
         errors.append("factory definition factory must be an object")
     else:
+        if set(factory) != {"id", "class", "maturity", "purpose"}:
+            errors.append("factory identity contains missing or unexpected fields")
         factory_id = factory.get("id")
         if not isinstance(factory_id, str) or not SLUG_RE.fullmatch(factory_id):
             errors.append("factory id must be a lowercase hyphenated slug")
@@ -398,6 +437,13 @@ def validate_factory_definition(data: Any) -> list[str]:
     if not isinstance(reproduction, dict):
         errors.append("factory reproducibility_policy must be an object")
     else:
+        if set(reproduction) != {
+            "host_configuration",
+            "worker_environments",
+            "nix_maturity",
+            "nix_cross_node_proof",
+        }:
+            errors.append("factory reproducibility policy has ambiguous fields")
         if reproduction.get("host_configuration") != "ansible":
             errors.append("factory host reproduction must use Ansible")
         if reproduction.get("worker_environments") != "nix":
@@ -416,6 +462,11 @@ def validate_factory_definition(data: Any) -> list[str]:
     if not isinstance(scheduling, dict):
         errors.append("factory scheduling_policy must be an object")
     else:
+        if set(scheduling) != {
+            "scheduler_of_record",
+            "one_scheduler_of_record_per_workload",
+        }:
+            errors.append("factory scheduling policy has ambiguous fields")
         scheduler = scheduling.get("scheduler_of_record")
         if not isinstance(scheduler, str) or scheduler not in {"systemd", "cron"}:
             errors.append("factory scheduler_of_record must be systemd or cron")
@@ -426,6 +477,13 @@ def validate_factory_definition(data: Any) -> list[str]:
     if not isinstance(agent, dict):
         errors.append("factory agent_policy must be an object")
     else:
+        if set(agent) != {
+            "skeleton_status",
+            "harness_binding",
+            "deterministic_gates",
+            "model_may_authorize_external_effect",
+        }:
+            errors.append("factory agent policy has ambiguous fields")
         skeleton_status = agent.get("skeleton_status")
         if not isinstance(skeleton_status, str) or skeleton_status not in {
             "planned",
@@ -459,6 +517,15 @@ def validate_factory_definition(data: Any) -> list[str]:
             if not isinstance(binding, dict):
                 errors.append(f"factory evidence binding at index {index} must be an object")
                 continue
+            if set(binding) != {
+                "capability",
+                "maturity",
+                "receipt",
+                "sha256",
+                "independently_verified",
+                "scope",
+            }:
+                errors.append(f"factory evidence binding at index {index} has ambiguous fields")
             capability = binding.get("capability")
             if not isinstance(capability, str) or not SLUG_RE.fullmatch(capability):
                 errors.append(f"factory evidence binding at index {index} needs a capability slug")
@@ -1147,7 +1214,9 @@ def validate_submission_readiness(data: Any) -> list[str]:
                     "architecture/factory-model.json",
                     "architecture/system.json",
                     "architecture/submission-readiness.json",
+                    "catalog/modules.json",
                     "examples/economic-factory.json",
+                    "examples/economic-factory.plan.json",
                 }
                 if (
                     not isinstance(contracts, list)
@@ -1542,8 +1611,8 @@ def validate_contract_schema_files(root: Path = ROOT) -> list[str]:
         if not isinstance(instance, dict) or instance.get("contract_schema") != expected_reference:
             errors.append(f"{relative}: contract_schema must equal {expected_reference}")
             continue
-        if relative == "examples/economic-factory.json":
-            schema_path = (root / "schemas" / "factory-definition.schema.json").resolve()
+        if relative in REMOTE_SCHEMA_LOCAL_PATHS:
+            schema_path = (root / REMOTE_SCHEMA_LOCAL_PATHS[relative]).resolve()
         else:
             schema_path = (instance_path.parent / expected_reference).resolve()
         try:
@@ -1562,8 +1631,13 @@ def validate_contract_schema_files(root: Path = ROOT) -> list[str]:
         if schema.get("$schema") != "https://json-schema.org/draft/2020-12/schema":
             errors.append(f"{relative}: project-owned schema must declare JSON Schema 2020-12")
         schema_release = (
-            "v1.1.2"
-            if schema_path.name == "factory-definition.schema.json"
+            "v1.2.0"
+            if schema_path.name
+            in {
+                "factory-definition.schema.json",
+                "factory-plan.schema.json",
+                "module-catalog.schema.json",
+            }
             else "v1.1.1"
         )
         expected_id = (
@@ -1617,6 +1691,8 @@ def main() -> int:
     data: Any = None
     factory_model: Any = None
     factory_definition: Any = None
+    module_catalog: Any = None
+    factory_plan: Any = None
     readiness: Any = None
     errors.extend(validate_public_paths())
     errors.extend(validate_required_files())
@@ -1635,10 +1711,27 @@ def main() -> int:
         errors.extend(validate_factory_model(factory_model))
     try:
         factory_definition = load_factory_definition()
-    except (OSError, json.JSONDecodeError) as exc:
+    except (OSError, ValueError) as exc:
         errors.append(f"cannot load example factory definition: {exc}")
     else:
         errors.extend(validate_factory_definition(factory_definition))
+    try:
+        module_catalog = load_module_catalog()
+    except (OSError, ValueError) as exc:
+        errors.append(f"cannot load module catalog: {exc}")
+    else:
+        errors.extend(validate_module_catalog(module_catalog))
+        if isinstance(factory_definition, dict):
+            errors.extend(validate_factory_bindings(factory_definition, module_catalog))
+    try:
+        factory_plan = load_factory_plan()
+    except (OSError, ValueError) as exc:
+        errors.append(f"cannot load example factory plan: {exc}")
+    else:
+        if isinstance(factory_definition, dict) and isinstance(module_catalog, dict):
+            errors.extend(
+                validate_factory_plan(factory_plan, factory_definition, module_catalog)
+            )
     try:
         readiness = json.loads(READINESS_PATH.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:
@@ -1664,7 +1757,7 @@ def main() -> int:
         f"- {len(factory_model['factory_instances'])} software factories and "
         f"{len(factory_model['capabilities'])} meta-factory capabilities checked"
     )
-    print("- reusable factory-definition example checked")
+    print("- reusable factory definition, module catalog, and control plan checked")
     print(f"- {len(EVIDENCE_CONTRACTS)} evidence receipts checked")
     print(f"- {len(REQUIRED_FACTORY_INVARIANTS)} meta-factory invariants checked")
     print(f"- {len(REQUIRED_TRUE_INVARIANTS)} fail-closed invariants checked")

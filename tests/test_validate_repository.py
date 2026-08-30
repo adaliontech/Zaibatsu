@@ -12,10 +12,13 @@ from pathlib import Path
 
 
 MODULE_PATH = Path(__file__).resolve().parents[1] / "scripts" / "validate_repository.py"
+if str(MODULE_PATH.parent) not in sys.path:
+    sys.path.insert(0, str(MODULE_PATH.parent))
 SPEC = importlib.util.spec_from_file_location("validate_repository", MODULE_PATH)
 assert SPEC and SPEC.loader
 validator = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(validator)
+import factory_composer as composer
 
 
 class ArchitectureValidationTests(unittest.TestCase):
@@ -647,6 +650,252 @@ class PortableFactoryDefinitionTests(unittest.TestCase):
         mutated["agent_policy"]["skeleton_status"] = []
         errors = validator.validate_factory_definition(mutated)
         self.assertGreaterEqual(len(errors), 5)
+
+
+class ModuleCompositionTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.factory = validator.load_factory_definition()
+        self.catalog = composer.load_module_catalog()
+        self.plan = composer.load_factory_plan()
+
+    def test_repository_catalog_bindings_and_plan_pass(self) -> None:
+        self.assertEqual([], composer.validate_module_catalog(self.catalog))
+        self.assertEqual(
+            [], composer.validate_factory_bindings(self.factory, self.catalog)
+        )
+        self.assertEqual(
+            [], composer.validate_factory_plan(self.plan, self.factory, self.catalog)
+        )
+
+    def test_compatible_alternate_module_id_is_interchangeable(self) -> None:
+        catalog = copy.deepcopy(self.catalog)
+        factory = copy.deepcopy(self.factory)
+        module = next(item for item in catalog["modules"] if item["id"] == "git-source")
+        module["id"] = "alternate-git-source"
+        binding = next(
+            item
+            for item in factory["module_bindings"]
+            if item["slot"] == "source_versioning"
+        )
+        binding["module"] = "alternate-git-source"
+        self.assertEqual([], composer.validate_module_catalog(catalog))
+        self.assertEqual([], composer.validate_factory_bindings(factory, catalog))
+
+    def test_module_policy_mismatch_fails_closed(self) -> None:
+        catalog = copy.deepcopy(self.catalog)
+        module = next(item for item in catalog["modules"] if item["id"] == "git-source")
+        module["policy_value"] = "not-git"
+        errors = composer.validate_factory_bindings(self.factory, catalog)
+        self.assertTrue(any("does not preserve" in error for error in errors))
+
+    def test_duplicate_module_id_is_rejected(self) -> None:
+        catalog = copy.deepcopy(self.catalog)
+        catalog["modules"][1]["id"] = catalog["modules"][0]["id"]
+        errors = composer.validate_module_catalog(catalog)
+        self.assertTrue(any("duplicate module id" in error for error in errors))
+
+    def test_invalid_module_id_is_rejected(self) -> None:
+        catalog = copy.deepcopy(self.catalog)
+        catalog["modules"][0]["id"] = "Ambiguous module id"
+        errors = composer.validate_module_catalog(catalog)
+        self.assertTrue(any("must have an id" in error for error in errors))
+
+    def test_missing_module_slot_is_rejected(self) -> None:
+        catalog = copy.deepcopy(self.catalog)
+        catalog["modules"] = [
+            module for module in catalog["modules"] if module["slot"] != "feedback"
+        ]
+        errors = composer.validate_module_catalog(catalog)
+        self.assertTrue(any("missing slots" in error for error in errors))
+
+    def test_forward_module_dependency_is_rejected(self) -> None:
+        catalog = copy.deepcopy(self.catalog)
+        catalog["modules"][0]["requires_slots"] = ["feedback"]
+        errors = composer.validate_module_catalog(catalog)
+        self.assertTrue(any("must precede" in error for error in errors))
+
+    def test_duplicate_typed_output_is_rejected(self) -> None:
+        catalog = copy.deepcopy(self.catalog)
+        catalog["modules"][0]["provides"].append(
+            catalog["modules"][0]["provides"][0]
+        )
+        errors = composer.validate_module_catalog(catalog)
+        self.assertTrue(any("provides must be unique" in error for error in errors))
+
+    def test_malformed_catalog_and_binding_fail_cleanly(self) -> None:
+        catalog = copy.deepcopy(self.catalog)
+        catalog["modules"][0]["policy_value"] = ["valid", []]
+        errors = composer.validate_module_catalog(catalog)
+        self.assertTrue(any("policy_value" in error for error in errors))
+        factory = copy.deepcopy(self.factory)
+        factory["module_bindings"][0]["slot"] = []
+        errors = composer.validate_factory_bindings(factory, self.catalog)
+        self.assertTrue(any("invalid slot" in error for error in errors))
+
+    def test_definition_drift_invalidates_recorded_plan(self) -> None:
+        factory = copy.deepcopy(self.factory)
+        factory["factory"]["purpose"] += " after a reviewed change"
+        errors = composer.validate_factory_plan(self.plan, factory, self.catalog)
+        self.assertTrue(any("content-addressed inputs" in error for error in errors))
+
+    def test_catalog_drift_invalidates_recorded_plan(self) -> None:
+        catalog = copy.deepcopy(self.catalog)
+        catalog["modules"][0]["description"] += " with a revised contract"
+        errors = composer.validate_factory_plan(self.plan, self.factory, catalog)
+        self.assertTrue(any("content-addressed inputs" in error for error in errors))
+
+    def test_plan_digest_tampering_is_rejected(self) -> None:
+        plan = copy.deepcopy(self.plan)
+        plan["plan_sha256"] = "0" * 64
+        errors = composer.validate_factory_plan(plan, self.factory, self.catalog)
+        self.assertTrue(any("content-addressed inputs" in error for error in errors))
+
+    def test_rebuild_is_byte_stable_and_path_independent(self) -> None:
+        stable, digest = composer.rebuild_check(self.factory, self.catalog)
+        self.assertTrue(stable)
+        self.assertEqual(self.plan["plan_sha256"], digest)
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            factory_path = root / "nested" / "factory.json"
+            catalog_path = root / "elsewhere" / "catalog.json"
+            factory_path.parent.mkdir()
+            catalog_path.parent.mkdir()
+            factory_path.write_text(json.dumps(self.factory), encoding="utf-8")
+            catalog_path.write_text(json.dumps(self.catalog), encoding="utf-8")
+            relocated = composer.build_factory_plan(
+                json.loads(factory_path.read_text(encoding="utf-8")),
+                json.loads(catalog_path.read_text(encoding="utf-8")),
+            )
+        self.assertEqual(self.plan, relocated)
+
+    def test_plan_cannot_claim_deployment_or_runtime_recovery(self) -> None:
+        claim = self.plan["rebuild_claim"]
+        self.assertEqual("control_plan_only", claim["scope"])
+        self.assertFalse(claim["deploys_infrastructure"])
+        self.assertFalse(claim["proves_runtime_recovery"])
+        rendered = json.dumps(self.plan)
+        self.assertNotIn("/home/", rendered)
+        self.assertNotIn("C:\\Users\\", rendered)
+
+    def test_plan_mutation_cannot_modify_source_inputs(self) -> None:
+        factory_before = copy.deepcopy(self.factory)
+        catalog_before = copy.deepcopy(self.catalog)
+        plan = composer.build_factory_plan(self.factory, self.catalog)
+        plan["deterministic_gates"].append("untrusted")
+        plan["modules"][0]["provides"].append("untrusted_output")
+        plan["modules"][7]["policy_value"].append("untrusted")
+        self.assertEqual(factory_before, self.factory)
+        self.assertEqual(catalog_before, self.catalog)
+
+    def test_cli_plan_verify_and_rebuild_round_trip(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            output = Path(temporary_directory) / "factory.plan.json"
+            cli = [sys.executable, str(validator.ROOT / "scripts" / "zaibatsu.py")]
+            plan_result = subprocess.run(
+                cli
+                + [
+                    "plan",
+                    str(validator.EXAMPLE_FACTORY_PATH),
+                    "--output",
+                    str(output),
+                ],
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(0, plan_result.returncode, plan_result.stderr)
+            self.assertEqual(self.plan, json.loads(output.read_text(encoding="utf-8")))
+            verify_result = subprocess.run(
+                cli
+                + [
+                    "verify-plan",
+                    str(output),
+                    str(validator.EXAMPLE_FACTORY_PATH),
+                ],
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(0, verify_result.returncode, verify_result.stderr)
+            rebuild_result = subprocess.run(
+                cli + ["rebuild-check", str(validator.EXAMPLE_FACTORY_PATH)],
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(0, rebuild_result.returncode, rebuild_result.stderr)
+            self.assertIn(self.plan["plan_sha256"], rebuild_result.stdout)
+
+    def test_cli_rejects_stale_plan(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            factory_path = Path(temporary_directory) / "factory.json"
+            factory = copy.deepcopy(self.factory)
+            factory["factory"]["purpose"] += " changed"
+            factory_path.write_text(json.dumps(factory), encoding="utf-8")
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(validator.ROOT / "scripts" / "zaibatsu.py"),
+                    "verify-plan",
+                    str(composer.EXAMPLE_PLAN_PATH),
+                    str(factory_path),
+                ],
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+        self.assertEqual(1, result.returncode)
+        self.assertIn("content-addressed inputs", result.stderr)
+
+    def test_cli_rejects_duplicate_json_keys(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            factory_path = Path(temporary_directory) / "factory.json"
+            factory_path.write_text(
+                '{"contract_schema":"first","contract_schema":"second"}\n',
+                encoding="utf-8",
+            )
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(validator.ROOT / "scripts" / "zaibatsu.py"),
+                    "validate",
+                    str(factory_path),
+                ],
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+        self.assertEqual(2, result.returncode)
+        self.assertIn("duplicate JSON object key", result.stderr)
+
+    def test_cli_refuses_dangling_output_symlink(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            output = root / "factory.plan.json"
+            target = root / "missing-target.json"
+            output.symlink_to(target)
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(validator.ROOT / "scripts" / "zaibatsu.py"),
+                    "plan",
+                    str(validator.EXAMPLE_FACTORY_PATH),
+                    "--output",
+                    str(output),
+                ],
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+        self.assertEqual(2, result.returncode)
+        self.assertIn("refusing to overwrite", result.stderr)
+        self.assertFalse(target.exists())
 
 
 class EvidenceReceiptTests(unittest.TestCase):

@@ -66,7 +66,12 @@ The validator confirms:
     or dependency-blocked;
 21. the portable example preserves the same Git/SOPS, Ansible/Nix,
     scheduler-of-record, deterministic-gate, no-model-effect, and
-    no-self-promotion boundaries.
+    no-self-promotion boundaries;
+22. reusable modules fill every ordered factory slot, preserve the declared
+    policy rather than a hard-coded implementation ID, and cannot introduce a
+    forward dependency or side-effect authority;
+23. the checked-in control plan exactly matches the canonical definition and
+    catalog digests, and compiling those inputs twice produces identical bytes.
 
 The adversarial tests mutate valid architecture data and prove that the
 validator rejects meta-factory role drift, a missing or reclassified factory,
@@ -82,6 +87,10 @@ The reusable CLI uses the same standard-library contract implementation:
 
 ```bash
 python3 scripts/zaibatsu.py validate examples/economic-factory.json
+python3 scripts/zaibatsu.py catalog-check
+python3 scripts/zaibatsu.py verify-plan \
+  examples/economic-factory.plan.json examples/economic-factory.json
+python3 scripts/zaibatsu.py rebuild-check examples/economic-factory.json
 ```
 
 To create a new definition, run `python3 scripts/zaibatsu.py scaffold --help`.
@@ -89,6 +98,11 @@ The scaffold starts at planned maturity; it is a policy-safe definition, not
 evidence that the new factory is deployed. Operational or
 validated-preproduction maturity requires a scoped, content-addressed,
 independently verified receipt binding.
+
+The rebuild check covers the deterministic control plan. It is path-independent
+and offline, but it does not run Ansible, realize Nix, activate cron/systemd,
+contact a model, deploy a service, or demonstrate recovery. Those are separate
+promotion gates.
 
 ## Optional Droid preflight
 
@@ -134,7 +148,7 @@ release reproduction, clone the named tag rather than the moving default
 branch:
 
 ```bash
-git clone --depth 1 --branch v1.1.2 https://github.com/adaliontech/Zaibatsu.git
+git clone --depth 1 --branch v1.2.0 https://github.com/adaliontech/Zaibatsu.git
 cd Zaibatsu
 make validate
 ```

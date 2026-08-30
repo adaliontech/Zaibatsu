@@ -1,0 +1,219 @@
+{
+  "contract_schema": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.2.0/schemas/factory-plan.schema.json",
+  "schema_version": "zaibatsu.factory-plan.v1",
+  "factory": {
+    "id": "example-product",
+    "class": "economic_factory",
+    "maturity": "planned",
+    "purpose": "Produce a bounded software product without inheriting another factory's authority"
+  },
+  "source": {
+    "factory_definition_sha256": "b9e0f0e7dcfc850f835d5f56ca8596a4b45419a943777afc889c64f508457eac",
+    "module_catalog_sha256": "445ddbb1a98378c5e13864ad2718b29b48da1b3a5a7713f819fc0baa739eab8c",
+    "module_api_version": "zaibatsu.module.v1"
+  },
+  "module_order": [
+    "source_versioning",
+    "static_secrets",
+    "runtime_secrets",
+    "host_reproduction",
+    "worker_environment",
+    "scheduling",
+    "execution",
+    "verification",
+    "feedback"
+  ],
+  "modules": [
+    {
+      "position": 0,
+      "slot": "source_versioning",
+      "module": "git-source",
+      "policy_value": "git",
+      "interface_version": "zaibatsu.module.v1",
+      "kind": "deterministic",
+      "implementation_status": "contract_only",
+      "side_effect_authority": false,
+      "requires_slots": [],
+      "provides": [
+        "versioned_source_ref",
+        "reviewed_diff",
+        "release_lineage"
+      ],
+      "rebuild_boundary": "source_and_intended_state"
+    },
+    {
+      "position": 1,
+      "slot": "static_secrets",
+      "module": "sops-age-static-secrets",
+      "policy_value": "sops_age",
+      "interface_version": "zaibatsu.module.v1",
+      "kind": "deterministic",
+      "implementation_status": "contract_only",
+      "side_effect_authority": false,
+      "requires_slots": [
+        "source_versioning"
+      ],
+      "provides": [
+        "ciphertext_manifest",
+        "recipient_policy"
+      ],
+      "rebuild_boundary": "encrypted_bootstrap_material"
+    },
+    {
+      "position": 2,
+      "slot": "runtime_secrets",
+      "module": "bounded-runtime-secrets",
+      "policy_value": "bounded_secret_manager",
+      "interface_version": "zaibatsu.module.v1",
+      "kind": "deterministic",
+      "implementation_status": "contract_only",
+      "side_effect_authority": false,
+      "requires_slots": [
+        "source_versioning"
+      ],
+      "provides": [
+        "secret_scope_contract",
+        "machine_identity_contract"
+      ],
+      "rebuild_boundary": "runtime_identity_and_scope"
+    },
+    {
+      "position": 3,
+      "slot": "host_reproduction",
+      "module": "ansible-host-reproduction",
+      "policy_value": "ansible",
+      "interface_version": "zaibatsu.module.v1",
+      "kind": "deterministic",
+      "implementation_status": "contract_only",
+      "side_effect_authority": false,
+      "requires_slots": [
+        "source_versioning",
+        "static_secrets"
+      ],
+      "provides": [
+        "host_configuration_contract",
+        "idempotence_receipt_requirement"
+      ],
+      "rebuild_boundary": "host_configuration"
+    },
+    {
+      "position": 4,
+      "slot": "worker_environment",
+      "module": "nix-worker-environment",
+      "policy_value": "nix",
+      "interface_version": "zaibatsu.module.v1",
+      "kind": "deterministic",
+      "implementation_status": "planned",
+      "side_effect_authority": false,
+      "requires_slots": [
+        "source_versioning"
+      ],
+      "provides": [
+        "worker_environment_contract",
+        "cross_node_proof_requirement"
+      ],
+      "rebuild_boundary": "worker_toolchain"
+    },
+    {
+      "position": 5,
+      "slot": "scheduling",
+      "module": "systemd-scheduler",
+      "policy_value": "systemd",
+      "interface_version": "zaibatsu.module.v1",
+      "kind": "deterministic",
+      "implementation_status": "contract_only",
+      "side_effect_authority": false,
+      "requires_slots": [
+        "host_reproduction"
+      ],
+      "provides": [
+        "scheduler_contract",
+        "duplicate_scheduler_denial"
+      ],
+      "rebuild_boundary": "schedule_and_supervision"
+    },
+    {
+      "position": 6,
+      "slot": "execution",
+      "module": "typed-agent-execution",
+      "policy_value": "model_independent_typed_ports",
+      "interface_version": "zaibatsu.module.v1",
+      "kind": "probabilistic_adapter",
+      "implementation_status": "source_only",
+      "side_effect_authority": false,
+      "requires_slots": [
+        "runtime_secrets",
+        "worker_environment",
+        "scheduling"
+      ],
+      "provides": [
+        "typed_task",
+        "candidate_artifact",
+        "execution_receipt"
+      ],
+      "rebuild_boundary": "worker_contract"
+    },
+    {
+      "position": 7,
+      "slot": "verification",
+      "module": "deterministic-verification",
+      "policy_value": [
+        "schemas",
+        "linters",
+        "tests",
+        "hashes",
+        "policy",
+        "receipts",
+        "owner_approval"
+      ],
+      "interface_version": "zaibatsu.module.v1",
+      "kind": "deterministic",
+      "implementation_status": "contract_only",
+      "side_effect_authority": false,
+      "requires_slots": [
+        "execution"
+      ],
+      "provides": [
+        "verification_result",
+        "policy_decision",
+        "effect_eligibility"
+      ],
+      "rebuild_boundary": "artifact_acceptance"
+    },
+    {
+      "position": 8,
+      "slot": "feedback",
+      "module": "owner-gated-feedback",
+      "policy_value": "reviewed_deterministic_policy_and_owner_gate",
+      "interface_version": "zaibatsu.module.v1",
+      "kind": "deterministic",
+      "implementation_status": "contract_only",
+      "side_effect_authority": false,
+      "requires_slots": [
+        "verification"
+      ],
+      "provides": [
+        "retained_evidence",
+        "improvement_candidate",
+        "promotion_requirement"
+      ],
+      "rebuild_boundary": "reviewed_improvement"
+    }
+  ],
+  "deterministic_gates": [
+    "schemas",
+    "linters",
+    "tests",
+    "hashes",
+    "policy",
+    "receipts",
+    "owner_approval"
+  ],
+  "rebuild_claim": {
+    "scope": "control_plan_only",
+    "byte_reproducible": true,
+    "deploys_infrastructure": false,
+    "proves_runtime_recovery": false
+  },
+  "plan_sha256": "eff8c2573035f2639313ace81500be42ce8005735fd5bfcc2344565b83ad8824"
+}

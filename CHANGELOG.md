@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.2.0 - Unreleased
+
+- Added a versioned reusable module catalog and policy-compatible module
+  bindings for Git, SOPS/age, bounded runtime secrets, Ansible, Nix,
+  cron/systemd, typed worker execution, deterministic verification, and
+  owner-gated feedback.
+- Added deterministic `plan`, `verify-plan`, and `rebuild-check` CLI commands.
+  Plans bind the canonical factory definition and catalog digests, resolve
+  modules in dependency order, and explicitly prove only byte-reproducible
+  control-plan composition—not infrastructure deployment or runtime recovery.
+- Rejected duplicate JSON keys, non-standard JSON numbers, ambiguous fields,
+  module-policy mismatch, forward dependencies, duplicate outputs, stale input
+  plans, and digest tampering.
+- Expanded the public adversarial suite from 95 to 114 tests.
+
 ## 1.1.2 - 2026-08-30
 
 - Changed portable factory definitions from a repository-relative schema path
