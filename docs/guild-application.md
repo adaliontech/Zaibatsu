@@ -12,7 +12,7 @@ credential-disabled public-clone proof and independent GitHub CI. Immutable
 v1.1.1 independently passed the same public boundary. The bounded v1.1.2
 portable-schema correction and v1.2.0 deterministic module-composition release
 passed their own public clone and CI proofs. The v1.3.0 portable-bundle
-candidate passed the same proof and is ready for its immutable release; the
+candidate passed the same proof and is now an immutable public release; the
 final demo and applicant materials remain explicit gates in
 [`architecture/submission-readiness.json`](../architecture/submission-readiness.json).
 

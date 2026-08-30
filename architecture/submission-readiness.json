@@ -99,7 +99,7 @@
       "id": "public_demo",
       "status": "pending_external",
       "required_for_submission": true,
-      "evidence": "Record and publish the final clip from the immutable v1.3.0 tag"
+      "evidence": "Immutable v1.3.0 is public; the applicant still needs to record and publish the final clip from that tag"
     },
     {
       "id": "applicant_materials",

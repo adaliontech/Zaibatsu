@@ -50,7 +50,7 @@ and redacted status ledger without receiving production access.
 | Fresh-clone reproduction | Passed for v1.1.2 candidate | Credential-disabled public clone of `03d325241c81dec4c83629d36dd4aff3b5e2cf92` passed all 95 tests, schema and receipt contracts, strict Git checks, and Gitleaks 8.30.1 history/tree scans; [GitHub Actions run 33319815603](https://github.com/adaliontech/Zaibatsu/actions/runs/33319815603) independently passed |
 | v1.2.0 candidate proof | Passed | Credential-disabled public clone of `d42831e7d6fa367f225fb4a6e489391ad3856e9a` passed all 114 tests, schema and receipt contracts, strict Git checks, and Gitleaks 8.30.1 history/tree scans; [GitHub Actions run 33332863314](https://github.com/adaliontech/Zaibatsu/actions/runs/33332863314) independently passed |
 | v1.3.0 candidate proof | Passed | Credential-disabled public clone of `373666ca1d107bc326e01dc8bf9d41037af53089` passed all 136 tests, schema and receipt contracts, strict Git checks, Gitleaks 8.30.1 history/tree scans, and two byte-identical bundle builds with SHA-256 `d4918fd16f55b907a0b2b9734422d7106d3030a511e5cae5d6efc1cb7b253aba`; [GitHub Actions run 33333876277](https://github.com/adaliontech/Zaibatsu/actions/runs/33333876277) independently passed |
-| Demo recording | Pending immutable v1.3.0 release; applicant action follows | Record from the released tag using the [Demo script](demo-script.md) |
+| Demo recording | Pending applicant action | Immutable v1.3.0 is public; record from that tag using the [Demo script](demo-script.md) |
 
 ## Architecture claims
 
