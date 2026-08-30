@@ -22,8 +22,8 @@ Gitleaks, schema, determinism, and independent-CI proof. Immutable v1.5.0 and
 its tag clone passed the same release boundary. The v1.6.0 bundle-derived
 qualification-evidence and partial-assessment candidate passed its own
 163-test credential-disabled clone, deterministic-artifact, Gitleaks, schema,
-and independent-CI proof; immutable release proof is next. The final demo and
-applicant materials remain explicit gates in
+and independent-CI proof. Immutable v1.6.0 and its tag clone passed the same
+release boundary. The final demo and applicant materials remain explicit gates in
 [`architecture/submission-readiness.json`](../architecture/submission-readiness.json).
 
 ## Current project description
@@ -185,6 +185,8 @@ the public repository:
       forged/replayed/duplicate/scope-inflated receipt checks, schema
       validation, deterministic evidence/assessment reproduction, Gitleaks,
       and independent public CI.
+- [x] Immutable v1.6.0 passes roof and tag CI, tagged-schema byte checks, and
+      the full credential-disabled tag-clone reproduction.
 - [x] Public repository and article links resolve without authentication.
 - [ ] Demo clip or screenshots show a real Factory task and validation result.
 - [x] No private host, credential, recovery, or deployment detail is exposed.

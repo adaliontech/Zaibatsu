@@ -24,9 +24,8 @@ changes.
   bundle-comparison proof before recording the final demo;
 - preserve the reproduced immutable `v1.5.0` fail-closed qualification policy
   and content-addressed missing-evidence plan;
-- preserve the reproduced `v1.6.0` candidate and publish its bundle-derived
-  contract evidence and partial qualification assessment as an immutable
-  release before recording the final demo;
+- preserve the reproduced immutable `v1.6.0` bundle-derived contract evidence
+  and partial qualification assessment before recording the final demo;
 - record the Guild demo and complete applicant-owned submission materials.
 
 Exit: the public narrative, architecture, portable factory, module artifacts,

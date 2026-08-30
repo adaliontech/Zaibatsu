@@ -425,8 +425,8 @@ qualification-plan candidate passed the same credential-disabled clone and
 independent-CI boundary; immutable `v1.5.0` and its tag clone passed the full
 release proof. The bundle-derived qualification-evidence candidate passed the
 same 163-test credential-disabled clone and independent-CI boundary; immutable
-`v1.6.0` release proof is next. The final demo and applicant-owned form
-materials remain external submission gates.
+`v1.6.0` and its tag clone passed the full release proof. The final demo and
+applicant-owned form materials remain external submission gates.
 
 Zaibatsu is an independent project and is not affiliated with or endorsed by
 Factory AI.
