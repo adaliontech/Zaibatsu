@@ -63,7 +63,7 @@ path.
 | Real public project | This repository | Public and anonymously reachable |
 | Clear README | [`README.md`](../README.md) | Complete |
 | License | [`LICENSE`](../LICENSE) | Complete |
-| Runnable quickstart | [`docs/reproducibility.md`](reproducibility.md) | The 183-test v1.8.0 rebuild-DAG candidate passed its credential-disabled full-history clone, independent CI, Gitleaks, strict schema, exact artifact regeneration, and non-authorizing semantic proof; immutable tag proof remains pending |
+| Runnable quickstart | [`docs/reproducibility.md`](reproducibility.md) | Immutable v1.8.0 passed its 183-test full-history candidate and tag clones, independent CI, Gitleaks, strict schema, exact artifact regeneration, and non-authorizing semantic proof |
 | Reusable value | [`examples/economic-factory.json`](../examples/economic-factory.json), [cron variant](../examples/economic-factory-cron.json), [`catalog/modules.json`](../catalog/modules.json), [source lock](../examples/economic-factory.source-lock.json), [qualification policy](../policies/runtime-qualification-v1.json), [partial assessment](../examples/economic-factory.qualification-assessment.json), [rebuild plan](../examples/economic-factory.rebuild-plan.json), and [`scripts/zaibatsu.py`](../scripts/zaibatsu.py) | Another project can scaffold a fail-closed definition, reproduce and inspect a self-verifying control bundle, bind it to exact annotated-release control sources, compare a policy-compatible module substitution, generate a missing-evidence plan, derive bundle-proven contract receipts, assess the exact remaining qualification gaps, and compile those verified inputs into a non-executing rebuild DAG offline |
 | Explain Factory/Droid role | [`docs/droid-session.md`](droid-session.md) | Authenticated session, scoped diff, and independent validation recorded |
 | End-to-end case study | [`docs/case-study.md`](case-study.md) | Factory-of-software-factories narrative and real Droid result complete |
@@ -87,6 +87,6 @@ qualification-planning candidate and immutable release passed the same public
 proof. The v1.6.0 bundle-derived qualification-evidence candidate passed that
 proof, and its immutable release passed tag CI and clone reproduction. The
 v1.7.0 source-lock candidate and immutable release passed the complete public
-boundary. The v1.8.0 rebuild-DAG candidate passed the same public boundary; its
-immutable tag and tag clone remain. The final clip and applicant-owned form
+boundary. The v1.8.0 rebuild-DAG candidate and immutable release passed the
+same complete public boundary. The final clip and applicant-owned form
 submission remain.

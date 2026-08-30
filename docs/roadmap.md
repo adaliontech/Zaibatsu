@@ -29,7 +29,7 @@ changes.
 - preserve the reproduced immutable `v1.7.0` annotated-release
   control-source-lock proof without inflating it into runtime implementation or
   qualification evidence;
-- reproduce and release the `v1.8.0` deterministic rebuild DAG without
+- preserve the reproduced immutable `v1.8.0` deterministic rebuild DAG without
   presenting action intents as execution or its gates as runtime authority;
 - record the Guild demo and complete applicant-owned submission materials.
 

@@ -29,7 +29,8 @@ independent-CI proof. Immutable v1.7.0 and its full-history tag clone passed the
 complete release boundary. The v1.8.0 deterministic rebuild-DAG candidate
 passed its 183-test credential-disabled full-history clone, strict schema,
 Gitleaks, exact-regeneration, non-authorizing semantic, and independent-CI
-proof. Its immutable tag and tag-clone proofs remain pending. The final demo and
+proof. Immutable v1.8.0 and its full-history tag clone passed the complete
+release proof. The final demo and
 applicant materials remain explicit gates in
 [`architecture/submission-readiness.json`](../architecture/submission-readiness.json).
 
@@ -220,7 +221,7 @@ the public repository:
       reorder/dependency/replay/type/authority adversarial checks, strict schema
       validation, exact regeneration, Gitleaks, and independent public CI from
       a full-history clone.
-- [ ] Immutable v1.8.0 passes roof and tag CI, tagged-schema byte checks, and
+- [x] Immutable v1.8.0 passes roof and tag CI, tagged-schema byte checks, and
       the full credential-disabled tag-clone reproduction.
 - [x] Public repository and article links resolve without authentication.
 - [ ] Demo clip or screenshots show a real Factory task and validation result.

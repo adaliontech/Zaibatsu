@@ -514,7 +514,8 @@ boundary; immutable `v1.7.0` and its full-history tag clone passed the complete
 release proof. The v1.8.0 rebuild-DAG candidate passed its 183-test
 credential-disabled full-history clone, strict schema,
 secret-scan, exact-regeneration, non-authorizing semantic, and independent-CI
-boundary. Immutable-release and tag-clone evidence remain pending.
+boundary. Immutable `v1.8.0` and its full-history tag clone passed the complete
+release proof.
 
 Zaibatsu is an independent project and is not affiliated with or endorsed by
 Factory AI.
