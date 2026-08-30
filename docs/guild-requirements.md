@@ -63,7 +63,7 @@ path.
 | Real public project | This repository | Public and anonymously reachable |
 | Clear README | [`README.md`](../README.md) | Complete |
 | License | [`LICENSE`](../LICENSE) | Complete |
-| Runnable quickstart | [`docs/reproducibility.md`](reproducibility.md) | Immutable v1.1.0–v1.3.0 proofs remain historical; the v1.4.0 comparison candidate requires its own credential-disabled clone and independent CI proof |
+| Runnable quickstart | [`docs/reproducibility.md`](reproducibility.md) | The v1.4.0 comparison candidate passed 143 tests, Gitleaks, semantic assertions, output-schema validation, and independent CI from a credential-disabled public clone; immutable release publication follows |
 | Reusable value | [`examples/economic-factory.json`](../examples/economic-factory.json), [cron variant](../examples/economic-factory-cron.json), [`catalog/modules.json`](../catalog/modules.json), [`examples/economic-factory.bundle-manifest.json`](../examples/economic-factory.bundle-manifest.json), and [`scripts/zaibatsu.py`](../scripts/zaibatsu.py) | Another project can scaffold a fail-closed definition, reproduce and inspect a self-verifying control bundle, then compare a policy-compatible module substitution offline |
 | Explain Factory/Droid role | [`docs/droid-session.md`](droid-session.md) | Authenticated session, scoped diff, and independent validation recorded |
 | End-to-end case study | [`docs/case-study.md`](case-study.md) | Factory-of-software-factories narrative and real Droid result complete |
@@ -81,7 +81,6 @@ public clean-clone proof. The exact release checklist is in
 [Guild application](guild-application.md).
 
 The bounded local-Qwen Droid run supplies reviewable “build something with
-Factory” evidence. The v1.1.0 through v1.3.0 candidates passed their scoped
-clean-clone gates; the current comparison follow-up still needs the same proof.
-The final clip and applicant-owned form materials are still required before
-submission.
+Factory” evidence. The v1.1.0 through v1.4.0 candidates passed their scoped
+clean-clone gates. The immutable v1.4.0 release, final clip, and applicant-owned
+form materials are still required before submission.

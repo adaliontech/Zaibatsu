@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.4.0 - Unreleased
+## 1.4.0 - 2026-08-30
 
 - Added stable `inspect-bundle` output for verified bundle identity, source
   digests, selected modules, rebuild claims, and explicit runtime ineligibility.
