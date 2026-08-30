@@ -18,8 +18,8 @@ changes.
   `v1.1.2` from a credential-free clone;
 - preserve the reproduced `v1.2.0` module-composition candidate and record its
   evidence as a historical immutable release;
-- reproduce and release the `v1.3.0` content-addressed module-artifact and
-  portable-bundle candidate before recording its demo;
+- preserve the reproduced `v1.3.0` content-addressed module-artifact and
+  portable-bundle candidate, and release it before recording its demo;
 - record the Guild demo and complete applicant-owned submission materials.
 
 Exit: the public narrative, architecture, portable factory, module artifacts,

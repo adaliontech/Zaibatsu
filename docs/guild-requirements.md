@@ -63,7 +63,7 @@ path.
 | Real public project | This repository | Public and anonymously reachable |
 | Clear README | [`README.md`](../README.md) | Complete |
 | License | [`LICENSE`](../LICENSE) | Complete |
-| Runnable quickstart | [`docs/reproducibility.md`](reproducibility.md) | Immutable v1.1.0–v1.2.0 proofs remain historical; the v1.3.0 candidate requires a new credential-disabled clone proof |
+| Runnable quickstart | [`docs/reproducibility.md`](reproducibility.md) | Immutable v1.1.0–v1.2.0 proofs remain historical; the v1.3.0 candidate passed its credential-disabled clone and independent CI proof |
 | Reusable value | [`examples/economic-factory.json`](../examples/economic-factory.json), [`catalog/modules.json`](../catalog/modules.json), [`examples/economic-factory.bundle-manifest.json`](../examples/economic-factory.bundle-manifest.json), and [`scripts/zaibatsu.py`](../scripts/zaibatsu.py) | Another project can scaffold a fail-closed definition, substitute a content-addressed policy-compatible module artifact, and reproduce a self-verifying control bundle offline |
 | Explain Factory/Droid role | [`docs/droid-session.md`](droid-session.md) | Authenticated session, scoped diff, and independent validation recorded |
 | End-to-end case study | [`docs/case-study.md`](case-study.md) | Factory-of-software-factories narrative and real Droid result complete |
@@ -81,6 +81,6 @@ public clean-clone proof. The exact release checklist is in
 [Guild application](guild-application.md).
 
 The bounded local-Qwen Droid run supplies reviewable “build something with
-Factory” evidence. Immutable v1.1.0 and v1.1.1 and the bounded v1.1.2
-schema-path correction passed their clean-clone gates. The final clip and
-applicant-owned form materials are still required before submission.
+Factory” evidence. The v1.1.0 through v1.3.0 candidates passed their scoped
+clean-clone gates. The final clip and applicant-owned form materials are still
+required before submission.

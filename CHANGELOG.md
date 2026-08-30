@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.3.0 - Unreleased
+## 1.3.0 - 2026-08-30
 
 - Added individually content-addressed module contract artifacts for every
   catalog implementation. Catalog validation denies missing, drifting,
