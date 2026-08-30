@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.1.1/schemas/submission-readiness.schema.json",
+  "title": "Zaibatsu submission-readiness ledger",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_schema", "schema_version", "as_of", "submission_ready", "submitted", "gates"],
+  "properties": {
+    "contract_schema": {"const": "../schemas/submission-readiness.schema.json"},
+    "schema_version": {"const": "zaibatsu.submission-readiness.v1"},
+    "as_of": {"type": "string", "format": "date"},
+    "submission_ready": {"type": "boolean"},
+    "submitted": {"type": "boolean"},
+    "gates": {
+      "type": "array",
+      "minItems": 10,
+      "maxItems": 10,
+      "items": {
+        "type": "object",
+        "required": ["id", "status", "required_for_submission", "evidence"],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "status": {"enum": ["complete", "pending_external", "blocked_by_dependency"]},
+          "required_for_submission": {"const": true},
+          "evidence": {"type": "string", "minLength": 1},
+          "proof": {"type": "object", "minProperties": 1},
+          "blocked_by": {"type": "array", "uniqueItems": true, "items": {"type": "string"}}
+        }
+      }
+    }
+  }
+}

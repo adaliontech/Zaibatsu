@@ -29,7 +29,8 @@ python3 scripts/validate_repository.py
 
 The validator confirms:
 
-1. all submission documents and sanitized receipts exist;
+1. all submission documents, project-owned JSON Schemas, and sanitized receipts
+   exist and reference the correct contract;
 2. Zaibatsu remains the meta-factory control layer rather than one economic
    factory;
 3. the closed factory registry contains the control factory and both economic
@@ -51,14 +52,21 @@ The validator confirms:
 12. every side-effecting deterministic component declares a policy gate;
 13. required fail-closed invariants are true;
 14. persistence and verification precede a controlled side effect;
-15. every public repository file is inspected or rejected as an unapproved
-   binary, and every repository symlink is denied;
+15. every tracked or non-ignored public repository file is inspected, every
+   opaque or invalid-UTF-8 file fails closed regardless of suffix, and every
+   repository symlink or Git submodule is denied;
 16. public text contains no absolute home path, tailnet name, private or
     unapproved public address, or obvious inline credential;
 17. repository-local documentation links resolve;
-18. every submission gate remains required and dependency order is enforced;
-19. submission readiness cannot become true while a required gate is pending
-    or dependency-blocked.
+18. every sanitized evidence receipt has the required status, counts, digests,
+    scope restrictions, redactions, and limitations for its evidence class;
+19. every completed submission gate has typed proof, every gate remains
+    required, and dependency order is enforced;
+20. submission readiness cannot become true while a required gate is pending
+    or dependency-blocked;
+21. the portable example preserves the same Git/SOPS, Ansible/Nix,
+    scheduler-of-record, deterministic-gate, no-model-effect, and
+    no-self-promotion boundaries.
 
 The adversarial tests mutate valid architecture data and prove that the
 validator rejects meta-factory role drift, a missing or reclassified factory,
@@ -67,6 +75,20 @@ authority, factory self-promotion, component/model divergence, an unknown
 project, missing component, unbounded model exit, direct model publication,
 unguarded side effect, leaked private detail, malformed contract data,
 dependency bypass, optionalized gates, and premature readiness.
+
+## Validate another factory
+
+The reusable CLI uses the same standard-library contract implementation:
+
+```bash
+python3 scripts/zaibatsu.py validate examples/economic-factory.json
+```
+
+To create a new definition, run `python3 scripts/zaibatsu.py scaffold --help`.
+The scaffold starts at planned maturity; it is a policy-safe definition, not
+evidence that the new factory is deployed. Operational or
+validated-preproduction maturity requires a scoped, content-addressed,
+independently verified receipt binding.
 
 ## Optional Droid preflight
 
@@ -112,7 +134,7 @@ release reproduction, clone the named tag rather than the moving default
 branch:
 
 ```bash
-git clone --depth 1 --branch v1.1.0 https://github.com/adaliontech/Zaibatsu.git
+git clone --depth 1 --branch v1.1.1 https://github.com/adaliontech/Zaibatsu.git
 cd Zaibatsu
 make validate
 ```

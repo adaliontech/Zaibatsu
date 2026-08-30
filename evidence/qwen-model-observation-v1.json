@@ -1,5 +1,5 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "contract_schema": "../schemas/qwen-model-observation-receipt.schema.json",
   "schema_version": "zaibatsu.qwen-model-observation.v1",
   "observed_at": "2026-08-29",
   "status": "passed",

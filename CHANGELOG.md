@@ -1,5 +1,22 @@
 # Changelog
 
+## 1.1.1 - 2026-08-30
+
+- Added a portable factory-definition contract, project-owned JSON Schemas,
+  reusable economic-factory example, and `zaibatsu scaffold` / `validate` CLI
+  so adopters can apply the control model outside Zaibatsu's own registry.
+- Made all four sanitized evidence receipts executable contracts: empty,
+  malformed, contradictory, zero-count, unbounded, or digest-invalid receipts
+  now fail validation.
+- Replaced prose-only completion with typed submission-gate proof and fixed
+  malformed or missing gate status handling to fail cleanly.
+- Closed ignored-directory, force-added local-settings, misleading media-suffix,
+  invalid-UTF-8, and Git-submodule public-scan gaps. Opaque files now fail
+  closed because their contents cannot be inspected.
+- Expanded the public adversarial suite from 70 to 95 tests and tightened the
+  Guild, demo, security, and maturity wording around what is reusable today
+  versus validated privately, source-only, designed, or planned.
+
 ## 1.1.0 - 2026-08-29
 
 - Reframed Zaibatsu around its intended role as the factory of software

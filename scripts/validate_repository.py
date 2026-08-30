@@ -6,6 +6,7 @@ from __future__ import annotations
 import ipaddress
 import json
 import re
+import subprocess
 import sys
 from pathlib import Path
 from typing import Any
@@ -15,6 +16,7 @@ ROOT = Path(__file__).resolve().parents[1]
 ARCHITECTURE_PATH = ROOT / "architecture" / "system.json"
 FACTORY_MODEL_PATH = ROOT / "architecture" / "factory-model.json"
 READINESS_PATH = ROOT / "architecture" / "submission-readiness.json"
+EXAMPLE_FACTORY_PATH = ROOT / "examples" / "economic-factory.json"
 
 REQUIRED_FILES = (
     "README.md",
@@ -29,6 +31,7 @@ REQUIRED_FILES = (
     "architecture/factory-model.json",
     "architecture/system.json",
     "architecture/submission-readiness.json",
+    "examples/economic-factory.json",
     "evidence/dispatcher-validation-v1.json",
     "evidence/droid-contribution-v1.json",
     "evidence/meta-factory-foundations-v1.json",
@@ -44,7 +47,16 @@ REQUIRED_FILES = (
     "docs/reproducibility.md",
     "docs/roadmap.md",
     "docs/security-and-threat-model.md",
+    "schemas/dispatcher-validation-receipt.schema.json",
+    "schemas/droid-contribution-receipt.schema.json",
+    "schemas/factory-definition.schema.json",
+    "schemas/factory-model.schema.json",
+    "schemas/meta-factory-foundations-receipt.schema.json",
+    "schemas/qwen-model-observation-receipt.schema.json",
+    "schemas/submission-readiness.schema.json",
+    "schemas/system.schema.json",
     "scripts/droid_preflight.py",
+    "scripts/zaibatsu.py",
     "scripts/validate_repository.py",
     "tests/test_droid_preflight.py",
     "tests/test_validate_repository.py",
@@ -64,6 +76,83 @@ PROJECT_NAME = "Zaibatsu"
 ARCHITECTURE_SCHEMA_VERSION = "zaibatsu.architecture.v1"
 FACTORY_MODEL_SCHEMA_VERSION = "zaibatsu.factory-model.v1"
 READINESS_SCHEMA_VERSION = "zaibatsu.submission-readiness.v1"
+FACTORY_DEFINITION_SCHEMA_VERSION = "zaibatsu.factory-definition.v1"
+INTEGRATED_TEST_COUNT = 95
+DROID_FACTORY_CLI_VERSION = "0.206.0"
+DROID_SESSION_REFERENCE = "46f941a9-82f8-4df3-a45c-b8158996360b"
+PUBLIC_REPOSITORY_URL = "https://github.com/adaliontech/Zaibatsu"
+
+DISPATCHER_MIGRATIONS = {
+    "0001_dispatcher_state.sql",
+    "0002_job_leases_and_audit.sql",
+    "0003_runtime_grants.sql",
+    "0004_admin_projection.sql",
+    "0005_api_idempotency.sql",
+    "0006_coordinator_operations.sql",
+}
+
+DISPATCHER_RESTORE_TABLES = {
+    "active_leases",
+    "approval_decisions",
+    "approval_requests",
+    "artifacts",
+    "audit_events",
+    "job_attempts",
+    "job_dependencies",
+    "jobs",
+    "policy_decisions",
+    "projects",
+    "request_ledger",
+    "workers",
+}
+
+CONTRACT_SCHEMA_REFERENCES = {
+    "architecture/factory-model.json": "../schemas/factory-model.schema.json",
+    "architecture/system.json": "../schemas/system.schema.json",
+    "architecture/submission-readiness.json": "../schemas/submission-readiness.schema.json",
+    "examples/economic-factory.json": "../schemas/factory-definition.schema.json",
+    "evidence/dispatcher-validation-v1.json": "../schemas/dispatcher-validation-receipt.schema.json",
+    "evidence/droid-contribution-v1.json": "../schemas/droid-contribution-receipt.schema.json",
+    "evidence/meta-factory-foundations-v1.json": "../schemas/meta-factory-foundations-receipt.schema.json",
+    "evidence/qwen-model-observation-v1.json": "../schemas/qwen-model-observation-receipt.schema.json",
+}
+
+EVIDENCE_CONTRACTS = {
+    "evidence/dispatcher-validation-v1.json": (
+        "zaibatsu.dispatcher-validation-receipt.v1",
+        "passed",
+    ),
+    "evidence/droid-contribution-v1.json": (
+        "zaibatsu.droid-contribution-receipt.v1",
+        "passed_and_reviewed",
+    ),
+    "evidence/meta-factory-foundations-v1.json": (
+        "zaibatsu.meta-factory-foundations.v1",
+        "passed_with_maturity_boundaries",
+    ),
+    "evidence/qwen-model-observation-v1.json": (
+        "zaibatsu.qwen-model-observation.v1",
+        "passed",
+    ),
+}
+
+GATE_PROOF_FIELDS = {
+    "public_package": {"contracts", "validator"},
+    "droid_cli_install": {"receipt", "factory_cli_version"},
+    "local_qwen_endpoint": {"receipt", "transport_tested"},
+    "local_model_credential": {"receipt", "credential_value_recorded"},
+    "factory_cli_authentication": {"receipt", "authenticated_session_recorded"},
+    "bounded_droid_contribution": {"receipt", "session_reference"},
+    "public_repository": {"url", "anonymous_access_verified"},
+    "fresh_clone_reproduction": {
+        "candidate_commit",
+        "tests_passed",
+        "gitleaks_version",
+        "github_actions_run",
+    },
+    "public_demo": {"url", "release_tag"},
+    "applicant_materials": {"submitted_by_applicant", "resume_provided_privately"},
+}
 
 REQUIRED_FACTORY_INSTANCES = {
     "orchestrator": ("control_factory", "operational"),
@@ -194,16 +283,6 @@ REQUIRED_TRUE_INVARIANTS = {
     "every_terminal_state_retains_evidence",
 }
 
-APPROVED_BINARY_SUFFIXES = {
-    ".gif",
-    ".jpeg",
-    ".jpg",
-    ".mov",
-    ".mp4",
-    ".pdf",
-    ".png",
-    ".webp",
-}
 PUBLIC_SAFETY_PATTERNS = {
     "legacy pre-release brand": re.compile(
         "factory" + r"(?:²|\^2|[-_ ]squared)", re.IGNORECASE
@@ -252,6 +331,9 @@ IPV6_CANDIDATE_RE = re.compile(
 )
 
 MARKDOWN_LINK_RE = re.compile(r"(?<!!)\[[^\]]+\]\(([^)]+)\)")
+HEX_40_RE = re.compile(r"^[0-9a-f]{40}$")
+HEX_64_RE = re.compile(r"^[0-9a-f]{64}$")
+SLUG_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 
 
 def load_architecture(path: Path = ARCHITECTURE_PATH) -> dict[str, Any]:
@@ -262,12 +344,422 @@ def load_factory_model(path: Path = FACTORY_MODEL_PATH) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def load_factory_definition(path: Path = EXAMPLE_FACTORY_PATH) -> dict[str, Any]:
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def validate_factory_definition(data: Any) -> list[str]:
+    """Validate one portable software-factory definition."""
+    errors: list[str] = []
+    if not isinstance(data, dict):
+        return ["factory definition root must be an object"]
+
+    if data.get("contract_schema") != "../schemas/factory-definition.schema.json":
+        errors.append("factory definition must reference its project-owned schema")
+    if data.get("schema_version") != FACTORY_DEFINITION_SCHEMA_VERSION:
+        errors.append(
+            f"factory definition schema_version must equal {FACTORY_DEFINITION_SCHEMA_VERSION}"
+        )
+
+    factory = data.get("factory")
+    factory_maturity: Any = None
+    if not isinstance(factory, dict):
+        errors.append("factory definition factory must be an object")
+    else:
+        factory_id = factory.get("id")
+        if not isinstance(factory_id, str) or not SLUG_RE.fullmatch(factory_id):
+            errors.append("factory id must be a lowercase hyphenated slug")
+        factory_class = factory.get("class")
+        if not isinstance(factory_class, str) or factory_class not in {
+            "control_factory",
+            "economic_factory",
+        }:
+            errors.append("factory class must be control_factory or economic_factory")
+        factory_maturity = factory.get("maturity")
+        if not isinstance(factory_maturity, str) or factory_maturity not in ALLOWED_MATURITIES:
+            errors.append("factory maturity must use a Zaibatsu maturity value")
+        if not isinstance(factory.get("purpose"), str) or not factory["purpose"].strip():
+            errors.append("factory purpose must be a non-empty string")
+
+    versioning = data.get("versioning_policy")
+    if not isinstance(versioning, dict) or versioning != {
+        "source_and_intended_state": "git",
+        "encrypted_static_secrets": "sops_age",
+        "runtime_secrets": "bounded_secret_manager",
+        "plaintext_secrets_in_git": False,
+    }:
+        errors.append("factory versioning must preserve Git, SOPS/age, and no plaintext")
+
+    reproduction = data.get("reproducibility_policy")
+    if not isinstance(reproduction, dict):
+        errors.append("factory reproducibility_policy must be an object")
+    else:
+        if reproduction.get("host_configuration") != "ansible":
+            errors.append("factory host reproduction must use Ansible")
+        if reproduction.get("worker_environments") != "nix":
+            errors.append("factory worker-environment boundary must use Nix")
+        nix_maturity = reproduction.get("nix_maturity")
+        if not isinstance(nix_maturity, str) or nix_maturity not in ALLOWED_MATURITIES:
+            errors.append("factory nix_maturity must use a Zaibatsu maturity value")
+        if (
+            reproduction.get("nix_cross_node_proof") is not True
+            and isinstance(nix_maturity, str)
+            and nix_maturity in {"operational", "validated_preproduction"}
+        ):
+            errors.append("factory Nix maturity requires cross-node reproduction proof")
+
+    scheduling = data.get("scheduling_policy")
+    if not isinstance(scheduling, dict):
+        errors.append("factory scheduling_policy must be an object")
+    else:
+        scheduler = scheduling.get("scheduler_of_record")
+        if not isinstance(scheduler, str) or scheduler not in {"systemd", "cron"}:
+            errors.append("factory scheduler_of_record must be systemd or cron")
+        if scheduling.get("one_scheduler_of_record_per_workload") is not True:
+            errors.append("factory workloads must have exactly one scheduler of record")
+
+    agent = data.get("agent_policy")
+    if not isinstance(agent, dict):
+        errors.append("factory agent_policy must be an object")
+    else:
+        skeleton_status = agent.get("skeleton_status")
+        if not isinstance(skeleton_status, str) or skeleton_status not in {
+            "planned",
+            "source_only",
+            "validated_preproduction",
+            "operational",
+        }:
+            errors.append("factory skeleton_status must declare an allowed boundary")
+        if agent.get("harness_binding") != "model_independent_typed_ports":
+            errors.append("factory harnesses must use model-independent typed ports")
+        if agent.get("deterministic_gates") != list(REQUIRED_DETERMINISTIC_GATES):
+            errors.append("factory deterministic gates must remain complete and ordered")
+        if agent.get("model_may_authorize_external_effect") is not False:
+            errors.append("a model may not authorize a factory external effect")
+
+    feedback = data.get("feedback_policy")
+    if not isinstance(feedback, dict) or feedback != {
+        "return_evidence": True,
+        "promotion_authority": "reviewed_deterministic_policy_and_owner_gate",
+        "factory_may_self_promote": False,
+    }:
+        errors.append("factory feedback must return evidence without self-promotion")
+
+    bindings = data.get("evidence_bindings")
+    validated_bindings: list[dict[str, Any]] = []
+    if not isinstance(bindings, list):
+        errors.append("factory evidence_bindings must be a list")
+    else:
+        seen_capabilities: set[str] = set()
+        for index, binding in enumerate(bindings):
+            if not isinstance(binding, dict):
+                errors.append(f"factory evidence binding at index {index} must be an object")
+                continue
+            capability = binding.get("capability")
+            if not isinstance(capability, str) or not SLUG_RE.fullmatch(capability):
+                errors.append(f"factory evidence binding at index {index} needs a capability slug")
+                continue
+            if capability in seen_capabilities:
+                errors.append(f"duplicate factory evidence capability: {capability}")
+            seen_capabilities.add(capability)
+            binding_maturity = binding.get("maturity")
+            if not isinstance(binding_maturity, str) or binding_maturity not in {
+                "operational",
+                "validated_preproduction",
+            }:
+                errors.append(f"{capability}: evidence binding needs a strong maturity")
+            if not isinstance(binding.get("receipt"), str) or not binding["receipt"].strip():
+                errors.append(f"{capability}: evidence binding receipt is required")
+            digest = binding.get("sha256")
+            if not isinstance(digest, str) or not HEX_64_RE.fullmatch(digest):
+                errors.append(f"{capability}: evidence binding needs a SHA-256 digest")
+            if binding.get("independently_verified") is not True:
+                errors.append(f"{capability}: evidence binding needs independent verification")
+            if not isinstance(binding.get("scope"), str) or not binding["scope"].strip():
+                errors.append(f"{capability}: evidence binding scope is required")
+            validated_bindings.append(binding)
+
+    if (
+        isinstance(factory_maturity, str)
+        and factory_maturity in {"operational", "validated_preproduction"}
+        and not any(
+        binding.get("capability") == "factory-definition"
+        and binding.get("maturity") == factory_maturity
+        and binding.get("independently_verified") is True
+        for binding in validated_bindings
+        )
+    ):
+        errors.append("strong factory maturity requires a matching factory-definition receipt")
+
+    if (
+        isinstance(reproduction, dict)
+        and isinstance(reproduction.get("nix_maturity"), str)
+        and reproduction.get("nix_maturity")
+        in {"operational", "validated_preproduction"}
+        and not any(
+            binding.get("capability") == "nix-environment-reproduction"
+            and binding.get("maturity") == reproduction.get("nix_maturity")
+            and binding.get("independently_verified") is True
+            for binding in validated_bindings
+        )
+    ):
+        errors.append("strong Nix maturity requires a content-addressed cross-node receipt")
+
+    return errors
+
+
+def _is_positive_int(value: Any) -> bool:
+    return isinstance(value, int) and not isinstance(value, bool) and value > 0
+
+
+def _is_nonnegative_int(value: Any) -> bool:
+    return isinstance(value, int) and not isinstance(value, bool) and value >= 0
+
+
+def _validate_hash_map(value: Any, label: str) -> list[str]:
+    if not isinstance(value, dict) or not value:
+        return [f"{label} must be a non-empty object"]
+    errors: list[str] = []
+    for name, digest in value.items():
+        if not isinstance(name, str) or not name.strip():
+            errors.append(f"{label} keys must be non-empty strings")
+        if not isinstance(digest, str) or not HEX_64_RE.fullmatch(digest):
+            errors.append(f"{label}.{name} must be a lowercase SHA-256 digest")
+    return errors
+
+
+def validate_evidence_receipt(relative: str, data: Any) -> list[str]:
+    """Validate the semantic minimum for each sanitized evidence class."""
+    errors: list[str] = []
+    expected = EVIDENCE_CONTRACTS.get(relative)
+    if expected is None:
+        return [f"unknown evidence contract: {relative}"]
+    if not isinstance(data, dict):
+        return [f"{relative}: receipt root must be an object"]
+
+    expected_schema, expected_status = expected
+    if data.get("contract_schema") != CONTRACT_SCHEMA_REFERENCES[relative]:
+        errors.append(f"{relative}: must reference its project-owned schema")
+    if data.get("schema_version") != expected_schema:
+        errors.append(f"{relative}: schema_version must equal {expected_schema}")
+    if data.get("status") != expected_status:
+        errors.append(f"{relative}: status must equal {expected_status}")
+    observed_at = data.get("observed_at")
+    if not isinstance(observed_at, str) or not re.fullmatch(
+        r"\d{4}-\d{2}-\d{2}(?:T\d{2}:\d{2}:\d{2}Z)?", observed_at
+    ):
+        errors.append(f"{relative}: observed_at must be an ISO date or UTC timestamp")
+
+    if relative.endswith("dispatcher-validation-v1.json"):
+        source = data.get("source")
+        focused = data.get("focused_suite")
+        postgres = data.get("postgresql_acceptance")
+        if data.get("visibility") != "sanitized_from_private_source":
+            errors.append(f"{relative}: visibility must preserve the private-source limitation")
+        if not isinstance(source, dict):
+            errors.append(f"{relative}: source must be an object")
+        else:
+            if not isinstance(source.get("base_revision"), str) or not HEX_40_RE.fullmatch(source["base_revision"]):
+                errors.append(f"{relative}: source.base_revision must be a full Git commit")
+            if source.get("scope") != "dispatcher" or source.get("state") != "reviewed_working_tree":
+                errors.append(f"{relative}: source scope and reviewed state must remain explicit")
+            if not _is_positive_int(source.get("source_file_count")):
+                errors.append(f"{relative}: source.source_file_count must be positive")
+            if not isinstance(source.get("source_tree_sha256"), str) or not HEX_64_RE.fullmatch(source["source_tree_sha256"]):
+                errors.append(f"{relative}: source.source_tree_sha256 must be a SHA-256 digest")
+            if not isinstance(source.get("limitation"), str) or not source["limitation"].strip():
+                errors.append(f"{relative}: source.limitation must be recorded")
+        if not isinstance(focused, dict) or focused.get("status") != "passed":
+            errors.append(f"{relative}: focused suite must be a passed result")
+        elif focused.get("tests_passed") != 158 or focused.get("tests_failed") != 0:
+            errors.append(f"{relative}: focused suite counts must prove a zero-failure run")
+        if not isinstance(postgres, dict) or postgres.get("status") != "passed":
+            errors.append(f"{relative}: PostgreSQL acceptance must be a passed result")
+        else:
+            if postgres.get("network") != "unix-socket-only" or postgres.get("production_data") is not False:
+                errors.append(f"{relative}: PostgreSQL acceptance must remain isolated from production")
+            if postgres.get("postgresql_version") != "16.15":
+                errors.append(f"{relative}: PostgreSQL version must remain bound to the observed run")
+            if postgres.get("assertions_passed") != 104 or postgres.get("assertions_failed") != 0:
+                errors.append(f"{relative}: PostgreSQL assertion counts must prove a zero-failure run")
+            migrations = postgres.get("migration_sha256")
+            if not isinstance(migrations, dict) or set(migrations) != DISPATCHER_MIGRATIONS:
+                errors.append(f"{relative}: migration digest set must match the accepted run")
+            errors.extend(
+                f"{relative}: {error}"
+                for error in _validate_hash_map(migrations, "migration_sha256")
+            )
+            restore = postgres.get("restore")
+            if not isinstance(restore, dict):
+                errors.append(f"{relative}: restore evidence must be an object")
+            else:
+                for field in ("dump_sha256", "fingerprint_sha256"):
+                    value = restore.get(field)
+                    if not isinstance(value, str) or not HEX_64_RE.fullmatch(value):
+                        errors.append(f"{relative}: restore.{field} must be a SHA-256 digest")
+                rows = restore.get("row_counts")
+                if not isinstance(rows, dict) or set(rows) != DISPATCHER_RESTORE_TABLES or not all(
+                    isinstance(name, str) and _is_nonnegative_int(count)
+                    for name, count in rows.items()
+                ):
+                    errors.append(f"{relative}: restore.row_counts must be nonnegative integers")
+
+    elif relative.endswith("droid-contribution-v1.json"):
+        scope = data.get("scope")
+        contribution = data.get("contribution")
+        acceptance = data.get("acceptance")
+        if data.get("factory_cli_version") != DROID_FACTORY_CLI_VERSION:
+            errors.append(f"{relative}: factory_cli_version must match the accepted run")
+        if data.get("session_reference") != DROID_SESSION_REFERENCE:
+            errors.append(f"{relative}: session_reference must match the accepted run")
+        if not isinstance(scope, dict) or scope.get("production_authority") is not False:
+            errors.append(f"{relative}: contribution scope must deny production authority")
+        elif (
+            scope.get("files_changed")
+            != ["scripts/validate_repository.py", "tests/test_validate_repository.py"]
+            or scope.get("model_turns") != 15
+            or scope.get("factory_credits") != 0
+        ):
+            errors.append(f"{relative}: contribution scope must match the accepted bounded run")
+        if not isinstance(contribution, dict):
+            errors.append(f"{relative}: contribution must be an object")
+        elif (
+            contribution.get("contribution_tests_passed") != 36
+            or contribution.get("current_integrated_tests_passed")
+            != INTEGRATED_TEST_COUNT
+            or contribution.get("pre_change_result") != "mutation accepted"
+            or contribution.get("post_change_result") != "mutation rejected"
+        ):
+            errors.append(f"{relative}: contribution result must match the accepted bounded run")
+        if not isinstance(acceptance, dict) or acceptance != {
+            "model_self_report_is_verification": False,
+            "diff_reviewed": True,
+            "independent_validation_passed": True,
+            "credential_values_recorded": False,
+        }:
+            errors.append(f"{relative}: acceptance must preserve independent review and secret denial")
+
+    elif relative.endswith("meta-factory-foundations-v1.json"):
+        instances = data.get("factory_instances")
+        operations = data.get("operations_foundation")
+        scaffold = data.get("modular_agent_scaffold")
+        harness = data.get("harness_and_verification")
+        scheduling = data.get("scheduling")
+        recursive = data.get("recursive_improvement")
+        if data.get("visibility") != "sanitized_from_private_source":
+            errors.append(f"{relative}: visibility must preserve the private-source limitation")
+        if not isinstance(instances, dict) or instances.get("closed_registry") != REQUIRED_PROJECTS:
+            errors.append(f"{relative}: factory registry must match current public authority")
+        elif instances.get("control_factory_count") != 1 or instances.get("economic_factory_count") != 2:
+            errors.append(f"{relative}: factory class counts must match the registry")
+        if not isinstance(operations, dict) or (
+            operations.get("policy_check") != "passed"
+            or operations.get("ansible_maturity") != "validated_preproduction"
+            or operations.get("sops_age_maturity") != "validated_preproduction"
+            or operations.get("nix_maturity") != "planned"
+            or not isinstance(operations.get("base_revision"), str)
+            or not HEX_40_RE.fullmatch(operations["base_revision"])
+            or not isinstance(operations.get("limitation"), str)
+            or not operations["limitation"].strip()
+        ):
+            errors.append(f"{relative}: operations foundation must preserve evidence and maturity")
+        if not isinstance(scaffold, dict):
+            errors.append(f"{relative}: modular_agent_scaffold must be an object")
+        else:
+            if not isinstance(scaffold.get("source_tree_sha256"), str) or not HEX_64_RE.fullmatch(scaffold["source_tree_sha256"]):
+                errors.append(f"{relative}: scaffold source digest must be a SHA-256 digest")
+            if (
+                scaffold.get("source_file_count") != 203
+                or scaffold.get("tests_passed") != 309
+                or scaffold.get("tests_failed") != 0
+                or scaffold.get("logical_modules") != 21
+                or scaffold.get("composed_flows") != 6
+                or scaffold.get("deployment_profiles") != 12
+            ):
+                errors.append(f"{relative}: scaffold test counts must prove a zero-failure run")
+            if scaffold.get("activation") != "none" or scaffold.get("production_authority") is not False:
+                errors.append(f"{relative}: source-only scaffold may not claim activation or authority")
+            if not isinstance(scaffold.get("limitation"), str) or not scaffold["limitation"].strip():
+                errors.append(f"{relative}: source-only scaffold limitation must be recorded")
+        if not isinstance(harness, dict) or harness.get("deterministic_gate_classes") != list(REQUIRED_DETERMINISTIC_GATES):
+            errors.append(f"{relative}: deterministic gate classes must remain complete")
+        elif (
+            harness.get("model_independent_ports") != "source_present"
+            or harness.get("general_unattended_multi_harness_routing") != "not_active"
+        ):
+            errors.append(f"{relative}: harness maturity boundary must remain explicit")
+        if not isinstance(scheduling, dict) or scheduling != {
+            "systemd": "operational_primary_durable_scheduler",
+            "cron": "operational_selected_downstream_scheduler",
+            "invariant": "one scheduler of record per workload",
+        }:
+            errors.append(f"{relative}: scheduler evidence must preserve single ownership")
+        if not isinstance(recursive, dict) or recursive.get("autonomous_self_promotion") is not False:
+            errors.append(f"{relative}: recursive improvement may not self-promote")
+        elif recursive.get("shared_template_promotion") != "designed_owner_gated":
+            errors.append(f"{relative}: shared promotion must remain designed and owner-gated")
+        if data.get("external_changes_performed") is not False or data.get("credential_values_recorded") is not False:
+            errors.append(f"{relative}: receipt must deny external changes and credential capture")
+
+    elif relative.endswith("qwen-model-observation-v1.json"):
+        observation = data.get("reported_observation")
+        limitations = data.get("limitations")
+        if data.get("transport") != "authenticated_private_openai_compatible_gateway":
+            errors.append(f"{relative}: transport boundary must remain explicit")
+        if not isinstance(observation, dict) or not all(
+            isinstance(observation.get(field), str) and observation[field].strip()
+            for field in ("loaded_filename_label", "artifact_filename_format", "server_reported_quantization")
+        ):
+            errors.append(f"{relative}: reported model observations must be non-empty strings")
+        elif observation != {
+            "loaded_filename_label": "Qwen 3.8 27B",
+            "artifact_filename_format": "GGUF",
+            "server_reported_quantization": "Q4_K - Small",
+        }:
+            errors.append(f"{relative}: model observation must match the bounded receipt")
+        redactions = data.get("redactions")
+        if (
+            not isinstance(redactions, list)
+            or not all(isinstance(item, str) for item in redactions)
+            or set(redactions)
+            != {"endpoint", "credential", "model_path", "model_alias"}
+        ):
+            errors.append(f"{relative}: endpoint, credential, model path, and alias must stay redacted")
+        if not isinstance(limitations, list) or len(limitations) < 3 or not all(
+            isinstance(item, str) and item.strip() for item in limitations
+        ):
+            errors.append(f"{relative}: model identity limitations must remain explicit")
+        elif not any("does not independently verify" in item for item in limitations) or not any(
+            "does not map a weight-file hash" in item for item in limitations
+        ):
+            errors.append(f"{relative}: model identity and provenance limitations are required")
+
+    return errors
+
+
+def validate_evidence_receipts(root: Path = ROOT) -> list[str]:
+    errors: list[str] = []
+    for relative in EVIDENCE_CONTRACTS:
+        path = root / relative
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            errors.append(f"{relative}: cannot load evidence receipt: {exc}")
+            continue
+        errors.extend(validate_evidence_receipt(relative, data))
+    return errors
+
+
 def validate_factory_model(data: Any) -> list[str]:
     """Validate Zaibatsu's factory-of-software-factories contract."""
     errors: list[str] = []
     if not isinstance(data, dict):
         return ["factory model root must be an object"]
 
+    if data.get("contract_schema") != CONTRACT_SCHEMA_REFERENCES[
+        "architecture/factory-model.json"
+    ]:
+        errors.append("factory model must reference its project-owned schema")
     if data.get("schema_version") != FACTORY_MODEL_SCHEMA_VERSION:
         errors.append(
             f"factory schema_version must equal {FACTORY_MODEL_SCHEMA_VERSION}"
@@ -430,6 +922,10 @@ def validate_architecture(data: Any) -> list[str]:
     if not isinstance(data, dict):
         return ["architecture root must be an object"]
 
+    if data.get("contract_schema") != CONTRACT_SCHEMA_REFERENCES[
+        "architecture/system.json"
+    ]:
+        errors.append("architecture must reference its project-owned schema")
     if data.get("schema_version") != ARCHITECTURE_SCHEMA_VERSION:
         errors.append(f"schema_version must equal {ARCHITECTURE_SCHEMA_VERSION}")
 
@@ -571,6 +1067,10 @@ def validate_submission_readiness(data: Any) -> list[str]:
     if not isinstance(data, dict):
         return ["submission readiness root must be an object"]
 
+    if data.get("contract_schema") != CONTRACT_SCHEMA_REFERENCES[
+        "architecture/submission-readiness.json"
+    ]:
+        errors.append("submission readiness must reference its project-owned schema")
     if data.get("schema_version") != READINESS_SCHEMA_VERSION:
         errors.append(f"schema_version must equal {READINESS_SCHEMA_VERSION}")
     if not isinstance(data.get("submission_ready"), bool):
@@ -611,6 +1111,98 @@ def validate_submission_readiness(data: Any) -> list[str]:
         if not isinstance(gate.get("evidence"), str) or not gate["evidence"].strip():
             errors.append(f"{gate_id}: evidence or pending rationale is required")
 
+        proof = gate.get("proof")
+        if status == "complete":
+            required_fields = GATE_PROOF_FIELDS[gate_id]
+            if not isinstance(proof, dict):
+                errors.append(f"{gate_id}: complete gate requires structured proof")
+            else:
+                missing_proof = required_fields - set(proof)
+                if missing_proof:
+                    errors.append(
+                        f"{gate_id}: proof missing required fields: "
+                        + ", ".join(sorted(missing_proof))
+                    )
+                if any(
+                    value is None or value == "" or value == [] or value == {}
+                    for value in proof.values()
+                ):
+                    errors.append(f"{gate_id}: proof values must be non-empty")
+        elif proof is not None:
+            errors.append(f"{gate_id}: incomplete gate must not carry completion proof")
+
+        if isinstance(proof, dict):
+            receipt = proof.get("receipt")
+            if receipt is not None and (
+                not isinstance(receipt, str) or receipt not in EVIDENCE_CONTRACTS
+            ):
+                errors.append(f"{gate_id}: proof receipt must reference a validated receipt")
+            if gate_id == "public_package":
+                contracts = proof.get("contracts")
+                required_contracts = {
+                    "architecture/factory-model.json",
+                    "architecture/system.json",
+                    "architecture/submission-readiness.json",
+                    "examples/economic-factory.json",
+                }
+                if (
+                    not isinstance(contracts, list)
+                    or not all(isinstance(path, str) for path in contracts)
+                    or set(contracts) != required_contracts
+                    or len(contracts) != len(required_contracts)
+                ):
+                    errors.append(f"{gate_id}: proof contracts must reference public contracts")
+                if proof.get("validator") != "scripts/validate_repository.py":
+                    errors.append(f"{gate_id}: proof validator must name the enforced validator")
+            elif gate_id == "droid_cli_install":
+                if proof.get("receipt") != "evidence/droid-contribution-v1.json":
+                    errors.append(f"{gate_id}: proof must use the Droid receipt")
+                if proof.get("factory_cli_version") != DROID_FACTORY_CLI_VERSION:
+                    errors.append(f"{gate_id}: proof must match the accepted Factory CLI version")
+            elif gate_id == "local_qwen_endpoint":
+                if proof.get("receipt") != "evidence/qwen-model-observation-v1.json":
+                    errors.append(f"{gate_id}: proof must use the Qwen observation receipt")
+                if proof.get("transport_tested") is not True:
+                    errors.append(f"{gate_id}: proof must record a tested transport")
+            elif gate_id == "local_model_credential":
+                if proof.get("receipt") != "evidence/droid-contribution-v1.json":
+                    errors.append(f"{gate_id}: proof must use the credential-safe Droid receipt")
+                if proof.get("credential_value_recorded") is not False:
+                    errors.append(f"{gate_id}: proof must deny credential-value recording")
+            elif gate_id == "factory_cli_authentication":
+                if proof.get("receipt") != "evidence/droid-contribution-v1.json":
+                    errors.append(f"{gate_id}: proof must use the authenticated Droid receipt")
+                if proof.get("authenticated_session_recorded") is not True:
+                    errors.append(f"{gate_id}: proof must record an authenticated session")
+            elif gate_id == "bounded_droid_contribution":
+                if proof.get("receipt") != "evidence/droid-contribution-v1.json":
+                    errors.append(f"{gate_id}: proof must use the Droid receipt")
+                if proof.get("session_reference") != DROID_SESSION_REFERENCE:
+                    errors.append(f"{gate_id}: proof must match the accepted session")
+            elif gate_id == "public_repository":
+                if proof.get("url") != PUBLIC_REPOSITORY_URL:
+                    errors.append(f"{gate_id}: proof must use the canonical public repository")
+                if proof.get("anonymous_access_verified") is not True:
+                    errors.append(f"{gate_id}: proof must record anonymous access")
+            elif gate_id == "fresh_clone_reproduction":
+                commit = proof.get("candidate_commit")
+                if not isinstance(commit, str) or not HEX_40_RE.fullmatch(commit):
+                    errors.append(f"{gate_id}: proof must pin a full candidate commit")
+                if proof.get("tests_passed") != INTEGRATED_TEST_COUNT:
+                    errors.append(f"{gate_id}: proof must match the integrated test count")
+                if not isinstance(proof.get("gitleaks_version"), str) or not proof["gitleaks_version"].strip():
+                    errors.append(f"{gate_id}: proof must record the Gitleaks version")
+                if not isinstance(proof.get("github_actions_run"), str) or not proof["github_actions_run"].startswith("https://github.com/"):
+                    errors.append(f"{gate_id}: proof must link the GitHub Actions run")
+            elif gate_id == "public_demo":
+                if not isinstance(proof.get("url"), str) or not proof["url"].startswith("https://"):
+                    errors.append(f"{gate_id}: proof must link the public demo")
+                if not isinstance(proof.get("release_tag"), str) or not re.fullmatch(r"v\d+\.\d+\.\d+", proof["release_tag"]):
+                    errors.append(f"{gate_id}: proof must name a semantic release tag")
+            elif gate_id == "applicant_materials":
+                if proof.get("submitted_by_applicant") is not True or proof.get("resume_provided_privately") is not True:
+                    errors.append(f"{gate_id}: proof must preserve applicant-owned submission")
+
         blockers = gate.get("blocked_by", [])
         if not isinstance(blockers, list) or not all(
             isinstance(blocker, str) for blocker in blockers
@@ -642,7 +1234,7 @@ def validate_submission_readiness(data: Any) -> list[str]:
                 errors.append(f"{gate_id}: resolved gate must not declare blocked_by")
 
     computed_ready = all(
-        gate["status"] == "complete" for gate in gate_by_id.values()
+        gate.get("status") == "complete" for gate in gate_by_id.values()
     )
     if (
         isinstance(data.get("submission_ready"), bool)
@@ -743,32 +1335,105 @@ def validate_factory_consistency(architecture: Any, factory_model: Any) -> list[
     return errors
 
 
+def repository_candidate_paths(root: Path = ROOT) -> list[Path]:
+    """Return tracked and non-ignored untracked paths, including force-added files."""
+    if (root / ".git").exists():
+        try:
+            result = subprocess.run(
+                [
+                    "git",
+                    "-C",
+                    str(root),
+                    "ls-files",
+                    "--cached",
+                    "--others",
+                    "--exclude-standard",
+                    "-z",
+                ],
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+            )
+        except (OSError, subprocess.CalledProcessError):
+            pass
+        else:
+            paths = [
+                root / item.decode("utf-8", errors="surrogateescape")
+                for item in result.stdout.split(b"\0")
+                if item
+            ]
+            return sorted(paths, key=lambda path: str(path.relative_to(root)))
+
+    return sorted(
+        (
+            path
+            for path in root.rglob("*")
+            if ".git" not in path.relative_to(root).parts
+            and (path.is_file() or path.is_symlink())
+        ),
+        key=lambda path: str(path.relative_to(root)),
+    )
+
+
+def git_index_entries(root: Path = ROOT) -> list[tuple[str, str, str, Path]]:
+    """Return mode, object id, stage, and path for every Git index entry."""
+    if not (root / ".git").exists():
+        return []
+    result = subprocess.run(
+        ["git", "-C", str(root), "ls-files", "--stage", "-z"],
+        check=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+    entries: list[tuple[str, str, str, Path]] = []
+    for raw_entry in result.stdout.split(b"\0"):
+        if not raw_entry:
+            continue
+        metadata, separator, raw_path = raw_entry.partition(b"\t")
+        parts = metadata.decode("ascii", errors="strict").split()
+        if not separator or len(parts) != 3:
+            raise ValueError("malformed Git index entry")
+        mode, object_id, stage = parts
+        path = root / raw_path.decode("utf-8", errors="surrogateescape")
+        entries.append((mode, object_id, stage, path))
+    return entries
+
+
 def public_files(root: Path = ROOT) -> list[Path]:
-    paths: list[Path] = []
-    excluded_directories = {".git", "__pycache__", "runtime"}
-    ignored_local_settings = root / ".factory" / "settings.local.json"
-    for path in root.rglob("*"):
-        if any(part in excluded_directories for part in path.relative_to(root).parts):
-            continue
-        if path == ignored_local_settings or path.is_symlink() or not path.is_file():
-            continue
-        paths.append(path)
-    return sorted(paths)
+    return [
+        path
+        for path in repository_candidate_paths(root)
+        if not path.is_symlink() and path.is_file()
+    ]
 
 
 def validate_public_paths(root: Path = ROOT) -> list[str]:
     """Reject links that can hide or redirect public repository content."""
     errors: list[str] = []
-    excluded_directories = {".git", "__pycache__", "runtime"}
-    ignored_local_settings = root / ".factory" / "settings.local.json"
-    for path in root.rglob("*"):
+    try:
+        index_entries = git_index_entries(root)
+    except (OSError, subprocess.CalledProcessError, UnicodeError, ValueError) as exc:
+        errors.append(f"cannot inspect Git index paths: {exc}")
+        index_entries = []
+    special_index_paths: set[Path] = set()
+    for mode, _object_id, stage, path in index_entries:
         relative = path.relative_to(root)
-        if any(part in excluded_directories for part in relative.parts):
-            continue
-        if path == ignored_local_settings:
+        if stage != "0":
+            errors.append(f"{relative}: unresolved Git index stage must fail closed")
+        if mode == "120000":
+            errors.append(f"{relative}: public repository paths must not be symlinks")
+            special_index_paths.add(path)
+        elif mode == "160000":
+            errors.append(f"{relative}: Git submodules are outside the public scan boundary")
+            special_index_paths.add(path)
+    for path in repository_candidate_paths(root):
+        relative = path.relative_to(root)
+        if path in special_index_paths:
             continue
         if path.is_symlink():
             errors.append(f"{relative}: public repository paths must not be symlinks")
+        elif path.is_dir():
+            errors.append(f"{relative}: Git submodules are outside the public scan boundary")
     return errors
 
 
@@ -780,6 +1445,39 @@ def contains_disallowed_match(label: str, pattern: re.Pattern[str], text: str) -
     return any(match.group(0).casefold() not in allowed for match in pattern.finditer(text))
 
 
+def validate_public_content(relative: str, raw: bytes) -> list[str]:
+    errors: list[str] = []
+    if b"\x00" in raw:
+        return [f"{relative}: opaque binary file cannot be safety-scanned"]
+    try:
+        text = raw.decode("utf-8")
+    except UnicodeDecodeError as exc:
+        return [f"{relative}: cannot scan public text: {exc}"]
+    for label, pattern in PUBLIC_SAFETY_PATTERNS.items():
+        if contains_disallowed_match(label, pattern, text):
+            errors.append(f"{relative}: contains {label}")
+    for match in IPV4_CANDIDATE_RE.finditer(text):
+        try:
+            address = ipaddress.ip_address(match.group(0))
+        except ValueError:
+            continue
+        if address.version == 4 and address.is_global:
+            errors.append(f"{relative}: contains public IPv4 address")
+            break
+    for match in IPV6_CANDIDATE_RE.finditer(text):
+        candidate = match.group(0).strip("[]")
+        try:
+            address = ipaddress.ip_address(candidate)
+        except ValueError:
+            continue
+        if address.version == 6 and not (
+            address.is_loopback or address.is_unspecified
+        ):
+            errors.append(f"{relative}: contains IPv6 address")
+            break
+    return errors
+
+
 def validate_public_safety(root: Path = ROOT) -> list[str]:
     errors: list[str] = []
     for path in public_files(root):
@@ -788,40 +1486,31 @@ def validate_public_safety(root: Path = ROOT) -> list[str]:
         except OSError as exc:
             errors.append(f"{path.relative_to(root)}: cannot scan public text: {exc}")
             continue
-        if b"\x00" in raw:
-            if path.suffix.casefold() not in APPROVED_BINARY_SUFFIXES:
-                errors.append(
-                    f"{path.relative_to(root)}: unapproved binary file cannot be safety-scanned"
-                )
+        errors.extend(validate_public_content(str(path.relative_to(root)), raw))
+
+    try:
+        index_entries = git_index_entries(root)
+    except (OSError, subprocess.CalledProcessError, UnicodeError, ValueError) as exc:
+        errors.append(f"cannot inspect Git index content: {exc}")
+        return errors
+    for mode, object_id, stage, path in index_entries:
+        if stage != "0" or mode not in {"100644", "100755"}:
             continue
         try:
-            text = raw.decode("utf-8")
-        except UnicodeDecodeError as exc:
-            if path.suffix.casefold() not in APPROVED_BINARY_SUFFIXES:
-                errors.append(f"{path.relative_to(root)}: cannot scan public text: {exc}")
+            result = subprocess.run(
+                ["git", "-C", str(root), "cat-file", "blob", object_id],
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+            )
+        except (OSError, subprocess.CalledProcessError) as exc:
+            errors.append(f"{path.relative_to(root)}: cannot scan Git index blob: {exc}")
             continue
-        for label, pattern in PUBLIC_SAFETY_PATTERNS.items():
-            if contains_disallowed_match(label, pattern, text):
-                errors.append(f"{path.relative_to(root)}: contains {label}")
-        for match in IPV4_CANDIDATE_RE.finditer(text):
-            try:
-                address = ipaddress.ip_address(match.group(0))
-            except ValueError:
-                continue
-            if address.version == 4 and address.is_global:
-                errors.append(f"{path.relative_to(root)}: contains public IPv4 address")
-                break
-        for match in IPV6_CANDIDATE_RE.finditer(text):
-            candidate = match.group(0).strip("[]")
-            try:
-                address = ipaddress.ip_address(candidate)
-            except ValueError:
-                continue
-            if address.version == 6 and not (
-                address.is_loopback or address.is_unspecified
-            ):
-                errors.append(f"{path.relative_to(root)}: contains IPv6 address")
-                break
+        errors.extend(
+            validate_public_content(
+                f"{path.relative_to(root)} (Git index)", result.stdout
+            )
+        )
     return errors
 
 
@@ -833,6 +1522,53 @@ def validate_required_files(root: Path = ROOT) -> list[str]:
             errors.append(f"missing required file: {relative}")
         elif path.is_symlink():
             errors.append(f"required file must not be a symlink: {relative}")
+    return errors
+
+
+def validate_contract_schema_files(root: Path = ROOT) -> list[str]:
+    errors: list[str] = []
+    root_resolved = root.resolve()
+    for relative, expected_reference in CONTRACT_SCHEMA_REFERENCES.items():
+        instance_path = root / relative
+        try:
+            instance = json.loads(instance_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            errors.append(f"{relative}: cannot load schema-bound contract: {exc}")
+            continue
+        if not isinstance(instance, dict) or instance.get("contract_schema") != expected_reference:
+            errors.append(f"{relative}: contract_schema must equal {expected_reference}")
+            continue
+        schema_path = (instance_path.parent / expected_reference).resolve()
+        try:
+            schema_path.relative_to(root_resolved)
+        except ValueError:
+            errors.append(f"{relative}: contract schema escapes the repository")
+            continue
+        try:
+            schema = json.loads(schema_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            errors.append(f"{relative}: cannot load project-owned schema: {exc}")
+            continue
+        if not isinstance(schema, dict):
+            errors.append(f"{relative}: project-owned schema root must be an object")
+            continue
+        if schema.get("$schema") != "https://json-schema.org/draft/2020-12/schema":
+            errors.append(f"{relative}: project-owned schema must declare JSON Schema 2020-12")
+        expected_id = (
+            "https://raw.githubusercontent.com/adaliontech/Zaibatsu/"
+            f"v1.1.1/schemas/{schema_path.name}"
+        )
+        if schema.get("$id") != expected_id:
+            errors.append(f"{relative}: project-owned schema must use its immutable v1.1.1 id")
+        if schema.get("type") != "object" or not isinstance(schema.get("required"), list):
+            errors.append(f"{relative}: project-owned schema must define an object contract")
+        properties = schema.get("properties")
+        if (
+            not isinstance(properties, dict)
+            or not isinstance(properties.get("contract_schema"), dict)
+            or properties["contract_schema"].get("const") != expected_reference
+        ):
+            errors.append(f"{relative}: schema must bind the instance contract_schema")
     return errors
 
 
@@ -868,9 +1604,11 @@ def main() -> int:
     errors: list[str] = []
     data: Any = None
     factory_model: Any = None
+    factory_definition: Any = None
     readiness: Any = None
     errors.extend(validate_public_paths())
     errors.extend(validate_required_files())
+    errors.extend(validate_contract_schema_files())
     try:
         data = load_architecture()
     except (OSError, json.JSONDecodeError) as exc:
@@ -884,6 +1622,12 @@ def main() -> int:
     else:
         errors.extend(validate_factory_model(factory_model))
     try:
+        factory_definition = load_factory_definition()
+    except (OSError, json.JSONDecodeError) as exc:
+        errors.append(f"cannot load example factory definition: {exc}")
+    else:
+        errors.extend(validate_factory_definition(factory_definition))
+    try:
         readiness = json.loads(READINESS_PATH.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:
         errors.append(f"cannot load submission readiness: {exc}")
@@ -891,6 +1635,7 @@ def main() -> int:
         errors.extend(validate_submission_readiness(readiness))
     errors.extend(validate_contract_consistency(data, readiness))
     errors.extend(validate_factory_consistency(data, factory_model))
+    errors.extend(validate_evidence_receipts())
     errors.extend(validate_public_safety())
     errors.extend(validate_local_links())
 
@@ -907,6 +1652,8 @@ def main() -> int:
         f"- {len(factory_model['factory_instances'])} software factories and "
         f"{len(factory_model['capabilities'])} meta-factory capabilities checked"
     )
+    print("- reusable factory-definition example checked")
+    print(f"- {len(EVIDENCE_CONTRACTS)} evidence receipts checked")
     print(f"- {len(REQUIRED_FACTORY_INVARIANTS)} meta-factory invariants checked")
     print(f"- {len(REQUIRED_TRUE_INVARIANTS)} fail-closed invariants checked")
     print(f"- {len(readiness['gates'])} submission gates checked")

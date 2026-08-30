@@ -11,11 +11,13 @@ changes.
 - represent Git/SOPS, Ansible/Nix, cron/systemd, modular skeletons, harnesses,
   deterministic gates, and recursive improvement at truthful maturity;
 - publish sanitized evidence and adversarial tests;
-- reproduce `v1.1.0` from a credential-free clone;
+- preserve the immutable `v1.1.0` proof and reproduce hardened `v1.1.1` from a
+  credential-free clone;
 - record the Guild demo and complete applicant-owned submission materials.
 
-Exit: the public narrative and both machine-readable contracts describe the
-same meta-factory without inflating source-only or planned capabilities.
+Exit: the public narrative, architecture, portable factory, readiness, and
+evidence contracts describe the same meta-factory without inflating
+source-only or planned capabilities.
 
 ## Phase 1 — Factory identity and versioning
 

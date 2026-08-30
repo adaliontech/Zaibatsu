@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.1.1/schemas/factory-model.schema.json",
+  "title": "Zaibatsu meta-factory model",
+  "type": "object",
+  "required": ["contract_schema", "schema_version", "project", "factory_classes", "factory_instances", "factory_lifecycle", "capabilities", "reproducibility_policy", "versioning_policy", "scheduling_policy", "agent_policy", "feedback_policy", "invariants"],
+  "properties": {
+    "contract_schema": {"const": "../schemas/factory-model.schema.json"},
+    "schema_version": {"const": "zaibatsu.factory-model.v1"},
+    "project": {"type": "object", "required": ["name", "role", "definition"]},
+    "factory_classes": {"type": "object", "required": ["control_factory", "economic_factory"]},
+    "factory_instances": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "object", "required": ["id", "class", "maturity", "purpose"]}
+    },
+    "factory_lifecycle": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+    "capabilities": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "object", "required": ["id", "layer", "maturity", "scope"]}
+    },
+    "reproducibility_policy": {"type": "object", "required": ["host_configuration", "worker_environments", "nix_currently_deployed"]},
+    "versioning_policy": {"type": "object", "required": ["source_and_intended_state", "encrypted_static_secrets", "runtime_machine_secrets", "plaintext_secrets_in_git"]},
+    "scheduling_policy": {"type": "object", "required": ["supported_schedulers", "durable_default", "one_scheduler_of_record_per_workload"]},
+    "agent_policy": {"type": "object", "required": ["skeleton_status", "factory_deployment_status", "harness_binding", "deterministic_gates", "model_may_authorize_external_effect"]},
+    "feedback_policy": {"type": "object", "required": ["evidence_return_maturity", "shared_pattern_promotion_maturity", "promotion_authority", "factory_may_self_promote"]},
+    "invariants": {"type": "object", "minProperties": 1, "additionalProperties": {"const": true}}
+  }
+}

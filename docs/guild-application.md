@@ -7,21 +7,22 @@
 **Link to submission:** `https://github.com/adaliontech/Zaibatsu`
 
 The application is prepared but must not be submitted yet. The official Guild
-path requires real Factory work and a public link. The meta-factory v1.1.0
-candidate passed its credential-disabled public-clone proof and independent
-GitHub CI. The final demo and applicant materials remain explicit gates in
+path requires real Factory work and a public link. Immutable v1.1.0 passed its
+credential-disabled public-clone proof and independent GitHub CI. The v1.1.1
+hardening release requires its own clean-clone proof before the final demo; the
+demo and applicant materials remain explicit gates in
 [`architecture/submission-readiness.json`](../architecture/submission-readiness.json).
 
 ## Current project description
 
-Zaibatsu is a reproducible meta-factory: the control layer that builds and
-governs project-scoped software factories. It models a control factory and two
-economic factories, then makes their lifecycle executable—from Git/SOPS
-versioning and Ansible/Nix reproduction through cron/systemd scheduling,
-modular agent skeletons, interchangeable LLM harnesses, deterministic output
-gates, evidence return, and reviewed recursive improvement. The public status
-ledger distinguishes operational, validated-preproduction, designed, and
-planned capabilities rather than presenting the entire target as deployed.
+Zaibatsu is an evidence-gated architecture and toolkit for building and
+governing project-scoped software factories. It models one control factory and
+two economic factories, and provides a portable contract others can scaffold
+and validate. Git/SOPS versioning, Ansible host reproduction, cron/systemd
+scheduler ownership, modular agent skeletons, interchangeable LLM harnesses,
+deterministic gates, and reviewed feedback are represented at their actual
+maturities. Nix environments remain planned; the agent scaffold is tested
+source but not deployed.
 
 The core repository works without a model or Droid credentials. For the Guild
 case study, authenticated Factory Droid used an owner-operated GGUF whose
@@ -43,13 +44,12 @@ new test moves `policy_decision` before `verify`; the pre-change validator
 accepted that unsafe ordering, while the shipped validator rejects it with a
 deterministic adjacent-stage error. Droid reported 36 passing tests, and an
 independent run reproduced all 36 before later integration, branding, release,
-and meta-factory checks brought the package to 70 passing tests. No model or
+and meta-factory checks brought the package to 95 passing tests. No model or
 Factory credential is published.
 
 ## One-line description
 
-The reproducible control layer for building, governing, and recursively
-improving modular software factories.
+The evidence-gated control layer for building reproducible software factories.
 
 ## Optional public Guild bio
 
@@ -59,23 +59,25 @@ deterministic operational boundaries.
 
 ## Social post draft
 
-I built Zaibatsu, the factory of software factories: a reproducible control
+I built Zaibatsu, the factory of software factories: an evidence-gated control
 layer for versioning, scheduling, verifying, and improving project-scoped
-software factories. Git/SOPS, Ansible/Nix, cron/systemd, modular agent
-skeletons, interchangeable LLM harnesses, deterministic gates, and no direct
-model-to-production path. Local-Qwen-backed Factory Droid strengthened and
-tested one of those gate-ordering invariants.
+software factories. It includes portable schemas and a validation CLI;
+Git/SOPS and Ansible have bounded evidence, Nix remains planned, and modular
+agent skeletons remain tested source rather than deployed authority.
+Local-Qwen-backed Factory Droid strengthened and tested one deterministic
+gate-ordering invariant, with no direct model-to-production path.
 https://github.com/adaliontech/Zaibatsu @FactoryAI
 
 ## Guild Council interview notes
 
 ### What did you build?
 
-A public executable architecture for the meta-factory above my real
-self-hosted software factories. It defines factory identity, lifecycle,
-reproduction, scheduling, modular work, harness-independent verification,
-feedback, and promotion. Anyone can clone it and validate the model and
-adversarial cases offline without access to my private fleet.
+A public executable architecture and reusable validation toolkit for the
+meta-factory above my real self-hosted software factories. It defines factory
+identity, lifecycle, reproduction, scheduling, modular work,
+harness-independent verification, feedback, and promotion. Anyone can clone
+it, scaffold a new factory definition, and validate the model and adversarial
+cases offline without access to my private fleet.
 
 ### Why does it matter?
 
@@ -140,8 +142,9 @@ the public repository:
 - [x] Factory contribution maturity changes from `pending_evidence` only after
       the receipt exists.
 - [x] Repository is published under the intended owner with an MIT license.
-- [x] Meta-factory v1.1.0 release candidate passes `make validate` from a
-      credential-free clone.
+- [x] Immutable v1.1.0 passes `make validate` from a credential-free clone.
+- [ ] Hardened v1.1.1 passes `make validate` and Gitleaks from a
+      credential-free public clone.
 - [x] Public repository and article links resolve without authentication.
 - [ ] Demo clip or screenshots show a real Factory task and validation result.
 - [x] No private host, credential, recovery, or deployment detail is exposed.

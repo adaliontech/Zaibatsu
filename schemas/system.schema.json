@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.1.1/schemas/system.schema.json",
+  "title": "Zaibatsu component architecture",
+  "type": "object",
+  "required": ["contract_schema", "schema_version", "project", "maturity_definitions", "project_allowlist", "components", "invariants", "task_flow"],
+  "properties": {
+    "contract_schema": {"const": "../schemas/system.schema.json"},
+    "schema_version": {"const": "zaibatsu.architecture.v1"},
+    "project": {"type": "object", "required": ["name", "spoken_name", "tagline", "as_of"]},
+    "maturity_definitions": {"type": "object", "minProperties": 5, "additionalProperties": {"type": "string", "minLength": 1}},
+    "project_allowlist": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string"}},
+    "components": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "plane", "kind", "maturity", "responsibility", "can_trigger_external_side_effects"],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "kind": {"enum": ["deterministic", "probabilistic"]},
+          "can_trigger_external_side_effects": {"type": "boolean"}
+        }
+      }
+    },
+    "invariants": {"type": "object", "minProperties": 1, "additionalProperties": {"const": true}},
+    "task_flow": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string"}}
+  }
+}

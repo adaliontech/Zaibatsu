@@ -1,7 +1,7 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "contract_schema": "../schemas/submission-readiness.schema.json",
   "schema_version": "zaibatsu.submission-readiness.v1",
-  "as_of": "2026-08-29",
+  "as_of": "2026-08-30",
   "submission_ready": false,
   "submitted": false,
   "gates": [
@@ -9,55 +9,91 @@
       "id": "public_package",
       "status": "complete",
       "required_for_submission": true,
-      "evidence": "Meta-factory and component contracts, documentation, sanitized receipts, and offline adversarial validation suite"
+      "evidence": "Meta-factory, component, portable factory, readiness, and evidence contracts are enforced by the offline validator and adversarial suite",
+      "proof": {
+        "contracts": [
+          "architecture/factory-model.json",
+          "architecture/system.json",
+          "architecture/submission-readiness.json",
+          "examples/economic-factory.json"
+        ],
+        "validator": "scripts/validate_repository.py"
+      }
     },
     {
       "id": "droid_cli_install",
       "status": "complete",
       "required_for_submission": true,
-      "evidence": "Local Droid CLI 0.206.0 version check"
+      "evidence": "Local Droid CLI 0.206.0 version check and reviewed bounded session",
+      "proof": {
+        "receipt": "evidence/droid-contribution-v1.json",
+        "factory_cli_version": "0.206.0"
+      }
     },
     {
       "id": "local_qwen_endpoint",
       "status": "complete",
       "required_for_submission": true,
-      "evidence": "Authenticated OpenAI-compatible local-model endpoint passed health, model, streaming, and native tool-call checks; the loaded GGUF filename was labeled Qwen 3.8 27B and the server reports Q4_K - Small quantization, but official model identity and parameter count are not independently verified"
+      "evidence": "Authenticated OpenAI-compatible local-model endpoint passed health, model, streaming, and native tool-call checks; the loaded GGUF filename was labeled Qwen 3.8 27B and the server reports Q4_K - Small quantization, but official model identity and parameter count are not independently verified",
+      "proof": {
+        "receipt": "evidence/qwen-model-observation-v1.json",
+        "transport_tested": true
+      }
     },
     {
       "id": "local_model_credential",
       "status": "complete",
       "required_for_submission": true,
-      "evidence": "Root-only source-bound client credential was injected transiently; no value is stored in this repository or evidence"
+      "evidence": "Root-only source-bound client credential was injected transiently; no value is stored in this repository or evidence",
+      "proof": {
+        "receipt": "evidence/droid-contribution-v1.json",
+        "credential_value_recorded": false
+      }
     },
     {
       "id": "factory_cli_authentication",
       "status": "complete",
       "required_for_submission": true,
-      "evidence": "Factory CLI login was verified separately from the model credential and completed authenticated Droid Exec sessions"
+      "evidence": "Factory CLI login was verified separately from the model credential and completed authenticated Droid Exec sessions",
+      "proof": {
+        "receipt": "evidence/droid-contribution-v1.json",
+        "authenticated_session_recorded": true
+      }
     },
     {
       "id": "bounded_droid_contribution",
       "status": "complete",
       "required_for_submission": true,
-      "evidence": "Qwen-backed Droid session 46f941a9-82f8-4df3-a45c-b8158996360b produced a reviewed two-file invariant and adversarial-test change; evidence/droid-contribution-v1.json records the bounded receipt and the integrated Zaibatsu package passes 70 tests"
+      "evidence": "Qwen-backed Droid session 46f941a9-82f8-4df3-a45c-b8158996360b produced a reviewed two-file invariant and adversarial-test change; the validated receipt binds the session and acceptance",
+      "proof": {
+        "receipt": "evidence/droid-contribution-v1.json",
+        "session_reference": "46f941a9-82f8-4df3-a45c-b8158996360b"
+      }
     },
     {
       "id": "public_repository",
       "status": "complete",
       "required_for_submission": true,
-      "evidence": "https://github.com/adaliontech/Zaibatsu is public and anonymously reachable"
+      "evidence": "https://github.com/adaliontech/Zaibatsu is public and anonymously reachable",
+      "proof": {
+        "url": "https://github.com/adaliontech/Zaibatsu",
+        "anonymous_access_verified": true
+      }
     },
     {
       "id": "fresh_clone_reproduction",
-      "status": "complete",
+      "status": "pending_external",
       "required_for_submission": true,
-      "evidence": "Credential-disabled public clone of candidate b9a628a7d9a4910c0e5456c2930b260a96c7d864 passed all 70 tests, both machine-readable contracts, workflow linting, strict Git checks, symlink denial, and Gitleaks 8.30.1 history/tree scans; GitHub Actions run 33291506370 independently passed"
+      "evidence": "The v1.1.1 candidate must be pushed and reproduced from a credential-disabled public clone before release"
     },
     {
       "id": "public_demo",
-      "status": "pending_external",
+      "status": "blocked_by_dependency",
       "required_for_submission": true,
-      "evidence": "The revised meta-factory narration and verified public release candidate are ready; the applicant must record and publish the final clip from the immutable v1.1.0 tag"
+      "evidence": "The applicant records and publishes the final clip only after the v1.1.1 fresh-clone gate passes",
+      "blocked_by": [
+        "fresh_clone_reproduction"
+      ]
     },
     {
       "id": "applicant_materials",

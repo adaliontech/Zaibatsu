@@ -4,6 +4,7 @@
 
 - Full validation: `make validate`
 - Architecture contract only: `python3 scripts/validate_repository.py`
+- Portable example: `python3 scripts/zaibatsu.py validate examples/economic-factory.json`
 - Tests only: `python3 -m unittest discover -s tests -v`
 - Deferred local-model preflight: `make droid-preflight`
 
@@ -40,6 +41,11 @@ credentials, or bootstrap procedures.
 - Preserve the direct-owner recovery path. Dispatcher cannot be its own only
   recovery mechanism.
 - Preserve the closed factory/project registry and deny unknown identities.
+- Keep every JSON instance bound to its project-owned schema. Evidence receipts
+  and completed submission gates require typed fields, not prose alone.
+- Treat every tracked or non-ignored path as public. Opaque files, symlinks,
+  and Git submodules are outside the scanner's inspectable boundary and must
+  fail closed.
 - Prefer Python standard-library validation; do not add a dependency unless it
   materially improves the public kit.
 - Never commit `.factory/settings.local.json`; the local model identifier,

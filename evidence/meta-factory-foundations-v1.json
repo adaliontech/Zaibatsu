@@ -1,5 +1,5 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "contract_schema": "../schemas/meta-factory-foundations-receipt.schema.json",
   "schema_version": "zaibatsu.meta-factory-foundations.v1",
   "observed_at": "2026-08-30T03:46:42Z",
   "status": "passed_with_maturity_boundaries",

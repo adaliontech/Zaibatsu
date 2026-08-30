@@ -1,5 +1,5 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "contract_schema": "../schemas/droid-contribution-receipt.schema.json",
   "schema_version": "zaibatsu.droid-contribution-receipt.v1",
   "observed_at": "2026-08-28",
   "status": "passed_and_reviewed",
@@ -20,7 +20,7 @@
     "pre_change_result": "mutation accepted",
     "post_change_result": "mutation rejected",
     "contribution_tests_passed": 36,
-    "current_integrated_tests_passed": 70
+    "current_integrated_tests_passed": 95
   },
   "acceptance": {
     "model_self_report_is_verification": false,

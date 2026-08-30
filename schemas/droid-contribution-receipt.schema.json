@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.1.1/schemas/droid-contribution-receipt.schema.json",
+  "title": "Bounded Droid contribution receipt",
+  "type": "object",
+  "required": ["contract_schema", "schema_version", "observed_at", "status", "factory_cli_version", "session_reference", "scope", "contribution", "acceptance"],
+  "properties": {
+    "contract_schema": {"const": "../schemas/droid-contribution-receipt.schema.json"},
+    "schema_version": {"const": "zaibatsu.droid-contribution-receipt.v1"},
+    "observed_at": {"type": "string", "minLength": 1},
+    "status": {"const": "passed_and_reviewed"},
+    "factory_cli_version": {"type": "string", "minLength": 1},
+    "session_reference": {"type": "string", "format": "uuid"},
+    "scope": {"type": "object", "required": ["files_changed", "model_turns", "factory_credits", "production_authority"]},
+    "contribution": {"type": "object", "required": ["invariant", "adversarial_mutation", "pre_change_result", "post_change_result", "contribution_tests_passed", "current_integrated_tests_passed"]},
+    "acceptance": {"type": "object", "required": ["model_self_report_is_verification", "diff_reviewed", "independent_validation_passed", "credential_values_recorded"]}
+  }
+}

@@ -2,12 +2,12 @@
 
 ## Summary
 
-Zaibatsu is a reproducible meta-factory for controlling multiple
-project-specific software factories. An economic factory produces software,
-data, research, content, or services for one business boundary. Zaibatsu
-defines and governs the common machinery: factory identity, versioning,
-reproduction, scheduling, modular work, deterministic verification, evidence,
-recovery, and reviewed improvement.
+Zaibatsu is an evidence-gated architecture and toolkit for making multiple
+project-specific software factories reproducible. An economic factory produces
+software, data, research, content, or services for one business boundary.
+Zaibatsu defines and governs the common machinery: factory identity,
+versioning, reproduction, scheduling, modular work, deterministic verification,
+evidence, recovery, and reviewed improvement.
 
 The system combines Git and SOPS/age, Ansible and planned Nix environments,
 cron and systemd, PostgreSQL durable state, modular agent skeletons, and
@@ -196,7 +196,12 @@ reusable contracts while preserving evidence and limitations:
   reproducibility, versioning, schedulers, skeletons, harnesses, and feedback;
 - `architecture/system.json` defines control-plane components, maturity, task
   order, and fail-closed invariants;
-- `scripts/validate_repository.py` checks both models and public safety;
+- `examples/economic-factory.json` and `scripts/zaibatsu.py` let another
+  project scaffold and validate a portable factory definition;
+- project-owned JSON Schemas describe the architecture, factory, readiness,
+  and evidence documents;
+- `scripts/validate_repository.py` checks all contracts, evidence semantics,
+  readiness proof, and public safety;
 - adversarial tests prove that hierarchy, lifecycle, maturity, secret,
   scheduler, model-authority, and feedback rules reject unsafe mutations;
 - sanitized receipts bind private observations without publishing operational
@@ -233,8 +238,10 @@ The public package can now reject claims or architectures in which:
 
 ## Takeaway
 
-Zaibatsu is not one AI agent and not one software factory. It is the system that
-makes software factories repeatable and governable: versioned definitions,
-reproducible infrastructure, modular work, interchangeable harnesses,
-deterministic verification, explicit effects, retained evidence, and reviewed
-recursive improvement.
+Zaibatsu is not one AI agent and not one software factory. It is the control
+architecture and toolkit for making factories repeatable and governable:
+versioned definitions, bounded reproduction, modular work, interchangeable
+harnesses, deterministic verification, explicit effects, retained evidence,
+and reviewed recursive improvement. The maturity ledger identifies which of
+those layers are operational, validated privately, source-only, or still
+planned.

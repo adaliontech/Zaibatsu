@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.1.1/schemas/qwen-model-observation-receipt.schema.json",
+  "title": "Sanitized local-Qwen observation receipt",
+  "type": "object",
+  "required": ["contract_schema", "schema_version", "observed_at", "status", "transport", "observation_source", "reported_observation", "redactions", "limitations"],
+  "properties": {
+    "contract_schema": {"const": "../schemas/qwen-model-observation-receipt.schema.json"},
+    "schema_version": {"const": "zaibatsu.qwen-model-observation.v1"},
+    "observed_at": {"type": "string", "minLength": 1},
+    "status": {"const": "passed"},
+    "transport": {"const": "authenticated_private_openai_compatible_gateway"},
+    "observation_source": {"type": "string", "minLength": 1},
+    "reported_observation": {"type": "object", "required": ["loaded_filename_label", "artifact_filename_format", "server_reported_quantization"]},
+    "redactions": {"type": "array", "minItems": 4, "uniqueItems": true, "items": {"type": "string"}},
+    "limitations": {"type": "array", "minItems": 3, "items": {"type": "string", "minLength": 1}}
+  }
+}

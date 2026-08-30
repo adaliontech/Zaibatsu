@@ -28,10 +28,10 @@ and redacted status ledger without receiving production access.
 
 | Evidence | Status | Receipt |
 | --- | --- | --- |
-| Architecture validator | Passed after meta-factory correction | 31 required files, 13 components, 3 software factories, 11 meta-factory capabilities, 9 meta-factory invariants, 8 component invariants, and 10 submission gates checked |
-| Adversarial unit tests | Passed after meta-factory correction | 70 of 70 tests passed |
-| Broken-link and public-safety scan | Passed after release hardening | Every repository file is inspected or rejected; exact placeholder matching, all symlinks, Linux/macOS/Windows home paths, tailnet DNS, IPv4/IPv6, credential patterns, approved binary formats, and local links are checked |
-| Malformed-input robustness | Passed 2026-08-28 | 5,000 seeded JSON-like cases produced 20,000 validation calls across architecture, readiness, consistency, and preflight with zero unhandled exceptions |
+| Architecture validator | Passed after reusable-contract hardening | 41 required files, 13 components, 3 current software factories, 1 portable factory example, 11 meta-factory capabilities, 4 evidence receipts, 9 meta-factory invariants, 8 component invariants, and 10 submission gates checked |
+| Adversarial unit tests | Passed after reusable-contract hardening | 95 of 95 tests passed |
+| Broken-link and public-safety scan | Passed after release hardening | Git-tracked and non-ignored files are inspected; force-added ignored paths, directory-name bypasses, all symlinks, Git submodules, Linux/macOS/Windows home paths, tailnet DNS, IPv4/IPv6, credential patterns, opaque content regardless of media suffix, invalid UTF-8, and local links fail closed |
+| Malformed-input robustness | Passed 2026-08-30 | 5,000 seeded JSON-like cases produced 50,000 calls across architecture, factory, readiness, consistency, and all four evidence validators with zero unhandled exceptions (seed `20260830`) |
 | Independent secret scan | Passed on v1.1.0 candidate | Checksum-pinned Gitleaks `8.30.1` found no leaks in the full public Git history or candidate tree; GitHub secret scanning and push protection provide a separate repository guard |
 | Official external links | Resolved 2026-08-28 | 5 of 5 Factory documentation and Guild links resolved successfully |
 | Droid CLI availability | Observed | Local version `0.206.0` returned a version receipt |
@@ -43,8 +43,9 @@ and redacted status ledger without receiving production access.
 | Factory/Droid contribution | Passed and reviewed | Session `46f941a9-82f8-4df3-a45c-b8158996360b`; two scoped files; 15 turns; zero Factory credits; sanitized receipt in [`evidence/droid-contribution-v1.json`](../evidence/droid-contribution-v1.json) |
 | Pre-change adversarial proof | Passed | Moving `policy_decision` before `verify` produced no ordering error under the original validator |
 | Independent contribution validation | Passed | The accepted two-file diff passed 36 tests, the standalone validator, and `git diff --check` |
-| Fresh-clone reproduction | Passed on v1.1.0 candidate | Credential-disabled public clone of `b9a628a7d9a4910c0e5456c2930b260a96c7d864` passed all 70 tests, both contracts, workflow linting, strict Git checks, symlink denial, and both Gitleaks modes; [GitHub Actions run 33291506370](https://github.com/adaliontech/Zaibatsu/actions/runs/33291506370) independently passed |
-| Demo recording | Ready; applicant action pending | Record from the immutable v1.1.0 tag using the [Demo script](demo-script.md) |
+| Prior immutable release proof | Passed on v1.1.0 | Credential-disabled public clone of `b9a628a7d9a4910c0e5456c2930b260a96c7d864` passed all 70 tests, the prior contracts, workflow linting, strict Git checks, symlink denial, and both Gitleaks modes; [GitHub Actions run 33291506370](https://github.com/adaliontech/Zaibatsu/actions/runs/33291506370) independently passed before the immutable release |
+| Fresh-clone reproduction | Pending for v1.1.1 | The hardened candidate must pass all 95 tests, contract checks, workflow linting, strict Git checks, and Gitleaks history/tree scans from a credential-disabled public clone |
+| Demo recording | Blocked on v1.1.1 clone proof | Record from the immutable v1.1.1 tag using the [Demo script](demo-script.md) after the release proof passes |
 
 ## Architecture claims
 
@@ -109,7 +110,7 @@ does not represent private implementation as publicly reproducible.
 
 ## Evidence still required before external submission
 
-The application is not represented as submitted until the immutable v1.1.0
+The application is not represented as submitted until the hardened v1.1.1
 public-clone proof passes, a demo or screenshot is published, and the required
 applicant resume is attached. These are tracked in
 [Guild application](guild-application.md).

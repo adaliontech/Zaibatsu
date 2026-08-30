@@ -1,97 +1,103 @@
 # Demo script
 
-The final demo must use the immutable `v1.1.0` release. Its candidate passed the
-credential-free clone proof. Use only the public repository. Do not show
-private terminals, history, settings, infrastructure, model credentials, or
-personal data.
+Use only a fresh clone of immutable `v1.1.1`. Do not show private terminals,
+history, settings, infrastructure, model credentials, notifications, or
+personal data. Lead with the real Factory result; explain the larger
+architecture only after the reviewer sees working evidence.
 
-## Architecture cut — about 2 minutes
+## Main cut — about 2 minutes 30 seconds
 
-### 0:00–0:20 — The thesis
+### 0:00–0:35 — Real Factory contribution
 
-Show the README title and hierarchy.
+Show the public Droid receipt, retained prompt, focused diff, and adversarial
+test.
 
-> Zaibatsu is the factory of software factories. It is the reproducible control
-> layer above project-specific economic factories. Each factory keeps its own
-> identity, data, credentials, schedules, and production authority while
-> Zaibatsu supplies shared definitions, modules, policy, evidence, and recovery.
+> Factory Droid, backed by my local Qwen endpoint, strengthened a deterministic
+> gate in Zaibatsu. It required persistence, bounded execution, verification,
+> policy decision, and controlled side effect in that order. The original
+> validator accepted policy before verification; the added adversarial test
+> makes that unsafe ordering fail. The two-file result was independently
+> reviewed and reproduced. Droid never received production authority.
 
-### 0:20–0:50 — The factory lifecycle
+Keep the session UUID and contribution-era 36-test result visible briefly. Do
+not imply the model's self-report was acceptance.
 
-Open `architecture/factory-model.json`. Show `project.role`, the three factory
-instances, and `factory_lifecycle`.
+### 0:35–1:05 — Apply Zaibatsu to a new factory
 
-> A factory is versioned in Git, static secret material is encrypted with
-> SOPS/age, hosts are reproduced with Ansible, and worker environments will use
-> Nix after cross-node proof. Work has one cron or systemd scheduler, passes
-> deterministic gates, returns evidence, and cannot promote shared changes
-> without review.
+From the fresh release clone, run:
 
-### 0:50–1:15 — Modular agents and models
+```bash
+demo_root="$(mktemp -d)"
+python3 scripts/zaibatsu.py scaffold \
+  --id demo-product \
+  --class economic_factory \
+  --purpose "Produce a bounded software product" \
+  --output "${demo_root}/factory.json"
+python3 scripts/zaibatsu.py validate "${demo_root}/factory.json"
+```
 
-Show `agent_policy`, `feedback_policy`, and the capability maturity rows.
+> This is the reusable part: Zaibatsu creates and validates a versioned factory
+> contract. The safe starting point denies plaintext secrets, assigns one
+> scheduler, keeps models behind typed deterministic gates, forbids direct
+> model effects, prevents factory feedback from promoting itself, and refuses
+> stronger maturity without a content-addressed evidence binding.
 
-> Reusable agent skeletons are typed modules and flows, not autonomous
-> personalities. Different LLM harnesses can implement the same bounded port,
-> but schemas, linters, tests, hashes, policies, receipts, and owner approval
-> decide whether the artifact advances. The scaffold is implemented and tested
-> source, not a deployed production agent system.
+### 1:05–1:35 — The factory-of-factories hierarchy
 
-### 1:15–1:40 — Run the contract
+Show the README hierarchy and `architecture/factory-model.json`.
+
+> Zaibatsu is the control layer above project-scoped economic factories. Each
+> factory keeps its own identity, credentials, schedules, data, and production
+> authority. Git and SOPS/age version intended state and encrypted static
+> material. Ansible owns host reproduction. Cron or systemd owns each workload,
+> but never both. Nix is the planned worker-environment boundary and is not
+> presented as deployed.
+
+### 1:35–2:05 — Run every deterministic gate
 
 ```bash
 make validate
 ```
 
-> The adversarial suite rejects a missing or reclassified factory, promotion
-> before evidence, false Nix maturity, plaintext Git secrets, model effect
-> authority, factory self-promotion, component/model drift, unsafe task order,
-> public leaks, and premature submission claims.
+> The offline suite validates the architecture, portable factory definition,
+> project-owned schemas, four sanitized evidence receipts, typed submission
+> proof, local links, and the entire public scan boundary. Adversarial tests
+> cover false maturity, self-promotion, model effect authority, malformed
+> evidence, force-added ignored files, misleading media suffixes, and premature
+> readiness.
 
-### 1:40–2:00 — Honest current state
+Pause on the final 95-test pass and validator summary.
+
+### 2:05–2:30 — Honest current boundary
 
 Open `docs/implementation-status.md`.
 
 > The closed registry, current schedulers, bounded evidence return, and one
 > deterministic read-only coordination lane are operational. Ansible,
-> SOPS/age, the broader Dispatcher, deterministic gates, and modular skeleton
-> source have bounded validation. Nix, general agent deployment, sandboxes, and
-> automatic shared promotion remain planned or designed.
-
-## Factory/Droid insert — about 25 seconds
-
-Show the retained public prompt, session reference, focused diff, adversarial
-test, and validation output.
-
-> Factory Droid, backed by my local Qwen endpoint, strengthened one of
-> Zaibatsu's deterministic gates. It required persistence, bounded execution,
-> verification, policy decision, and controlled side effect in that order. The
-> old validator accepted policy before verification; the new test rejects it.
-> I independently reproduced all 36 contribution-era checks, and the v1.1.0
-> package now passes 70 tests.
-
-Return to the hierarchy:
-
-> Factory Droid is one harness inside the larger system. Zaibatsu is the layer
-> that makes whole software factories reproducible, modular, verifiable, and
-> capable of reviewed recursive improvement.
+> SOPS/age, broader Dispatcher contracts, deterministic gates, and modular
+> skeleton source have bounded validation. Nix, general agent deployment,
+> sandboxes, and automatic shared promotion remain planned or designed.
+> Zaibatsu makes those boundaries machine-checkable instead of hiding them in
+> a diagram.
 
 ## Before recording
 
-1. Use a fresh clone of the immutable `v1.1.0` tag.
+1. Clone the immutable `v1.1.1` tag into a new temporary directory.
 2. Increase terminal font size and hide unrelated tabs and notifications.
 3. Run `make validate` once off camera.
-4. Prepare only the redacted Droid receipt and public diff.
-5. Record at 1080p or better with readable output.
+4. Prepare only the public prompt, sanitized receipt, focused diff, and status
+   ledger.
+5. Record at 1080p or better with readable output and captions.
 
 ## Capture checklist
 
-- [ ] Repository URL visible once.
-- [ ] “The factory of software factories” hierarchy visible.
-- [ ] `architecture/factory-model.json` lifecycle and maturity visible.
-- [ ] Factory/Droid visibly doing or reporting real work.
-- [ ] Shipped diff and adversarial test visible.
-- [ ] Independent reproduction command legible.
+- [ ] Repository URL and `v1.1.1` tag visible once.
+- [ ] Real Factory/Droid session receipt and shipped diff visible first.
+- [ ] Pre-change gap and adversarial post-change result are understandable.
+- [ ] Portable factory scaffold and validation succeed on screen.
+- [ ] “The factory of software factories” hierarchy is visible.
+- [ ] `make validate` shows all 95 tests and contract checks passing.
+- [ ] Maturity limits are stated explicitly.
 - [ ] No private history, addresses, credentials, local settings, or host details.
-- [ ] Captions included.
+- [ ] Captions are included.
 - [ ] Final clip has a public, stable link.

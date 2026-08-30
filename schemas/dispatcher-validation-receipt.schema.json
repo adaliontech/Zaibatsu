@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.1.1/schemas/dispatcher-validation-receipt.schema.json",
+  "title": "Sanitized Dispatcher validation receipt",
+  "type": "object",
+  "required": ["contract_schema", "schema_version", "observed_at", "status", "visibility", "source", "focused_suite", "postgresql_acceptance"],
+  "properties": {
+    "contract_schema": {"const": "../schemas/dispatcher-validation-receipt.schema.json"},
+    "schema_version": {"const": "zaibatsu.dispatcher-validation-receipt.v1"},
+    "observed_at": {"type": "string", "minLength": 1},
+    "status": {"const": "passed"},
+    "visibility": {"const": "sanitized_from_private_source"},
+    "source": {"type": "object", "required": ["base_revision", "scope", "source_file_count", "source_tree_sha256", "state", "limitation"]},
+    "focused_suite": {"type": "object", "required": ["command", "python_version", "status", "tests_passed", "tests_failed"]},
+    "postgresql_acceptance": {"type": "object", "required": ["command", "network", "production_data", "postgresql_version", "status", "assertions_passed", "assertions_failed", "migration_sha256", "restore"]}
+  }
+}

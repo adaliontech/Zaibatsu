@@ -1,6 +1,6 @@
 # Implementation status
 
-Status date: **2026-08-29**
+Status date: **2026-08-30**
 
 This ledger distinguishes the Zaibatsu meta-factory vision from deployed
 runtime. Maturity is enforced by
@@ -29,6 +29,15 @@ The sanitized meta-factory evidence is
 [`evidence/meta-factory-foundations-v1.json`](../evidence/meta-factory-foundations-v1.json).
 It binds current private-source observations while explicitly recording what is
 not publicly reproducible or deployed.
+
+## Public toolkit
+
+| Capability | Status | Evidence strength | Exact claim |
+| --- | --- | --- | --- |
+| Portable factory definition | Operational in the public kit | Project-owned schema, example, CLI, and adversarial tests | A user can scaffold and validate a control or economic factory definition offline; this does not deploy that factory |
+| Evidence receipt validation | Operational in the public kit | Four typed receipt classes plus malformed, contradictory, count, digest, scope, and limitation tests | Receipt files must contain enforceable evidence fields; their sanitized private observations are not independently reproduced by the public validator |
+| Submission readiness validation | Operational in the public kit | Typed completion proof, exact dependency graph, and adversarial tests | Non-empty prose alone cannot complete a gate; final demo and applicant materials remain external |
+| Public-safety scan | Operational in the public kit | Git-aware enumeration and adversarial path/content tests | Tracked and non-ignored public files are text-scanned; opaque files, symlinks, and Git submodules fail closed |
 
 ## Control-plane components
 

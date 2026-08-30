@@ -4,11 +4,11 @@
 
 **The factory of software factories.**
 
-Zaibatsu is a reproducible meta-factory: the control layer that defines,
-versions, coordinates, observes, and improves multiple project-scoped software
-factories. Each factory produces software, data, research, content, or services
-for one business boundary. Zaibatsu produces and governs the factories
-themselves.
+Zaibatsu is an evidence-gated architecture and toolkit for making software
+factories reproducible: a control layer that defines, versions, coordinates,
+observes, and improves multiple project-scoped factories. Each economic factory
+produces software, data, research, content, or services for one business
+boundary. Zaibatsu defines and governs the factories themselves.
 
 The architecture combines conventional infrastructure and schedulers with
 modular agent skeletons and interchangeable LLM harnesses. AI workers may
@@ -121,7 +121,7 @@ component-level control-plane contract remains in
 
 ## What is real today
 
-As of 2026-08-29, the private program behind this public model has earned the
+As of 2026-08-30, the private program behind this public model has earned the
 following bounded claims:
 
 - Orchestrator, FFN, and SimbaPool are distinct factory identities with denied
@@ -172,11 +172,33 @@ cd Zaibatsu
 make validate
 ```
 
-`make validate` checks both machine-readable architecture contracts, the
-factory hierarchy and lifecycle, maturity boundaries, submission gates,
-public-safety rules, local links, and adversarial mutations. No model, network
-access, cloud account, secret, Nix installation, or production system is
-required.
+`make validate` checks the project-owned schemas, architecture contracts,
+portable factory example, evidence receipts, factory hierarchy and lifecycle,
+maturity boundaries, submission gates, public-safety rules, local links, and
+adversarial mutations. No model, network access, cloud account, secret, Nix
+installation, or production system is required.
+
+## Apply the contract to another factory
+
+Create a safe starting definition and validate it with the same fail-closed
+rules used by Zaibatsu:
+
+```bash
+python3 scripts/zaibatsu.py scaffold \
+  --id example-product \
+  --class economic_factory \
+  --purpose "Produce a bounded software product" \
+  --output examples/my-factory.json
+python3 scripts/zaibatsu.py validate examples/my-factory.json
+```
+
+The scaffold starts at `planned`, denies plaintext Git secrets, requires one
+cron or systemd scheduler of record, keeps model workers behind typed ports and
+deterministic gates, and forbids self-promotion. Edit maturity only when the
+corresponding content-addressed, independently verified evidence binding
+exists; stronger factory and Nix maturity fail without it. A committed
+[`examples/economic-factory.json`](examples/economic-factory.json) is ready to
+inspect without creating a file.
 
 ## Factory AI and local Qwen
 
@@ -205,6 +227,10 @@ and the complete repository suite was rerun independently.
   feedback.
 - [Component architecture](architecture/system.json) — planes, components,
   task flow, and fail-closed invariants.
+- [Portable factory definition](examples/economic-factory.json) — reusable
+  contract for a new control or economic factory.
+- [Project-owned schemas](schemas/) — JSON Schema contracts for architecture,
+  readiness, portable factories, and sanitized evidence.
 - [Architecture guide](docs/architecture.md) — how the two models compose.
 - [Implementation status](docs/implementation-status.md) — operational versus
   validated, designed, and planned capabilities.
@@ -241,9 +267,10 @@ and the complete repository suite was rerun independently.
 ## Factory Guild submission
 
 The intended submission is an open-source project plus technical article and
-short demo. The meta-factory `v1.1.0` candidate passed a credential-disabled
-public-clone proof and independent GitHub CI. The final demo and
-applicant-owned form materials remain external submission gates.
+short demo. Immutable `v1.1.0` passed a credential-disabled public-clone proof
+and independent GitHub CI; `v1.1.1` adds reusable contracts and harder evidence
+validation. The final demo and applicant-owned form materials remain external
+submission gates.
 
 Zaibatsu is an independent project and is not affiliated with or endorsed by
 Factory AI.

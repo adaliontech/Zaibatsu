@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.1.1/schemas/meta-factory-foundations-receipt.schema.json",
+  "title": "Sanitized meta-factory foundations receipt",
+  "type": "object",
+  "required": ["contract_schema", "schema_version", "observed_at", "status", "visibility", "factory_instances", "operations_foundation", "modular_agent_scaffold", "harness_and_verification", "scheduling", "recursive_improvement", "external_changes_performed", "credential_values_recorded"],
+  "properties": {
+    "contract_schema": {"const": "../schemas/meta-factory-foundations-receipt.schema.json"},
+    "schema_version": {"const": "zaibatsu.meta-factory-foundations.v1"},
+    "observed_at": {"type": "string", "minLength": 1},
+    "status": {"const": "passed_with_maturity_boundaries"},
+    "visibility": {"const": "sanitized_from_private_source"},
+    "factory_instances": {"type": "object", "required": ["closed_registry", "control_factory_count", "economic_factory_count"]},
+    "operations_foundation": {"type": "object", "required": ["base_revision", "source_state", "policy_check", "ansible_maturity", "sops_age_maturity", "git_maturity", "nix_maturity", "limitation"]},
+    "modular_agent_scaffold": {"type": "object", "required": ["base_revision", "source_state", "source_file_count", "source_tree_sha256", "tests_passed", "tests_failed", "activation", "production_authority", "limitation"]},
+    "harness_and_verification": {"type": "object", "required": ["model_independent_ports", "bounded_factory_qwen_contribution", "general_unattended_multi_harness_routing", "deterministic_gate_classes"]},
+    "scheduling": {"type": "object", "required": ["systemd", "cron", "invariant"]},
+    "recursive_improvement": {"type": "object", "required": ["factory_evidence_return", "shared_template_promotion", "autonomous_self_promotion"]},
+    "external_changes_performed": {"const": false},
+    "credential_values_recorded": {"const": false}
+  }
+}

@@ -1,5 +1,5 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "contract_schema": "../schemas/system.schema.json",
   "schema_version": "zaibatsu.architecture.v1",
   "project": {
     "name": "Zaibatsu",

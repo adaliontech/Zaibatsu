@@ -30,6 +30,9 @@ Only the latest release on the default branch is maintained.
 - Source-only agent skeletons and planned Nix environments cannot be presented
   as deployed.
 - Public documentation must pass the built-in safety scan.
+- Git-tracked and non-ignored paths are scanned; opaque binaries, invalid UTF-8,
+  symlinks, and Git submodules are rejected because their contents cannot be
+  inspected by the offline public-safety gate.
 - CI runs checksum-pinned Gitleaks against full Git history and the release
   tree; GitHub secret scanning and push protection are enabled separately.
 - Published release tags are protected by release immutability.

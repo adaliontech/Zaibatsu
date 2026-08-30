@@ -7,7 +7,8 @@ architecture, validator, tests, and public documentation.
 
 1. Read [`AGENTS.md`](AGENTS.md).
 2. Preserve the meta-factory, deterministic-control, and least-authority
-   invariants in both machine-readable contracts.
+invariants across the machine-readable architecture, portable factory,
+readiness, and evidence contracts.
 3. Keep control-factory and economic-factory identities, credentials,
    schedulers, data, and production authority project-scoped.
 4. Decide whether the change is operational, validated preproduction,

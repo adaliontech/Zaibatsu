@@ -1,0 +1,155 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.1.1/schemas/factory-definition.schema.json",
+  "title": "Zaibatsu portable software-factory definition",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_schema",
+    "schema_version",
+    "factory",
+    "versioning_policy",
+    "reproducibility_policy",
+    "scheduling_policy",
+    "agent_policy",
+    "feedback_policy",
+    "evidence_bindings"
+  ],
+  "properties": {
+    "contract_schema": {"const": "../schemas/factory-definition.schema.json"},
+    "schema_version": {"const": "zaibatsu.factory-definition.v1"},
+    "factory": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "class", "maturity", "purpose"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+        "class": {"enum": ["control_factory", "economic_factory"]},
+        "maturity": {"$ref": "#/$defs/maturity"},
+        "purpose": {"type": "string", "minLength": 1}
+      }
+    },
+    "versioning_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_and_intended_state", "encrypted_static_secrets", "runtime_secrets", "plaintext_secrets_in_git"],
+      "properties": {
+        "source_and_intended_state": {"const": "git"},
+        "encrypted_static_secrets": {"const": "sops_age"},
+        "runtime_secrets": {"const": "bounded_secret_manager"},
+        "plaintext_secrets_in_git": {"const": false}
+      }
+    },
+    "reproducibility_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["host_configuration", "worker_environments", "nix_maturity", "nix_cross_node_proof"],
+      "properties": {
+        "host_configuration": {"const": "ansible"},
+        "worker_environments": {"const": "nix"},
+        "nix_maturity": {"$ref": "#/$defs/maturity"},
+        "nix_cross_node_proof": {"type": "boolean"}
+      }
+    },
+    "scheduling_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["scheduler_of_record", "one_scheduler_of_record_per_workload"],
+      "properties": {
+        "scheduler_of_record": {"enum": ["systemd", "cron"]},
+        "one_scheduler_of_record_per_workload": {"const": true}
+      }
+    },
+    "agent_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["skeleton_status", "harness_binding", "deterministic_gates", "model_may_authorize_external_effect"],
+      "properties": {
+        "skeleton_status": {"enum": ["planned", "source_only", "validated_preproduction", "operational"]},
+        "harness_binding": {"const": "model_independent_typed_ports"},
+        "deterministic_gates": {
+          "const": ["schemas", "linters", "tests", "hashes", "policy", "receipts", "owner_approval"]
+        },
+        "model_may_authorize_external_effect": {"const": false}
+      }
+    },
+    "feedback_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["return_evidence", "promotion_authority", "factory_may_self_promote"],
+      "properties": {
+        "return_evidence": {"const": true},
+        "promotion_authority": {"const": "reviewed_deterministic_policy_and_owner_gate"},
+        "factory_may_self_promote": {"const": false}
+      }
+    },
+    "evidence_bindings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["capability", "maturity", "receipt", "sha256", "independently_verified", "scope"],
+        "properties": {
+          "capability": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+          "maturity": {"enum": ["operational", "validated_preproduction"]},
+          "receipt": {"type": "string", "minLength": 1},
+          "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+          "independently_verified": {"const": true},
+          "scope": {"type": "string", "minLength": 1}
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "factory": {
+            "properties": {
+              "maturity": {"enum": ["operational", "validated_preproduction"]}
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "evidence_bindings": {
+            "contains": {
+              "properties": {"capability": {"const": "factory-definition"}},
+              "required": ["capability"]
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "reproducibility_policy": {
+            "properties": {
+              "nix_maturity": {"enum": ["operational", "validated_preproduction"]}
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "reproducibility_policy": {
+            "properties": {"nix_cross_node_proof": {"const": true}}
+          },
+          "evidence_bindings": {
+            "contains": {
+              "properties": {"capability": {"const": "nix-environment-reproduction"}},
+              "required": ["capability"]
+            }
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "maturity": {
+      "enum": ["operational", "validated_preproduction", "designed", "planned", "pending_evidence"]
+    }
+  }
+}

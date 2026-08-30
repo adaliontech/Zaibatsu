@@ -1,5 +1,5 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "contract_schema": "../schemas/factory-model.schema.json",
   "schema_version": "zaibatsu.factory-model.v1",
   "project": {
     "name": "Zaibatsu",

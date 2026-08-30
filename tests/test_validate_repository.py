@@ -3,6 +3,9 @@ from __future__ import annotations
 import copy
 import importlib.util
 import json
+import shutil
+import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -335,7 +338,103 @@ class ArchitectureValidationTests(unittest.TestCase):
             root = Path(temporary_directory)
             (root / "opaque.bin").write_bytes(b"safe-prefix\x00opaque")
             errors = validator.validate_public_safety(root)
-        self.assertTrue(any("unapproved binary" in error for error in errors))
+        self.assertTrue(any("opaque binary" in error for error in errors))
+
+    def test_media_extension_does_not_bypass_binary_scan(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            (root / "claim.png").write_bytes(b"safe-prefix\x00private-content")
+            errors = validator.validate_public_safety(root)
+        self.assertTrue(any("opaque binary" in error for error in errors))
+
+    def test_invalid_utf8_media_file_fails_closed(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            (root / "claim.jpg").write_bytes(b"\xff\xfeprivate-content")
+            errors = validator.validate_public_safety(root)
+        self.assertTrue(any("cannot scan public text" in error for error in errors))
+
+    def test_runtime_and_pycache_names_do_not_bypass_scan(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            (root / "runtime").mkdir()
+            (root / "__pycache__").mkdir()
+            (root / "runtime" / "leak.txt").write_text(
+                "Private host: 8.8." + "8.8\n", encoding="utf-8"
+            )
+            (root / "__pycache__" / "leak.txt").write_text(
+                "Private path: /" + "home/example/private\n", encoding="utf-8"
+            )
+            errors = validator.validate_public_safety(root)
+        self.assertTrue(any("runtime/leak.txt" in error for error in errors))
+        self.assertTrue(any("__pycache__/leak.txt" in error for error in errors))
+
+    def test_force_added_ignored_settings_are_scanned(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            (root / ".factory").mkdir()
+            (root / ".gitignore").write_text(
+                ".factory/settings.local.json\n", encoding="utf-8"
+            )
+            settings = root / ".factory" / "settings.local.json"
+            settings.write_text(
+                '{\n  "api' + 'Key": "plaintext-example"\n}\n', encoding="utf-8"
+            )
+            subprocess.run(["git", "init", "-q", str(root)], check=True)
+            subprocess.run(
+                ["git", "-C", str(root), "add", "-f", ".factory/settings.local.json"],
+                check=True,
+            )
+            errors = validator.validate_public_safety(root)
+        self.assertTrue(any("literal JSON API key" in error for error in errors))
+
+    def test_git_submodule_fails_closed(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            subprocess.run(["git", "init", "-q", str(root)], check=True)
+            nested = root / "module"
+            subprocess.run(["git", "init", "-q", str(nested)], check=True)
+            (nested / "README.md").write_text("nested\n", encoding="utf-8")
+            subprocess.run(["git", "-C", str(nested), "add", "README.md"], check=True)
+            subprocess.run(
+                [
+                    "git",
+                    "-C",
+                    str(nested),
+                    "-c",
+                    "user.name=Test",
+                    "-c",
+                    "user.email=test@example.invalid",
+                    "commit",
+                    "-qm",
+                    "nested",
+                ],
+                check=True,
+            )
+            subprocess.run(
+                ["git", "-C", str(root), "add", "module"],
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+            )
+            shutil.rmtree(nested)
+            errors = validator.validate_public_paths(root)
+        self.assertTrue(any("submodules" in error for error in errors))
+
+    def test_staged_content_is_scanned_even_when_worktree_is_safe(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            subprocess.run(["git", "init", "-q", str(root)], check=True)
+            path = root / "settings.json"
+            path.write_text(
+                '{\n  "api' + 'Key": "plaintext-example"\n}\n', encoding="utf-8"
+            )
+            subprocess.run(["git", "-C", str(root), "add", "settings.json"], check=True)
+            path.write_text('{"safe": true}\n', encoding="utf-8")
+            errors = validator.validate_public_safety(root)
+        self.assertTrue(
+            any("settings.json (Git index)" in error for error in errors)
+        )
 
 
 class FactoryModelValidationTests(unittest.TestCase):
@@ -447,6 +546,156 @@ class FactoryModelValidationTests(unittest.TestCase):
         self.assertTrue(any("factory capability at index 0" in error for error in errors))
 
 
+class PortableFactoryDefinitionTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.factory = validator.load_factory_definition()
+
+    def test_repository_example_passes(self) -> None:
+        self.assertEqual([], validator.validate_factory_definition(self.factory))
+
+    def test_unknown_factory_class_fails_closed(self) -> None:
+        mutated = copy.deepcopy(self.factory)
+        mutated["factory"]["class"] = "unbounded_factory"
+        errors = validator.validate_factory_definition(mutated)
+        self.assertTrue(any("factory class" in error for error in errors))
+
+    def test_model_cannot_authorize_effect(self) -> None:
+        mutated = copy.deepcopy(self.factory)
+        mutated["agent_policy"]["model_may_authorize_external_effect"] = True
+        errors = validator.validate_factory_definition(mutated)
+        self.assertTrue(any("may not authorize" in error for error in errors))
+
+    def test_feedback_cannot_self_promote(self) -> None:
+        mutated = copy.deepcopy(self.factory)
+        mutated["feedback_policy"]["factory_may_self_promote"] = True
+        errors = validator.validate_factory_definition(mutated)
+        self.assertTrue(any("without self-promotion" in error for error in errors))
+
+    def test_nix_claim_requires_cross_node_proof(self) -> None:
+        mutated = copy.deepcopy(self.factory)
+        mutated["reproducibility_policy"]["nix_maturity"] = "operational"
+        errors = validator.validate_factory_definition(mutated)
+        self.assertTrue(any("cross-node" in error for error in errors))
+
+    def test_strong_factory_maturity_requires_bound_receipt(self) -> None:
+        mutated = copy.deepcopy(self.factory)
+        mutated["factory"]["maturity"] = "operational"
+        errors = validator.validate_factory_definition(mutated)
+        self.assertTrue(any("factory-definition receipt" in error for error in errors))
+
+    def test_cli_validates_repository_example(self) -> None:
+        result = subprocess.run(
+            [
+                sys.executable,
+                str(validator.ROOT / "scripts" / "zaibatsu.py"),
+                "validate",
+                str(validator.EXAMPLE_FACTORY_PATH),
+            ],
+            check=False,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
+        self.assertEqual(0, result.returncode, result.stderr)
+
+    def test_cli_scaffold_round_trip_refuses_overwrite(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            output = Path(temporary_directory) / "factory.json"
+            command = [
+                sys.executable,
+                str(validator.ROOT / "scripts" / "zaibatsu.py"),
+                "scaffold",
+                "--id",
+                "test-product",
+                "--class",
+                "economic_factory",
+                "--purpose",
+                "Produce a bounded test product",
+                "--output",
+                str(output),
+            ]
+            first = subprocess.run(
+                command,
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(0, first.returncode, first.stderr)
+            document = json.loads(output.read_text(encoding="utf-8"))
+            self.assertEqual([], validator.validate_factory_definition(document))
+            second = subprocess.run(
+                command,
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(2, second.returncode)
+            self.assertIn("refusing to overwrite", second.stderr)
+
+    def test_unhashable_factory_fields_fail_cleanly(self) -> None:
+        mutated = copy.deepcopy(self.factory)
+        mutated["factory"]["class"] = []
+        mutated["factory"]["maturity"] = []
+        mutated["reproducibility_policy"]["nix_maturity"] = []
+        mutated["scheduling_policy"]["scheduler_of_record"] = []
+        mutated["agent_policy"]["skeleton_status"] = []
+        errors = validator.validate_factory_definition(mutated)
+        self.assertGreaterEqual(len(errors), 5)
+
+
+class EvidenceReceiptTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.receipts = {
+            relative: json.loads((validator.ROOT / relative).read_text(encoding="utf-8"))
+            for relative in validator.EVIDENCE_CONTRACTS
+        }
+
+    def test_repository_receipts_pass(self) -> None:
+        self.assertEqual([], validator.validate_evidence_receipts())
+
+    def test_empty_receipt_fails_closed(self) -> None:
+        relative = "evidence/dispatcher-validation-v1.json"
+        errors = validator.validate_evidence_receipt(relative, {})
+        self.assertGreaterEqual(len(errors), 6)
+
+    def test_dispatcher_zero_test_claim_is_rejected(self) -> None:
+        relative = "evidence/dispatcher-validation-v1.json"
+        mutated = copy.deepcopy(self.receipts[relative])
+        mutated["focused_suite"]["tests_passed"] = 0
+        errors = validator.validate_evidence_receipt(relative, mutated)
+        self.assertTrue(any("focused suite counts" in error for error in errors))
+
+    def test_dispatcher_invalid_digest_is_rejected(self) -> None:
+        relative = "evidence/dispatcher-validation-v1.json"
+        mutated = copy.deepcopy(self.receipts[relative])
+        mutated["source"]["source_tree_sha256"] = "not-a-digest"
+        errors = validator.validate_evidence_receipt(relative, mutated)
+        self.assertTrue(any("source_tree_sha256" in error for error in errors))
+
+    def test_droid_self_report_cannot_become_verification(self) -> None:
+        relative = "evidence/droid-contribution-v1.json"
+        mutated = copy.deepcopy(self.receipts[relative])
+        mutated["acceptance"]["model_self_report_is_verification"] = True
+        errors = validator.validate_evidence_receipt(relative, mutated)
+        self.assertTrue(any("independent review" in error for error in errors))
+
+    def test_qwen_identity_limitations_cannot_be_removed(self) -> None:
+        relative = "evidence/qwen-model-observation-v1.json"
+        mutated = copy.deepcopy(self.receipts[relative])
+        mutated["limitations"] = []
+        errors = validator.validate_evidence_receipt(relative, mutated)
+        self.assertTrue(any("identity limitations" in error for error in errors))
+
+    def test_unhashable_qwen_redaction_fails_cleanly(self) -> None:
+        relative = "evidence/qwen-model-observation-v1.json"
+        mutated = copy.deepcopy(self.receipts[relative])
+        mutated["redactions"] = [{}]
+        errors = validator.validate_evidence_receipt(relative, mutated)
+        self.assertTrue(any("must stay redacted" in error for error in errors))
+
+
 class SubmissionReadinessTests(unittest.TestCase):
     def setUp(self) -> None:
         self.architecture = validator.load_architecture()
@@ -517,12 +766,50 @@ class SubmissionReadinessTests(unittest.TestCase):
         errors = validator.validate_submission_readiness(mutated)
         self.assertTrue(any("invalid gate status" in error for error in errors))
 
+    def test_missing_gate_status_fails_cleanly(self) -> None:
+        mutated = copy.deepcopy(self.readiness)
+        del mutated["gates"][0]["status"]
+        errors = validator.validate_submission_readiness(mutated)
+        self.assertTrue(any("invalid gate status" in error for error in errors))
+
+    def test_complete_gate_rejects_prose_only_evidence(self) -> None:
+        mutated = copy.deepcopy(self.readiness)
+        gate = next(item for item in mutated["gates"] if item["id"] == "public_package")
+        gate.pop("proof")
+        gate["evidence"] = "reviewed external evidence"
+        errors = validator.validate_submission_readiness(mutated)
+        self.assertTrue(any("structured proof" in error for error in errors))
+
+    def test_unhashable_receipt_reference_fails_cleanly(self) -> None:
+        mutated = copy.deepcopy(self.readiness)
+        gate = next(item for item in mutated["gates"] if item["id"] == "droid_cli_install")
+        gate["proof"]["receipt"] = []
+        errors = validator.validate_submission_readiness(mutated)
+        self.assertTrue(any("validated receipt" in error for error in errors))
+
     def test_all_gates_can_progress_to_ready(self) -> None:
         mutated = copy.deepcopy(self.readiness)
+        completion_proofs = {
+            "fresh_clone_reproduction": {
+                "candidate_commit": "a" * 40,
+                "tests_passed": validator.INTEGRATED_TEST_COUNT,
+                "gitleaks_version": "8.30.1",
+                "github_actions_run": "https://github.com/example/project/actions/runs/1",
+            },
+            "public_demo": {
+                "url": "https://example.com/demo",
+                "release_tag": "v1.1.1",
+            },
+            "applicant_materials": {
+                "submitted_by_applicant": True,
+                "resume_provided_privately": True,
+            },
+        }
         for gate in mutated["gates"]:
             gate["status"] = "complete"
             gate.pop("blocked_by", None)
-            gate["evidence"] = "reviewed external evidence"
+            if gate["id"] in completion_proofs:
+                gate["proof"] = completion_proofs[gate["id"]]
         mutated["submission_ready"] = True
         self.assertEqual([], validator.validate_submission_readiness(mutated))
 
