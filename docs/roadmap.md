@@ -31,9 +31,10 @@ changes.
   qualification evidence;
 - preserve the reproduced immutable `v1.8.0` deterministic rebuild DAG without
   presenting action intents as execution or its gates as runtime authority;
-- complete the `v1.9.0` signed runtime-evidence release proof without
-  presenting a fixture key, evaluator-selected registry, or historical
-  assessment time as independent operational truth;
+- preserve the passed `v1.9.0` signed runtime-evidence candidate proof and
+  complete its immutable tag proof without presenting a fixture key,
+  evaluator-selected registry, or historical assessment time as independent
+  operational truth;
 - record the Guild demo and complete applicant-owned submission materials.
 
 Exit: the public narrative, architecture, portable factory, module artifacts,

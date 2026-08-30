@@ -568,7 +568,11 @@ release proof. The v1.8.0 rebuild-DAG candidate passed its 183-test
 credential-disabled full-history clone, strict schema,
 secret-scan, exact-regeneration, non-authorizing semantic, and independent-CI
 boundary. Immutable `v1.8.0` and its full-history tag clone passed the complete
-release proof.
+release proof. The v1.9.0 signed runtime-evidence candidate passed its 194-test,
+87-file credential-disabled full-history clone, both Gitleaks modes, strict
+Draft 2020-12 schema validation, exact artifact regeneration, signature and
+non-authorizing semantic checks, and independent CI boundary. Its immutable
+tag proof remains pending.
 
 Zaibatsu is an independent project and is not affiliated with or endorsed by
 Factory AI.
