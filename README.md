@@ -380,9 +380,10 @@ harder evidence validation and passed its own anonymous-clone and CI proof.
 The `v1.1.2` candidate corrects the portable schema URI for definitions created
 outside this repository and passed its own anonymous-clone and CI proof.
 Immutable `v1.2.0` through `v1.4.0` then proved module composition, portable
-bundles, and semantic comparison at their scoped public boundaries. The current
-qualification-plan candidate requires the same proof before release; the final
-demo and applicant-owned form materials remain external submission gates.
+bundles, and semantic comparison at their scoped public boundaries. The
+qualification-plan candidate passed the same credential-disabled clone and
+independent-CI boundary; its immutable `v1.5.0` release proof remains before
+the final demo and applicant-owned form materials.
 
 Zaibatsu is an independent project and is not affiliated with or endorsed by
 Factory AI.

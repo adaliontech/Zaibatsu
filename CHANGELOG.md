@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.5.0 - Unreleased
+## 1.5.0 - 2026-08-30
 
 - Added a versioned runtime-qualification policy with mandatory base and
   slot-specific evidence requirements for every selected factory module.

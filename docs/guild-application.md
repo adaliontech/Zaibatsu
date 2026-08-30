@@ -17,8 +17,9 @@ v1.4.0 verified-inspection and semantic-comparison candidate passed 143 tests,
 Gitleaks, semantic assertions, output-schema validation, and independent CI
 from a credential-disabled public clone. The immutable v1.4.0 release and its
 tag clone passed the same boundary. The v1.5.0 qualification-policy and
-missing-evidence-plan candidate now requires its own 153-test public proof.
-The final demo and applicant materials remain explicit gates in
+missing-evidence-plan candidate passed its 153-test credential-disabled clone,
+Gitleaks, schema, determinism, and independent-CI proof. Its immutable release,
+the final demo, and applicant materials remain explicit gates in
 [`architecture/submission-readiness.json`](../architecture/submission-readiness.json).
 
 ## Current project description
@@ -168,7 +169,7 @@ the public repository:
       bundle reproduction, and independent CI from the public boundary.
 - [x] Bundle-inspection v1.4.0 candidate passes 143 tests, semantic
       systemd/cron comparison, Gitleaks, and independent public CI.
-- [ ] Qualification-planning v1.5.0 candidate passes 153 tests, policy
+- [x] Qualification-planning v1.5.0 candidate passes 153 tests, policy
       weakening and stale-plan adversarial checks, Gitleaks, schema validation,
       deterministic reproduction, and independent public CI.
 - [x] Public repository and article links resolve without authentication.
