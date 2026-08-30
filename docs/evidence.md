@@ -45,8 +45,8 @@ and redacted status ledger without receiving production access.
 | Independent contribution validation | Passed | The accepted two-file diff passed 36 tests, the standalone validator, and `git diff --check` |
 | Prior immutable release proof | Passed on v1.1.0 | Credential-disabled public clone of `b9a628a7d9a4910c0e5456c2930b260a96c7d864` passed all 70 tests, the prior contracts, workflow linting, strict Git checks, symlink denial, and both Gitleaks modes; [GitHub Actions run 33291506370](https://github.com/adaliontech/Zaibatsu/actions/runs/33291506370) independently passed before the immutable release |
 | v1.1.1 release proof | Passed | Candidate `9f0c1a7f3e866df1e1d5d954e464d53ec96af247` passed 95 tests, schema and receipt contracts, strict Git checks, index-mode denial, and Gitleaks; [candidate CI 33319619388](https://github.com/adaliontech/Zaibatsu/actions/runs/33319619388) and [release CI 33319676893](https://github.com/adaliontech/Zaibatsu/actions/runs/33319676893) passed, then an immutable-tag clone passed again. A post-release usability review found that externally scaffolded files needed a canonical rather than relative schema URI; v1.1.2 is the bounded correction. |
-| Fresh-clone reproduction | Pending for v1.1.2 | The portable-schema correction must pass all 95 tests, contract checks, strict Git checks, and Gitleaks history/tree scans from a credential-disabled public clone |
-| Demo recording | Blocked on v1.1.2 proof | Record from the immutable v1.1.2 tag using the [Demo script](demo-script.md) after the release proof passes |
+| Fresh-clone reproduction | Passed for v1.1.2 candidate | Credential-disabled public clone of `03d325241c81dec4c83629d36dd4aff3b5e2cf92` passed all 95 tests, schema and receipt contracts, strict Git checks, and Gitleaks 8.30.1 history/tree scans; [GitHub Actions run 33319815603](https://github.com/adaliontech/Zaibatsu/actions/runs/33319815603) independently passed |
+| Demo recording | Ready; applicant action pending | Record from the immutable v1.1.2 tag using the [Demo script](demo-script.md) |
 
 ## Architecture claims
 
@@ -111,6 +111,6 @@ does not represent private implementation as publicly reproducible.
 
 ## Evidence still required before external submission
 
-The application is not represented as submitted until the v1.1.2 release proof
-passes, a demo or screenshot is published, and the required applicant resume is attached. These are tracked in
+The application is not represented as submitted until a demo or screenshot is
+published and the required applicant resume is attached. These are tracked in
 [Guild application](guild-application.md).
