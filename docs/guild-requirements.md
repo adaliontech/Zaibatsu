@@ -63,7 +63,7 @@ path.
 | Real public project | This repository | Public and anonymously reachable |
 | Clear README | [`README.md`](../README.md) | Complete |
 | License | [`LICENSE`](../LICENSE) | Complete |
-| Runnable quickstart | [`docs/reproducibility.md`](reproducibility.md) | The v1.5.0 qualification-plan candidate passed its 153-test credential-disabled clone, Gitleaks, schema, determinism, and independent-CI proof; immutable release proof follows |
+| Runnable quickstart | [`docs/reproducibility.md`](reproducibility.md) | Immutable v1.5.0 passed its 153-test credential-disabled candidate and tag clones, Gitleaks, schema, determinism, and independent-CI proof |
 | Reusable value | [`examples/economic-factory.json`](../examples/economic-factory.json), [cron variant](../examples/economic-factory-cron.json), [`catalog/modules.json`](../catalog/modules.json), [qualification policy](../policies/runtime-qualification-v1.json), and [`scripts/zaibatsu.py`](../scripts/zaibatsu.py) | Another project can scaffold a fail-closed definition, reproduce and inspect a self-verifying control bundle, compare a policy-compatible module substitution, and generate a content-addressed missing-evidence plan offline |
 | Explain Factory/Droid role | [`docs/droid-session.md`](droid-session.md) | Authenticated session, scoped diff, and independent validation recorded |
 | End-to-end case study | [`docs/case-study.md`](case-study.md) | Factory-of-software-factories narrative and real Droid result complete |
@@ -83,5 +83,5 @@ public clean-clone proof. The exact release checklist is in
 The bounded local-Qwen Droid run supplies reviewable “build something with
 Factory” evidence. The v1.1.0 through v1.4.0 candidates passed their scoped
 clean-clone gates, and v1.4.0 is now an immutable public release. The v1.5.0
-qualification-planning candidate passed the same public proof; its immutable
-release precedes the final clip and applicant-owned form submission.
+qualification-planning candidate and immutable release passed the same public
+proof. The final clip and applicant-owned form submission remain.

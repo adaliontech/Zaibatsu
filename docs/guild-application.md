@@ -18,8 +18,9 @@ Gitleaks, semantic assertions, output-schema validation, and independent CI
 from a credential-disabled public clone. The immutable v1.4.0 release and its
 tag clone passed the same boundary. The v1.5.0 qualification-policy and
 missing-evidence-plan candidate passed its 153-test credential-disabled clone,
-Gitleaks, schema, determinism, and independent-CI proof. Its immutable release,
-the final demo, and applicant materials remain explicit gates in
+Gitleaks, schema, determinism, and independent-CI proof. Immutable v1.5.0 and
+its tag clone passed the same release boundary. The final demo and applicant
+materials remain explicit gates in
 [`architecture/submission-readiness.json`](../architecture/submission-readiness.json).
 
 ## Current project description
@@ -172,6 +173,8 @@ the public repository:
 - [x] Qualification-planning v1.5.0 candidate passes 153 tests, policy
       weakening and stale-plan adversarial checks, Gitleaks, schema validation,
       deterministic reproduction, and independent public CI.
+- [x] Immutable v1.5.0 passes tag CI, tagged-schema byte checks, and the full
+      credential-disabled tag-clone reproduction.
 - [x] Public repository and article links resolve without authentication.
 - [ ] Demo clip or screenshots show a real Factory task and validation result.
 - [x] No private host, credential, recovery, or deployment detail is exposed.

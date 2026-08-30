@@ -102,7 +102,7 @@
       "id": "public_demo",
       "status": "pending_external",
       "required_for_submission": true,
-      "evidence": "The v1.5.0 candidate passed public reproduction; record and publish the final clip only from the immutable released tag"
+      "evidence": "Immutable v1.5.0 passed tag CI, tagged-schema checks, and credential-disabled tag-clone reproduction; record and publish the final clip from that released tag"
     },
     {
       "id": "applicant_materials",
