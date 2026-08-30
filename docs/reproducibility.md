@@ -134,7 +134,7 @@ release reproduction, clone the named tag rather than the moving default
 branch:
 
 ```bash
-git clone --depth 1 --branch v1.1.1 https://github.com/adaliontech/Zaibatsu.git
+git clone --depth 1 --branch v1.1.2 https://github.com/adaliontech/Zaibatsu.git
 cd Zaibatsu
 make validate
 ```

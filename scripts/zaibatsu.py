@@ -11,6 +11,7 @@ from typing import Any
 
 from validate_repository import (
     FACTORY_DEFINITION_SCHEMA_VERSION,
+    PORTABLE_FACTORY_SCHEMA_REFERENCE,
     REQUIRED_DETERMINISTIC_GATES,
     validate_factory_definition,
 )
@@ -23,7 +24,7 @@ def factory_template(
     scheduler: str,
 ) -> dict[str, Any]:
     return {
-        "contract_schema": "../schemas/factory-definition.schema.json",
+        "contract_schema": PORTABLE_FACTORY_SCHEMA_REFERENCE,
         "schema_version": FACTORY_DEFINITION_SCHEMA_VERSION,
         "factory": {
             "id": factory_id,

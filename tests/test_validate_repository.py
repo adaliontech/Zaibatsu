@@ -624,6 +624,10 @@ class PortableFactoryDefinitionTests(unittest.TestCase):
             self.assertEqual(0, first.returncode, first.stderr)
             document = json.loads(output.read_text(encoding="utf-8"))
             self.assertEqual([], validator.validate_factory_definition(document))
+            self.assertEqual(
+                validator.PORTABLE_FACTORY_SCHEMA_REFERENCE,
+                document["contract_schema"],
+            )
             second = subprocess.run(
                 command,
                 check=False,
@@ -798,7 +802,7 @@ class SubmissionReadinessTests(unittest.TestCase):
             },
             "public_demo": {
                 "url": "https://example.com/demo",
-                "release_tag": "v1.1.1",
+                "release_tag": "v1.1.2",
             },
             "applicant_materials": {
                 "submitted_by_applicant": True,

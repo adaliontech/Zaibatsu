@@ -1,6 +1,6 @@
 # Demo script
 
-Use only a fresh clone of immutable `v1.1.1`. Do not show private terminals,
+Use only a fresh clone of immutable `v1.1.2`. Do not show private terminals,
 history, settings, infrastructure, model credentials, notifications, or
 personal data. Lead with the real Factory result; explain the larger
 architecture only after the reviewer sees working evidence.
@@ -82,7 +82,7 @@ Open `docs/implementation-status.md`.
 
 ## Before recording
 
-1. Clone the immutable `v1.1.1` tag into a new temporary directory.
+1. Clone the immutable `v1.1.2` tag into a new temporary directory.
 2. Increase terminal font size and hide unrelated tabs and notifications.
 3. Run `make validate` once off camera.
 4. Prepare only the public prompt, sanitized receipt, focused diff, and status
@@ -91,7 +91,7 @@ Open `docs/implementation-status.md`.
 
 ## Capture checklist
 
-- [ ] Repository URL and `v1.1.1` tag visible once.
+- [ ] Repository URL and `v1.1.2` tag visible once.
 - [ ] Real Factory/Droid session receipt and shipped diff visible first.
 - [ ] Pre-change gap and adversarial post-change result are understandable.
 - [ ] Portable factory scaffold and validation succeed on screen.

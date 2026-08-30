@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.1.2 - 2026-08-30
+
+- Changed portable factory definitions from a repository-relative schema path
+  to the immutable v1.1.2 schema URI. Definitions scaffolded into another
+  directory now resolve correctly in standard JSON Schema tooling, while the
+  offline Zaibatsu validator maps the canonical URI to its bundled copy.
+
 ## 1.1.1 - 2026-08-30
 
 - Added a portable factory-definition contract, project-owned JSON Schemas,

@@ -1,5 +1,5 @@
 {
-  "contract_schema": "../schemas/factory-definition.schema.json",
+  "contract_schema": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.1.2/schemas/factory-definition.schema.json",
   "schema_version": "zaibatsu.factory-definition.v1",
   "factory": {
     "id": "example-product",

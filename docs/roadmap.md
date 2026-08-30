@@ -11,8 +11,8 @@ changes.
 - represent Git/SOPS, Ansible/Nix, cron/systemd, modular skeletons, harnesses,
   deterministic gates, and recursive improvement at truthful maturity;
 - publish sanitized evidence and adversarial tests;
-- preserve the immutable `v1.1.0` proof and reproduce hardened `v1.1.1` from a
-  credential-free clone;
+- preserve the immutable `v1.1.0` and `v1.1.1` proofs and reproduce corrected
+  `v1.1.2` from a credential-free clone;
 - record the Guild demo and complete applicant-owned submission materials.
 
 Exit: the public narrative, architecture, portable factory, readiness, and

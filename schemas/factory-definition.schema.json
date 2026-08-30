@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.1.1/schemas/factory-definition.schema.json",
+  "$id": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.1.2/schemas/factory-definition.schema.json",
   "title": "Zaibatsu portable software-factory definition",
   "type": "object",
   "additionalProperties": false,
@@ -16,7 +16,7 @@
     "evidence_bindings"
   ],
   "properties": {
-    "contract_schema": {"const": "../schemas/factory-definition.schema.json"},
+    "contract_schema": {"const": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.1.2/schemas/factory-definition.schema.json"},
     "schema_version": {"const": "zaibatsu.factory-definition.v1"},
     "factory": {
       "type": "object",

@@ -268,9 +268,11 @@ and the complete repository suite was rerun independently.
 
 The intended submission is an open-source project plus technical article and
 short demo. Immutable `v1.1.0` passed a credential-disabled public-clone proof
-and independent GitHub CI. The `v1.1.1` candidate adds reusable contracts and
-harder evidence validation and passed its own anonymous-clone and CI proof. The
-final demo and applicant-owned form materials remain external submission gates.
+and independent GitHub CI. Immutable `v1.1.1` added reusable contracts and
+harder evidence validation and passed its own anonymous-clone and CI proof.
+`v1.1.2` corrects the portable schema URI for definitions created outside this
+repository. The final demo and applicant-owned form materials remain external
+submission gates.
 
 Zaibatsu is an independent project and is not affiliated with or endorsed by
 Factory AI.

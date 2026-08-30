@@ -8,9 +8,10 @@
 
 The application is prepared but must not be submitted yet. The official Guild
 path requires real Factory work and a public link. Immutable v1.1.0 passed its
-credential-disabled public-clone proof and independent GitHub CI. The v1.1.1
-hardening candidate independently passed the same public boundary; the final
-demo and applicant materials remain explicit gates in
+credential-disabled public-clone proof and independent GitHub CI. Immutable
+v1.1.1 independently passed the same public boundary. The bounded v1.1.2
+portable-schema correction requires its own proof; the final demo and applicant
+materials remain explicit gates in
 [`architecture/submission-readiness.json`](../architecture/submission-readiness.json).
 
 ## Current project description
@@ -145,6 +146,8 @@ the public repository:
 - [x] Immutable v1.1.0 passes `make validate` from a credential-free clone.
 - [x] Hardened v1.1.1 candidate passes `make validate` and Gitleaks from a
       credential-free public clone.
+- [ ] Portable-schema v1.1.2 candidate passes from a credential-free public
+      clone.
 - [x] Public repository and article links resolve without authentication.
 - [ ] Demo clip or screenshots show a real Factory task and validation result.
 - [x] No private host, credential, recovery, or deployment detail is exposed.

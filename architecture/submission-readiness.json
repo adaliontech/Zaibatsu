@@ -82,21 +82,18 @@
     },
     {
       "id": "fresh_clone_reproduction",
-      "status": "complete",
+      "status": "pending_external",
       "required_for_submission": true,
-      "evidence": "Credential-disabled public clone of candidate 9f0c1a7f3e866df1e1d5d954e464d53ec96af247 passed all 95 tests, schema and receipt contracts, strict Git checks, index-mode denial, and Gitleaks 8.30.1 history/tree scans; GitHub Actions run 33319619388 independently passed",
-      "proof": {
-        "candidate_commit": "9f0c1a7f3e866df1e1d5d954e464d53ec96af247",
-        "tests_passed": 95,
-        "gitleaks_version": "8.30.1",
-        "github_actions_run": "https://github.com/adaliontech/Zaibatsu/actions/runs/33319619388"
-      }
+      "evidence": "The v1.1.2 portable-schema correction must pass its own credential-disabled public clone and CI proof before release"
     },
     {
       "id": "public_demo",
-      "status": "pending_external",
+      "status": "blocked_by_dependency",
       "required_for_submission": true,
-      "evidence": "The v1.1.1 release package and revised demo narration are ready; the applicant must record and publish the final clip from the immutable tag"
+      "evidence": "Record and publish the final clip only after the v1.1.2 fresh-clone gate passes",
+      "blocked_by": [
+        "fresh_clone_reproduction"
+      ]
     },
     {
       "id": "applicant_materials",

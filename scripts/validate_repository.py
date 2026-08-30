@@ -81,6 +81,10 @@ INTEGRATED_TEST_COUNT = 95
 DROID_FACTORY_CLI_VERSION = "0.206.0"
 DROID_SESSION_REFERENCE = "46f941a9-82f8-4df3-a45c-b8158996360b"
 PUBLIC_REPOSITORY_URL = "https://github.com/adaliontech/Zaibatsu"
+PORTABLE_FACTORY_SCHEMA_REFERENCE = (
+    "https://raw.githubusercontent.com/adaliontech/Zaibatsu/"
+    "v1.1.2/schemas/factory-definition.schema.json"
+)
 
 DISPATCHER_MIGRATIONS = {
     "0001_dispatcher_state.sql",
@@ -110,7 +114,7 @@ CONTRACT_SCHEMA_REFERENCES = {
     "architecture/factory-model.json": "../schemas/factory-model.schema.json",
     "architecture/system.json": "../schemas/system.schema.json",
     "architecture/submission-readiness.json": "../schemas/submission-readiness.schema.json",
-    "examples/economic-factory.json": "../schemas/factory-definition.schema.json",
+    "examples/economic-factory.json": PORTABLE_FACTORY_SCHEMA_REFERENCE,
     "evidence/dispatcher-validation-v1.json": "../schemas/dispatcher-validation-receipt.schema.json",
     "evidence/droid-contribution-v1.json": "../schemas/droid-contribution-receipt.schema.json",
     "evidence/meta-factory-foundations-v1.json": "../schemas/meta-factory-foundations-receipt.schema.json",
@@ -354,7 +358,7 @@ def validate_factory_definition(data: Any) -> list[str]:
     if not isinstance(data, dict):
         return ["factory definition root must be an object"]
 
-    if data.get("contract_schema") != "../schemas/factory-definition.schema.json":
+    if data.get("contract_schema") != PORTABLE_FACTORY_SCHEMA_REFERENCE:
         errors.append("factory definition must reference its project-owned schema")
     if data.get("schema_version") != FACTORY_DEFINITION_SCHEMA_VERSION:
         errors.append(
@@ -1538,7 +1542,10 @@ def validate_contract_schema_files(root: Path = ROOT) -> list[str]:
         if not isinstance(instance, dict) or instance.get("contract_schema") != expected_reference:
             errors.append(f"{relative}: contract_schema must equal {expected_reference}")
             continue
-        schema_path = (instance_path.parent / expected_reference).resolve()
+        if relative == "examples/economic-factory.json":
+            schema_path = (root / "schemas" / "factory-definition.schema.json").resolve()
+        else:
+            schema_path = (instance_path.parent / expected_reference).resolve()
         try:
             schema_path.relative_to(root_resolved)
         except ValueError:
@@ -1554,12 +1561,17 @@ def validate_contract_schema_files(root: Path = ROOT) -> list[str]:
             continue
         if schema.get("$schema") != "https://json-schema.org/draft/2020-12/schema":
             errors.append(f"{relative}: project-owned schema must declare JSON Schema 2020-12")
+        schema_release = (
+            "v1.1.2"
+            if schema_path.name == "factory-definition.schema.json"
+            else "v1.1.1"
+        )
         expected_id = (
             "https://raw.githubusercontent.com/adaliontech/Zaibatsu/"
-            f"v1.1.1/schemas/{schema_path.name}"
+            f"{schema_release}/schemas/{schema_path.name}"
         )
         if schema.get("$id") != expected_id:
-            errors.append(f"{relative}: project-owned schema must use its immutable v1.1.1 id")
+            errors.append(f"{relative}: project-owned schema must use its immutable release id")
         if schema.get("type") != "object" or not isinstance(schema.get("required"), list):
             errors.append(f"{relative}: project-owned schema must define an object contract")
         properties = schema.get("properties")
