@@ -13,10 +13,11 @@ The public package was reconciled against these private, reviewed sources on
 
 | Source | Revision or state | Supports |
 | --- | --- | --- |
-| Operations control repository | `489a1ed7225424dec291bc2ab61ae7fb7e91895f` | Tailscale, Ansible, OpenTofu, secret scope, shadow execution, migration gates |
+| Operations control repository | prior pinned source plus reviewed working tree, 2026-08-29 | Tailscale, Git/SOPS, Ansible, OpenTofu, secret scope, shadow execution, migration gates; sanitized current result in [`evidence/meta-factory-foundations-v1.json`](../evidence/meta-factory-foundations-v1.json) |
 | Orchestrator repository | `a3e1a96403dfbaa279b1c72fb26a68668df6aca5` | Current systemd authority, newsroom regressions, target Dispatcher architecture |
 | Dispatcher owner handoff | matched local/remote private copy | Host boundary, deterministic state-machine contract, production-readiness gates |
 | Current Dispatcher source and runtime receipts | reviewed working tree and effective state, 2026-08-29 | PostgreSQL contract, bounded coordinator lane, workers, backup/restore, and current authority boundary; sanitized result in [`evidence/dispatcher-validation-v1.json`](../evidence/dispatcher-validation-v1.json) |
+| Modular agent scaffold | reviewed source-only working tree, 2026-08-29 | Typed modules, flows, implementation profiles, deterministic gates, human approval, effect fencing, activation blockers, and 309-test pass; sanitized result in [`evidence/meta-factory-foundations-v1.json`](../evidence/meta-factory-foundations-v1.json) |
 | Machine-readable readiness ledger | reviewed 2026-08-29 | Passed, pending, and deliberately blocked capability gates |
 
 The private source contains operational detail that is intentionally not
@@ -27,28 +28,34 @@ and redacted status ledger without receiving production access.
 
 | Evidence | Status | Receipt |
 | --- | --- | --- |
-| Architecture validator | Passed after Droid contribution and skeptical release review | 29 required files, 13 components, 8 invariants, and 10 submission gates checked |
-| Adversarial unit tests | Passed after release hardening | 59 of 59 tests passed |
+| Architecture validator | Passed after meta-factory correction | 31 required files, 13 components, 3 software factories, 11 meta-factory capabilities, 9 meta-factory invariants, 8 component invariants, and 10 submission gates checked |
+| Adversarial unit tests | Passed after meta-factory correction | 70 of 70 tests passed |
 | Broken-link and public-safety scan | Passed after release hardening | Every repository file is inspected or rejected; exact placeholder matching, all symlinks, Linux/macOS/Windows home paths, tailnet DNS, IPv4/IPv6, credential patterns, approved binary formats, and local links are checked |
 | Malformed-input robustness | Passed 2026-08-28 | 5,000 seeded JSON-like cases produced 20,000 validation calls across architecture, readiness, consistency, and preflight with zero unhandled exceptions |
-| Independent secret scan | Passed manually; continuous CI gate added for v1.0.1 | Checksum-pinned Gitleaks `8.30.1` scans full public Git history and the release tree; GitHub secret scanning and push protection provide a separate repository guard |
+| Independent secret scan | v1.0.1 passed; v1.1.0 refresh pending | Checksum-pinned Gitleaks `8.30.1` scans full public Git history and the release tree; GitHub secret scanning and push protection provide a separate repository guard |
 | Official external links | Resolved 2026-08-28 | 5 of 5 Factory documentation and Guild links resolved successfully |
 | Droid CLI availability | Observed | Local version `0.206.0` returned a version receipt |
 | First headless Droid attempt | Stopped before model work | Factory authentication failed, zero model turns, and no repository changes |
 | Factory CLI authentication | Passed | Secure CLI login completed authenticated Droid Exec sessions; credential value was not recorded |
 | Droid/Qwen static preflight | Passed 2026-08-28 | Custom-model shape, private endpoint class, separate credential prerequisites, and Droid version passed without a model request or secret output |
-| Local Qwen endpoint and key | Passed with explicit identity limitation | Health, model alias, streaming, and native tool calls passed through an authenticated gateway; the server-reported loaded filename identifies a Qwen 3.8 27B GGUF and the server reports `Q4_K - Small`; [`evidence/qwen-model-observation-v1.json`](../evidence/qwen-model-observation-v1.json) records what this does and does not prove |
+| Local-model endpoint and key | Passed with explicit identity limitation | Health, model alias, streaming, and native tool calls passed through an authenticated gateway; the loaded GGUF filename was labeled `Qwen 3.8 27B` and the server reports `Q4_K - Small`, but official identity and parameter count are unverified; [`evidence/qwen-model-observation-v1.json`](../evidence/qwen-model-observation-v1.json) records the boundary |
 | Read-only native-tool canary | Passed | One `Read` call plus exact sentinel in two turns; zero Factory credits and no file change |
 | Factory/Droid contribution | Passed and reviewed | Session `46f941a9-82f8-4df3-a45c-b8158996360b`; two scoped files; 15 turns; zero Factory credits; sanitized receipt in [`evidence/droid-contribution-v1.json`](../evidence/droid-contribution-v1.json) |
 | Pre-change adversarial proof | Passed | Moving `policy_decision` before `verify` produced no ordering error under the original validator |
 | Independent contribution validation | Passed | The accepted two-file diff passed 36 tests, the standalone validator, and `git diff --check` |
-| Fresh-clone reproduction | Hardened v1.0.1 candidate passed | Credential-free public clone of `3cf2d53f46e8531837acca7f5b3afacdfb12f35a` passed all 59 tests, repository validation, workflow linting, strict Git checks, symlink denial, and Gitleaks `8.30.1` history/tree scans; GitHub Actions run `33283633785` also passed |
-| Demo recording | Ready for owner recording from the immutable v1.0.1 release | See [Demo script](demo-script.md) |
+| Fresh-clone reproduction | v1.0.1 passed; v1.1.0 refresh pending | The prior immutable release retains its proof; the meta-factory release must independently pass all 70 tests, repository validation, workflow linting, strict Git checks, symlink denial, and both Gitleaks modes |
+| Demo recording | Blocked on immutable v1.1.0 clone proof | See [Demo script](demo-script.md) |
 
 ## Architecture claims
 
 | Claim | Evidence type | Result |
 | --- | --- | --- |
+| Zaibatsu controls a closed set of one control factory and two economic factories | Machine registry plus current coordinator, scheduler, and factory-boundary evidence | Supported operationally at the named registry scope |
+| Git/SOPS provide reviewed source and encrypted static-secret versioning | Private policy/ciphertext validation plus public immutable releases | Git supported operationally at reviewed scope; SOPS/age supported in validated preproduction |
+| systemd and cron are current scheduler adapters | Effective scheduler inventory and authority register | Supported operationally; one scheduler of record remains mandatory |
+| Modular agent skeletons are implemented source | 309 tests over 21 modules, 6 flows, 12 deployment profiles, and 23 implementation variants | Supported in validated preproduction source; deployment is not claimed |
+| LLM harnesses can bind behind typed modules | Source contracts plus bounded Factory/Qwen result | Supported at validated source/contribution scope; general unattended routing is not claimed |
+| Factory evidence can recursively promote shared changes without review | No general deployment evidence | Not claimed; owner-gated promotion is designed |
 | Current schedules remain authoritative | Runtime plus checked-in configuration | Supported |
 | Private management path exists | Tailnet, SSH, firewall, and listener checks | Supported |
 | Host automation is idempotent | Ansible first/second-run evidence | Supported in preproduction |
@@ -57,6 +64,17 @@ and redacted status ledger without receiving production access.
 | Bounded deterministic read-only coordinator lane is deployed | Effective runtime plus durable job, worker, artifact, and recovery receipts | Supported operationally at the stated narrow scope |
 | Project sandboxes are deployed | No evidence | Not claimed |
 | Nix environments reproduce workers | No flake or cross-node proof | Not claimed |
+
+## Current meta-factory foundation run
+
+On 2026-08-29, the private operations policy validator passed its current
+Git/SOPS, Ansible, infrastructure, secret, and scheduler contracts. The
+source-only modular agent scaffold independently passed 309 tests. The scaffold
+contains 21 typed modules, 6 composed flows, 12 deployment profiles, 23
+implementation variants, deterministic quality gates, human approval, and
+fenced effect contracts. It has no activation or production authority. The
+sanitized source digests, counts, and limitations are retained in
+[`evidence/meta-factory-foundations-v1.json`](../evidence/meta-factory-foundations-v1.json).
 
 ## Current private validation run
 
@@ -91,6 +109,7 @@ does not represent private implementation as publicly reproducible.
 
 ## Evidence still required before external submission
 
-The application is not represented as submitted until a demo or screenshot is
-published and the required applicant resume is attached. These are tracked in
+The application is not represented as submitted until the immutable v1.1.0
+public-clone proof passes, a demo or screenshot is published, and the required
+applicant resume is attached. These are tracked in
 [Guild application](guild-application.md).

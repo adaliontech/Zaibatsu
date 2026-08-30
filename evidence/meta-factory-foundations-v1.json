@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "schema_version": "zaibatsu.meta-factory-foundations.v1",
+  "observed_at": "2026-08-30T03:46:42Z",
+  "status": "passed_with_maturity_boundaries",
+  "visibility": "sanitized_from_private_source",
+  "factory_instances": {
+    "closed_registry": [
+      "orchestrator",
+      "simbapool",
+      "ffn"
+    ],
+    "control_factory_count": 1,
+    "economic_factory_count": 2
+  },
+  "operations_foundation": {
+    "base_revision": "5899de25a2a79f83ea87867fd0284f2fc7969146",
+    "source_state": "reviewed_working_tree",
+    "policy_check": "passed",
+    "ansible_maturity": "validated_preproduction",
+    "sops_age_maturity": "validated_preproduction",
+    "git_maturity": "operational_at_reviewed_source_and_release_scope",
+    "nix_maturity": "planned",
+    "limitation": "The private operations source is not publicly reproducible, canonical product-repository consolidation is incomplete, and no Nix flake or cross-node Nix proof is claimed."
+  },
+  "modular_agent_scaffold": {
+    "base_revision": "21b3b2ef8457e77c463e8e2026fa7f8a1c692e80",
+    "source_state": "source_only_reviewed_working_tree",
+    "source_file_count": 203,
+    "source_tree_sha256": "ff2dc2ce28606bf955729445c27430aba1c257340ff3fb79092a3e6d53989a86",
+    "tests_passed": 309,
+    "tests_failed": 0,
+    "logical_modules": 21,
+    "composed_flows": 6,
+    "deployment_profiles": 12,
+    "implementation_variants": 23,
+    "reusable_fragments": 11,
+    "handler_contracts": 16,
+    "source_present_handlers": 9,
+    "activation": "none",
+    "production_authority": false,
+    "limitation": "The scaffold is implemented and tested source, but dedicated runtime pools, handler qualification, durable activation, factory deployment, and an observe-only canary remain incomplete."
+  },
+  "harness_and_verification": {
+    "model_independent_ports": "source_present",
+    "bounded_factory_qwen_contribution": "validated_preproduction",
+    "general_unattended_multi_harness_routing": "not_active",
+    "deterministic_gate_classes": [
+      "schemas",
+      "linters",
+      "tests",
+      "hashes",
+      "policy",
+      "receipts",
+      "owner_approval"
+    ]
+  },
+  "scheduling": {
+    "systemd": "operational_primary_durable_scheduler",
+    "cron": "operational_selected_downstream_scheduler",
+    "invariant": "one scheduler of record per workload"
+  },
+  "recursive_improvement": {
+    "factory_evidence_return": "operational_at_bounded_receipt_scope",
+    "shared_template_promotion": "designed_owner_gated",
+    "autonomous_self_promotion": false
+  },
+  "external_changes_performed": false,
+  "credential_values_recorded": false
+}

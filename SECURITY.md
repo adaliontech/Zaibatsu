@@ -2,9 +2,9 @@
 
 ## Scope
 
-Zaibatsu is a reference architecture and offline validation kit. It contains no
-production access, credential material, network enrollment, or deployment
-mechanism.
+Zaibatsu is a public meta-factory architecture and offline validation kit. It
+contains factory contracts and sanitized evidence, but no production access,
+credential material, network enrollment, or deployment mechanism.
 
 ## Reporting
 
@@ -23,6 +23,12 @@ Only the latest release on the default branch is maintained.
 - Probabilistic components cannot directly own external side effects.
 - Every side-effecting deterministic component declares a policy gate.
 - Unknown project identities fail closed.
+- Factory feedback cannot self-promote into shared policy.
+- Plaintext secrets are forbidden in Git; SOPS/age is the modeled static
+  ciphertext boundary and runtime machine secrets remain separate.
+- Each workload has one cron or systemd scheduler of record.
+- Source-only agent skeletons and planned Nix environments cannot be presented
+  as deployed.
 - Public documentation must pass the built-in safety scan.
 - CI runs checksum-pinned Gitleaks against full Git history and the release
   tree; GitHub secret scanning and push protection are enabled separately.

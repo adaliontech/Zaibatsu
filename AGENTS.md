@@ -12,9 +12,11 @@ production connection is required.
 
 ## Repository purpose
 
-This is a public-safe Factory Guild submission package. It explains and tests
-the Zaibatsu architecture without exposing the private operations repository,
-host inventory, credentials, or bootstrap procedures.
+This is the public-safe executable architecture for Zaibatsu, the factory of
+software factories, and its Factory Guild submission package. It explains and
+tests the meta-factory, economic-factory, component, agent, verification, and
+feedback boundaries without exposing private operations, inventory,
+credentials, or bootstrap procedures.
 
 ## Hard rules
 
@@ -22,15 +24,22 @@ host inventory, credentials, or bootstrap procedures.
   coordinates, machine fingerprints, personal data, or absolute home paths.
 - Do not add commands that deploy, publish, enroll a device, alter a firewall,
   rotate a secret, or touch a production host.
-- Do not describe a target component as operational beyond its evidenced
-  scope. Use only the maturity values defined in `architecture/system.json`;
-  when a narrow sub-scope is live but the full component is not, name both
-  boundaries explicitly.
+- Do not describe a target capability as operational beyond its evidenced
+  scope. Keep `architecture/factory-model.json` and `architecture/system.json`
+  aligned; when a narrow sub-scope is live but the full capability is not,
+  name both boundaries explicitly.
+- Preserve Zaibatsu's role as the meta-factory control layer, the control versus
+  economic factory classes, and the complete factory lifecycle.
+- Preserve Git/SOPS, Ansible/Nix, and cron/systemd as distinct boundaries. Do
+  not represent Nix, repository hooks, modular-agent deployment, unattended
+  multi-harness routing, or shared recursive promotion as complete.
 - Keep the distinction between deterministic control and probabilistic worker
   judgment explicit.
+- Returned factory evidence may propose an improvement but may not self-promote
+  into shared policy or another factory.
 - Preserve the direct-owner recovery path. Dispatcher cannot be its own only
   recovery mechanism.
-- Preserve the closed project allowlist and deny unknown project identities.
+- Preserve the closed factory/project registry and deny unknown identities.
 - Prefer Python standard-library validation; do not add a dependency unless it
   materially improves the public kit.
 - Never commit `.factory/settings.local.json`; the local model identifier,

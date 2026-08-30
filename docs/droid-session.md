@@ -3,18 +3,19 @@
 ## Current state
 
 On 2026-08-28, Droid CLI `0.206.0` authenticated successfully and used an
-owner-operated Qwen 3.8 27B GGUF model through an authenticated
-OpenAI-compatible gateway. On 2026-08-29, authenticated llama.cpp metadata
-confirmed the loaded model filename identifies Qwen 3.8 27B and reports
-`Q4_K - Small` quantization. A read-only native-tool canary and a bounded
-repository contribution both completed. The contribution was reviewed and
+owner-operated GGUF through an authenticated OpenAI-compatible gateway. On
+2026-08-29, authenticated llama.cpp metadata reported a loaded filename labeled
+`Qwen 3.8 27B` and `Q4_K - Small` quantization. The filename is an observed
+label, not independently verified model identity or parameter count. A
+read-only native-tool canary and a bounded repository contribution both
+completed. The contribution was reviewed and
 independently validated before promotion.
 
 The model strengthened the deterministic task-flow ordering contract and added
 an adversarial test. It did not receive publication, deployment, secret, or
 private-operations authority. The integration is validated preproduction
-evidence for this public kit, not a production-performance claim for the 27B
-model.
+evidence for one harness implementation in the public meta-factory kit, not a
+production-performance or independent model-provenance claim.
 
 ## Why the integration is separate
 
@@ -90,7 +91,7 @@ See [`.factory/prompts/review.md`](../.factory/prompts/review.md).
 | Field | Current value |
 | --- | --- |
 | CLI version | `0.206.0` |
-| Model | Owner-operated GGUF whose loaded filename identifies Qwen 3.8 27B; server-reported `Q4_K - Small` |
+| Model | Owner-operated GGUF whose loaded filename was labeled `Qwen 3.8 27B`; server-reported `Q4_K - Small`; official identity and parameter count unverified |
 | Model metadata | Authenticated `/props` observation with path, alias, and credential redacted; filename-level identity limitation recorded in [`evidence/qwen-model-observation-v1.json`](../evidence/qwen-model-observation-v1.json) |
 | Endpoint | Authenticated OpenAI-compatible gateway; health and model alias passed |
 | Local-model credential | Root-only, source-bound, and transiently injected; value never recorded |
@@ -102,7 +103,7 @@ See [`.factory/prompts/review.md`](../.factory/prompts/review.md).
 | Focused contribution | Enforce `persist < execute_in_sandbox < verify < policy_decision < controlled_side_effect` |
 | Adversarial test | Move `policy_decision` before `verify`; the pre-change validator accepted this mutation |
 | Droid-reported validation | 36 tests and standalone validator passed; `git diff --check` clean |
-| Independent validation | Same two-file diff passed 36 tests; integrated Zaibatsu package later passed 59 tests |
+| Independent validation | Same two-file diff passed 36 tests; integrated Zaibatsu package later passed 70 tests |
 | Reviewed diff | 21 insertions, 9 deletions in the accepted two-file contribution |
 
 ## Promotion rule

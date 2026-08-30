@@ -338,6 +338,115 @@ class ArchitectureValidationTests(unittest.TestCase):
         self.assertTrue(any("unapproved binary" in error for error in errors))
 
 
+class FactoryModelValidationTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.architecture = validator.load_architecture()
+        self.factory_model = validator.load_factory_model()
+
+    def test_repository_factory_model_passes(self) -> None:
+        self.assertEqual([], validator.validate_factory_model(self.factory_model))
+        self.assertEqual(
+            [],
+            validator.validate_factory_consistency(
+                self.architecture, self.factory_model
+            ),
+        )
+
+    def test_meta_factory_role_cannot_drift(self) -> None:
+        mutated = copy.deepcopy(self.factory_model)
+        mutated["project"]["role"] = "single_software_factory"
+        errors = validator.validate_factory_model(mutated)
+        self.assertTrue(any("meta-factory control layer" in error for error in errors))
+
+    def test_required_factory_instance_cannot_be_removed(self) -> None:
+        mutated = copy.deepcopy(self.factory_model)
+        mutated["factory_instances"] = mutated["factory_instances"][:-1]
+        errors = validator.validate_factory_model(mutated)
+        self.assertTrue(any("closed project registry" in error for error in errors))
+
+    def test_economic_factory_cannot_become_control_factory(self) -> None:
+        mutated = copy.deepcopy(self.factory_model)
+        economic_factory = next(
+            instance
+            for instance in mutated["factory_instances"]
+            if instance["id"] == "ffn"
+        )
+        economic_factory["class"] = "control_factory"
+        errors = validator.validate_factory_model(mutated)
+        self.assertTrue(any("class and maturity" in error for error in errors))
+
+    def test_factory_lifecycle_cannot_promote_before_evidence_return(self) -> None:
+        mutated = copy.deepcopy(self.factory_model)
+        lifecycle = mutated["factory_lifecycle"]
+        lifecycle.remove("promote_reviewed_change")
+        lifecycle.insert(lifecycle.index("return_evidence"), "promote_reviewed_change")
+        errors = validator.validate_factory_model(mutated)
+        self.assertTrue(any("meta-factory order" in error for error in errors))
+
+    def test_nix_maturity_cannot_be_inflated(self) -> None:
+        mutated = copy.deepcopy(self.factory_model)
+        nix = next(
+            capability
+            for capability in mutated["capabilities"]
+            if capability["id"] == "nix-environment-reproduction"
+        )
+        nix["maturity"] = "operational"
+        mutated["reproducibility_policy"]["nix_currently_deployed"] = True
+        errors = validator.validate_factory_model(mutated)
+        self.assertTrue(any("nix-environment-reproduction" in error for error in errors))
+        self.assertTrue(any("Ansible/Nix boundary" in error for error in errors))
+
+    def test_plaintext_secrets_cannot_be_allowed_in_git(self) -> None:
+        mutated = copy.deepcopy(self.factory_model)
+        mutated["versioning_policy"]["plaintext_secrets_in_git"] = True
+        errors = validator.validate_factory_model(mutated)
+        self.assertTrue(any("no plaintext" in error for error in errors))
+
+    def test_model_cannot_authorize_external_effect(self) -> None:
+        mutated = copy.deepcopy(self.factory_model)
+        mutated["agent_policy"]["model_may_authorize_external_effect"] = True
+        errors = validator.validate_factory_model(mutated)
+        self.assertTrue(any("may not authorize" in error for error in errors))
+
+    def test_factory_feedback_cannot_self_promote(self) -> None:
+        mutated = copy.deepcopy(self.factory_model)
+        mutated["feedback_policy"]["factory_may_self_promote"] = True
+        errors = validator.validate_factory_model(mutated)
+        self.assertTrue(any("feedback policy" in error for error in errors))
+
+    def test_component_and_factory_maturities_cannot_diverge(self) -> None:
+        mutated = copy.deepcopy(self.factory_model)
+        ansible = next(
+            capability
+            for capability in mutated["capabilities"]
+            if capability["id"] == "ansible-reproduction"
+        )
+        ansible["maturity"] = "operational"
+        errors = validator.validate_factory_consistency(self.architecture, mutated)
+        self.assertTrue(any("ansible-configuration" in error for error in errors))
+
+    def test_malformed_factory_model_fails_cleanly(self) -> None:
+        malformed = {
+            "schema_version": validator.FACTORY_MODEL_SCHEMA_VERSION,
+            "project": [],
+            "factory_classes": [],
+            "factory_instances": [None],
+            "factory_lifecycle": None,
+            "capabilities": [None],
+            "reproducibility_policy": [],
+            "versioning_policy": [],
+            "scheduling_policy": [],
+            "agent_policy": [],
+            "feedback_policy": [],
+            "invariants": [],
+        }
+        errors = validator.validate_factory_model(malformed)
+        self.assertGreaterEqual(len(errors), 11)
+        self.assertTrue(any("factory model project" in error for error in errors))
+        self.assertTrue(any("factory instance at index 0" in error for error in errors))
+        self.assertTrue(any("factory capability at index 0" in error for error in errors))
+
+
 class SubmissionReadinessTests(unittest.TestCase):
     def setUp(self) -> None:
         self.architecture = validator.load_architecture()

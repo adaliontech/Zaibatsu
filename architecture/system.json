@@ -4,7 +4,7 @@
   "project": {
     "name": "Zaibatsu",
     "spoken_name": "Zaibatsu",
-    "tagline": "Deterministic control around probabilistic workers",
+    "tagline": "The factory of software factories",
     "as_of": "2026-08-29"
   },
   "maturity_definitions": {

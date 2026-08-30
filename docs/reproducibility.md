@@ -2,9 +2,9 @@
 
 ## Scope
 
-This repository reproduces the **public architecture contract**, not the
-private fleet. Validation is offline and checks that the published model still
-enforces its core safety properties.
+This repository reproduces the **public meta-factory and component contracts**,
+not the private fleet. Validation is offline and checks that the factory
+hierarchy, lifecycle, maturity, and safety properties remain congruent.
 
 ## Requirements
 
@@ -29,30 +29,44 @@ python3 scripts/validate_repository.py
 
 The validator confirms:
 
-1. all submission documents exist;
-2. the closed project allowlist and required component set are exact;
-3. maturity labels cannot be promoted without an explicit evidence-policy
-   change;
-4. every probabilistic component has deterministic preconditions and
+1. all submission documents and sanitized receipts exist;
+2. Zaibatsu remains the meta-factory control layer rather than one economic
+   factory;
+3. the closed factory registry contains the control factory and both economic
+   factories with exact roles;
+4. the factory lifecycle preserves versioning, reproduction, scheduling,
+   verification, evidence return, improvement, and reviewed promotion order;
+5. Git/SOPS, Ansible/Nix, cron/systemd, skeleton, harness, gate, and feedback
+   maturity cannot be inflated;
+6. plaintext secrets remain forbidden in Git and SOPS/age remains the static
+   ciphertext boundary;
+7. agent skeletons remain source-only and repository hooks remain a planned
+   gate extension;
+8. factories cannot self-promote feedback and models cannot authorize effects;
+9. the factory registry and shared capability maturities agree with the
+   component architecture;
+10. every probabilistic component has deterministic preconditions and
    postconditions;
-5. probabilistic components cannot directly trigger external side effects;
-6. every side-effecting deterministic component declares a policy gate;
-7. required fail-closed invariants are true;
-8. persistence and verification precede a controlled side effect;
-9. every public repository file is inspected or rejected as an unapproved
+11. probabilistic components cannot directly trigger external side effects;
+12. every side-effecting deterministic component declares a policy gate;
+13. required fail-closed invariants are true;
+14. persistence and verification precede a controlled side effect;
+15. every public repository file is inspected or rejected as an unapproved
    binary, and every repository symlink is denied;
-10. public text contains no absolute home path, tailnet name, private or
+16. public text contains no absolute home path, tailnet name, private or
     unapproved public address, or obvious inline credential;
-11. repository-local documentation links resolve;
-12. every submission gate remains required and dependency order is enforced;
-13. submission readiness cannot become true while a required gate is pending
+17. repository-local documentation links resolve;
+18. every submission gate remains required and dependency order is enforced;
+19. submission readiness cannot become true while a required gate is pending
     or dependency-blocked.
 
 The adversarial tests mutate valid architecture data and prove that the
-validator rejects an unknown project, missing component, maturity inflation,
-unbounded model exit, direct model publication, unguarded side effect, leaked
-private detail, malformed contract data, dependency bypass, optionalized gate,
-and premature submission-ready claim.
+validator rejects meta-factory role drift, a missing or reclassified factory,
+premature promotion, Nix inflation, plaintext Git secrets, model effect
+authority, factory self-promotion, component/model divergence, an unknown
+project, missing component, unbounded model exit, direct model publication,
+unguarded side effect, leaked private detail, malformed contract data,
+dependency bypass, optionalized gates, and premature readiness.
 
 ## Optional Droid preflight
 
@@ -73,7 +87,15 @@ configured model can stream native tool calls and complete this narrow task.
 The command exits zero and prints `Zaibatsu validation passed`. Any failure is
 reported as a concrete contract violation.
 
-## Nix boundary
+## Infrastructure reproduction boundary
+
+The private evidence behind this public model distinguishes:
+
+- Git for source and intended state;
+- SOPS/age for static encrypted material that may be versioned;
+- bounded secret-manager identities for runtime values;
+- Ansible for host configuration;
+- Nix for exact worker environments.
 
 Nix is part of the target architecture for cross-worker toolchain pinning, but
 it is not required by or implemented in this public validation kit. Adding a
@@ -90,7 +112,7 @@ release reproduction, clone the named tag rather than the moving default
 branch:
 
 ```bash
-git clone --depth 1 --branch v1.0.1 https://github.com/adaliontech/Zaibatsu.git
+git clone --depth 1 --branch v1.1.0 https://github.com/adaliontech/Zaibatsu.git
 cd Zaibatsu
 make validate
 ```

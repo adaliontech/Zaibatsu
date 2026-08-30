@@ -1,0 +1,169 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "schema_version": "zaibatsu.factory-model.v1",
+  "project": {
+    "name": "Zaibatsu",
+    "role": "meta_factory_control_layer",
+    "definition": "A factory of software factories"
+  },
+  "factory_classes": {
+    "control_factory": "Builds, versions, coordinates, observes, and improves software factories",
+    "economic_factory": "Produces software, data, research, content, or services for one business boundary"
+  },
+  "factory_instances": [
+    {
+      "id": "orchestrator",
+      "class": "control_factory",
+      "maturity": "operational",
+      "purpose": "Operate the shared control layer and reusable factory contracts"
+    },
+    {
+      "id": "simbapool",
+      "class": "economic_factory",
+      "maturity": "operational",
+      "purpose": "Produce bounded stake-pool operations, research, and publishing outputs"
+    },
+    {
+      "id": "ffn",
+      "class": "economic_factory",
+      "maturity": "operational",
+      "purpose": "Produce bounded fantasy-data, software-tool, and publishing outputs"
+    }
+  ],
+  "factory_lifecycle": [
+    "define_factory",
+    "version_factory",
+    "reproduce_factory",
+    "schedule_work",
+    "execute_bounded_work",
+    "verify_artifacts",
+    "authorize_effect",
+    "operate_factory",
+    "observe_outcomes",
+    "return_evidence",
+    "improve_shared_patterns",
+    "promote_reviewed_change"
+  ],
+  "capabilities": [
+    {
+      "id": "factory-registry",
+      "layer": "control",
+      "maturity": "operational",
+      "scope": "Closed registry for the three current factory identities"
+    },
+    {
+      "id": "git-version-control",
+      "layer": "versioning",
+      "maturity": "operational",
+      "scope": "Reviewed source, intended state, diffs, and public releases; canonical private repository consolidation remains separately gated"
+    },
+    {
+      "id": "sops-age-secret-versioning",
+      "layer": "versioning",
+      "maturity": "validated_preproduction",
+      "scope": "Encrypted static bootstrap material and recipient policy without plaintext secrets in Git"
+    },
+    {
+      "id": "ansible-reproduction",
+      "layer": "reproducibility",
+      "maturity": "validated_preproduction",
+      "scope": "Reviewed host configuration, hardening, services, guards, and idempotence evidence"
+    },
+    {
+      "id": "nix-environment-reproduction",
+      "layer": "reproducibility",
+      "maturity": "planned",
+      "scope": "Pinned per-factory worker environments after cross-node reproduction proof"
+    },
+    {
+      "id": "systemd-scheduling",
+      "layer": "execution",
+      "maturity": "operational",
+      "scope": "Primary durable scheduling and service supervision for managed workloads"
+    },
+    {
+      "id": "cron-scheduling",
+      "layer": "execution",
+      "maturity": "operational",
+      "scope": "Selected downstream schedules retained behind an explicit scheduler-of-record inventory"
+    },
+    {
+      "id": "modular-agent-skeletons",
+      "layer": "worker",
+      "maturity": "validated_preproduction",
+      "scope": "Source-only reusable typed modules, flows, profiles, approvals, and effect fences; no scaffold deployment is claimed"
+    },
+    {
+      "id": "llm-harness-adapters",
+      "layer": "worker",
+      "maturity": "validated_preproduction",
+      "scope": "Model-independent typed ports plus one reviewed Factory and local-Qwen contribution; general unattended routing is not active"
+    },
+    {
+      "id": "deterministic-output-gates",
+      "layer": "verification",
+      "maturity": "validated_preproduction",
+      "scope": "Tests, schemas, linters, hashes, policies, receipts, and owner approval around probabilistic work"
+    },
+    {
+      "id": "recursive-factory-improvement",
+      "layer": "feedback",
+      "maturity": "designed",
+      "scope": "Return evidence from factory outcomes and promote reviewed improvements into shared templates without self-authorization"
+    }
+  ],
+  "reproducibility_policy": {
+    "host_configuration": "ansible",
+    "worker_environments": "nix",
+    "nix_currently_deployed": false
+  },
+  "versioning_policy": {
+    "source_and_intended_state": "git",
+    "encrypted_static_secrets": "sops_age",
+    "runtime_machine_secrets": "bounded_secret_manager",
+    "plaintext_secrets_in_git": false
+  },
+  "scheduling_policy": {
+    "supported_schedulers": [
+      "systemd",
+      "cron"
+    ],
+    "durable_default": "systemd",
+    "one_scheduler_of_record_per_workload": true
+  },
+  "agent_policy": {
+    "skeleton_status": "source_only",
+    "factory_deployment_status": "planned",
+    "harness_binding": "model_independent_typed_ports",
+    "deterministic_gates": [
+      "schemas",
+      "linters",
+      "tests",
+      "hashes",
+      "policy",
+      "receipts",
+      "owner_approval"
+    ],
+    "planned_gate_extensions": [
+      "repository_hooks"
+    ],
+    "model_may_authorize_external_effect": false
+  },
+  "feedback_policy": {
+    "evidence_return_maturity": "operational",
+    "shared_pattern_promotion_maturity": "designed",
+    "promotion_authority": "reviewed_deterministic_policy_and_owner_gate",
+    "factory_may_self_promote": false
+  },
+  "invariants": {
+    "zaibatsu_is_meta_factory": true,
+    "factory_instances_are_project_scoped": true,
+    "unknown_factories_fail_closed": true,
+    "one_scheduler_of_record_per_workload": true,
+    "plaintext_secrets_never_enter_git": true,
+    "model_output_is_never_verification": true,
+    "feedback_cannot_self_promote": true,
+    "factory_changes_require_deterministic_evidence": true,
+    "owner_controls_irreversible_effects": true
+  }
+}

@@ -1,206 +1,240 @@
-# Zaibatsu: deterministic control around probabilistic workers
+# Zaibatsu: the factory of software factories
 
 ## Summary
 
-Zaibatsu is a small, self-hosted software-factory architecture for operating
-multiple projects without turning an LLM into an infrastructure administrator.
-It combines a private Tailscale management plane, reviewed OpenTofu and Ansible
-automation, durable systemd execution, scoped identities, explicit readiness
-gates, and a validated PostgreSQL Dispatcher around replaceable AI workers.
+Zaibatsu is a reproducible meta-factory for controlling multiple
+project-specific software factories. An economic factory produces software,
+data, research, content, or services for one business boundary. Zaibatsu
+defines and governs the common machinery: factory identity, versioning,
+reproduction, scheduling, modular work, deterministic verification, evidence,
+recovery, and reviewed improvement.
 
-The public artifact is an executable architecture kit. A machine-readable
-contract distinguishes operational, validated-preproduction, designed, and
-planned capabilities. A standard-library validator rejects unknown projects,
-probabilistic components without deterministic entry and exit gates, direct
-model-to-production paths, unguarded side effects, unsafe public details, and
-broken documentation links.
+The system combines Git and SOPS/age, Ansible and planned Nix environments,
+cron and systemd, PostgreSQL durable state, modular agent skeletons, and
+interchangeable LLM harnesses. Models provide bounded judgment. Conventional
+software retains authority over state, secrets, policy, scheduling,
+verification, deployment, publication, and other irreversible effects.
 
 ## The problem
 
-The starting environment had real automated products and recurring pipelines,
-but its long-running schedules were tied to one workstation. The desired future
-was broader: an always-on Dispatcher that could accept jobs, route work to
-different model and compute workers, preserve progress across worker failure,
-and coordinate two production project boundaries.
+The starting environment contained real automated products, data pipelines,
+content systems, schedules, and production services. Each had grown its own
+scripts, credentials, models, schedulers, recovery procedures, and operational
+knowledge. Long-running shared schedules were also tied too closely to one
+owner workstation.
 
-The obvious shortcut—give a capable model shell access and let it improvise—was
-also the wrong architecture. Models are excellent at diagnosis, synthesis, and
-implementation, but their output is probabilistic. Scheduling, identity,
-authorization, deployment, secret scope, recovery, and audit must remain
-explicit and repeatable.
+Moving timers to an always-on server solved only part of the problem. The
+larger challenge was to make each business boundary into a repeatable software
+factory without merging its authority with every other factory. A useful
+system needed to answer:
+
+- What exactly defines one factory?
+- How can it be versioned and reproduced?
+- Which scheduler owns each workload?
+- How can modules and model harnesses be reused without sharing credentials?
+- How does evidence return to the shared control layer?
+- How can a lesson improve multiple factories without allowing self-promotion?
 
 The design question became:
 
-> How can probabilistic workers do meaningful autonomous work while
-> deterministic software retains authority over state and side effects?
+> How can one control factory build and improve several economic software
+> factories while each remains reproducible, modular, recoverable, and
+> independently authorized?
 
-## The architecture
+## Meta-factory hierarchy
+
+```text
+Zaibatsu control factory
+  -> registry, templates, infrastructure, policy, evidence, recovery
+  -> modular deterministic and probabilistic work contracts
+  -> reviewed shared improvement
+       |
+       +-- FFN economic factory
+       |     data · tools · software · editorial · distribution
+       |
+       `-- SimbaPool economic factory
+             operations · research · software · publishing
+```
+
+The economic factories can reuse a module or infrastructure pattern without
+sharing their identities, secrets, data, schedules, or deployment rights.
+Unknown factory identities fail closed.
+
+## The factory contract
 
 Zaibatsu assigns one responsibility to each layer:
 
 | Layer | Responsibility |
 | --- | --- |
-| Dispatcher | routing, durable state, policy, leases, audit, and authorization |
-| Project boundary | business context, credentials, workflow, and production scope |
-| Job | stable goal, state, risk, checks, attempts, evidence, and artifacts |
-| Worker | temporary planning, research, implementation, or review |
-| Sandbox | isolated per-project, preferably per-job execution |
-| Verifier | tests, schemas, hashes, policy, health, and acceptance evidence |
-| Deployment mechanism | the only controlled bridge to production |
-| Knowledge system | durable decisions and small routed context packets |
+| Factory registry | closed identity, business class, ownership, and project boundary |
+| Git and release layer | reviewed source, intended state, diffs, manifests, and release history |
+| Static secret layer | SOPS/age ciphertext and recipient policy; no plaintext in Git |
+| Runtime secret layer | bounded machine identities and factory-scoped delivery |
+| Reproduction layer | Ansible host state and eventually Nix worker environments |
+| Scheduler layer | exactly one cron or systemd owner for each workload |
+| Dispatcher | durable jobs, routing, policy, leases, evidence, audit, and authorization |
+| Agent skeleton | reusable typed modules, flows, implementations, and deployment profiles |
+| Harness implementation | temporary deterministic tool or probabilistic model worker |
+| Verifier | schemas, linters, tests, hashes, policy, receipts, and independent checks |
+| Effect mechanism | the only controlled bridge to Git, publication, databases, or production |
+| Knowledge and feedback | decisions, incidents, runbooks, observations, and improvement candidates |
 
-The critical flow is:
+The complete lifecycle is:
 
 ```text
-deterministic trigger
-  -> deterministic eligibility and policy
-  -> probabilistic worker judgment
-  -> deterministic artifact validation
-  -> optional independent model critique
-  -> deterministic transition authorization
-  -> deterministic external side effect
+define -> version -> reproduce -> schedule -> execute -> verify -> authorize
+       -> operate -> observe -> return evidence -> improve -> reviewed promotion
 ```
 
-An agent can propose a deployment; it cannot make its own prose the deployment
-authorization.
+## Reproduction and versioning
 
-## Building beside the live system
+Git is the source/history boundary, not the runtime database. SOPS/age permits
+static encrypted bootstrap material to be reviewed and versioned without
+placing plaintext secrets in Git. Runtime machine credentials remain scoped to
+their factory and delivered separately.
 
-The architecture was developed side by side with existing production rather
-than by replacing its bootstrap or schedules.
+Ansible reproduces hosts: identities, hardening, packages, services, guards,
+and monitoring. Nix is intended to reproduce the narrower worker toolchain and
+environment. The two are complementary. Ansible has bounded evidence; Nix
+remains planned until a real flake reproduces on more than one eligible node.
 
-1. The current executor remained authoritative.
-2. The normal topology and three-project allowlist became machine-readable.
-3. Private Tailscale administration and a default-deny host boundary were
-   established and verified.
-4. Ansible adapted a reviewed release to the always-on host using locked service
-   identities and root-owned receipts.
-5. A non-publishing shadow installed the workload definitions with all
-   destination timers disabled and execution guarded.
-6. Source, mutable state, credentials, and operational authority were split
-   into separate transfer channels.
-7. Snapshot and restore logic verified a manifest while refusing credentials,
-   symlinks, active destination units, or a non-empty target.
-8. Early cutover gates stayed red for the then-missing job database, project
-   sandboxes, production verification, rollback drills, and observation
-   window.
+## Scheduling beside the live system
 
-The later bounded Dispatcher increment crossed only the evidence it actually
-earned: a socket-only PostgreSQL 16 database, transactional API/policy
-contracts, a deterministic read-only coordinator, receipt-bound project
-workers, and cross-host restore drills. The focused source suite now passes 158
-tests, and a disposable PostgreSQL 16.15 two-cluster harness passes 104 live
-assertions including restore equivalence. Heavy production workloads remain
-under the existing systemd authority.
+The architecture was built beside existing production rather than pretending
+all scheduler diversity had already disappeared.
 
-This is the architecture’s core lesson in practice: preparation is not
-authorization, and an artifact existing on a destination is not the same as
-that destination owning production.
+1. Every current workload was inventoried with one scheduler of record.
+2. Managed shared schedules moved to the always-on control host under systemd.
+3. Selected downstream cron workloads remained with their factories.
+4. Private networking, locked identities, guards, and receipts were added
+   before wider authority.
+5. A non-publishing shadow proved configuration without becoming a duplicate
+   scheduler.
+6. Backups and restore drills preserved a recovery path independent of the
+   normal control flow.
 
-## Turning prose into an executable public artifact
+Systemd is the durable default, but cron remains a supported adapter while it
+owns real downstream workloads. Migration requires equivalent failure,
+monitoring, retry, rollback, and ownership evidence.
 
-The private program cannot safely be published in full. Host coordinates,
-credential topology, recovery details, and production repositories belong
-behind the control boundary. Zaibatsu therefore extracts the reusable
-architecture while preserving claim provenance.
+## Durable control and modular agents
 
-The public repository includes:
+PostgreSQL provides durable state for the bounded Dispatcher lane. The broader
+contract covers jobs, transitions, attempts, leases, idempotency, policy,
+evidence, audit events, and recovery. The current fixed read-only coordinator
+runs across the three factory identities without invoking a model.
 
-- `architecture/system.json`, a machine-readable component and invariant
-  model;
-- `scripts/validate_repository.py`, an offline contract and public-safety
-  validator;
-- adversarial tests that mutate the valid contract and prove rejection;
-- an implementation-status ledger that prevents planned Nix and sandbox work,
-  or the broader Dispatcher target, from being described as operational;
-- a threat model, reproduction guide, evidence ledger, demo, and application
-  package.
+The reusable unit above that state is a typed module rather than an agent
+persona. Modules compose into flows, and deployment profiles select reviewed
+implementations for each factory. A research module could use one harness in
+FFN and another in SimbaPool while preserving identical typed inputs, outputs,
+budgets, denied capabilities, and evaluation rules.
 
-This makes the architecture independently inspectable without publishing the
-keys to the factory floor.
+The private source-only scaffold currently has 21 logical modules, 6 flows, 12
+deployment profiles, 23 implementation variants, and a 309-test pass. It
+contains deterministic quality modules, probabilistic work modules, durable
+approval, and idempotent effect contracts. It remains source-only: dedicated
+pools, handler qualification, activation, credentials, alerts, and an
+observe-only canary are not complete.
 
-## Factory/Droid integration boundary
+## LLM harness boundary
 
-The core artifact remains useful without Droid. For the Guild contribution,
-Factory Droid operated only on a sanitized public clone, never the private
-fleet. The backend was an owner-operated GGUF whose authenticated
-server-reported loaded filename identifies Qwen 3.8 27B and whose server
-reports `Q4_K - Small`, through an authenticated OpenAI-compatible gateway.
-Its endpoint and
-credential stayed in ignored local configuration and the launch boundary, not
-in Git. Factory authentication remained separate from model authentication.
+```text
+typed task and bounded context
+  -> selected deterministic or LLM harness implementation
+  -> typed candidate artifact
+  -> schemas, linters, tests, hashes, policy, receipts
+  -> optional independent critique
+  -> durable owner or effect gate
+```
 
-The project-level `AGENTS.md` supplies exact commands and security boundaries.
-One headless Droid task ran with low local autonomy. It strengthened the
-validator from a partial task-flow order to `persist < execute_in_sandbox <
-verify < policy_decision < controlled_side_effect`, added a test that moves
-policy before verification, and ran the offline validation suite. The original
-validator accepted that adversarial mutation. Because the custom model is
-probabilistic, its self-report was not acceptance; the two-file diff was
-reviewed and `make validate` was rerun independently.
+Codex, Qwen, Factory Droid, or a future model can implement a module only after
+its adapter and behavior qualify. A model cannot waive a deterministic failure,
+approve itself, use credentials, change policy, or trigger an effect merely by
+returning confident prose.
 
-The configuration seam, exact command, initial failed-auth observation,
-successful session, reviewed diff, and independent evidence are recorded in
-[Droid integration](droid-session.md).
+## Recursive improvement without recursive authority
+
+Factory outcomes return evidence to Zaibatsu:
+
+```text
+run -> observation/failure -> evidence -> classified improvement candidate
+    -> shared module/template/gate change -> deterministic validation
+    -> owner-reviewed promotion -> eligible factory rollout with rollback
+```
+
+Today, evidence capture and some improvement work are operational at bounded
+scope. General automatic classification, shared-template promotion, and
+cross-factory rollout are not deployed. Recursive improvement means reviewed
+versioned learning, not self-modifying production authority.
+
+## Factory/Droid contribution
+
+Factory AI's Droid is one possible harness inside the larger Zaibatsu model.
+For the Guild contribution, Droid operated only on a sanitized public clone.
+It used an owner-operated GGUF through an authenticated OpenAI-compatible
+gateway; the loaded filename was labeled `Qwen 3.8 27B` and the server reports
+`Q4_K - Small`. Official identity and parameter count remain unverified.
+
+The bounded task strengthened the public validator from a partial task-flow
+check to:
+
+```text
+persist < execute_in_sandbox < verify < policy_decision < controlled_side_effect
+```
+
+It added an adversarial test that the original validator accepted. Droid's
+self-report was not acceptance: the two-file diff was reviewed and the suite
+was rerun independently.
+
+## Executable public artifact
+
+The private implementation cannot be published in full. Zaibatsu extracts the
+reusable contracts while preserving evidence and limitations:
+
+- `architecture/factory-model.json` defines factories, lifecycle,
+  reproducibility, versioning, schedulers, skeletons, harnesses, and feedback;
+- `architecture/system.json` defines control-plane components, maturity, task
+  order, and fail-closed invariants;
+- `scripts/validate_repository.py` checks both models and public safety;
+- adversarial tests prove that hierarchy, lifecycle, maturity, secret,
+  scheduler, model-authority, and feedback rules reject unsafe mutations;
+- sanitized receipts bind private observations without publishing operational
+  access.
 
 ## Results
 
-The public kit converts architectural intent into properties a machine can
-reject:
+The public package can now reject claims or architectures in which:
 
-- an unrecognized project cannot enter the control model;
-- a probabilistic worker without a deterministic precondition or postcondition
-  fails validation;
-- a probabilistic component cannot own an external side effect;
-- a deterministic side-effecting component must declare its policy gate;
-- the task flow must place sandbox execution, verification, and policy in the
-  deterministic order required before a controlled side effect;
-- a public document containing a private home path, tailnet name, private
-  address, or unapproved public IPv4 address fails the safety scan;
-- maturity is explicit, so Nix, sandboxes, and broad production authority
-  cannot silently become “done” in the narrative.
-
-The private implementation separately carries its operational validation and
-regression evidence. Exact results are recorded in [Evidence](evidence.md)
-after the final clean run.
-
-## What changed in my engineering workflow
-
-Before Zaibatsu, architectural invariants existed across prose, playbooks,
-runtime checks, and operator knowledge. The migration work made those
-boundaries explicit, but the public extraction added a second layer: claims and
-agent-control rules now have a small executable specification.
-
-The most valuable pattern is not “let an agent run everything.” It is:
-
-```text
-give the agent a narrow problem
-  -> require an artifact
-  -> make deterministic checks cheap and local
-  -> retain evidence independently of the agent
-  -> expand authority only after the proof exists
-```
+- Zaibatsu drifts from meta-factory to a single project factory;
+- an economic factory becomes the shared control factory;
+- an unknown factory enters the registry;
+- promotion happens before evidence returns;
+- Nix becomes “operational” without a flake and cross-node proof;
+- plaintext secrets become allowed in Git;
+- cron and systemd both own the same workload;
+- a source-only skeleton is described as deployed;
+- a model authorizes an external effect;
+- a factory promotes its own feedback into shared policy;
+- component and meta-factory maturity ledgers diverge.
 
 ## Limitations
 
-- The Dispatcher API/policy and PostgreSQL state contracts are validated
-  preproduction; only a narrow deterministic read-only coordinator lane is
-  operational.
-- The existing systemd executor still owns the heavy production workloads.
-- Project sandboxes are planned, not proven.
-- Nix is a deliberate next step and has no current flake implementation.
-- The public validator tests architecture declarations, not the private fleet.
-- Some business-level correctness will always require domain-specific tests or
-  explicit owner judgment.
-- The local Qwen/Droid result is one bounded contribution, not a general model
-  benchmark or production-autonomy claim.
-- A short Guild demo cannot substitute for recovery drills and operational
-  observation.
+- The modular agent scaffold is source-only and not production-authorized.
+- Nix environments and repository-hook extensions remain planned.
+- General unattended multi-model routing is not active.
+- Project/job sandboxes and future separate sandbox hosts are not proven.
+- Only the deterministic read-only Dispatcher lane is operational; broader
+  side-effect authority remains validated preproduction.
+- Complete canonical private repository consolidation remains gated.
+- Public receipts describe private validation but do not make the private
+  implementation independently reproducible.
+- A Guild demo cannot substitute for recovery drills and operational evidence.
 
 ## Takeaway
 
-Autonomy becomes safer when AI workers are easy to replace and the surrounding
-system is difficult to fool. Durable jobs, explicit capabilities, private
-networking, reproducible configuration, deterministic verification, scoped
-side effects, and honest maturity labels make probabilistic reasoning useful
-without making it sovereign.
+Zaibatsu is not one AI agent and not one software factory. It is the system that
+makes software factories repeatable and governable: versioned definitions,
+reproducible infrastructure, modular work, interchangeable harnesses,
+deterministic verification, explicit effects, retained evidence, and reviewed
+recursive improvement.

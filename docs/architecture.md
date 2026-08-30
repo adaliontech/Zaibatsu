@@ -2,201 +2,265 @@
 
 ## Thesis
 
-Zaibatsu separates the parts of software work that benefit from probabilistic
-judgment from the parts that must be repeatable, auditable, and fail closed.
+Zaibatsu is the control factory above project-specific software factories. It
+does not replace the products, repositories, schedules, or business rules
+inside those factories. It gives them a common way to be defined, reproduced,
+versioned, scheduled, observed, verified, and improved.
 
 ```text
-                  control plane
-  +-------------------------------------------+
-  | intake -> policy -> durable job -> lease |
-  +----------------------+--------------------+
-                         |
-                         v
-                bounded execution plane
-  +-------------------------------------------+
-  | sandbox -> probabilistic worker -> result |
-  +----------------------+--------------------+
-                         |
-                         v
-                 verification plane
-  +-------------------------------------------+
-  | tests -> schema -> evidence -> risk gate  |
-  +----------------------+--------------------+
-                         |
-                         v
-                  side-effect plane
-  +-------------------------------------------+
-  | merge / deploy / publish / operate        |
-  +-------------------------------------------+
+                         Zaibatsu
+                meta-factory control layer
+        definitions · registry · policy · evidence
+          reproduction · modules · shared learning
+                         /       \
+                        v         v
+              FFN economic      SimbaPool economic
+                 factory             factory
+              data · tools       operations · research
+              software · media   software · publishing
 ```
 
-The control plane may use agents as advisers, but its authority is conventional
-software: transactions, explicit transitions, scoped capabilities, verified
-artifacts, and policy decisions.
+The shared layer controls factory contracts. Each economic factory retains its
+own identity, data, credentials, repositories, schedules, acceptance rules,
+budgets, and production authority.
 
-## Planes
+## Two machine-readable views
 
-### 1. Intake and control
+Zaibatsu deliberately separates two questions:
 
-Requests arrive from an owner, schedule, alert, API, or project service. The
-Dispatcher assigns a stable job ID, project, priority, risk class, required
-capabilities, acceptance checks, and idempotency key. Unknown projects and
-invalid transitions fail closed.
+| Contract | Question |
+| --- | --- |
+| [`architecture/factory-model.json`](../architecture/factory-model.json) | What is a software factory, how is it reproduced and improved, and which factory instances exist? |
+| [`architecture/system.json`](../architecture/system.json) | Which control-plane components execute the work, what is their maturity, and which invariants constrain them? |
 
-The target job state machine is:
+The validator requires the factory registry and shared component maturities to
+agree. A narrative edit cannot silently turn planned Nix reproduction or
+source-only agents into operational capability.
+
+## Factory classes
+
+### Control factory
+
+The Orchestrator factory supplies the shared control layer: registry, policy,
+durable state, scheduling contracts, evidence, reusable modules, deployment
+patterns, recovery, and improvement proposals. Zaibatsu is the public model of
+that meta-factory role.
+
+### Economic factory
+
+An economic factory produces outputs for one product or business boundary.
+Current instances are FFN and SimbaPool. Their outputs differ, but each factory
+has the same categories of control:
+
+- project identity and repository lineage;
+- static and runtime secret boundaries;
+- host and environment reproduction;
+- declared schedulers and workloads;
+- deterministic and probabilistic worker modules;
+- artifact contracts and verification;
+- publication, deployment, and recovery policy;
+- observations and evidence returned to Zaibatsu.
+
+An unknown factory receives no routing, repository, credential, worker,
+scheduler, or production authority.
+
+## Factory lifecycle
 
 ```text
-queued -> eligible -> leased -> running -> verifying -> succeeded
-   |          |          |          |           |
-   +----------+----------+----------+-----------+-> failed / repair / exception
+define
+  -> version
+  -> reproduce
+  -> schedule
+  -> execute bounded work
+  -> verify artifacts
+  -> authorize effect
+  -> operate
+  -> observe
+  -> return evidence
+  -> improve shared patterns
+  -> promote reviewed change
 ```
 
-Every transition is explicit and transactional. A worker cannot promote its
-own natural-language answer into terminal success.
+Promotion is intentionally last. Evidence from one factory may reveal a better
+module, prompt, linter, hook, policy, environment, or recovery procedure. That
+evidence becomes an improvement candidate in Zaibatsu. It does not immediately
+change the reporting factory or propagate to another factory.
 
-### 2. Durable state
+## Versioning and secret boundary
 
-Workers are disposable; work is durable. PostgreSQL is the source of truth for
-the bounded Dispatcher lane's jobs, leases, attempts, policy decisions,
-evidence, and audit events. Kanban is a synchronized human-readable surface,
-not the only record that work exists.
+Git versions reviewed source, intended state, diffs, release manifests, and
+public releases. It is not a place for plaintext credentials or mutable runtime
+state.
 
-The private implementation runs PostgreSQL 16 over a Unix socket and a
-deterministic read-only coordinator across the three allowlisted projects. The
-coordinator invokes no model, is idempotent by time bucket, retries once, and
-then blocks. `architecture/system.json` models this coordinator as its own
-operational component. The broader Dispatcher API and policy surface remains
-validated preproduction, while systemd retains authority for the existing
-production workloads.
+SOPS/age and a bounded runtime secret manager serve different purposes:
 
-Operational state and knowledge stay separate:
+| Mechanism | Boundary |
+| --- | --- |
+| Git | reviewed source and intended state |
+| SOPS/age | static encrypted bootstrap material and recipient policy that may be versioned safely |
+| Bounded runtime secret manager | machine-scoped values delivered at runtime without a personal vault session |
+
+The private operations layer has validated SOPS/age policy and ciphertext
+checks. Complete canonical repository consolidation across every product
+factory remains a separate owner-controlled gate.
+
+## Reproducibility
+
+Ansible and Nix solve different reproduction problems:
+
+| Tool | Reproduces | Current maturity |
+| --- | --- | --- |
+| Ansible | host configuration, locked identities, hardening, packages, services, guards, and monitoring | Validated preproduction |
+| Nix | exact per-factory or per-worker tool environments | Planned |
+
+Ansible has review, syntax, policy, application, and idempotence evidence at
+bounded scope. Nix is part of the required target architecture, but no accepted
+flake or cross-node reproduction proof exists. A missing Nix environment must
+eventually make a worker ineligible rather than inviting it to improvise a
+toolchain.
+
+## Scheduling and durable execution
+
+The fleet contains both cron and systemd schedules. Zaibatsu does not pretend
+that heterogeneity has already disappeared. Instead, it enforces one scheduler
+of record per workload and requires inventory, failure handling, evidence, and
+rollback before scheduler migration.
+
+Systemd is the preferred durable default and owns the managed control-host
+workloads. Selected downstream factory workloads still use cron. A duplicate
+cron and systemd owner for the same effect is an architecture failure.
+
+PostgreSQL is machine-level truth for the bounded Dispatcher lane's jobs,
+leases, attempts, decisions, evidence, and audit events. Kanban and dashboards
+are views, not the only record that work exists.
+
+```text
+trigger -> durable job -> eligibility -> lease -> run -> verify -> decision
+                                                       |          |
+                                                       v          v
+                                                    evidence   effect gate
+```
+
+The current deterministic read-only coordinator invokes no model, uses fixed
+time buckets, retains failures, and is operational across the closed factory
+registry. General side-effecting Dispatcher execution remains validated
+preproduction.
+
+## Modular agent skeletons
+
+The intended unit of reuse is a typed module, not an agent personality. Modules
+can be composed into flows and assigned implementations per factory:
+
+```text
+factory profile
+  -> flow recipe
+  -> typed modules
+  -> reviewed implementation for each module
+  -> isolated execution plan
+  -> deterministic evaluation and approval
+```
+
+Typical module classes include:
+
+- deterministic heartbeat, readiness, evidence assembly, checkpoint, lint,
+  test, schema validation, evaluation merge, and effect fencing;
+- probabilistic research, analysis, writing, planning, building, and review;
+- durable human approval;
+- deterministic, idempotent commit, publication, or database-effect modules
+  that require upstream authorization.
+
+The private source-only scaffold currently contains 21 logical modules, 6
+composed flows, 12 deployment profiles, and 23 implementation variants. Its
+309-test suite passes. Those facts establish validated source, not deployment:
+handlers, isolated pools, credentials, durable activation, qualification, and
+an observe-only canary remain incomplete.
+
+## LLM harnesses and deterministic verification
+
+Logical modules bind to typed ports rather than one model vendor. A Codex,
+Qwen, Factory Droid, or future harness may implement a compatible bounded
+module after qualification. Harness selection does not grant authority.
+
+```text
+typed task + bounded context
+            |
+            v
+     selected harness/model
+            |
+            v
+      typed candidate artifact
+            |
+            v
+schemas -> linters -> tests -> hashes -> policy -> receipt
+            |
+            v
+       optional independent review
+            |
+            v
+          owner/effect gate
+```
+
+Repository hooks are an explicit future extension to the deterministic gate
+surface; they are not represented as universally deployed today. Model output
+cannot waive a failed or unknown deterministic result, approve itself, publish,
+deploy, commit, apply a database change, use a credential, or change policy.
+
+## State and knowledge separation
 
 | System | Question | Examples |
 | --- | --- | --- |
-| Operational database | What are we doing now? | jobs, leases, attempts, approvals, health |
-| Git | What changed? | reviewed source, configuration, diffs |
-| Artifact store | What can be shipped? | packages, manifests, reports |
-| Logs and events | What happened? | commands, checks, transitions |
-| Knowledge memory | What do we know? | decisions, runbooks, incidents, lessons |
+| PostgreSQL | What work exists now? | jobs, leases, attempts, approvals, evidence |
+| Git | What was reviewed and versioned? | source, configuration, diffs, releases |
+| Artifact store | What exact output was produced? | packages, reports, manifests, candidates |
+| Logs and receipts | What happened? | checks, transitions, effects, recovery |
+| Knowledge memory | What have the factories learned? | decisions, incidents, runbooks, patterns |
 
-### 3. Worker routing
+Knowledge can inform a job but cannot become operational state merely because
+an agent wrote persuasive prose.
 
-Jobs declare capabilities rather than preferred personalities. A router can
-choose any eligible implementation, research, planning, local-inference, or
-review worker. Each worker receives only the repository, context, tools,
-network, and credentials needed for that job.
+## Recursive factory improvement
 
 ```text
-job requirements
-      |
-      v
-capability + health + policy match
-      |
-      v
-short-lived lease and bounded context
-      |
-      v
-replaceable worker
+factory run
+  -> observation or failure
+  -> retained evidence
+  -> classified improvement candidate
+  -> change to shared module/template/gate
+  -> deterministic and independent validation
+  -> owner/policy promotion
+  -> eligible factory rollout with rollback
 ```
 
-A missing or failed optional model must not stop the Dispatcher. Lease expiry
-returns abandoned work to a recoverable state.
-
-### 4. Sandboxed execution
-
-The intended execution boundary is one isolated workspace or worktree per job,
-with project-scoped identity and deny-by-default network and secret access.
-Failed workspaces remain available long enough for resumption or diagnosis.
-
-Project sandboxes are planned, not currently deployed. The word “sandbox” is
-reserved for an environment whose isolation, credentials, network policy,
-lifecycle, and recovery have been proven.
-
-### 5. Verification and policy
-
-Verification starts with deterministic tools:
-
-- unit, integration, regression, and acceptance tests;
-- schema, type, lint, and format checks;
-- stable hashes and signed or attributable manifests;
-- policy evaluation against job risk and capability scope;
-- idempotence, health, listener, and duplicate-execution checks.
-
-An independent model may critique an artifact, but model judgment supplements
-rather than replaces deterministic evidence. Only the policy engine authorizes
-an external side effect.
-
-### 6. Production boundary
-
-Workers normally produce artifacts rather than changing production directly.
-
-```text
-worker result
-    -> artifact
-    -> deterministic checks
-    -> risk policy
-    -> controlled deploy or publish mechanism
-    -> health verification
-    -> durable evidence
-```
-
-Destructive infrastructure actions, sensitive blockchain operations, root
-identity changes, secret rotation, and database migrations require stronger
-policy and explicit owner authority.
+Evidence return exists at bounded operational scope. General automatic
+classification, shared-template promotion, and rollout are still designed.
+Recursive improvement therefore means the system learns through reviewed,
+versioned artifacts—not that an agent recursively expands its own authority.
 
 ## Infrastructure composition
 
-Each tool answers a different question.
+| Tool | Zaibatsu responsibility | Current maturity |
+| --- | --- | --- |
+| Git | source, intended state, history, releases | Operational at reviewed scope |
+| SOPS/age | static encrypted secret material in Git | Validated preproduction |
+| Bounded secret manager | runtime machine-secret delivery | Validated preproduction in the public ledger |
+| OpenTofu | reviewed resource lifecycle and cost gate | Validated preproduction |
+| Tailscale | private management fabric | Operational |
+| Ansible | host reproduction and configuration | Validated preproduction |
+| Nix | exact worker environments | Planned |
+| cron | selected downstream schedules | Operational |
+| systemd | primary durable services and schedules | Operational |
+| PostgreSQL | durable jobs and bounded coordination | Validated preproduction broadly; narrow lane operational |
+| Agent skeletons | reusable typed work graphs | Validated source only |
+| LLM harnesses | replaceable probabilistic implementations | Bounded validation only |
 
-| Tool | Question | Zaibatsu role | Current maturity |
-| --- | --- | --- | --- |
-| OpenTofu | What cloud resources should exist? | reviewed resource lifecycle and cost gate | Validated preproduction |
-| Tailscale | How does the management plane connect privately? | authenticated private administration fabric | Operational |
-| Ansible | How should a host be configured? | identities, hardening, services, guards, monitoring | Validated preproduction |
-| Nix | Which exact project tools should workers receive? | pinned development and runtime environments | Planned |
-| systemd | What executes durably on a host? | current schedules and service supervision | Operational |
-| PostgreSQL | What work exists and what state is it in? | durable bounded Dispatcher state plus broader validated contract | Validated preproduction |
-| Bounded coordinator | Which fixed read-only collection is due? | allowlisted collect-only scheduling and receipt-bound completion | Operational |
-| Factory Droid + local Qwen | Where can bounded AI repository work run? | optional public-kit contributor behind deterministic checks | Validated preproduction |
+## Production and recovery boundaries
 
-The order is intentional: private access and reproducible host configuration
-are established before Nix is introduced. There is no current `flake.nix` in
-the private operational source, so Zaibatsu does not claim Nix implementation.
-
-## Network topology
-
-The public model avoids hostnames and addresses:
-
-```text
-operator endpoints + bounded compute workers
-                    |
-              Tailscale fabric
-                    |
-               Dispatcher
-              /          \
-     project boundary A  project boundary B
-```
-
-Public applications expose only required service endpoints. SSH, management
-APIs, metrics, databases, queues, dashboards, and deployment controls stay on
-loopback or the private management network.
-
-## Factory improvement loop
-
-Zaibatsu closes the improvement loop by turning operational weakness into
-durable improvement work:
-
-```text
-run -> failure evidence -> classified defect -> improvement job
-    -> bounded implementation -> validation -> stronger future workflow
-```
-
-This is organizational feedback, not autonomous authority expansion. The same
-policy and production gates apply to changes that improve the factory itself.
-
-## Recovery invariant
+Workers normally produce artifacts rather than changing production. Sensitive
+publication, deployment, infrastructure, credentials, wallet or signing
+operations, destructive changes, and data migrations require stronger policy
+and explicit owner authority.
 
 The owner retains a direct recovery path outside the normal Dispatcher route.
-Backups, configuration source, and operator access must permit rebuilding the
-control plane when it is unavailable. Dispatcher must never be required to
-recover Dispatcher.
+Backups, Git-defined configuration, encrypted recovery material, and operator
+access must permit rebuilding the control layer when it is unavailable.
+Dispatcher must never be required to recover Dispatcher.

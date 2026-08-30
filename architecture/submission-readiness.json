@@ -9,7 +9,7 @@
       "id": "public_package",
       "status": "complete",
       "required_for_submission": true,
-      "evidence": "Repository contract, documentation, and offline validation suite"
+      "evidence": "Meta-factory and component contracts, documentation, sanitized receipts, and offline adversarial validation suite"
     },
     {
       "id": "droid_cli_install",
@@ -21,7 +21,7 @@
       "id": "local_qwen_endpoint",
       "status": "complete",
       "required_for_submission": true,
-      "evidence": "Authenticated OpenAI-compatible Qwen endpoint passed health, model, streaming, and native tool-call checks; the server-reported loaded filename identifies a Qwen 3.8 27B GGUF and the server reports Q4_K - Small quantization, with limitations recorded in evidence/qwen-model-observation-v1.json"
+      "evidence": "Authenticated OpenAI-compatible local-model endpoint passed health, model, streaming, and native tool-call checks; the loaded GGUF filename was labeled Qwen 3.8 27B and the server reports Q4_K - Small quantization, but official model identity and parameter count are not independently verified"
     },
     {
       "id": "local_model_credential",
@@ -39,7 +39,7 @@
       "id": "bounded_droid_contribution",
       "status": "complete",
       "required_for_submission": true,
-      "evidence": "Qwen-backed Droid session 46f941a9-82f8-4df3-a45c-b8158996360b produced a reviewed two-file invariant and adversarial-test change; evidence/droid-contribution-v1.json records the bounded receipt and the integrated Zaibatsu package passes 59 tests"
+      "evidence": "Qwen-backed Droid session 46f941a9-82f8-4df3-a45c-b8158996360b produced a reviewed two-file invariant and adversarial-test change; evidence/droid-contribution-v1.json records the bounded receipt and the integrated Zaibatsu package passes 70 tests"
     },
     {
       "id": "public_repository",
@@ -49,15 +49,18 @@
     },
     {
       "id": "fresh_clone_reproduction",
-      "status": "complete",
+      "status": "pending_external",
       "required_for_submission": true,
-      "evidence": "Credential-free public clone of hardened candidate 3cf2d53f46e8531837acca7f5b3afacdfb12f35a passed all 59 tests, repository validation, workflow linting, strict Git checks, symlink denial, and Gitleaks 8.30.1 history/tree scans; its GitHub Actions run 33283633785 also passed"
+      "evidence": "The immutable v1.0.1 proof remains recorded; the congruent meta-factory v1.1.0 candidate must pass all 70 tests, both machine-readable contracts, workflow linting, strict Git checks, symlink denial, and Gitleaks 8.30.1 history/tree scans from the public remote"
     },
     {
       "id": "public_demo",
-      "status": "pending_external",
+      "status": "blocked_by_dependency",
       "required_for_submission": true,
-      "evidence": "Public URL, hardened clone proof, and final Guild narration are ready; owner records and publishes the final clip or screenshots from the immutable v1.0.1 release"
+      "evidence": "The revised meta-factory narration is ready; recording waits for the immutable v1.1.0 fresh-clone gate",
+      "blocked_by": [
+        "fresh_clone_reproduction"
+      ]
     },
     {
       "id": "applicant_materials",

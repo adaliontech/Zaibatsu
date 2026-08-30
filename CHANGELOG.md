@@ -1,5 +1,31 @@
 # Changelog
 
+## 1.1.0 - 2026-08-29
+
+- Reframed Zaibatsu around its intended role as the factory of software
+  factories: a meta-factory control layer above project-scoped economic
+  factories.
+- Added `architecture/factory-model.json` with the closed factory registry,
+  complete lifecycle, capability maturities, reproducibility, versioning,
+  scheduler, modular-agent, harness, deterministic-gate, and feedback policy.
+- Added adversarial enforcement for meta-factory role drift, factory
+  reclassification, premature promotion, false Nix maturity, plaintext Git
+  secrets, model effect authority, factory self-promotion, and cross-contract
+  maturity drift.
+- Made Git/SOPS, Ansible/Nix, cron/systemd, bounded runtime secrets, modular
+  skeletons, LLM harness adapters, and recursive improvement first-class while
+  preserving their actual operational, validated, designed, or planned scope.
+- Added a sanitized foundations receipt binding a fresh private SOPS/Ansible
+  policy pass and a 309-test source-only modular-agent scaffold with 21 modules,
+  6 flows, and 12 deployment profiles.
+- Rewrote the README, architecture, case study, implementation ledger, threat
+  model, reproduction guide, roadmap, application, and demo around the same
+  meta-factory hierarchy.
+- Expanded the public adversarial suite from 59 to 70 tests, including malformed
+  meta-factory input handling.
+- Tightened the local-model receipt so a server filename is recorded only as an
+  observed label, not verified model identity or parameter count.
+
 ## 1.0.1 - 2026-08-29
 
 - Closed the documentation-host placeholder substring bypass and added

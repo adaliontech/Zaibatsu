@@ -13,6 +13,7 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 ARCHITECTURE_PATH = ROOT / "architecture" / "system.json"
+FACTORY_MODEL_PATH = ROOT / "architecture" / "factory-model.json"
 READINESS_PATH = ROOT / "architecture" / "submission-readiness.json"
 
 REQUIRED_FILES = (
@@ -25,10 +26,12 @@ REQUIRED_FILES = (
     ".github/workflows/validate.yml",
     ".factory/prompts/review.md",
     ".factory/settings.local.example.json",
+    "architecture/factory-model.json",
     "architecture/system.json",
     "architecture/submission-readiness.json",
     "evidence/dispatcher-validation-v1.json",
     "evidence/droid-contribution-v1.json",
+    "evidence/meta-factory-foundations-v1.json",
     "evidence/qwen-model-observation-v1.json",
     "docs/architecture.md",
     "docs/case-study.md",
@@ -59,7 +62,65 @@ ALLOWED_GATE_STATUSES = {"complete", "pending_external", "blocked_by_dependency"
 
 PROJECT_NAME = "Zaibatsu"
 ARCHITECTURE_SCHEMA_VERSION = "zaibatsu.architecture.v1"
+FACTORY_MODEL_SCHEMA_VERSION = "zaibatsu.factory-model.v1"
 READINESS_SCHEMA_VERSION = "zaibatsu.submission-readiness.v1"
+
+REQUIRED_FACTORY_INSTANCES = {
+    "orchestrator": ("control_factory", "operational"),
+    "simbapool": ("economic_factory", "operational"),
+    "ffn": ("economic_factory", "operational"),
+}
+
+REQUIRED_FACTORY_LIFECYCLE = (
+    "define_factory",
+    "version_factory",
+    "reproduce_factory",
+    "schedule_work",
+    "execute_bounded_work",
+    "verify_artifacts",
+    "authorize_effect",
+    "operate_factory",
+    "observe_outcomes",
+    "return_evidence",
+    "improve_shared_patterns",
+    "promote_reviewed_change",
+)
+
+REQUIRED_FACTORY_CAPABILITY_MATURITIES = {
+    "factory-registry": "operational",
+    "git-version-control": "operational",
+    "sops-age-secret-versioning": "validated_preproduction",
+    "ansible-reproduction": "validated_preproduction",
+    "nix-environment-reproduction": "planned",
+    "systemd-scheduling": "operational",
+    "cron-scheduling": "operational",
+    "modular-agent-skeletons": "validated_preproduction",
+    "llm-harness-adapters": "validated_preproduction",
+    "deterministic-output-gates": "validated_preproduction",
+    "recursive-factory-improvement": "designed",
+}
+
+REQUIRED_FACTORY_INVARIANTS = {
+    "zaibatsu_is_meta_factory",
+    "factory_instances_are_project_scoped",
+    "unknown_factories_fail_closed",
+    "one_scheduler_of_record_per_workload",
+    "plaintext_secrets_never_enter_git",
+    "model_output_is_never_verification",
+    "feedback_cannot_self_promote",
+    "factory_changes_require_deterministic_evidence",
+    "owner_controls_irreversible_effects",
+}
+
+REQUIRED_DETERMINISTIC_GATES = (
+    "schemas",
+    "linters",
+    "tests",
+    "hashes",
+    "policy",
+    "receipts",
+    "owner_approval",
+)
 
 REQUIRED_COMPONENT_IDS = {
     "current-systemd-executor",
@@ -195,6 +256,172 @@ MARKDOWN_LINK_RE = re.compile(r"(?<!!)\[[^\]]+\]\(([^)]+)\)")
 
 def load_architecture(path: Path = ARCHITECTURE_PATH) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def load_factory_model(path: Path = FACTORY_MODEL_PATH) -> dict[str, Any]:
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def validate_factory_model(data: Any) -> list[str]:
+    """Validate Zaibatsu's factory-of-software-factories contract."""
+    errors: list[str] = []
+    if not isinstance(data, dict):
+        return ["factory model root must be an object"]
+
+    if data.get("schema_version") != FACTORY_MODEL_SCHEMA_VERSION:
+        errors.append(
+            f"factory schema_version must equal {FACTORY_MODEL_SCHEMA_VERSION}"
+        )
+
+    project = data.get("project")
+    if not isinstance(project, dict):
+        errors.append("factory model project must be an object")
+    elif (
+        project.get("name") != PROJECT_NAME
+        or project.get("role") != "meta_factory_control_layer"
+        or project.get("definition") != "A factory of software factories"
+    ):
+        errors.append("Zaibatsu must remain the meta-factory control layer")
+
+    classes = data.get("factory_classes")
+    if not isinstance(classes, dict) or set(classes) != {
+        "control_factory",
+        "economic_factory",
+    }:
+        errors.append("factory_classes must define control_factory and economic_factory")
+    elif not all(isinstance(value, str) and value.strip() for value in classes.values()):
+        errors.append("factory class definitions must be non-empty strings")
+
+    instances = data.get("factory_instances")
+    instance_by_id: dict[str, dict[str, Any]] = {}
+    if not isinstance(instances, list):
+        errors.append("factory_instances must be a list")
+    else:
+        for index, instance in enumerate(instances):
+            if not isinstance(instance, dict):
+                errors.append(f"factory instance at index {index} must be an object")
+                continue
+            instance_id = instance.get("id")
+            if not isinstance(instance_id, str) or not instance_id.strip():
+                errors.append(f"factory instance at index {index} must have a string id")
+                continue
+            if instance_id in instance_by_id:
+                errors.append(f"duplicate factory instance id: {instance_id}")
+                continue
+            instance_by_id[instance_id] = instance
+            expected = REQUIRED_FACTORY_INSTANCES.get(instance_id)
+            if expected is not None and (
+                instance.get("class"), instance.get("maturity")
+            ) != expected:
+                errors.append(
+                    f"{instance_id}: factory class and maturity must remain {expected!r}"
+                )
+            if not isinstance(instance.get("purpose"), str) or not instance[
+                "purpose"
+            ].strip():
+                errors.append(f"{instance_id}: factory purpose must be a non-empty string")
+        if set(instance_by_id) != set(REQUIRED_FACTORY_INSTANCES):
+            errors.append("factory_instances must exactly match the closed project registry")
+
+    lifecycle = data.get("factory_lifecycle")
+    if lifecycle != list(REQUIRED_FACTORY_LIFECYCLE):
+        errors.append("factory_lifecycle must preserve the complete meta-factory order")
+
+    capabilities = data.get("capabilities")
+    capability_by_id: dict[str, dict[str, Any]] = {}
+    if not isinstance(capabilities, list):
+        errors.append("factory capabilities must be a list")
+    else:
+        for index, capability in enumerate(capabilities):
+            if not isinstance(capability, dict):
+                errors.append(f"factory capability at index {index} must be an object")
+                continue
+            capability_id = capability.get("id")
+            if not isinstance(capability_id, str) or not capability_id.strip():
+                errors.append(f"factory capability at index {index} must have a string id")
+                continue
+            if capability_id in capability_by_id:
+                errors.append(f"duplicate factory capability id: {capability_id}")
+                continue
+            capability_by_id[capability_id] = capability
+            expected_maturity = REQUIRED_FACTORY_CAPABILITY_MATURITIES.get(
+                capability_id
+            )
+            if capability.get("maturity") != expected_maturity:
+                errors.append(
+                    f"{capability_id}: factory capability maturity must remain "
+                    f"{expected_maturity!r}"
+                )
+            for field in ("layer", "scope"):
+                if not isinstance(capability.get(field), str) or not capability[
+                    field
+                ].strip():
+                    errors.append(
+                        f"{capability_id}: factory capability {field} must be non-empty"
+                    )
+        if set(capability_by_id) != set(REQUIRED_FACTORY_CAPABILITY_MATURITIES):
+            errors.append("factory capabilities must exactly match the required meta-factory set")
+
+    reproduction = data.get("reproducibility_policy")
+    if not isinstance(reproduction, dict) or reproduction != {
+        "host_configuration": "ansible",
+        "worker_environments": "nix",
+        "nix_currently_deployed": False,
+    }:
+        errors.append("reproducibility policy must preserve the Ansible/Nix boundary")
+
+    versioning = data.get("versioning_policy")
+    if not isinstance(versioning, dict) or versioning != {
+        "source_and_intended_state": "git",
+        "encrypted_static_secrets": "sops_age",
+        "runtime_machine_secrets": "bounded_secret_manager",
+        "plaintext_secrets_in_git": False,
+    }:
+        errors.append("versioning policy must preserve Git, SOPS/age, and no plaintext")
+
+    scheduling = data.get("scheduling_policy")
+    if not isinstance(scheduling, dict) or scheduling != {
+        "supported_schedulers": ["systemd", "cron"],
+        "durable_default": "systemd",
+        "one_scheduler_of_record_per_workload": True,
+    }:
+        errors.append("scheduling policy must preserve systemd, cron, and single ownership")
+
+    agent_policy = data.get("agent_policy")
+    if not isinstance(agent_policy, dict):
+        errors.append("agent_policy must be an object")
+    else:
+        if agent_policy.get("skeleton_status") != "source_only":
+            errors.append("agent skeletons must remain source_only until deployment evidence")
+        if agent_policy.get("factory_deployment_status") != "planned":
+            errors.append("agent factory deployment must remain planned")
+        if agent_policy.get("harness_binding") != "model_independent_typed_ports":
+            errors.append("agent harnesses must bind through model-independent typed ports")
+        if agent_policy.get("deterministic_gates") != list(
+            REQUIRED_DETERMINISTIC_GATES
+        ):
+            errors.append("agent deterministic gates must remain complete and ordered")
+        if agent_policy.get("planned_gate_extensions") != ["repository_hooks"]:
+            errors.append("repository hooks must remain an explicit planned gate extension")
+        if agent_policy.get("model_may_authorize_external_effect") is not False:
+            errors.append("a model may not authorize an external effect")
+
+    feedback = data.get("feedback_policy")
+    if not isinstance(feedback, dict) or feedback != {
+        "evidence_return_maturity": "operational",
+        "shared_pattern_promotion_maturity": "designed",
+        "promotion_authority": "reviewed_deterministic_policy_and_owner_gate",
+        "factory_may_self_promote": False,
+    }:
+        errors.append("feedback policy must remain evidence-bound and owner-gated")
+
+    invariants = data.get("invariants")
+    if not isinstance(invariants, dict) or set(invariants) != REQUIRED_FACTORY_INVARIANTS:
+        errors.append("factory invariants must exactly match the required meta-factory set")
+    elif not all(value is True for value in invariants.values()):
+        errors.append("every factory invariant must remain true")
+
+    return errors
 
 
 def validate_architecture(data: Any) -> list[str]:
@@ -468,6 +695,54 @@ def validate_contract_consistency(architecture: Any, readiness: Any) -> list[str
     return []
 
 
+def validate_factory_consistency(architecture: Any, factory_model: Any) -> list[str]:
+    """Keep the component architecture and meta-factory model aligned."""
+    if not isinstance(architecture, dict) or not isinstance(factory_model, dict):
+        return []
+
+    errors: list[str] = []
+    instances = factory_model.get("factory_instances")
+    if isinstance(instances, list) and all(
+        isinstance(instance, dict) and isinstance(instance.get("id"), str)
+        for instance in instances
+    ):
+        instance_ids = [instance["id"] for instance in instances]
+        if architecture.get("project_allowlist") != instance_ids:
+            errors.append(
+                "architecture project_allowlist must match factory instance order"
+            )
+
+    components = architecture.get("components")
+    capabilities = factory_model.get("capabilities")
+    if not isinstance(components, list) or not isinstance(capabilities, list):
+        return errors
+    component_maturities = {
+        component.get("id"): component.get("maturity")
+        for component in components
+        if isinstance(component, dict) and isinstance(component.get("id"), str)
+    }
+    capability_maturities = {
+        capability.get("id"): capability.get("maturity")
+        for capability in capabilities
+        if isinstance(capability, dict) and isinstance(capability.get("id"), str)
+    }
+    required_matches = {
+        "ansible-configuration": "ansible-reproduction",
+        "nix-project-environments": "nix-environment-reproduction",
+        "current-systemd-executor": "systemd-scheduling",
+        "factory-droid-contribution": "llm-harness-adapters",
+    }
+    for component_id, capability_id in required_matches.items():
+        if component_maturities.get(component_id) != capability_maturities.get(
+            capability_id
+        ):
+            errors.append(
+                f"{component_id} maturity must match meta-factory capability "
+                f"{capability_id}"
+            )
+    return errors
+
+
 def public_files(root: Path = ROOT) -> list[Path]:
     paths: list[Path] = []
     excluded_directories = {".git", "__pycache__", "runtime"}
@@ -592,6 +867,7 @@ def validate_local_links(root: Path = ROOT) -> list[str]:
 def main() -> int:
     errors: list[str] = []
     data: Any = None
+    factory_model: Any = None
     readiness: Any = None
     errors.extend(validate_public_paths())
     errors.extend(validate_required_files())
@@ -602,12 +878,19 @@ def main() -> int:
     else:
         errors.extend(validate_architecture(data))
     try:
+        factory_model = load_factory_model()
+    except (OSError, json.JSONDecodeError) as exc:
+        errors.append(f"cannot load factory model: {exc}")
+    else:
+        errors.extend(validate_factory_model(factory_model))
+    try:
         readiness = json.loads(READINESS_PATH.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:
         errors.append(f"cannot load submission readiness: {exc}")
     else:
         errors.extend(validate_submission_readiness(readiness))
     errors.extend(validate_contract_consistency(data, readiness))
+    errors.extend(validate_factory_consistency(data, factory_model))
     errors.extend(validate_public_safety())
     errors.extend(validate_local_links())
 
@@ -620,6 +903,11 @@ def main() -> int:
     print("Zaibatsu validation passed")
     print(f"- {len(REQUIRED_FILES)} required files present")
     print(f"- {len(data['components'])} architecture components checked")
+    print(
+        f"- {len(factory_model['factory_instances'])} software factories and "
+        f"{len(factory_model['capabilities'])} meta-factory capabilities checked"
+    )
+    print(f"- {len(REQUIRED_FACTORY_INVARIANTS)} meta-factory invariants checked")
     print(f"- {len(REQUIRED_TRUE_INVARIANTS)} fail-closed invariants checked")
     print(f"- {len(readiness['gates'])} submission gates checked")
     print("- public-safety and local-link checks passed")

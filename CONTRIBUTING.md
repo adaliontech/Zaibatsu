@@ -6,10 +6,13 @@ architecture, validator, tests, and public documentation.
 ## Before changing anything
 
 1. Read [`AGENTS.md`](AGENTS.md).
-2. Preserve the deterministic-control and least-authority invariants.
-3. Decide whether the change is operational, validated preproduction,
+2. Preserve the meta-factory, deterministic-control, and least-authority
+   invariants in both machine-readable contracts.
+3. Keep control-factory and economic-factory identities, credentials,
+   schedulers, data, and production authority project-scoped.
+4. Decide whether the change is operational, validated preproduction,
    designed, or planned; do not inflate maturity.
-4. Keep operational infrastructure and personal data out of this repository.
+5. Keep operational infrastructure and personal data out of this repository.
 
 ## Validate
 
@@ -20,6 +23,11 @@ git diff --check
 
 New validation behavior should include an adversarial test that demonstrates
 the failure it prevents.
+
+Changes to factory lifecycle, reproduction, versioning, scheduling, worker
+harnesses, verification, or feedback must keep
+[`architecture/factory-model.json`](architecture/factory-model.json) and
+[`architecture/system.json`](architecture/system.json) consistent.
 
 ## Pull request evidence
 

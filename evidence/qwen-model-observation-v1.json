@@ -6,7 +6,7 @@
   "transport": "authenticated_private_openai_compatible_gateway",
   "observation_source": "authenticated llama.cpp props response",
   "reported_observation": {
-    "loaded_filename_identifies": "Qwen 3.8 27B",
+    "loaded_filename_label": "Qwen 3.8 27B",
     "artifact_filename_format": "GGUF",
     "server_reported_quantization": "Q4_K - Small"
   },
@@ -17,8 +17,8 @@
     "model_alias"
   ],
   "limitations": [
-    "The observation identifies model family and size from the loaded filename and alias pattern.",
-    "The observation does not independently map a weight-file hash to an official artifact.",
+    "The observation records a family-and-size label from the loaded filename and alias pattern; it does not independently verify that label.",
+    "The observation does not map a weight-file hash to an official artifact or prove an official model name or parameter count.",
     "Embedded GGUF general.name and parameter-count metadata were not recorded."
   ]
 }

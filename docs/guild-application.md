@@ -7,25 +7,27 @@
 **Link to submission:** `https://github.com/adaliontech/Zaibatsu`
 
 The application is prepared but must not be submitted yet. The official Guild
-path requires real Factory work and a public link. The public repository is
-complete and the hardened v1.0.1 fresh-clone proof passed. The final demo and
-applicant materials remain explicit gates in
+path requires real Factory work and a public link. The prior v1.0.1 proof
+passed; the meta-factory correction requires a new v1.1.0 public-clone proof.
+The final demo and applicant materials remain explicit gates in
 [`architecture/submission-readiness.json`](../architecture/submission-readiness.json).
 
 ## Current project description
 
-Zaibatsu is an executable reference architecture for putting deterministic
-control around probabilistic AI workers. It models durable jobs, scoped
-capabilities, private Tailscale administration, Ansible configuration,
-artifact gates, and recovery boundaries, then validates the safety invariants
-offline. The case study distinguishes operational, preproduction, designed,
-planned, and pending-evidence components—including the validated PostgreSQL
-Dispatcher and planned Nix and project sandboxes.
+Zaibatsu is a reproducible meta-factory: the control layer that builds and
+governs project-scoped software factories. It models a control factory and two
+economic factories, then makes their lifecycle executable—from Git/SOPS
+versioning and Ansible/Nix reproduction through cron/systemd scheduling,
+modular agent skeletons, interchangeable LLM harnesses, deterministic output
+gates, evidence return, and reviewed recursive improvement. The public status
+ledger distinguishes operational, validated-preproduction, designed, and
+planned capabilities rather than presenting the entire target as deployed.
 
 The core repository works without a model or Droid credentials. For the Guild
 case study, authenticated Factory Droid used an owner-operated GGUF whose
-server-reported loaded filename identifies Qwen 3.8 27B and whose server
-reports `Q4_K - Small`, on a clean sanitized clone. Its reviewed change
+loaded filename was labeled `Qwen 3.8 27B` and whose server reports
+`Q4_K - Small`, on a clean sanitized clone. The label is not independently
+verified model identity or parameter count. Its reviewed change
 strengthened the contract from a
 three-stage check to the full ordering `persist <
 execute_in_sandbox < verify < policy_decision < controlled_side_effect` and
@@ -40,44 +42,47 @@ OpenAI-compatible gateway, changed exactly
 new test moves `policy_decision` before `verify`; the pre-change validator
 accepted that unsafe ordering, while the shipped validator rejects it with a
 deterministic adjacent-stage error. Droid reported 36 passing tests, and an
-independent run reproduced all 36 before later integration, branding, and
-release-hardening checks brought the package to 59 passing tests. No model or
+independent run reproduced all 36 before later integration, branding, release,
+and meta-factory checks brought the package to 70 passing tests. No model or
 Factory credential is published.
 
 ## One-line description
 
-An executable reference architecture for durable, auditable software factories
-where deterministic systems govern probabilistic workers.
+The reproducible control layer for building, governing, and recursively
+improving modular software factories.
 
 ## Optional public Guild bio
 
-Independent builder working on self-hosted agentic systems, reproducible
-infrastructure, and deterministic safety boundaries for AI-assisted software
-operations.
+Independent builder creating self-hosted software factories with reproducible
+infrastructure, modular agents, interchangeable model harnesses, and
+deterministic operational boundaries.
 
 ## Social post draft
 
-I built Zaibatsu: deterministic control around probabilistic workers. It turns
-agentic-system boundaries into an executable architecture contract—durable
-jobs, scoped capabilities, artifact gates, honest maturity labels, and no
-direct model-to-production path. Local-Qwen-backed Factory Droid added and
-tested the full deterministic task-flow ordering boundary.
+I built Zaibatsu, the factory of software factories: a reproducible control
+layer for versioning, scheduling, verifying, and improving project-scoped
+software factories. Git/SOPS, Ansible/Nix, cron/systemd, modular agent
+skeletons, interchangeable LLM harnesses, deterministic gates, and no direct
+model-to-production path. Local-Qwen-backed Factory Droid strengthened and
+tested one of those gate-ordering invariants.
 https://github.com/adaliontech/Zaibatsu @FactoryAI
 
 ## Guild Council interview notes
 
 ### What did you build?
 
-A public architecture kit that describes and tests the control contract around
-a real self-hosted software-factory program. It is useful without access to my
-private fleet: clone it and run one offline command to validate the model and
-adversarial cases.
+A public executable architecture for the meta-factory above my real
+self-hosted software factories. It defines factory identity, lifecycle,
+reproduction, scheduling, modular work, harness-independent verification,
+feedback, and promotion. Anyone can clone it and validate the model and
+adversarial cases offline without access to my private fleet.
 
 ### Why does it matter?
 
-AI engineering often focuses on the worker model while leaving task state,
-permissions, side effects, and recovery implicit. Zaibatsu makes those
-boundaries first-class and machine-checkable.
+Software-factory projects often focus on the model while leaving factory
+identity, reproducibility, scheduler ownership, task state, feedback,
+cross-project permissions, effects, and recovery implicit. Zaibatsu makes the
+factory itself a versioned, modular, machine-checkable object.
 
 ### Where did Factory contribute?
 
@@ -89,27 +94,30 @@ validation result are retained without publishing either credential.
 
 ### What is the most important design decision?
 
-An LLM response is never verification. Workers return artifacts and evidence;
-deterministic software decides whether the job may transition or cause an
-external side effect.
+Feedback is recursive, but authority is not. Models and economic factories
+return typed artifacts and evidence; deterministic software and owner policy
+decide whether a job, effect, shared template, or cross-factory improvement may
+be promoted.
 
 ### What is actually deployed?
 
-Private administration, host automation, shadow execution, and the existing
-systemd scheduler have current evidence. Dispatcher PostgreSQL and a fixed
-read-only coordinator lane are live; the broader API/policy contract is
-validated preproduction, and systemd remains the production workload
-authority. Sandboxes and Nix environments are not production claims. The
-Droid contribution is validated preproduction work and has no deployment
+The closed factory registry, systemd-managed shared schedules, selected
+downstream cron schedules, private administration, bounded read-only
+coordination, backups, and evidence return are operational at stated scopes.
+Ansible, SOPS/age, broader Dispatcher contracts, deterministic gates, and the
+modular agent scaffold have preproduction or source evidence. The agent
+scaffold is not deployed, Nix and sandboxes remain planned, recursive shared
+promotion remains designed, and the Droid contribution has no deployment
 authority.
 
 ### What would you build next?
 
-Expand the already-deployed read-only Dispatcher slice without skipping its
-gates: add an isolated per-job workspace and deterministic artifact verifier,
-then prove recovery and duplicate-side-effect denial before authorizing one
-low-risk mutation. Nix follows when the same worker toolchain can be
-reproduced on multiple eligible nodes.
+Make one complete factory definition reproducible end to end: canonical Git
+lineage, SOPS/age policy, Ansible host state, a real Nix worker environment,
+one scheduler owner, one source-only agent profile promoted through
+qualification into an observe-only sandbox, and evidence returned to Zaibatsu.
+Only after recovery and no-effect proof would I activate another profile or a
+low-risk mutation.
 
 ## Applicant-owned fields
 
@@ -132,8 +140,8 @@ the public repository:
 - [x] Factory contribution maturity changes from `pending_evidence` only after
       the receipt exists.
 - [x] Repository is published under the intended owner with an MIT license.
-- [x] Hardened v1.0.1 release candidate passes `make validate` from a credential-free
-      clone.
+- [ ] Meta-factory v1.1.0 release candidate passes `make validate` from a
+      credential-free clone.
 - [x] Public repository and article links resolve without authentication.
 - [ ] Demo clip or screenshots show a real Factory task and validation result.
 - [x] No private host, credential, recovery, or deployment detail is exposed.

@@ -1,90 +1,167 @@
 # Roadmap
 
-The roadmap strengthens the real system in bounded increments. It does not
-authorize production migration.
+The roadmap builds Zaibatsu as a factory of software factories. It records
+technical sequence and evidence gates; it does not authorize production
+changes.
 
-## Phase 0 — Public package and Guild evidence
+## Phase 0 — Public meta-factory contract
 
-- validate the architecture kit — complete locally;
-- connect the owner-operated GGUF whose loaded filename identifies Qwen 3.8
-  27B and whose server reports `Q4_K - Small` through an
-  authenticated OpenAI-compatible endpoint without committing its API key —
-  complete;
-- authenticate headless Droid separately from the model credential — complete;
-- pass the static Droid preflight, then run, review, and record one bounded
-  Factory/Droid contribution — complete;
-- publish the sanitized repository — complete;
-- reproduce from a credential-free public clone — complete;
-- record a short demo and submit the public link.
+- define Zaibatsu as the control factory above economic software factories;
+- encode the closed factory registry and lifecycle;
+- represent Git/SOPS, Ansible/Nix, cron/systemd, modular skeletons, harnesses,
+  deterministic gates, and recursive improvement at truthful maturity;
+- publish sanitized evidence and adversarial tests;
+- reproduce `v1.1.0` from a credential-free clone;
+- record the Guild demo and complete applicant-owned submission materials.
 
-Exit: every Guild claim is backed by a public artifact or explicit private
-evidence class, with no pending claim disguised as complete.
+Exit: the public narrative and both machine-readable contracts describe the
+same meta-factory without inflating source-only or planned capabilities.
 
-## Phase 1 — Minimum Dispatcher contract — complete
+## Phase 1 — Factory identity and versioning
 
-- PostgreSQL schema for jobs, transitions, attempts, leases, evidence, policy
-  decisions, and append-only events;
-- exact three-project enum and deny-unknown behavior;
-- transactional transition and lease tests;
-- backup, restore, and migration rollback tests.
+Current foundation:
 
-Exit: jobs survive worker failure, invalid transitions fail closed, and every
-terminal state retains verifier evidence.
+- closed `orchestrator`, `simbapool`, and `ffn` registry;
+- denied unknown-factory routing;
+- Git-reviewed source and immutable public releases;
+- validated SOPS/age ciphertext and recipient policy;
+- bounded runtime machine-secret delivery.
 
-The current private source passes 158 focused Dispatcher tests and 104 live
-PostgreSQL 16.15 assertions across two disposable socket-only clusters,
-including backup/restore equivalence and post-restore continuation.
+Still required:
 
-## Phase 2 — One bounded worker path — narrow read-only lane operational
+- complete canonical private repository consolidation;
+- preserve histories and current dirty work through reviewed cutovers;
+- bind each factory definition to its repository and release lineage;
+- prove factory-scoped static and runtime secret recovery.
 
-Complete for the fixed read-only collection lane:
+Exit: every factory has one canonical versioned definition, no plaintext secret
+in Git, and an independently recoverable identity/secret boundary.
 
-- deterministic jobs for all three allowlisted projects;
-- authenticated capability-bound workers;
-- durable attempts, retained failures, and receipt-bound artifacts;
-- bounded retry, idempotent time buckets, and no model invocation.
+## Phase 2 — Reproducible factory foundations
 
-Still required before broader authority:
+Ansible boundary:
 
-- isolated job workspace;
-- deterministic artifact verification for a side-effecting workflow;
-- interchangeable-worker recovery and duplicate-side-effect denial.
+- retain reviewed host roles, hardening, identities, services, guards,
+  monitoring, rollback, and idempotence evidence;
+- extend one factory at a time with exact acceptance and recovery receipts.
 
-Exit: two interchangeable workers can complete or resume the same bounded job
-without duplicate side effects.
+Nix boundary:
 
-## Phase 3 — Project sandboxes
-
-- separate identities, repositories, credentials, networks, memory, and
-  deployment permissions;
-- lifecycle and cleanup policy;
-- retained failed workspace and recovery drill;
-- denial tests for cross-project access.
-
-Exit: compromise of one project worker cannot access the other project or the
-control plane.
-
-## Phase 4 — Nix worker environments
-
-- introduce one project flake only after the actual dependency contract is
+- introduce one real worker environment only after its dependency contract is
   known;
-- pin the toolchain and lock file;
-- reproduce on at least two eligible nodes;
-- prove cache-independent clean development shells;
-- integrate the result into worker eligibility.
+- pin flake inputs and lock file;
+- reproduce the same revision on at least two eligible nodes;
+- prove a clean, cache-independent environment;
+- make a missing or mismatched environment deny worker eligibility.
 
-Exit: the same revision yields the same declared tool environment on multiple
-workers, and a missing Nix environment makes a worker ineligible rather than
-triggering improvisation.
+Exit: Ansible reproduces the host and Nix reproduces the worker toolchain; the
+two evidence classes are not conflated.
 
-## Phase 5 — Controlled production authority
+## Phase 3 — Scheduler ownership
 
-- private monitoring and alerting;
-- off-provider encrypted restore drill;
-- single-writer scheduler and publication proof;
-- per-unit cutover and rollback;
-- observation window with explicit rollback triggers;
-- owner authorization after all evidence passes.
+Current foundation:
 
-Exit: the Dispatcher owns only the scopes that have independently passed their
-full production and recovery gates.
+- systemd owns managed durable control-host workloads;
+- cron remains active for selected downstream factory workloads;
+- current authority inventories name the scheduler of record.
+
+Still required:
+
+- finish downstream scheduler/security reconciliation;
+- ensure every workload has one trigger, failure route, retry contract,
+  recovery path, and SLO;
+- eliminate duplicate scheduler authority before any migration;
+- preserve cron as an explicit adapter until its workloads are deliberately
+  moved or retired.
+
+Exit: exactly one cron or systemd owner exists for every workload and scheduler
+migration is receipt-bound and reversible.
+
+## Phase 4 — Durable Dispatcher control
+
+Complete at bounded scope:
+
+- PostgreSQL jobs, transitions, attempts, leases, evidence, decisions, and
+  audit contracts;
+- three-factory deny-unknown policy;
+- deterministic read-only coordinator;
+- authenticated workers, retained failures, fixed time buckets, and receipts;
+- backup/restore equivalence and post-restore continuation.
+
+Still required before broad authority:
+
+- isolated per-job workspaces;
+- complete artifact-store and verification adapters;
+- interchangeable-worker recovery;
+- duplicate and uncertain-effect reconciliation;
+- independent alerts and clean-host recovery.
+
+Exit: a bounded side-effecting workflow can resume safely without duplicate or
+uncertain effects, and recovery does not depend on Dispatcher being healthy.
+
+## Phase 5 — Modular agent factory
+
+Implemented source foundation:
+
+- typed module, artifact, flow, fragment, implementation, handler, profile,
+  runtime, placement, worker, evaluation, approval, and effect contracts;
+- 21 logical modules, 6 flows, 12 deployment profiles, and 23 implementation
+  variants;
+- source-only deterministic quality and evidence joins;
+- 309 passing scaffold tests.
+
+Activation requirements:
+
+- deploy immutable artifact and state foundations;
+- qualify every selected deterministic handler and model implementation;
+- provision factory-scoped isolated worker pools;
+- enforce network, secret, budget, rate, and capacity policy;
+- connect durable approval/resume, cancellation, and uncertain-effect
+  reconciliation;
+- pass one observe-only canary with independent alerts and recovery;
+- activate one profile at a time.
+
+Exit: reusable skeletons can be deployed to eligible factories without sharing
+authority or silently changing production.
+
+## Phase 6 — Multi-harness qualification
+
+- define fixed task/evaluation fixtures for each probabilistic module class;
+- compare Codex, Qwen, Factory Droid, and future harness implementations behind
+  identical typed ports where their terms and capabilities permit;
+- measure quality, latency, resource use, cost, failure, and recovery;
+- preserve deterministic results through independent model review;
+- deny unqualified or unhealthy implementations without stopping the
+  deterministic control layer;
+- add repository hooks only after their exact scope and bypass policy are
+  tested.
+
+Exit: harness choice is an evidence-bound implementation decision, never an
+authority grant or hard dependency.
+
+## Phase 7 — Recursive improvement
+
+- normalize observations, failures, artifact outcomes, and owner corrections;
+- classify improvement candidates without granting mutation authority;
+- bind a proposed shared module/template/gate change to its source evidence;
+- test it against the reporting factory and independent regression fixtures;
+- require owner/policy promotion and an eligible-factory rollout plan;
+- retain rollback and prove no cross-factory privilege expansion;
+- measure whether the promoted pattern actually improves later outcomes.
+
+Exit: factory evidence can improve Zaibatsu and eligible factories through a
+reviewed, versioned, reversible loop; no factory can self-promote.
+
+## Phase 8 — Controlled production authority
+
+- complete project/job sandboxes and separate future sandbox hosts where
+  required;
+- pass private monitoring, independent alerting, backup, restore, and clean-host
+  recovery gates;
+- cut over one factory capability at a time;
+- retain owner approval for publication, deployment, credentials, spending,
+  infrastructure, destructive data changes, and sensitive signing effects;
+- observe each promotion with explicit rollback triggers.
+
+Exit: Zaibatsu owns only the scopes that have passed their complete
+qualification, recovery, owner-approval, and observation gates.

@@ -2,58 +2,81 @@
 
 Status date: **2026-08-29**
 
-This ledger prevents target architecture from being presented as deployed
-runtime. The maturity labels are enforced by
+This ledger distinguishes the Zaibatsu meta-factory vision from deployed
+runtime. Maturity is enforced by
+[`architecture/factory-model.json`](../architecture/factory-model.json) and
 [`architecture/system.json`](../architecture/system.json).
 
-| Capability | Status | Evidence strength | What the claim means |
-| --- | --- | --- | --- |
-| Current systemd workload executor | Operational | Runtime and checked-in unit evidence | Existing schedules remain authoritative until controlled migration |
-| Private Tailscale administration | Operational | Connection, firewall, and identity checks recorded privately | The management path is private; public recovery access has a separate removal gate |
-| Ansible host configuration | Validated preproduction | Syntax, check, apply, idempotence, service, and guard evidence | Configuration has been exercised without granting production authority |
-| OpenTofu lifecycle controls | Validated preproduction | Offline validation and saved-plan policy tests | Apply remains review-gated and is not a CI authority |
-| Non-publishing workload shadow | Validated preproduction | Disabled timers, execution guards, regression, and dry-run evidence | Shadow execution cannot publish or become a duplicate scheduler |
-| Scoped machine-secret delivery | Validated preproduction | Destination scope, file-mode, and deny-all authorization receipts | Personal-vault or cross-project authority is not part of the design |
-| Provenance-aware knowledge retrieval | Operational | Local retrieval tests and receipts | Agents receive small routed context packets; prose is not task state |
-| Dispatcher API and policy engine | Validated preproduction | 158 focused tests covering contracts, replay protection, coordinator behavior, recovery, and local transport; sanitized private-source receipt linked below | The broader side-effecting API surface is implemented and evidenced without general production authority |
-| PostgreSQL jobs and leases | Validated preproduction | 104 live assertions on two disposable PostgreSQL 16.15 clusters, including leases, privilege denial, audit chains, backup/restore equivalence, and continuation after restore | The full state contract is implemented and exercised privately; the public receipt records its reproducibility limitation |
-| Bounded read-only coordinator lane | Operational | Distinct machine-readable component plus live durable job state, deterministic time-bucket scheduling, three eligible project workers, retained failures, and receipt-bound completion | The live lane performs fixed read-only collection without a model; it does not authorize broader workload migration |
-| Project sandboxes | Planned | Isolation requirements only | No environment is called a sandbox until its boundaries pass |
-| Nix project environments | Planned | Tool-boundary design only | No current flake or cross-worker reproduction claim |
-| Factory/Droid contribution | Validated preproduction | Authenticated local-Qwen session, reviewed two-file diff, pre-change adversarial proof, and independent validation | Droid strengthened the five-stage deterministic task-flow order and added its rejection test; this grants no production authority |
+## Meta-factory capabilities
 
-The current private Dispatcher source validation passed 158 focused tests. Its
-standalone acceptance harness passed 104 live assertions against two
-disposable, socket-only PostgreSQL 16.15 clusters with production data
-explicitly excluded. These results support the bounded claims above; they do
-not promote untested side-effecting workflows or project sandboxes. The
-sanitized result and source-content digest are in
-[`evidence/dispatcher-validation-v1.json`](../evidence/dispatcher-validation-v1.json);
-the private implementation itself is not publicly reproducible.
+| Capability | Status | Evidence strength | Exact claim |
+| --- | --- | --- | --- |
+| Closed factory registry | Operational | Current control policy and worker/coordinator receipts | Orchestrator, SimbaPool, and FFN are the only factory identities; unknown factories fail closed |
+| Git version control | Operational at reviewed scope | Reviewed source, diffs, immutable public releases | Source and intended state are versioned; complete canonical consolidation of every private product repository is not claimed |
+| SOPS/age secret versioning | Validated preproduction | Ciphertext and recipient-policy checks passed privately | Static bootstrap material can remain encrypted in Git; universal factory adoption is not claimed |
+| Bounded runtime machine secrets | Validated preproduction in this public ledger | Destination-scope, authorization, file-mode, and denial receipts | Runtime delivery excludes personal-vault sessions and cross-factory authority |
+| Ansible host reproduction | Validated preproduction | Syntax, policy, apply, idempotence, service, and guard evidence | Reviewed host configuration has been exercised without making all factories disposable |
+| Nix environment reproduction | Planned | Tool-boundary design only | No accepted flake, lock, or cross-node reproduction proof exists |
+| systemd scheduling | Operational | Effective service/timer and authority evidence | Systemd is the primary durable scheduler for managed workloads |
+| cron scheduling | Operational at selected downstream scope | Current scheduler inventory and workload authority register | Some downstream workloads still use cron; exactly one scheduler must own each workload |
+| Modular agent skeletons | Validated preproduction source | 309 tests over a source-only scaffold with 21 modules, 6 flows, and 12 profiles | Reusable typed contracts exist; no scaffold runtime or production authority is deployed |
+| LLM harness adapters | Validated preproduction at bounded scope | Model-independent source contracts plus reviewed Factory/Qwen contribution | Models can sit behind typed ports; general unattended multi-harness routing is not active |
+| Deterministic output gates | Validated preproduction | Schemas, linters, tests, hashes, policies, receipts, adversarial mutations, and owner gates | Probabilistic output cannot declare itself verified or authorize an effect |
+| Factory evidence return | Operational at bounded scope | Durable failures, artifacts, audit events, memory routing, and retained receipts | Factories can return evidence to the control layer |
+| Recursive shared improvement | Designed | Lifecycle and promotion contract | Automatic classification and cross-factory promotion are not deployed; improvement remains reviewed and owner-gated |
+
+The sanitized meta-factory evidence is
+[`evidence/meta-factory-foundations-v1.json`](../evidence/meta-factory-foundations-v1.json).
+It binds current private-source observations while explicitly recording what is
+not publicly reproducible or deployed.
+
+## Control-plane components
+
+| Capability | Status | Evidence strength | Exact claim |
+| --- | --- | --- | --- |
+| Current systemd workload executor | Operational | Runtime and checked-in unit evidence | Existing managed schedules retain a declared owner until controlled migration |
+| Private Tailscale administration | Operational | Connection, firewall, and identity checks recorded privately | Management remains outside the public application boundary |
+| OpenTofu lifecycle controls | Validated preproduction | Offline validation and saved-plan policy tests | Apply remains owner-gated and CI has no apply authority |
+| Provenance-aware knowledge retrieval | Operational | Local retrieval tests and receipts | Agents receive small routed context packets; prose is not task state |
+| Dispatcher API and policy engine | Validated preproduction | 158 focused tests with sanitized private-source receipt | The broader side-effecting contract is implemented without general production authority |
+| PostgreSQL jobs and leases | Validated preproduction | 104 assertions on two disposable PostgreSQL 16.15 clusters | State, lease, audit, replay, backup/restore, and continuation contracts are exercised privately |
+| Bounded read-only coordinator | Operational | Live durable state, fixed time buckets, three eligible factory workers, retained failures, receipts | A narrow collect-only lane runs without a model; it does not authorize broader migration |
+| Project/job sandboxes | Planned | Isolation requirements only | No environment is called a sandbox until identity, network, credential, lifecycle, and recovery boundaries pass |
+| Probabilistic worker runtime | Designed | Contracts and source scaffold | General-purpose model workers are not activated in production |
+| Artifact verification | Validated preproduction | Tests, schema/hash gates, and private acceptance evidence | Verified source contracts exist; the broad side-effecting runtime is not deployed |
+| Factory Droid contribution | Validated preproduction | Authenticated local-Qwen session, reviewed diff, pre-change adversarial proof, independent validation | Droid strengthened the public task-flow contract and received no production authority |
+
+Dispatcher and PostgreSQL results are bounded by
+[`evidence/dispatcher-validation-v1.json`](../evidence/dispatcher-validation-v1.json).
+The private implementation itself is not publicly reproducible.
 
 ## Current authority
 
-The existing systemd executor remains production workload authority. The
-Dispatcher database and deterministic read-only coordinator are live for one
-bounded workflow family; the broader API/policy and worker architecture remain
-validated preproduction. Migration readiness is explicitly separate from
-migration authorization.
+- The always-on control host and downstream factories use conventional cron or
+  systemd owners for current production workloads.
+- PostgreSQL and the deterministic coordinator own one bounded read-only
+  workflow family.
+- Modular agent definitions, harness-independent implementations, and effect
+  contracts remain source-only until qualification, isolated runtimes,
+  independent alerts, recovery, and an observe-only canary pass.
+- Migration readiness is separate from migration authorization.
 
-## What is deliberately not claimed
+## Deliberately unclaimed
 
-- unattended model routing;
-- general production job execution through Dispatcher;
-- side-effecting Dispatcher transitions outside the bounded read-only lane;
-- completed project sandboxes;
-- Nix-based reconstruction;
-- unattended or production-authorized Qwen/Droid operation;
-- direct agent publication or deployment;
-- autonomous secret or infrastructure administration;
+- autonomous meta-factory self-improvement;
+- automatic rollout of a shared pattern to economic factories;
+- unattended model or harness routing;
+- deployed modular agent profiles;
+- direct model publication, deployment, commit, database apply, or secret use;
+- Nix-based worker reconstruction;
+- completed project/job sandboxes or separate sandbox hosts;
+- general production execution through Dispatcher;
+- complete private repository consolidation;
 - a complete production cutover.
 
 ## Promotion rule
 
-A capability moves to a stronger status only when the evidence required at its
-full scope exists. A passing local test cannot prove a remote service, a running
-process cannot prove recovery, and a design document cannot prove an
-implementation.
+A capability moves to a stronger status only when evidence covers its complete
+scope. Source tests cannot prove deployment, a running process cannot prove
+recovery, one model contribution cannot prove general harness routing, and one
+factory's success cannot authorize promotion into another factory.

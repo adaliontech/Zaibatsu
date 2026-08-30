@@ -1,81 +1,94 @@
 # Demo script
 
-The demo has two cuts. The architecture cut and factual Droid narration are
-ready for owner recording from the immutable v1.0.1 release. Its hardened
-candidate passed the credential-free clone gate before publication.
+The final demo must use the immutable `v1.1.0` release after its
+credential-free clone proof passes. Use only the public repository. Do not show
+private terminals, history, settings, infrastructure, model credentials, or
+personal data.
 
-The demo uses only the public repository. Do not open terminals, tabs, history,
-or files containing private infrastructure, model credentials, or personal
-data.
+## Architecture cut — about 2 minutes
 
-## Architecture cut — 1 minute 50 seconds
+### 0:00–0:20 — The thesis
 
-### 0:00–0:20 — The problem
+Show the README title and hierarchy.
 
-Show the README title and core diagram.
+> Zaibatsu is the factory of software factories. It is the reproducible control
+> layer above project-specific economic factories. Each factory keeps its own
+> identity, data, credentials, schedules, and production authority while
+> Zaibatsu supplies shared definitions, modules, policy, evidence, and recovery.
 
-> AI workers are powerful but probabilistic. Zaibatsu keeps durable jobs,
-> policy, verification, and production side effects in deterministic software,
-> while models remain bounded and replaceable.
+### 0:20–0:50 — The factory lifecycle
 
-### 0:20–0:50 — The executable contract
+Open `architecture/factory-model.json`. Show `project.role`, the three factory
+instances, and `factory_lifecycle`.
 
-Open `architecture/system.json`. Show a probabilistic worker with deterministic
-preconditions and postconditions, then the `direct_agent_to_production_denied`
-invariant.
+> A factory is versioned in Git, static secret material is encrypted with
+> SOPS/age, hosts are reproduced with Ansible, and worker environments will use
+> Nix after cross-node proof. Work has one cron or systemd scheduler, passes
+> deterministic gates, returns evidence, and cannot promote shared changes
+> without review.
 
-> The architecture is data, and its safety boundaries are repository policy.
+### 0:50–1:15 — Modular agents and models
 
-### 0:50–1:25 — Run it
+Show `agent_policy`, `feedback_policy`, and the capability maturity rows.
+
+> Reusable agent skeletons are typed modules and flows, not autonomous
+> personalities. Different LLM harnesses can implement the same bounded port,
+> but schemas, linters, tests, hashes, policies, receipts, and owner approval
+> decide whether the artifact advances. The scaffold is implemented and tested
+> source, not a deployed production agent system.
+
+### 1:15–1:40 — Run the contract
 
 ```bash
 make validate
 ```
 
-> The tests mutate the valid contract. They reject unknown projects,
-> unbounded model exits, direct model publication, unguarded side effects,
-> leaked private detail, and a submission-ready claim with pending gates.
+> The adversarial suite rejects a missing or reclassified factory, promotion
+> before evidence, false Nix maturity, plaintext Git secrets, model effect
+> authority, factory self-promotion, component/model drift, unsafe task order,
+> public leaks, and premature submission claims.
 
-### 1:25–1:50 — Honest status
+### 1:40–2:00 — Honest current state
 
-Open `docs/implementation-status.md` and
-`architecture/submission-readiness.json`.
+Open `docs/implementation-status.md`.
 
-> Tailscale is operational and Ansible has preproduction evidence. Dispatcher
-> PostgreSQL and its broader API contract are validated preproduction, with one
-> narrow deterministic read-only coordinator lane live. Systemd still owns the
-> production workloads; sandboxes and Nix remain planned. The bounded
-> Qwen-backed Droid contribution has no production authority.
+> The closed registry, current schedulers, bounded evidence return, and one
+> deterministic read-only coordination lane are operational. Ansible,
+> SOPS/age, the broader Dispatcher, deterministic gates, and modular skeleton
+> source have bounded validation. Nix, general agent deployment, sandboxes, and
+> automatic shared promotion remain planned or designed.
 
-## Final Guild insert — 25 seconds
+## Factory/Droid insert — about 25 seconds
 
-Show the exact prompt, non-secret model selector, session reference, focused
-diff, adversarial test, and final validation summary.
+Show the retained public prompt, session reference, focused diff, adversarial
+test, and validation output.
 
-> Local Qwen-backed Factory Droid strengthened the task-flow contract to require
-> persistence, sandbox execution, verification, policy decision, and controlled
-> side effect in that order. It changed the validator and one adversarial test.
-> The old validator accepted policy before verification; the new test rejects
-> it. I independently reproduced all 36 contribution-era checks, and the
-> hardened integrated package now passes 59 tests.
+> Factory Droid, backed by my local Qwen endpoint, strengthened one of
+> Zaibatsu's deterministic gates. It required persistence, bounded execution,
+> verification, policy decision, and controlled side effect in that order. The
+> old validator accepted policy before verification; the new test rejects it.
+> I independently reproduced all 36 contribution-era checks, and the v1.1.0
+> package now passes 70 tests.
 
-Then return to the README diagram:
+Return to the hierarchy:
 
-> Workers are disposable. Jobs and evidence are durable. That is Zaibatsu:
-> deterministic control around probabilistic workers.
+> Factory Droid is one harness inside the larger system. Zaibatsu is the layer
+> that makes whole software factories reproducible, modular, verifiable, and
+> capable of reviewed recursive improvement.
 
-## Before the final recording
+## Before recording
 
-1. Use a fresh clone of the immutable `v1.0.1` release tag.
+1. Use a fresh clone of the immutable `v1.1.0` tag.
 2. Increase terminal font size and hide unrelated tabs and notifications.
-3. Confirm `make validate` passes once off camera.
-4. Prepare a redacted Droid receipt and reviewed diff; never show the local
-   settings file or environment.
-5. Record at 1080p or better with readable command output.
+3. Run `make validate` once off camera.
+4. Prepare only the redacted Droid receipt and public diff.
+5. Record at 1080p or better with readable output.
 
 ## Capture checklist
 
 - [ ] Repository URL visible once.
+- [ ] “The factory of software factories” hierarchy visible.
+- [ ] `architecture/factory-model.json` lifecycle and maturity visible.
 - [ ] Factory/Droid visibly doing or reporting real work.
 - [ ] Shipped diff and adversarial test visible.
 - [ ] Independent reproduction command legible.
