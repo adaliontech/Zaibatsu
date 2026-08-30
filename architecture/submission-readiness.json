@@ -91,18 +91,21 @@
     },
     {
       "id": "fresh_clone_reproduction",
-      "status": "pending_external",
+      "status": "complete",
       "required_for_submission": true,
-      "evidence": "Immutable v1.6.0 remains reproduced; the v1.7.0 annotated-release source-lock candidate requires its own full-history credential-disabled clone, 173-test, strict-Git, Gitleaks, schema, determinism, and CI proof"
+      "evidence": "Credential-disabled full-history public clone of the v1.7.0 source-lock candidate passed 173 tests, 75-file validation, strict Git, Gitleaks 8.30.1 history/tree scans, exact bundle and source-lock reproduction, non-authorizing assertions, isolated Draft 2020-12 schema controls, and independent GitHub Actions",
+      "proof": {
+        "candidate_commit": "b9c96ba312827a2b5a09ebef1518092c33cc4a56",
+        "tests_passed": 173,
+        "gitleaks_version": "8.30.1",
+        "github_actions_run": "https://github.com/adaliontech/Zaibatsu/actions/runs/33338396408"
+      }
     },
     {
       "id": "public_demo",
-      "status": "blocked_by_dependency",
+      "status": "pending_external",
       "required_for_submission": true,
-      "evidence": "Record and publish the final clip only after the current source-lock candidate passes fresh-clone proof and is released",
-      "blocked_by": [
-        "fresh_clone_reproduction"
-      ]
+      "evidence": "The source-lock candidate passed fresh-clone proof; record and publish the final clip only after immutable v1.7.0 passes its release proof"
     },
     {
       "id": "applicant_materials",

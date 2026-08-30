@@ -466,9 +466,9 @@ release proof. The bundle-derived qualification-evidence candidate passed the
 same 163-test credential-disabled clone and independent-CI boundary; immutable
 `v1.6.0` and its tag clone passed the full release proof. The final demo and
 applicant-owned form materials remain external submission gates. The `v1.7.0`
-candidate adds annotated-release control-source locking and must pass its own
-173-test full-history clone, schema, secret-scan, determinism, and independent
-CI boundary before release.
+annotated-release control-source-lock candidate passed its own 173-test
+full-history clone, schema, secret-scan, determinism, and independent-CI
+boundary; immutable release proof remains next.
 
 Zaibatsu is an independent project and is not affiliated with or endorsed by
 Factory AI.

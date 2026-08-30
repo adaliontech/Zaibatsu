@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.7.0 - Unreleased
+## 1.7.0 - 2026-08-30
 
 - Added deterministic `source-lock` and `verify-source-lock` workflows that
   rebuild a verified control bundle entirely from an annotated release's Git

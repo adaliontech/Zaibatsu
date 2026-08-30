@@ -26,9 +26,9 @@ changes.
   and content-addressed missing-evidence plan;
 - preserve the reproduced immutable `v1.6.0` bundle-derived contract evidence
   and partial qualification assessment before recording the final demo;
-- reproduce and release the `v1.7.0` annotated-release control-source lock from
-  a full-history credential-disabled clone without inflating it into runtime
-  implementation or qualification evidence;
+- preserve the reproduced `v1.7.0` annotated-release control-source-lock
+  candidate and complete its immutable release without inflating it into
+  runtime implementation or qualification evidence;
 - record the Guild demo and complete applicant-owned submission materials.
 
 Exit: the public narrative, architecture, portable factory, module artifacts,

@@ -24,9 +24,9 @@ qualification-evidence and partial-assessment candidate passed its own
 163-test credential-disabled clone, deterministic-artifact, Gitleaks, schema,
 and independent-CI proof. Immutable v1.6.0 and its tag clone passed the same
 release boundary. The v1.7.0 annotated-release control-source-lock candidate
-must now pass a full-history 173-test clone, Gitleaks, schema, determinism, and
-independent-CI proof before release. The final demo and applicant materials
-remain explicit gates in
+passed its full-history 173-test clone, Gitleaks, schema, determinism, and
+independent-CI proof; immutable release proof remains. The final demo and
+applicant materials remain explicit gates in
 [`architecture/submission-readiness.json`](../architecture/submission-readiness.json).
 
 ## Current project description
@@ -197,7 +197,7 @@ the public repository:
       and independent public CI.
 - [x] Immutable v1.6.0 passes roof and tag CI, tagged-schema byte checks, and
       the full credential-disabled tag-clone reproduction.
-- [ ] Annotated-release source-lock v1.7.0 candidate passes 173 tests,
+- [x] Annotated-release source-lock v1.7.0 candidate passes 173 tests,
       moved/lightweight-tag, worktree, replacement, replay, path, and authority
       adversarial checks, isolated schema validation, exact bundle reproduction,
       Gitleaks, and independent public CI from a full-history clone.
