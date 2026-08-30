@@ -116,6 +116,7 @@ The target stack is intentionally boring at authority boundaries:
 | Qualification planner | Bind a verified control bundle to mandatory runtime evidence requirements | Implemented and tested; the public plan contains no qualification evidence and grants no eligibility or activation |
 | Qualification evidence assessment | Derive and assess reproducible proof from verified control inputs | Contract-conformance evidence is verified for all nine public modules; 58 runtime evidence bindings remain missing, with zero eligibility or activation |
 | Annotated-release source lock | Bind one verified control bundle to exact versioned source inputs | Sixteen Git blobs from immutable v1.6.0 rebuild the byte-identical bundle; no remote, signature, runtime-source, qualification, eligibility, or activation proof is claimed |
+| Deterministic rebuild DAG | Join verified control provenance, module dependencies, qualification gaps, and activation gates | Implemented and tested as an inert nine-action plan; zero actions are qualification-ready, all nine remain blocked, and no execution or effect authority is granted |
 
 The machine-readable source of this hierarchy is
 [`architecture/factory-model.json`](architecture/factory-model.json). The
@@ -179,10 +180,11 @@ make validate
 `make validate` checks the project-owned schemas, architecture contracts,
 portable factory example, content-addressed module artifacts, resolved control
 plan, portable bundle manifest, annotated-release source lock, qualification
-policy, plan, evidence and assessment, sanitized receipts, factory hierarchy
-and lifecycle, maturity boundaries, submission gates, public-safety rules,
-local links, and adversarial mutations. No model request, network access,
-cloud account, secret, Nix installation, or production system is required.
+policy, plan, evidence and assessment, deterministic rebuild DAG, sanitized
+receipts, factory hierarchy and lifecycle, maturity boundaries, submission
+gates, public-safety rules, local links, and adversarial mutations. No model
+request, network access, cloud account, secret, Ansible or Nix execution, or
+production system is required.
 
 ## Apply the contract to another factory
 
@@ -357,6 +359,40 @@ only those facts: 9 of 67 bindings verified, 58 missing, and zero modules
 runtime-eligible. They include no implementation, environment, isolation,
 recovery, independent external-verifier, activation, or deployment proof.
 
+## Plan the factory rebuild
+
+Compile the verified control and qualification state into an ordered,
+machine-readable rebuild graph:
+
+```bash
+python3 scripts/zaibatsu.py rebuild-plan \
+  /tmp/example-product.factory.tar \
+  --output /tmp/example-product.rebuild-plan.json
+python3 scripts/zaibatsu.py verify-rebuild-plan \
+  /tmp/example-product.rebuild-plan.json \
+  /tmp/example-product.factory.tar
+```
+
+Both commands fully reverify the bundle, annotated-release source lock,
+qualification policy, plan, evidence, and assessment. The resulting [rebuild
+plan](examples/economic-factory.rebuild-plan.json) binds their exact digests
+and expresses the nine module slots as a dependency-ordered action DAG. Each
+node records its intended operation, verified evidence, direct missing
+evidence, upstream blockers, and false execution authority. Four gates keep
+control-artifact verification, complete runtime qualification, explicit owner
+approval, and factory activation separate.
+
+For the public contracts, the graph reports 9 of 67 evidence bindings verified,
+58 missing, zero qualification-ready actions, and all nine actions blocked.
+Names such as `apply_host_configuration` and `realize_worker_environment` are
+intents, not executed commands. Generation and verification read no secrets,
+run no Ansible or Nix, install no scheduler, invoke no model, grant no approval,
+activate nothing, deploy nothing, and prove no runtime recovery.
+The current `v1` evidence and assessment contracts intentionally accept only
+bundle-derived contract-conformance receipts, so they cannot advance an action
+to qualification-ready. A future independently verified runtime-evidence
+contract is required before those states can be reached.
+
 ## Factory AI and local Qwen
 
 Zaibatsu is the meta-factory; Factory AI's Droid is one possible worker
@@ -405,6 +441,9 @@ and the complete repository suite was rerun independently.
   and [partial assessment](examples/economic-factory.qualification-assessment.json)
   — reproducible contract-only receipts, exact remaining gaps, and no runtime
   eligibility or activation authority.
+- [Factory rebuild plan](examples/economic-factory.rebuild-plan.json) — the
+  exact nine-action dependency graph, evidence blockers, and four
+  non-authorizing gates derived from fully reverified control inputs.
 - [Project-owned schemas](schemas/) — JSON Schema contracts for architecture,
   readiness, portable factories, and sanitized evidence.
 - [Architecture guide](docs/architecture.md) — how the two models compose.
@@ -444,10 +483,13 @@ and the complete repository suite was rerun independently.
     deterministic verifier scope may satisfy a qualification binding.
 12. A source lock proves exact local Git-object lineage for control contracts;
     it does not prove remote ownership, signature trust, or runtime source.
-13. Tests, schemas, linters, hashes, policy, receipts, and owner approval
+13. A rebuild plan reports intended actions and blockers; it executes no action
+    and grants no qualification, approval, activation, deployment, or recovery
+    authority.
+14. Tests, schemas, linters, hashes, policy, receipts, and owner approval
     outrank model confidence.
-14. Feedback may propose shared improvement but cannot self-promote.
-15. Failed work remains inspectable, and the owner retains a recovery path
+15. Feedback may propose shared improvement but cannot self-promote.
+16. Failed work remains inspectable, and the owner retains a recovery path
     outside Dispatcher.
 
 ## Factory Guild submission
@@ -469,7 +511,8 @@ applicant-owned form materials remain external submission gates. The `v1.7.0`
 annotated-release control-source-lock candidate passed its own 173-test
 full-history clone, schema, secret-scan, determinism, and independent-CI
 boundary; immutable `v1.7.0` and its full-history tag clone passed the complete
-release proof.
+release proof. The v1.8.0 rebuild-DAG candidate is under local validation and
+has not yet earned immutable-release or public-clone evidence.
 
 Zaibatsu is an independent project and is not affiliated with or endorsed by
 Factory AI.

@@ -30,6 +30,9 @@ from factory_composer import (
     validate_module_catalog,
 )
 from factory_qualification import (
+    EXAMPLE_QUALIFICATION_ASSESSMENT_PATH,
+    EXAMPLE_QUALIFICATION_EVIDENCE_PATH,
+    EXAMPLE_QUALIFICATION_PLAN_PATH,
     QUALIFICATION_POLICY_PATH,
     qualification_assessment_for_bundle,
     qualification_evidence_for_bundle,
@@ -38,7 +41,12 @@ from factory_qualification import (
     verify_qualification_evidence_for_bundle,
     verify_qualification_plan_for_bundle,
 )
+from factory_rebuild import (
+    factory_rebuild_plan_for_bundle,
+    verify_factory_rebuild_plan_for_bundle,
+)
 from factory_source_lock import (
+    EXAMPLE_SOURCE_LOCK_PATH,
     source_lock_for_bundle,
     verify_source_lock_for_bundle,
 )
@@ -164,7 +172,7 @@ def load_json_document(path: str, label: str) -> Any | None:
     document_path = Path(path)
     try:
         return load_json_file(document_path)
-    except (OSError, ValueError) as exc:
+    except (OSError, RecursionError, ValueError) as exc:
         print(f"cannot load {label}: {exc}", file=sys.stderr)
         return None
 
@@ -420,6 +428,133 @@ def command_verify_source_lock(
     print(f"locked control inputs: {source_lock['rebuild']['input_count']}")
     print("qualification evidence granted: false")
     print("runtime eligible: false")
+    print("activation authorized: false")
+    return 0
+
+
+def _load_rebuild_inputs(
+    source_lock_path: str,
+    assessment_path: str,
+    evidence_path: str,
+    qualification_plan_path: str,
+    policy_path: str,
+) -> tuple[Any, Any, Any, Any, Any] | None:
+    source_lock = load_json_document(source_lock_path, "factory source lock")
+    assessment = load_json_document(
+        assessment_path,
+        "qualification assessment",
+    )
+    evidence = load_json_document(evidence_path, "qualification evidence")
+    qualification_plan = load_json_document(
+        qualification_plan_path,
+        "qualification plan",
+    )
+    policy = load_json_document(policy_path, "qualification policy")
+    if any(
+        document is None
+        for document in (
+            source_lock,
+            assessment,
+            evidence,
+            qualification_plan,
+            policy,
+        )
+    ):
+        return None
+    return source_lock, assessment, evidence, qualification_plan, policy
+
+
+def command_rebuild_plan(
+    bundle_path: str,
+    source_lock_path: str,
+    assessment_path: str,
+    evidence_path: str,
+    qualification_plan_path: str,
+    policy_path: str,
+    repository_path: str,
+    output: str | None,
+) -> int:
+    bundle = load_bundle(bundle_path, "factory bundle")
+    documents = _load_rebuild_inputs(
+        source_lock_path,
+        assessment_path,
+        evidence_path,
+        qualification_plan_path,
+        policy_path,
+    )
+    if bundle is None or documents is None:
+        return 2
+    source_lock, assessment, evidence, qualification_plan, policy = documents
+    errors, rebuild_plan = factory_rebuild_plan_for_bundle(
+        source_lock,
+        assessment,
+        evidence,
+        qualification_plan,
+        bundle,
+        policy,
+        Path(repository_path),
+    )
+    if errors or rebuild_plan is None:
+        print("cannot build factory rebuild plan", file=sys.stderr)
+        for error in errors:
+            print(f"- {error}", file=sys.stderr)
+        return 1
+    return write_document(rebuild_plan, output)
+
+
+def command_verify_rebuild_plan(
+    rebuild_plan_path: str,
+    bundle_path: str,
+    source_lock_path: str,
+    assessment_path: str,
+    evidence_path: str,
+    qualification_plan_path: str,
+    policy_path: str,
+    repository_path: str,
+) -> int:
+    rebuild_plan = load_json_document(rebuild_plan_path, "factory rebuild plan")
+    bundle = load_bundle(bundle_path, "factory bundle")
+    documents = _load_rebuild_inputs(
+        source_lock_path,
+        assessment_path,
+        evidence_path,
+        qualification_plan_path,
+        policy_path,
+    )
+    if rebuild_plan is None or bundle is None or documents is None:
+        return 2
+    source_lock, assessment, evidence, qualification_plan, policy = documents
+    errors = verify_factory_rebuild_plan_for_bundle(
+        rebuild_plan,
+        source_lock,
+        assessment,
+        evidence,
+        qualification_plan,
+        bundle,
+        policy,
+        Path(repository_path),
+    )
+    if errors:
+        print(f"factory rebuild plan failed: {rebuild_plan_path}", file=sys.stderr)
+        for error in errors:
+            print(f"- {error}", file=sys.stderr)
+        return 1
+    print(f"factory rebuild plan passed: {rebuild_plan_path}")
+    print(
+        "factory rebuild plan sha256: "
+        f"{rebuild_plan['factory_rebuild_plan_sha256']}"
+    )
+    print(f"rebuild actions: {rebuild_plan['summary']['action_count']}")
+    print(
+        "qualification-ready actions: "
+        f"{rebuild_plan['summary']['qualification_ready_actions']}"
+    )
+    print(
+        "missing evidence bindings: "
+        f"{rebuild_plan['summary']['missing_evidence_bindings']}"
+    )
+    print("rebuild executed: false")
+    print("factory rebuilt: false")
     print("activation authorized: false")
     return 0
 
@@ -703,6 +838,74 @@ def build_parser() -> argparse.ArgumentParser:
         help="Git repository containing the release objects",
     )
 
+    rebuild_plan = commands.add_parser(
+        "rebuild-plan",
+        help="compile verified inputs into a non-executing factory rebuild DAG",
+    )
+    rebuild_plan.add_argument("bundle_path")
+    rebuild_plan.add_argument(
+        "--source-lock",
+        default=str(EXAMPLE_SOURCE_LOCK_PATH),
+        help="verified annotated-release source lock JSON",
+    )
+    rebuild_plan.add_argument(
+        "--qualification-assessment",
+        default=str(EXAMPLE_QUALIFICATION_ASSESSMENT_PATH),
+        help="verified qualification assessment JSON",
+    )
+    rebuild_plan.add_argument(
+        "--qualification-evidence",
+        default=str(EXAMPLE_QUALIFICATION_EVIDENCE_PATH),
+        help="qualification evidence JSON",
+    )
+    rebuild_plan.add_argument(
+        "--qualification-plan",
+        default=str(EXAMPLE_QUALIFICATION_PLAN_PATH),
+        help="qualification plan JSON",
+    )
+    rebuild_plan.add_argument(
+        "--policy",
+        default=str(QUALIFICATION_POLICY_PATH),
+        help="qualification policy JSON",
+    )
+    rebuild_plan.add_argument(
+        "--repository",
+        default=".",
+        help="Git repository containing the locked release objects",
+    )
+    rebuild_plan.add_argument(
+        "--output",
+        help="write rebuild-plan JSON to a new file",
+    )
+
+    verify_rebuild_plan = commands.add_parser(
+        "verify-rebuild-plan",
+        help="rebuild and verify a non-executing factory rebuild DAG",
+    )
+    verify_rebuild_plan.add_argument("rebuild_plan_path")
+    verify_rebuild_plan.add_argument("bundle_path")
+    verify_rebuild_plan.add_argument(
+        "--source-lock",
+        default=str(EXAMPLE_SOURCE_LOCK_PATH),
+    )
+    verify_rebuild_plan.add_argument(
+        "--qualification-assessment",
+        default=str(EXAMPLE_QUALIFICATION_ASSESSMENT_PATH),
+    )
+    verify_rebuild_plan.add_argument(
+        "--qualification-evidence",
+        default=str(EXAMPLE_QUALIFICATION_EVIDENCE_PATH),
+    )
+    verify_rebuild_plan.add_argument(
+        "--qualification-plan",
+        default=str(EXAMPLE_QUALIFICATION_PLAN_PATH),
+    )
+    verify_rebuild_plan.add_argument(
+        "--policy",
+        default=str(QUALIFICATION_POLICY_PATH),
+    )
+    verify_rebuild_plan.add_argument("--repository", default=".")
+
     qualification_plan = commands.add_parser(
         "qualification-plan",
         help="list evidence required before bundle modules can be runtime-eligible",
@@ -841,6 +1044,28 @@ def main() -> int:
         return command_verify_source_lock(
             arguments.source_lock_path,
             arguments.bundle_path,
+            arguments.repository,
+        )
+    if arguments.command == "rebuild-plan":
+        return command_rebuild_plan(
+            arguments.bundle_path,
+            arguments.source_lock,
+            arguments.qualification_assessment,
+            arguments.qualification_evidence,
+            arguments.qualification_plan,
+            arguments.policy,
+            arguments.repository,
+            arguments.output,
+        )
+    if arguments.command == "verify-rebuild-plan":
+        return command_verify_rebuild_plan(
+            arguments.rebuild_plan_path,
+            arguments.bundle_path,
+            arguments.source_lock,
+            arguments.qualification_assessment,
+            arguments.qualification_evidence,
+            arguments.qualification_plan,
+            arguments.policy,
             arguments.repository,
         )
     if arguments.command == "qualification-plan":

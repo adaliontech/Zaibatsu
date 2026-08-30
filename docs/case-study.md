@@ -221,6 +221,10 @@ reusable contracts while preserving evidence and limitations:
 - bundle-derived qualification evidence converts exact contract verification
   into nine reproducible receipts, while the deterministic assessment leaves
   the other 58 bindings missing and all nine modules runtime-ineligible;
+- `zaibatsu rebuild-plan` converts the fully reverified control provenance,
+  module dependencies, and qualification state into nine ordered actions and
+  four gates; every action remains blocked and non-authorizing in the public
+  example;
 - project-owned JSON Schemas describe the architecture, factory, readiness,
   and evidence documents;
 - `scripts/validate_repository.py` checks all contracts, evidence semantics,
@@ -247,6 +251,8 @@ The public package can now reject claims or architectures in which:
   trust, runtime implementation source, or qualification evidence;
 - a content-addressed claim or contract-only receipt is presented as runtime
   implementation, independent-verifier, recovery, or activation evidence;
+- a reordered, replayed, dependency-edited, or authority-inflated rebuild plan
+  is presented as the verified factory DAG or permission to execute it;
 - a model authorizes an external effect;
 - a factory promotes its own feedback into shared policy;
 - component and meta-factory maturity ledgers diverge.
@@ -262,6 +268,9 @@ The public package can now reject claims or architectures in which:
 - Complete canonical private repository consolidation remains gated.
 - Public receipts describe private validation but do not make the private
   implementation independently reproducible.
+- The public rebuild plan is an inert dependency and blocker graph, not an
+  Ansible/Nix executor, scheduler installer, runtime qualifier, activation
+  mechanism, deployment workflow, or recovery proof.
 - A Guild demo cannot substitute for recovery drills and operational evidence.
 
 ## Takeaway

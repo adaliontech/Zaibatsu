@@ -302,7 +302,7 @@ def verify_factory_bundle(bundle: bytes) -> tuple[list[str], dict[str, Any] | No
     for path in required:
         try:
             parsed[path] = _strict_json_bytes(payloads[path])
-        except (UnicodeDecodeError, ValueError) as exc:
+        except (RecursionError, UnicodeDecodeError, ValueError) as exc:
             errors.append(f"cannot parse {path}: {exc}")
     if errors:
         return errors, None
@@ -314,7 +314,7 @@ def verify_factory_bundle(bundle: bytes) -> tuple[list[str], dict[str, Any] | No
     for schema_path, (expected_id, expected_digest) in CONTRACT_SCHEMAS.items():
         try:
             schema = _strict_json_bytes(payloads[schema_path])
-        except (UnicodeDecodeError, ValueError) as exc:
+        except (RecursionError, UnicodeDecodeError, ValueError) as exc:
             errors.append(f"cannot parse bundled schema {schema_path}: {exc}")
             continue
         if not isinstance(schema, dict):
@@ -351,7 +351,7 @@ def verify_factory_bundle(bundle: bytes) -> tuple[list[str], dict[str, Any] | No
             continue
         try:
             artifact = _strict_json_bytes(data)
-        except (UnicodeDecodeError, ValueError) as exc:
+        except (RecursionError, UnicodeDecodeError, ValueError) as exc:
             errors.append(f"cannot parse module artifact {module_id}: {exc}")
             continue
         errors.extend(validate_module_artifact(artifact, modules.get(module_id)))
@@ -372,7 +372,7 @@ def verify_factory_bundle(bundle: bytes) -> tuple[list[str], dict[str, Any] | No
     for path, data in payloads.items():
         try:
             parsed_value = _strict_json_bytes(data)
-        except (UnicodeDecodeError, ValueError) as exc:
+        except (RecursionError, UnicodeDecodeError, ValueError) as exc:
             return [f"cannot canonicalize factory bundle member {path}: {exc}"], None
         if data != canonical_json_bytes(parsed_value):
             return [f"factory bundle member is not canonical JSON: {path}"], None
@@ -384,6 +384,7 @@ def verify_factory_bundle(bundle: bytes) -> tuple[list[str], dict[str, Any] | No
         "plan_sha256": plan["plan_sha256"],
         "factory_id": definition["factory"]["id"],
         "manifest": manifest,
+        "plan": plan,
     }
 
 

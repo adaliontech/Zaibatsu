@@ -52,6 +52,12 @@ rebuild the exact verified bundle, and reject replacement-object or
 repository-redirection environment substitution.
 A source lock may not be presented as remote ownership, tag-signature,
 implementation-source, runtime-qualification, eligibility, or deployment proof.
+Rebuild-plan changes must preserve the verified module dependency order, bind
+the exact bundle, source lock, qualification policy, plan, evidence, and
+assessment, and fully reverify those inputs before producing a result. The
+graph may report actions and blockers but may not execute them, infer missing
+evidence, grant qualification or owner approval, activate a factory, deploy
+infrastructure, or claim recovery.
 
 ## Pull request evidence
 

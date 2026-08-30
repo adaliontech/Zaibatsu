@@ -24,6 +24,7 @@ SPEC.loader.exec_module(validator)
 import factory_bundle as bundler
 import factory_composer as composer
 import factory_qualification as qualification
+import factory_rebuild as rebuild
 import factory_source_lock as source_lock
 
 
@@ -1175,6 +1176,15 @@ class FactoryBundleTests(unittest.TestCase):
         self.assertNotEqual(self.bundle, tampered)
         errors, _ = bundler.verify_factory_bundle(tampered)
         self.assertTrue(errors)
+        payloads, read_errors = bundler._read_archive_payloads(self.bundle)
+        self.assertEqual([], read_errors)
+        payloads[bundler.DEFINITION_PATH] = (
+            "[" * 2_000 + "]" * 2_000
+        ).encode("utf-8")
+        deeply_nested = bundler.canonical_tar_bytes(payloads)
+        errors, result = bundler.verify_factory_bundle(deeply_nested)
+        self.assertIsNone(result)
+        self.assertTrue(any("cannot parse" in error for error in errors))
 
     def test_bundled_schema_body_tampering_is_rejected_after_manifest_rebuild(self) -> None:
         payloads, read_errors = bundler._read_archive_payloads(self.bundle)
@@ -1795,7 +1805,6 @@ class FactorySourceLockTests(unittest.TestCase):
             )
             self.assertEqual(2, repeated.returncode)
             self.assertIn("refusing to overwrite", repeated.stderr)
-
     def test_source_lock_does_not_satisfy_runtime_qualification(self) -> None:
         assessment = qualification.load_qualification_assessment()
         self.assertEqual(9, assessment["summary"]["verified_evidence_bindings"])
@@ -1804,6 +1813,339 @@ class FactorySourceLockTests(unittest.TestCase):
         self.assertFalse(
             self.lock["source_lock_boundary"]["grants_qualification_evidence"]
         )
+
+
+class FactoryRebuildPlanTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.factory = validator.load_factory_definition()
+        self.catalog = composer.load_module_catalog()
+        self.artifacts, errors = composer.load_module_artifacts(self.catalog)
+        self.assertEqual([], errors)
+        self.bundle, _ = bundler.build_factory_bundle(
+            self.factory,
+            self.catalog,
+            self.artifacts,
+        )
+        self.source_lock = source_lock.load_source_lock()
+        self.policy = qualification.load_qualification_policy()
+        self.qualification_plan = qualification.load_qualification_plan()
+        self.evidence = qualification.load_qualification_evidence()
+        self.assessment = qualification.load_qualification_assessment()
+        self.rebuild_plan = rebuild.load_rebuild_plan()
+
+    @staticmethod
+    def _refresh_digest(document: dict[str, object], field: str) -> None:
+        without_digest = copy.deepcopy(document)
+        without_digest.pop(field)
+        document[field] = composer.sha256_json(without_digest)
+
+    def _verify(
+        self,
+        document: object,
+        bundle: bytes | None = None,
+        source_document: object | None = None,
+        assessment: object | None = None,
+        repository: Path | None = None,
+    ) -> list[str]:
+        return rebuild.verify_factory_rebuild_plan_for_bundle(
+            document,
+            self.source_lock if source_document is None else source_document,
+            self.assessment if assessment is None else assessment,
+            self.evidence,
+            self.qualification_plan,
+            self.bundle if bundle is None else bundle,
+            self.policy,
+            validator.ROOT if repository is None else repository,
+        )
+
+    def test_repository_rebuild_plan_and_schema_are_exact(self) -> None:
+        errors, generated = rebuild.factory_rebuild_plan_for_bundle(
+            self.source_lock,
+            self.assessment,
+            self.evidence,
+            self.qualification_plan,
+            self.bundle,
+            self.policy,
+            validator.ROOT,
+        )
+        self.assertEqual([], errors)
+        self.assertEqual(self.rebuild_plan, generated)
+        self.assertEqual([], self._verify(self.rebuild_plan))
+        schema = composer.load_json_file(
+            validator.ROOT / "schemas" / "factory-rebuild-plan.schema.json"
+        )
+        self.assertEqual(rebuild.REBUILD_PLAN_SCHEMA_REFERENCE, schema["$id"])
+        self.assertEqual(9, schema["properties"]["actions"]["minItems"])
+        self.assertEqual(4, schema["properties"]["gates"]["maxItems"])
+
+    def test_rebuild_actions_preserve_the_verified_module_dag(self) -> None:
+        bundle_errors, verified = bundler.verify_factory_bundle(self.bundle)
+        self.assertEqual([], bundle_errors)
+        self.assertIsNotNone(verified)
+        assert verified is not None
+        action_by_slot = {
+            action["slot"]: action for action in self.rebuild_plan["actions"]
+        }
+        for module in verified["plan"]["modules"]:
+            action = action_by_slot[module["slot"]]
+            expected_dependencies = [
+                "realize-" + slot.replace("_", "-")
+                for slot in module["requires_slots"]
+            ]
+            self.assertEqual(expected_dependencies, action["requires_actions"])
+            self.assertEqual(expected_dependencies, action["dependency_blockers"])
+            self.assertEqual("blocked_missing_evidence", action["status"])
+        self.assertEqual(
+            [action["action_id"] for action in self.rebuild_plan["actions"]],
+            self.rebuild_plan["gates"][1]["blockers"],
+        )
+
+    def test_rebuild_plan_is_content_addressed_and_non_executing(self) -> None:
+        without_digest = copy.deepcopy(self.rebuild_plan)
+        digest = without_digest.pop("factory_rebuild_plan_sha256")
+        self.assertEqual(composer.sha256_json(without_digest), digest)
+        summary = self.rebuild_plan["summary"]
+        self.assertEqual(9, summary["action_count"])
+        self.assertEqual(0, summary["qualification_ready_actions"])
+        self.assertEqual(9, summary["blocked_actions"])
+        self.assertEqual(9, summary["verified_evidence_bindings"])
+        self.assertEqual(58, summary["missing_evidence_bindings"])
+        for action in self.rebuild_plan["actions"]:
+            self.assertFalse(action["qualification_ready"])
+            self.assertFalse(action["execution_authorized"])
+            self.assertFalse(action["side_effect_authority"])
+        boundary = self.rebuild_plan["rebuild_boundary"]
+        self.assertTrue(boundary["plan_only"])
+        self.assertTrue(boundary["control_inputs_reverified"])
+        for denied in set(boundary) - {
+            "plan_only",
+            "control_inputs_reverified",
+        }:
+            self.assertFalse(boundary[denied])
+
+    def test_reordered_or_forged_rebuild_dag_fails_after_digest_refresh(self) -> None:
+        for mutation in (
+            "order",
+            "dependency",
+            "intent",
+            "source",
+            "status",
+            "gate_order",
+        ):
+            with self.subTest(mutation=mutation):
+                forged = copy.deepcopy(self.rebuild_plan)
+                if mutation == "order":
+                    forged["actions"].reverse()
+                elif mutation == "dependency":
+                    forged["actions"][5]["requires_actions"] = [
+                        "realize-source-versioning"
+                    ]
+                elif mutation == "intent":
+                    forged["actions"][4]["intent"] = "apply_host_configuration"
+                elif mutation == "source":
+                    forged["source"]["bundle_sha256"] = "a" * 64
+                elif mutation == "status":
+                    forged["actions"][0]["status"] = "qualified_not_authorized"
+                else:
+                    forged["gates"].reverse()
+                self._refresh_digest(forged, "factory_rebuild_plan_sha256")
+                errors = self._verify(forged)
+                self.assertTrue(
+                    any("does not exactly match" in error for error in errors)
+                )
+
+    def test_authority_inflation_and_scalar_confusion_fail_closed(self) -> None:
+        mutations = (
+            ("boundary", "runs_ansible", True),
+            ("boundary", "activation_authorized", 0),
+            ("action", "execution_authorized", True),
+            ("action", "side_effect_authority", 0),
+            ("gate", "grants_authority", True),
+            ("gate", "grants_authority", 0),
+        )
+        for target, field, value in mutations:
+            with self.subTest(target=target, field=field, value=value):
+                forged = copy.deepcopy(self.rebuild_plan)
+                if target == "boundary":
+                    forged["rebuild_boundary"][field] = value
+                elif target == "action":
+                    forged["actions"][0][field] = value
+                else:
+                    forged["gates"][0][field] = value
+                self._refresh_digest(forged, "factory_rebuild_plan_sha256")
+                self.assertTrue(self._verify(forged))
+
+    def test_rebuild_plan_replay_against_cron_bundle_is_rejected(self) -> None:
+        cron_factory = composer.load_json_file(
+            validator.ROOT / "examples" / "economic-factory-cron.json"
+        )
+        cron_bundle, _ = bundler.build_factory_bundle(
+            cron_factory,
+            self.catalog,
+            self.artifacts,
+        )
+        errors = self._verify(self.rebuild_plan, bundle=cron_bundle)
+        self.assertTrue(errors)
+        self.assertTrue(
+            any("source lock" in error or "assessment" in error for error in errors)
+        )
+
+    def test_tampered_source_or_assessment_is_rejected_before_planning(self) -> None:
+        forged_source = copy.deepcopy(self.source_lock)
+        forged_source["repository"]["commit_oid"] = "a" * 40
+        self._refresh_digest(forged_source, "factory_source_lock_sha256")
+        errors, generated = rebuild.factory_rebuild_plan_for_bundle(
+            forged_source,
+            self.assessment,
+            self.evidence,
+            self.qualification_plan,
+            self.bundle,
+            self.policy,
+            validator.ROOT,
+        )
+        self.assertIsNone(generated)
+        self.assertTrue(any("source lock" in error for error in errors))
+
+        forged_assessment = copy.deepcopy(self.assessment)
+        forged_assessment["modules"][0]["missing_evidence"].pop()
+        self._refresh_digest(
+            forged_assessment,
+            "qualification_assessment_sha256",
+        )
+        errors, generated = rebuild.factory_rebuild_plan_for_bundle(
+            self.source_lock,
+            forged_assessment,
+            self.evidence,
+            self.qualification_plan,
+            self.bundle,
+            self.policy,
+            validator.ROOT,
+        )
+        self.assertIsNone(generated)
+        self.assertTrue(any("assessment" in error for error in errors))
+
+    def test_malformed_rebuild_inputs_fail_cleanly(self) -> None:
+        for malformed in (None, [], "plan", 1, True, {}, {"actions": []}):
+            with self.subTest(malformed=malformed):
+                self.assertTrue(self._verify(malformed))
+        for malformed_source, malformed_assessment in (
+            (None, self.assessment),
+            ([], self.assessment),
+            (self.source_lock, None),
+            (self.source_lock, []),
+        ):
+            errors, generated = rebuild.factory_rebuild_plan_for_bundle(
+                malformed_source,
+                malformed_assessment,
+                self.evidence,
+                self.qualification_plan,
+                self.bundle,
+                self.policy,
+                validator.ROOT,
+            )
+            self.assertIsNone(generated)
+            self.assertTrue(errors)
+
+    def test_shallow_history_cannot_verify_the_rebuild_plan(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            clone = Path(temporary_directory) / "clone"
+            cloned = subprocess.run(
+                [
+                    "git",
+                    "clone",
+                    "--quiet",
+                    "--depth",
+                    "1",
+                    "--branch",
+                    "v1.7.0",
+                    f"file://{validator.ROOT}",
+                    str(clone),
+                ],
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(0, cloned.returncode, cloned.stderr)
+            errors = self._verify(self.rebuild_plan, repository=clone)
+            self.assertTrue(any("source lock" in error for error in errors))
+
+    def test_cli_rebuild_plan_round_trip_and_overwrite_refusal(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            bundle_path = root / "factory.tar"
+            plan_path = root / "rebuild-plan.json"
+            bundle_path.write_bytes(self.bundle)
+            cli = [sys.executable, str(validator.ROOT / "scripts" / "zaibatsu.py")]
+            command = cli + [
+                "rebuild-plan",
+                str(bundle_path),
+                "--repository",
+                str(validator.ROOT),
+                "--output",
+                str(plan_path),
+            ]
+            generated = subprocess.run(
+                command,
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(0, generated.returncode, generated.stderr)
+            self.assertEqual(
+                self.rebuild_plan,
+                json.loads(plan_path.read_text(encoding="utf-8")),
+            )
+            verified = subprocess.run(
+                cli
+                + [
+                    "verify-rebuild-plan",
+                    str(plan_path),
+                    str(bundle_path),
+                    "--repository",
+                    str(validator.ROOT),
+                ],
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(0, verified.returncode, verified.stderr)
+            self.assertIn("rebuild actions: 9", verified.stdout)
+            self.assertIn("qualification-ready actions: 0", verified.stdout)
+            self.assertIn("factory rebuilt: false", verified.stdout)
+            repeated = subprocess.run(
+                command,
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(2, repeated.returncode)
+            self.assertIn("refusing to overwrite", repeated.stderr)
+            deeply_nested = root / "deeply-nested.json"
+            deeply_nested.write_text(
+                "[" * 2_000 + "]" * 2_000,
+                encoding="utf-8",
+            )
+            malformed = subprocess.run(
+                cli
+                + [
+                    "verify-rebuild-plan",
+                    str(deeply_nested),
+                    str(bundle_path),
+                    "--repository",
+                    str(validator.ROOT),
+                ],
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(2, malformed.returncode)
+            self.assertIn("cannot load factory rebuild plan", malformed.stderr)
+            self.assertNotIn("Traceback", malformed.stderr)
 
 
 class QualificationPlanningTests(unittest.TestCase):

@@ -1,0 +1,131 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.8.0/schemas/factory-rebuild-plan.schema.json",
+  "title": "Zaibatsu deterministic factory rebuild plan",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_schema", "schema_version", "factory", "source", "actions", "gates", "summary", "rebuild_boundary", "factory_rebuild_plan_sha256"],
+  "properties": {
+    "contract_schema": {"const": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.8.0/schemas/factory-rebuild-plan.schema.json"},
+    "schema_version": {"const": "zaibatsu.factory-rebuild-plan.v1"},
+    "factory": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "class"],
+      "properties": {
+        "id": {"$ref": "#/$defs/slug"},
+        "class": {"enum": ["control_factory", "economic_factory"]}
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["bundle_sha256", "factory_plan_sha256", "module_catalog_sha256", "factory_source_lock_sha256", "control_source_release_tag", "control_source_commit_oid", "qualification_policy_id", "qualification_policy_sha256", "qualification_plan_sha256", "qualification_evidence_sha256", "qualification_assessment_sha256", "module_api_version"],
+      "properties": {
+        "bundle_sha256": {"$ref": "#/$defs/sha256"},
+        "factory_plan_sha256": {"$ref": "#/$defs/sha256"},
+        "module_catalog_sha256": {"$ref": "#/$defs/sha256"},
+        "factory_source_lock_sha256": {"$ref": "#/$defs/sha256"},
+        "control_source_release_tag": {"type": "string", "pattern": "^v[0-9]+\\.[0-9]+\\.[0-9]+$"},
+        "control_source_commit_oid": {"type": "string", "pattern": "^(?:[0-9a-f]{40}|[0-9a-f]{64})$"},
+        "qualification_policy_id": {"$ref": "#/$defs/slug"},
+        "qualification_policy_sha256": {"$ref": "#/$defs/sha256"},
+        "qualification_plan_sha256": {"$ref": "#/$defs/sha256"},
+        "qualification_evidence_sha256": {"$ref": "#/$defs/sha256"},
+        "qualification_assessment_sha256": {"$ref": "#/$defs/sha256"},
+        "module_api_version": {"const": "zaibatsu.module.v1"}
+      }
+    },
+    "actions": {
+      "type": "array",
+      "minItems": 9,
+      "maxItems": 9,
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["position", "action_id", "intent", "slot", "module", "artifact_sha256", "requires_actions", "verified_evidence", "missing_evidence", "dependency_blockers", "status", "qualification_ready", "execution_authorized", "side_effect_authority"],
+        "properties": {
+          "position": {"type": "integer", "minimum": 0, "maximum": 8},
+          "action_id": {"type": "string", "pattern": "^realize-[a-z0-9]+(?:-[a-z0-9]+)*$"},
+          "intent": {"enum": ["bind_versioned_runtime_source", "recover_encrypted_static_secrets", "materialize_bounded_runtime_secrets", "apply_host_configuration", "realize_worker_environment", "install_scheduler_disabled", "run_isolated_worker_acceptance", "verify_candidate_artifacts", "configure_evidence_return"]},
+          "slot": {"enum": ["source_versioning", "static_secrets", "runtime_secrets", "host_reproduction", "worker_environment", "scheduling", "execution", "verification", "feedback"]},
+          "module": {"$ref": "#/$defs/slug"},
+          "artifact_sha256": {"$ref": "#/$defs/sha256"},
+          "requires_actions": {"$ref": "#/$defs/actionIds"},
+          "verified_evidence": {"$ref": "#/$defs/evidenceIds"},
+          "missing_evidence": {"$ref": "#/$defs/evidenceIds"},
+          "dependency_blockers": {"$ref": "#/$defs/actionIds"},
+          "status": {"enum": ["blocked_missing_evidence", "blocked_dependency", "blocked_qualification", "qualified_not_authorized"]},
+          "qualification_ready": {"type": "boolean"},
+          "execution_authorized": {"const": false},
+          "side_effect_authority": {"const": false}
+        }
+      }
+    },
+    "gates": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["position", "gate_id", "requires_gates", "status", "blockers", "grants_authority"],
+        "properties": {
+          "position": {"type": "integer", "minimum": 0, "maximum": 3},
+          "gate_id": {"enum": ["control-artifacts-reverified", "all-modules-runtime-qualified", "owner-activation-approval", "factory-activation"]},
+          "requires_gates": {"type": "array", "uniqueItems": true, "items": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"}},
+          "status": {"enum": ["passed", "blocked", "not_requested", "not_authorized"]},
+          "blockers": {"type": "array", "uniqueItems": true, "items": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"}},
+          "grants_authority": {"const": false}
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["action_count", "qualification_ready_actions", "blocked_actions", "verified_evidence_bindings", "missing_evidence_bindings", "all_rebuild_actions_qualified", "rebuild_executed", "factory_rebuilt", "activation_authorized"],
+      "properties": {
+        "action_count": {"const": 9},
+        "qualification_ready_actions": {"type": "integer", "minimum": 0, "maximum": 9},
+        "blocked_actions": {"type": "integer", "minimum": 0, "maximum": 9},
+        "verified_evidence_bindings": {"type": "integer", "minimum": 0},
+        "missing_evidence_bindings": {"type": "integer", "minimum": 0},
+        "all_rebuild_actions_qualified": {"type": "boolean"},
+        "rebuild_executed": {"const": false},
+        "factory_rebuilt": {"const": false},
+        "activation_authorized": {"const": false}
+      }
+    },
+    "rebuild_boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["plan_only", "control_inputs_reverified", "remote_repository_contacted", "contains_runtime_implementations", "executes_rebuild_actions", "reads_or_materializes_secrets", "runs_ansible", "realizes_nix", "installs_or_enables_scheduler", "invokes_model", "grants_qualification_evidence", "grants_owner_approval", "activation_authorized", "deploys_infrastructure", "proves_runtime_recovery"],
+      "properties": {
+        "plan_only": {"const": true},
+        "control_inputs_reverified": {"const": true},
+        "remote_repository_contacted": {"const": false},
+        "contains_runtime_implementations": {"const": false},
+        "executes_rebuild_actions": {"const": false},
+        "reads_or_materializes_secrets": {"const": false},
+        "runs_ansible": {"const": false},
+        "realizes_nix": {"const": false},
+        "installs_or_enables_scheduler": {"const": false},
+        "invokes_model": {"const": false},
+        "grants_qualification_evidence": {"const": false},
+        "grants_owner_approval": {"const": false},
+        "activation_authorized": {"const": false},
+        "deploys_infrastructure": {"const": false},
+        "proves_runtime_recovery": {"const": false}
+      }
+    },
+    "factory_rebuild_plan_sha256": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "slug": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+    "actionIds": {"type": "array", "uniqueItems": true, "items": {"type": "string", "pattern": "^realize-[a-z0-9]+(?:-[a-z0-9]+)*$"}},
+    "evidenceIds": {"type": "array", "uniqueItems": true, "items": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"}}
+  }
+}

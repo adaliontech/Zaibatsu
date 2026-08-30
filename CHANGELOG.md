@@ -1,5 +1,28 @@
 # Changelog
 
+## 1.8.0 - Unreleased
+
+- Added a deterministic, content-addressed factory rebuild plan that turns the
+  verified control bundle, annotated-release source lock, qualification policy,
+  evidence, and assessment into a nine-action dependency graph with four
+  explicit gates.
+- Added `rebuild-plan` and `verify-rebuild-plan` CLI workflows. Both fully
+  reverify every input before emitting or accepting a plan, bind the exact
+  input digests and module DAG, and reject replay, reorder, dependency, intent,
+  status, gate, and authority forgery.
+- Kept the rebuild plan deliberately inert: it runs no Ansible or Nix, reads no
+  secrets, installs no scheduler, invokes no model, grants no qualification or
+  owner approval, activates nothing, deploys nothing, and proves no runtime
+  recovery.
+- Recorded the public example's honest state: 9 contract-conformance receipts,
+  58 missing runtime-evidence bindings, zero qualification-ready actions, and
+  all nine actions blocked before owner and activation gates.
+- Added a project-owned Draft 2020-12 schema plus boolean/integer-confusion,
+  replay, shallow-history, malformed-input, and CLI adversarial coverage.
+- Hardened shared CLI and bundle JSON parsing so recursion-depth attacks fail
+  with a validation error instead of escaping as an unhandled exception.
+- Expanded the public adversarial suite from 173 to 183 tests.
+
 ## 1.7.0 - 2026-08-30
 
 - Added deterministic `source-lock` and `verify-source-lock` workflows that

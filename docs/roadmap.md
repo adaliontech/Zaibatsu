@@ -29,12 +29,14 @@ changes.
 - preserve the reproduced immutable `v1.7.0` annotated-release
   control-source-lock proof without inflating it into runtime implementation or
   qualification evidence;
+- reproduce and release the `v1.8.0` deterministic rebuild DAG without
+  presenting action intents as execution or its gates as runtime authority;
 - record the Guild demo and complete applicant-owned submission materials.
 
 Exit: the public narrative, architecture, portable factory, module artifacts,
 control plan, bundle, source lock, qualification plan, partial assessment,
-readiness, and evidence contracts describe the same meta-factory without
-inflating source-only or planned capabilities.
+rebuild plan, readiness, and evidence contracts describe the same meta-factory
+without inflating source-only or planned capabilities.
 
 ## Phase 1 — Factory identity and versioning
 
@@ -131,6 +133,9 @@ Implemented source foundation:
   67 missing evidence bindings without granting eligibility or activation;
 - nine reproducible bundle-derived contract-conformance receipts and a partial
   assessment that leaves 58 bindings missing and all modules ineligible;
+- a deterministic nine-action rebuild DAG that preserves module dependencies,
+  direct evidence gaps, upstream blockers, and four non-authorizing gates while
+  executing no operation;
 - typed module, artifact, flow, fragment, implementation, handler, profile,
   runtime, placement, worker, evaluation, approval, and effect contracts;
 - 21 logical modules, 6 flows, 12 deployment profiles, and 23 implementation

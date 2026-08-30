@@ -26,8 +26,10 @@ and independent-CI proof. Immutable v1.6.0 and its tag clone passed the same
 release boundary. The v1.7.0 annotated-release control-source-lock candidate
 passed its full-history 173-test clone, Gitleaks, schema, determinism, and
 independent-CI proof. Immutable v1.7.0 and its full-history tag clone passed the
-complete release boundary. The final demo and applicant materials remain
-explicit gates in
+complete release boundary. The v1.8.0 deterministic rebuild-DAG change passes
+183 tests and strict schema/adversarial review locally; its public candidate,
+CI, immutable tag, and tag-clone proofs remain pending. The final demo and
+applicant materials remain explicit gates in
 [`architecture/submission-readiness.json`](../architecture/submission-readiness.json).
 
 ## Current project description
@@ -51,6 +53,11 @@ An annotated-release source lock binds that control bundle to exact local Git
 objects without trusting the checkout. It does not authenticate repository
 ownership, verify a signature, contain runtime implementation source, or count
 as qualification evidence.
+The deterministic rebuild plan then binds all of those verified inputs into
+nine dependency-ordered action intents and four separate gates. In the public
+example all nine actions remain blocked by 58 missing evidence bindings; the
+plan executes nothing and grants no qualification, owner approval, activation,
+deployment, or recovery authority.
 
 The core repository works without a model or Droid credentials. For the Guild
 case study, authenticated Factory Droid used an owner-operated GGUF whose
@@ -72,7 +79,7 @@ new test moves `policy_decision` before `verify`; the pre-change validator
 accepted that unsafe ordering, while the shipped validator rejects it with a
 deterministic adjacent-stage error. Droid reported 36 passing tests, and an
 independent run reproduced all 36 before later integration, branding, release,
-and meta-factory checks brought the package to 173 passing tests. No model or
+and meta-factory checks brought the package to 183 passing tests. No model or
 Factory credential is published.
 
 ## One-line description
@@ -111,7 +118,9 @@ cases offline without access to my private fleet. They can substitute a
 policy-compatible hashed module artifact and reproduce the same canonical
 control bundle without granting it runtime or deployment authority. The source
 lock proves exact local Git-object lineage for those control contracts, not
-repository ownership, runtime source, qualification, or deployment.
+repository ownership, runtime source, qualification, or deployment. The
+rebuild planner adds the exact dependency graph and blockers without executing
+the graph or converting verified control contracts into runtime authority.
 
 ### Why does it matter?
 
@@ -148,12 +157,14 @@ authority.
 
 ### What would you build next?
 
-Make one complete factory definition reproducible end to end: canonical Git
-lineage, SOPS/age policy, Ansible host state, a real Nix worker environment,
-one scheduler owner, one source-only agent profile promoted through
-qualification into an observe-only sandbox, and evidence returned to Zaibatsu.
-Only after recovery and no-effect proof would I activate another profile or a
-low-risk mutation.
+Implement one narrow executor adapter behind the rebuild graph, beginning with
+an observe-only source-versioning step. It would consume the exact plan digest,
+emit content-addressed evidence, persist continuation state, and remain unable
+to cross the next gate. Later slices would add SOPS/age recovery, Ansible host
+state, a real Nix worker environment, one scheduler owner, and one source-only
+agent profile promoted through qualification into an observe-only sandbox.
+Only after recovery and no-effect proof would I activate another step, profile,
+or low-risk mutation.
 
 ## Applicant-owned fields
 
@@ -203,6 +214,12 @@ the public repository:
       adversarial checks, isolated schema validation, exact bundle reproduction,
       Gitleaks, and independent public CI from a full-history clone.
 - [x] Immutable v1.7.0 passes roof and tag CI, tagged-schema byte checks, and
+      the full credential-disabled tag-clone reproduction.
+- [ ] Deterministic rebuild-DAG v1.8.0 candidate passes 183 tests,
+      reorder/dependency/replay/type/authority adversarial checks, strict schema
+      validation, exact regeneration, Gitleaks, and independent public CI from
+      a full-history clone.
+- [ ] Immutable v1.8.0 passes roof and tag CI, tagged-schema byte checks, and
       the full credential-disabled tag-clone reproduction.
 - [x] Public repository and article links resolve without authentication.
 - [ ] Demo clip or screenshots show a real Factory task and validation result.

@@ -91,6 +91,11 @@ The validator confirms:
     blob objects with Git replacements disabled, reproduces the byte-identical
     bundle, and preserves explicit remote-ownership, signature, runtime-source,
     qualification, eligibility, activation, and deployment denials.
+30. the factory rebuild plan fully reverifies the bundle, source lock, policy,
+    qualification plan, evidence, and assessment; preserves exact action and
+    gate order, dependencies, blockers, and digests; and grants no execution,
+    qualification, owner approval, activation, deployment, or recovery
+    authority.
 
 The adversarial tests mutate valid architecture data and prove that the
 validator rejects meta-factory role drift, a missing or reclassified factory,
@@ -153,6 +158,12 @@ python3 scripts/zaibatsu.py verify-qualification-assessment \
   /tmp/example-product.qualification-evidence.json \
   /tmp/example-product.qualification-plan.json \
   /tmp/example-product.factory.tar
+python3 scripts/zaibatsu.py rebuild-plan \
+  /tmp/example-product.factory.tar \
+  --output /tmp/example-product.rebuild-plan.json
+python3 scripts/zaibatsu.py verify-rebuild-plan \
+  /tmp/example-product.rebuild-plan.json \
+  /tmp/example-product.factory.tar
 ```
 
 To create a new definition, run `python3 scripts/zaibatsu.py scaffold --help`.
@@ -186,6 +197,18 @@ contract-conformance receipts to the exact bundle, plan, policy, module, and
 artifact. The assessment therefore reports 9 verified and 58 missing bindings.
 It explicitly contains no runtime implementation, environment, recovery,
 isolation, external independent-verifier, eligibility, or activation proof.
+
+The rebuild plan consumes those fully reverified inputs and emits an inert
+nine-action dependency graph plus four gates. The public result has zero
+qualification-ready actions, all nine blocked, and 58 missing evidence
+bindings. It reports future action intents and blockers; it does not read
+secrets, run Ansible, realize Nix, install a scheduler, invoke a model, produce
+qualification evidence, obtain owner approval, activate or deploy anything, or
+prove that a runtime can be recovered.
+Because the current evidence contract derives only contract-conformance
+receipts from the bundle, no valid v1 assessment can make an action
+qualification-ready. Independent runtime-evidence ingestion and assessment are
+future contracts, not an undocumented escape hatch in this graph.
 
 ## Optional Droid preflight
 
@@ -231,12 +254,12 @@ release reproduction, clone the named tag rather than the moving default
 branch:
 
 ```bash
-git clone --branch v1.7.0 https://github.com/adaliontech/Zaibatsu.git
+git clone --branch v1.8.0 https://github.com/adaliontech/Zaibatsu.git
 cd Zaibatsu
 make validate
 ```
 
-Use a full-history clone for `v1.7.0`: its checked source lock intentionally
+Use a full-history clone for `v1.8.0`: its checked source lock intentionally
 reproduces the `v1.6.0` control bundle and therefore requires that annotated
 tag and its objects. A shallow clone that omits the referenced release must
 fail instead of silently weakening the lineage proof.

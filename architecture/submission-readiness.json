@@ -20,6 +20,7 @@
           "examples/economic-factory-cron.json",
           "examples/economic-factory.bundle-manifest.json",
           "examples/economic-factory.plan.json",
+          "examples/economic-factory.rebuild-plan.json",
           "examples/economic-factory.source-lock.json",
           "examples/economic-factory.qualification-assessment.json",
           "examples/economic-factory.qualification-evidence.json",
@@ -91,21 +92,18 @@
     },
     {
       "id": "fresh_clone_reproduction",
-      "status": "complete",
+      "status": "pending_external",
       "required_for_submission": true,
-      "evidence": "Credential-disabled full-history public clone of the v1.7.0 source-lock candidate passed 173 tests, 75-file validation, strict Git, Gitleaks 8.30.1 history/tree scans, exact bundle and source-lock reproduction, non-authorizing assertions, isolated Draft 2020-12 schema controls, and independent GitHub Actions",
-      "proof": {
-        "candidate_commit": "b9c96ba312827a2b5a09ebef1518092c33cc4a56",
-        "tests_passed": 173,
-        "gitleaks_version": "8.30.1",
-        "github_actions_run": "https://github.com/adaliontech/Zaibatsu/actions/runs/33338396408"
-      }
+      "evidence": "Immutable v1.7.0 remains reproduced; the v1.8.0 deterministic rebuild-DAG candidate requires its own full-history credential-disabled clone, 183-test, strict-Git, Gitleaks, schema, determinism, and CI proof"
     },
     {
       "id": "public_demo",
-      "status": "pending_external",
+      "status": "blocked_by_dependency",
       "required_for_submission": true,
-      "evidence": "Immutable v1.7.0 passed roof CI, tag CI, tagged-schema byte checks, and full-history credential-disabled tag-clone reproduction; record and publish the final clip from that tag"
+      "evidence": "Record and publish the final clip only after the current rebuild-DAG candidate passes fresh-clone proof and is released",
+      "blocked_by": [
+        "fresh_clone_reproduction"
+      ]
     },
     {
       "id": "applicant_materials",

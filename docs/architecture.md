@@ -24,9 +24,9 @@ The shared layer controls factory contracts. Each economic factory retains its
 own identity, data, credentials, repositories, schedules, acceptance rules,
 budgets, and production authority.
 
-## Eight machine-readable views
+## Nine machine-readable views
 
-Zaibatsu deliberately separates eight questions:
+Zaibatsu deliberately separates nine questions:
 
 | Contract | Question |
 | --- | --- |
@@ -38,6 +38,7 @@ Zaibatsu deliberately separates eight questions:
 | [`examples/economic-factory.source-lock.json`](../examples/economic-factory.source-lock.json) | Which immutable annotated-release Git objects supplied the exact control files that reproduce that bundle? |
 | [`policies/runtime-qualification-v1.json`](../policies/runtime-qualification-v1.json) plus [`examples/economic-factory.qualification-plan.json`](../examples/economic-factory.qualification-plan.json) | Which content-addressed evidence bindings are still required before those contracts can become runtime-eligible? |
 | [`examples/economic-factory.qualification-evidence.json`](../examples/economic-factory.qualification-evidence.json) plus [`examples/economic-factory.qualification-assessment.json`](../examples/economic-factory.qualification-assessment.json) | Which requirements does the verified bundle itself actually prove, and exactly which runtime proofs remain missing? |
+| [`examples/economic-factory.rebuild-plan.json`](../examples/economic-factory.rebuild-plan.json) | In which dependency order would a qualified factory be rebuilt, which direct and upstream blockers stop each action, and which separate gates still deny activation? |
 
 The validator requires the factory registry and shared component maturities to
 agree. A narrative edit cannot silently turn planned Nix reproduction or
@@ -119,6 +120,29 @@ assessment verifies 9 of 67 bindings and leaves 58 missing. It claims no
 runtime implementation, environment realization, recovery, isolation,
 external independent verifier, eligibility, or activation. Replaying a receipt
 against the cron bundle, another plan, policy, module, or artifact fails closed.
+
+`rebuild-plan` then joins the fully reverified bundle, source lock,
+qualification policy, plan, evidence, and assessment. It converts the same
+nine module slots into an action DAG, preserves their dependency edges, records
+direct missing-evidence and upstream blockers separately, and terminates in
+four gates: control artifacts reverified, all modules runtime-qualified, owner
+activation approval, and factory activation. The public example has zero
+qualification-ready actions and 58 missing evidence bindings. The first gate
+passes because all control inputs were reverified; that pass grants no effect
+authority and cannot satisfy the three later gates.
+
+The action names describe intended future operations. The generator and
+verifier do not run Ansible, realize Nix, read or materialize secrets, install
+or enable a scheduler, invoke a model, create qualification evidence, obtain
+owner approval, activate a factory, deploy infrastructure, or prove runtime
+recovery. A reordered node, changed dependency, different input, inflated
+status, or false authority bit makes exact verification fail.
+
+The current `v1` qualification-evidence and assessment contracts deliberately
+derive only bundle-level contract-conformance receipts. They cannot produce a
+qualification-ready module. The rebuild schema reserves later statuses for a
+future independently verified runtime-evidence contract; their presence is not
+evidence that promotion or execution is implemented.
 
 This boundary is deliberately narrower than infrastructure reproduction. The
 plan and bundle own no side-effect authority and explicitly state that they

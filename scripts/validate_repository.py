@@ -48,6 +48,12 @@ from factory_qualification import (
     validate_qualification_plan,
     validate_qualification_policy,
 )
+from factory_rebuild import (
+    EXAMPLE_REBUILD_PLAN_PATH,
+    REBUILD_PLAN_SCHEMA_REFERENCE,
+    load_rebuild_plan,
+    verify_factory_rebuild_plan_for_bundle,
+)
 from factory_source_lock import (
     EXAMPLE_SOURCE_LOCK_PATH,
     SOURCE_LOCK_SCHEMA_REFERENCE,
@@ -97,6 +103,7 @@ REQUIRED_FILES = (
     "examples/economic-factory-cron.json",
     "examples/economic-factory.bundle-manifest.json",
     "examples/economic-factory.plan.json",
+    "examples/economic-factory.rebuild-plan.json",
     "examples/economic-factory.source-lock.json",
     "examples/economic-factory.qualification-assessment.json",
     "examples/economic-factory.qualification-evidence.json",
@@ -123,6 +130,7 @@ REQUIRED_FILES = (
     "schemas/factory-bundle-inspection.schema.json",
     "schemas/factory-bundle-manifest.schema.json",
     "schemas/factory-plan.schema.json",
+    "schemas/factory-rebuild-plan.schema.json",
     "schemas/factory-source-lock.schema.json",
     "schemas/factory-qualification-assessment.schema.json",
     "schemas/factory-qualification-evidence.schema.json",
@@ -139,6 +147,7 @@ REQUIRED_FILES = (
     "scripts/factory_bundle.py",
     "scripts/factory_composer.py",
     "scripts/factory_qualification.py",
+    "scripts/factory_rebuild.py",
     "scripts/factory_source_lock.py",
     "scripts/zaibatsu.py",
     "scripts/validate_repository.py",
@@ -162,7 +171,7 @@ ARCHITECTURE_SCHEMA_VERSION = "zaibatsu.architecture.v1"
 FACTORY_MODEL_SCHEMA_VERSION = "zaibatsu.factory-model.v1"
 READINESS_SCHEMA_VERSION = "zaibatsu.submission-readiness.v1"
 FACTORY_DEFINITION_SCHEMA_VERSION = "zaibatsu.factory-definition.v2"
-INTEGRATED_TEST_COUNT = 173
+INTEGRATED_TEST_COUNT = 183
 DROID_FACTORY_CLI_VERSION = "0.206.0"
 DROID_SESSION_REFERENCE = "46f941a9-82f8-4df3-a45c-b8158996360b"
 PUBLIC_REPOSITORY_URL = "https://github.com/adaliontech/Zaibatsu"
@@ -208,6 +217,7 @@ CONTRACT_SCHEMA_REFERENCES = {
     "examples/economic-factory-cron.json": PORTABLE_FACTORY_SCHEMA_REFERENCE,
     "examples/economic-factory.bundle-manifest.json": BUNDLE_MANIFEST_SCHEMA_REFERENCE,
     "examples/economic-factory.plan.json": FACTORY_PLAN_SCHEMA_REFERENCE,
+    "examples/economic-factory.rebuild-plan.json": REBUILD_PLAN_SCHEMA_REFERENCE,
     "examples/economic-factory.source-lock.json": SOURCE_LOCK_SCHEMA_REFERENCE,
     "examples/economic-factory.qualification-assessment.json": (
         QUALIFICATION_ASSESSMENT_SCHEMA_REFERENCE
@@ -237,6 +247,9 @@ REMOTE_SCHEMA_LOCAL_PATHS = {
         "schemas/factory-bundle-manifest.schema.json"
     ),
     "examples/economic-factory.plan.json": "schemas/factory-plan.schema.json",
+    "examples/economic-factory.rebuild-plan.json": (
+        "schemas/factory-rebuild-plan.schema.json"
+    ),
     "examples/economic-factory.source-lock.json": (
         "schemas/factory-source-lock.schema.json"
     ),
@@ -1328,6 +1341,7 @@ def validate_submission_readiness(data: Any) -> list[str]:
                     "examples/economic-factory-cron.json",
                     "examples/economic-factory.bundle-manifest.json",
                     "examples/economic-factory.plan.json",
+                    "examples/economic-factory.rebuild-plan.json",
                     "examples/economic-factory.source-lock.json",
                     "examples/economic-factory.qualification-assessment.json",
                     "examples/economic-factory.qualification-evidence.json",
@@ -1747,7 +1761,9 @@ def validate_contract_schema_files(root: Path = ROOT) -> list[str]:
         if schema.get("$schema") != "https://json-schema.org/draft/2020-12/schema":
             errors.append(f"{relative}: project-owned schema must declare JSON Schema 2020-12")
         schema_release = (
-            "v1.7.0"
+            "v1.8.0"
+            if schema_path.name == "factory-rebuild-plan.schema.json"
+            else "v1.7.0"
             if schema_path.name == "factory-source-lock.schema.json"
             else "v1.6.0"
             if schema_path.name
@@ -1832,6 +1848,7 @@ def main() -> int:
     qualification_plan: Any = None
     qualification_evidence: Any = None
     qualification_assessment: Any = None
+    rebuild_plan_document: Any = None
     source_lock_document: Any = None
     qualification_bundle: bytes | None = None
     verified_qualification_bundle: Any = None
@@ -1998,6 +2015,36 @@ def main() -> int:
                 )
             )
     try:
+        rebuild_plan_document = load_rebuild_plan(EXAMPLE_REBUILD_PLAN_PATH)
+    except (OSError, RecursionError, ValueError) as exc:
+        errors.append(f"cannot load example factory rebuild plan: {exc}")
+    else:
+        if (
+            qualification_bundle is not None
+            and all(
+                isinstance(value, dict)
+                for value in (
+                    source_lock_document,
+                    qualification_assessment,
+                    qualification_evidence,
+                    qualification_plan,
+                    qualification_policy,
+                )
+            )
+        ):
+            errors.extend(
+                verify_factory_rebuild_plan_for_bundle(
+                    rebuild_plan_document,
+                    source_lock_document,
+                    qualification_assessment,
+                    qualification_evidence,
+                    qualification_plan,
+                    qualification_bundle,
+                    qualification_policy,
+                    ROOT,
+                )
+            )
+    try:
         readiness = json.loads(READINESS_PATH.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:
         errors.append(f"cannot load submission readiness: {exc}")
@@ -2024,8 +2071,8 @@ def main() -> int:
     )
     print(
         "- 2 reusable factory definitions, content-addressed modules, control "
-        "plan, bundle manifest, source lock, inspection schemas, "
-        "qualification policy, evidence, and assessment checked"
+        "plan, bundle manifest, source lock, qualification evidence, and "
+        "non-executing rebuild DAG checked"
     )
     print(f"- {len(EVIDENCE_CONTRACTS)} evidence receipts checked")
     print(f"- {len(REQUIRED_FACTORY_INVARIANTS)} meta-factory invariants checked")

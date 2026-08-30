@@ -18,6 +18,8 @@
 - Qualification-plan proof: `python3 scripts/zaibatsu.py verify-qualification-plan /tmp/example-product.qualification-plan.json /tmp/example-product.factory.tar`
 - Bundle-derived evidence: `python3 scripts/zaibatsu.py qualification-evidence /tmp/example-product.qualification-plan.json /tmp/example-product.factory.tar --output /tmp/example-product.qualification-evidence.json`
 - Partial assessment: `python3 scripts/zaibatsu.py qualification-assessment /tmp/example-product.qualification-evidence.json /tmp/example-product.qualification-plan.json /tmp/example-product.factory.tar --output /tmp/example-product.qualification-assessment.json`
+- Factory rebuild DAG: `python3 scripts/zaibatsu.py rebuild-plan /tmp/example-product.factory.tar --output /tmp/example-product.rebuild-plan.json`
+- Rebuild-DAG proof: `python3 scripts/zaibatsu.py verify-rebuild-plan /tmp/example-product.rebuild-plan.json /tmp/example-product.factory.tar`
 - Tests only: `python3 -m unittest discover -s tests -v`
 - Deferred local-model preflight: `make droid-preflight`
 
@@ -68,6 +70,12 @@ credentials, or bootstrap procedures.
   or authenticate the named remote, verify a tag signature or repository
   owner, include runtime implementation source, satisfy a qualification
   binding, grant eligibility or activation, or deploy anything.
+- Treat a factory rebuild plan only as a deterministic graph of intended
+  actions, direct evidence gaps, upstream blockers, and non-authorizing gates.
+  It must fully reverify every bound input and may not run Ansible, realize Nix,
+  read secrets, install a scheduler, invoke a model, manufacture qualification
+  evidence or owner approval, activate a factory, deploy infrastructure, or
+  claim runtime recovery.
 - Treat every tracked or non-ignored path as public. Opaque files, symlinks,
   and Git submodules are outside the scanner's inspectable boundary and must
   fail closed.
