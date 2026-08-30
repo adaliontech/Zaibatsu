@@ -82,7 +82,11 @@ The validator confirms:
     explicit no-runtime and no-deployment boundary;
 27. the qualification policy preserves every mandatory evidence class, and
     the checked-in plan exactly matches its verified bundle and policy while
-    granting no runtime eligibility, activation, or owner approval.
+    granting no runtime eligibility, activation, or owner approval;
+28. bundle-derived qualification receipts and the partial assessment exactly
+    rebuild from the verified bundle, plan, and policy; forged, replayed,
+    duplicate, reordered, scope-inflated, or authority-inflated evidence fails
+    closed.
 
 The adversarial tests mutate valid architecture data and prove that the
 validator rejects meta-factory role drift, a missing or reclassified factory,
@@ -119,6 +123,24 @@ python3 scripts/zaibatsu.py qualification-plan \
 python3 scripts/zaibatsu.py verify-qualification-plan \
   /tmp/example-product.qualification-plan.json \
   /tmp/example-product.factory.tar
+python3 scripts/zaibatsu.py qualification-evidence \
+  /tmp/example-product.qualification-plan.json \
+  /tmp/example-product.factory.tar \
+  --output /tmp/example-product.qualification-evidence.json
+python3 scripts/zaibatsu.py verify-qualification-evidence \
+  /tmp/example-product.qualification-evidence.json \
+  /tmp/example-product.qualification-plan.json \
+  /tmp/example-product.factory.tar
+python3 scripts/zaibatsu.py qualification-assessment \
+  /tmp/example-product.qualification-evidence.json \
+  /tmp/example-product.qualification-plan.json \
+  /tmp/example-product.factory.tar \
+  --output /tmp/example-product.qualification-assessment.json
+python3 scripts/zaibatsu.py verify-qualification-assessment \
+  /tmp/example-product.qualification-assessment.json \
+  /tmp/example-product.qualification-evidence.json \
+  /tmp/example-product.qualification-plan.json \
+  /tmp/example-product.factory.tar
 ```
 
 To create a new definition, run `python3 scripts/zaibatsu.py scaffold --help`.
@@ -136,6 +158,14 @@ The qualification plan closes none of those gates. It binds the control bundle
 and minimum policy by digest and enumerates missing evidence. The public
 example contains 67 missing bindings across 27 requirement types, marks zero
 of nine modules eligible, accepts no self-attestation, and grants no activation.
+
+The bundle verifier can independently reproduce one narrow evidence type from
+the public inputs: every selected module contract matches its catalog record,
+schema reference, and artifact digest. The generated evidence set binds nine
+contract-conformance receipts to the exact bundle, plan, policy, module, and
+artifact. The assessment therefore reports 9 verified and 58 missing bindings.
+It explicitly contains no runtime implementation, environment, recovery,
+isolation, external independent-verifier, eligibility, or activation proof.
 
 ## Optional Droid preflight
 
@@ -181,7 +211,7 @@ release reproduction, clone the named tag rather than the moving default
 branch:
 
 ```bash
-git clone --depth 1 --branch v1.5.0 https://github.com/adaliontech/Zaibatsu.git
+git clone --depth 1 --branch v1.6.0 https://github.com/adaliontech/Zaibatsu.git
 cd Zaibatsu
 make validate
 ```

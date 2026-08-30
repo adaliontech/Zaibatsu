@@ -1,0 +1,144 @@
+{
+  "contract_schema": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.6.0/schemas/factory-qualification-evidence.schema.json",
+  "schema_version": "zaibatsu.factory-qualification-evidence.v1",
+  "factory": {
+    "class": "economic_factory",
+    "id": "example-product"
+  },
+  "source": {
+    "bundle_sha256": "d4918fd16f55b907a0b2b9734422d7106d3030a511e5cae5d6efc1cb7b253aba",
+    "qualification_plan_sha256": "a9419341bf0806e1a6fc3769354e46ac6eb1c29043042ddd7eec35cca1a8ff81",
+    "qualification_policy_id": "runtime-eligibility-default",
+    "qualification_policy_sha256": "4fd359cc6dfe3eb3b555eb26a3453939fde34efd8d65a281a81dd34041468e9a",
+    "module_api_version": "zaibatsu.module.v1"
+  },
+  "receipts": [
+    {
+      "position": 0,
+      "slot": "source_versioning",
+      "module": "git-source",
+      "artifact_sha256": "977317056e3b4ae88471cd7aeddb1b514bd5c3310ca1d73c324599785c61e412",
+      "requirement": "contract_conformance_receipt",
+      "verifier": "zaibatsu.factory-bundle-verifier.v1",
+      "verification_method": "canonical_contract_catalog_and_digest",
+      "evidence_scope": "module_contract_only",
+      "result": "passed",
+      "receipt_sha256": "1bbcf084c8d59f4b69b64eaaa3b2d3ec2c2f3773791feb6f173245719e7b3c7a"
+    },
+    {
+      "position": 1,
+      "slot": "static_secrets",
+      "module": "sops-age-static-secrets",
+      "artifact_sha256": "23462ec661dfc00e330ce8e604157aba5e44b1401e17369ab43ec408e1ac251d",
+      "requirement": "contract_conformance_receipt",
+      "verifier": "zaibatsu.factory-bundle-verifier.v1",
+      "verification_method": "canonical_contract_catalog_and_digest",
+      "evidence_scope": "module_contract_only",
+      "result": "passed",
+      "receipt_sha256": "34af06146a52b8408929e1956e1b7c40886e8c74d813490004a3abb1365c59ff"
+    },
+    {
+      "position": 2,
+      "slot": "runtime_secrets",
+      "module": "bounded-runtime-secrets",
+      "artifact_sha256": "4c62e939782ef9b5990d81de413a809aadfdb58c0c28e2785abd0a57a06a4585",
+      "requirement": "contract_conformance_receipt",
+      "verifier": "zaibatsu.factory-bundle-verifier.v1",
+      "verification_method": "canonical_contract_catalog_and_digest",
+      "evidence_scope": "module_contract_only",
+      "result": "passed",
+      "receipt_sha256": "9f19e88122d524b59c61e2ddace47e28702ff45b98f72565207412335a783757"
+    },
+    {
+      "position": 3,
+      "slot": "host_reproduction",
+      "module": "ansible-host-reproduction",
+      "artifact_sha256": "905bf55cd2fe0973a89702e8752e8dfec174606d58da15e289d984ecf8385fe9",
+      "requirement": "contract_conformance_receipt",
+      "verifier": "zaibatsu.factory-bundle-verifier.v1",
+      "verification_method": "canonical_contract_catalog_and_digest",
+      "evidence_scope": "module_contract_only",
+      "result": "passed",
+      "receipt_sha256": "3ede6019f387aa3d0c0ae05acf21d5f6961467eae69868dc1952b26c945048ca"
+    },
+    {
+      "position": 4,
+      "slot": "worker_environment",
+      "module": "nix-worker-environment",
+      "artifact_sha256": "a58729508be0cda87c2db3748ae487d76d9d90e3facfb78cbcaded5385731759",
+      "requirement": "contract_conformance_receipt",
+      "verifier": "zaibatsu.factory-bundle-verifier.v1",
+      "verification_method": "canonical_contract_catalog_and_digest",
+      "evidence_scope": "module_contract_only",
+      "result": "passed",
+      "receipt_sha256": "512e2431a513ddad027b5c16e8e45ca9d3bbb0b21e79ec5dd8bc819d363fbbd0"
+    },
+    {
+      "position": 5,
+      "slot": "scheduling",
+      "module": "systemd-scheduler",
+      "artifact_sha256": "ff549f0c47e82dcc0126907d1cb423dc8339c6e294f0a89f465142f3f5e5bdb3",
+      "requirement": "contract_conformance_receipt",
+      "verifier": "zaibatsu.factory-bundle-verifier.v1",
+      "verification_method": "canonical_contract_catalog_and_digest",
+      "evidence_scope": "module_contract_only",
+      "result": "passed",
+      "receipt_sha256": "714eef5cb42ee6c00c5d6b54ed3c8c0b2a32d60ef5c7be99d0da666caa821bd1"
+    },
+    {
+      "position": 6,
+      "slot": "execution",
+      "module": "typed-agent-execution",
+      "artifact_sha256": "b2a0558758afa709b2e03b3fe8e025c520c5ad6b80e4db7826d7a9b2e802e8d6",
+      "requirement": "contract_conformance_receipt",
+      "verifier": "zaibatsu.factory-bundle-verifier.v1",
+      "verification_method": "canonical_contract_catalog_and_digest",
+      "evidence_scope": "module_contract_only",
+      "result": "passed",
+      "receipt_sha256": "19333f0a677ce4e8016eedd4d45662c60131f13423eda1fba48fb566597fd76f"
+    },
+    {
+      "position": 7,
+      "slot": "verification",
+      "module": "deterministic-verification",
+      "artifact_sha256": "636525656d07dc89683a08ae3ffefabfd592909a61b729f4efc024dc1a43df31",
+      "requirement": "contract_conformance_receipt",
+      "verifier": "zaibatsu.factory-bundle-verifier.v1",
+      "verification_method": "canonical_contract_catalog_and_digest",
+      "evidence_scope": "module_contract_only",
+      "result": "passed",
+      "receipt_sha256": "70af4b96475076c6df989c05e6e3f1fa2ce30ff215eb5bac3a52d4af07bd4a57"
+    },
+    {
+      "position": 8,
+      "slot": "feedback",
+      "module": "owner-gated-feedback",
+      "artifact_sha256": "ecb44bb384ff295af9af5b3b121fc53302364d12b6112c7275af2d6169caff26",
+      "requirement": "contract_conformance_receipt",
+      "verifier": "zaibatsu.factory-bundle-verifier.v1",
+      "verification_method": "canonical_contract_catalog_and_digest",
+      "evidence_scope": "module_contract_only",
+      "result": "passed",
+      "receipt_sha256": "7ef5f70c15135eb7aa47ae7abac7d9834e63bbc0270734fe4929ff54d2e9582c"
+    }
+  ],
+  "summary": {
+    "receipt_count": 9,
+    "required_evidence_bindings": 67,
+    "verified_evidence_bindings": 9,
+    "remaining_evidence_bindings": 58,
+    "verified_requirement_types": 1,
+    "full_qualification_evidence": false
+  },
+  "evidence_boundary": {
+    "source_is_verified_control_bundle": true,
+    "contract_conformance_only": true,
+    "external_independent_verification_included": false,
+    "contains_runtime_implementation_evidence": false,
+    "self_attestation_accepted": false,
+    "runtime_eligibility_granted": false,
+    "activation_authorized": false,
+    "owner_approval_required_for_activation": true
+  },
+  "qualification_evidence_sha256": "a19e1f82e13f6a7e07011c6e80e112d4981740e9188805e615ee57e12c9d1963"
+}

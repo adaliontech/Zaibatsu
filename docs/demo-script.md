@@ -1,6 +1,6 @@
 # Demo script
 
-Use only a fresh clone of immutable `v1.5.0` after its release proof passes. Do
+Use only a fresh clone of immutable `v1.6.0` after its release proof passes. Do
 not show private terminals, history, settings, infrastructure, model
 credentials, notifications, or personal data. Lead with the real Factory
 result; explain the larger architecture only after the reviewer sees working
@@ -77,6 +77,20 @@ python3 scripts/zaibatsu.py qualification-plan \
 python3 scripts/zaibatsu.py verify-qualification-plan \
   /tmp/example-product.qualification-plan.json \
   /tmp/example-product.factory.tar
+python3 scripts/zaibatsu.py qualification-evidence \
+  /tmp/example-product.qualification-plan.json \
+  /tmp/example-product.factory.tar \
+  --output /tmp/example-product.qualification-evidence.json
+python3 scripts/zaibatsu.py qualification-assessment \
+  /tmp/example-product.qualification-evidence.json \
+  /tmp/example-product.qualification-plan.json \
+  /tmp/example-product.factory.tar \
+  --output /tmp/example-product.qualification-assessment.json
+python3 scripts/zaibatsu.py verify-qualification-assessment \
+  /tmp/example-product.qualification-assessment.json \
+  /tmp/example-product.qualification-evidence.json \
+  /tmp/example-product.qualification-plan.json \
+  /tmp/example-product.factory.tar
 ```
 
 > The factory definition selects policy-compatible reusable modules. The plan
@@ -87,8 +101,10 @@ python3 scripts/zaibatsu.py verify-qualification-plan \
 > changes only the scheduling implementation from systemd to cron while the
 > catalog and schemas stay fixed, making modularity directly inspectable. The
 > qualification plan then lists 67 evidence bindings still missing across all
-> nine modules. It marks none eligible and authorizes no activation; the plan
-> is a reproducible request for proof, not proof itself.
+> nine modules. Bundle verification then derives nine real but narrow
+> contract-conformance receipts. The assessment credits exactly those nine,
+> leaves 58 runtime bindings missing, marks none eligible, and authorizes no
+> activation. Content identity is not treated as broader runtime proof.
 
 ### 1:35–2:05 — Run every deterministic gate
 
@@ -103,7 +119,7 @@ make validate
 > evidence, force-added ignored files, misleading media suffixes, and premature
 > readiness.
 
-Pause on the final 153-test pass and validator summary.
+Pause on the final 163-test pass and validator summary.
 
 ### 2:05–2:30 — Honest current boundary
 
@@ -119,7 +135,7 @@ Open `docs/implementation-status.md`.
 
 ## Before recording
 
-1. Clone the immutable `v1.5.0` tag into a new temporary directory after its
+1. Clone the immutable `v1.6.0` tag into a new temporary directory after its
    release proof passes.
 2. Increase terminal font size and hide unrelated tabs and notifications.
 3. Run `make validate` once off camera.
@@ -129,15 +145,17 @@ Open `docs/implementation-status.md`.
 
 ## Capture checklist
 
-- [ ] Repository URL and `v1.5.0` tag visible once.
+- [ ] Repository URL and `v1.6.0` tag visible once.
 - [ ] Real Factory/Droid session receipt and shipped diff visible first.
 - [ ] Pre-change gap and adversarial post-change result are understandable.
 - [ ] Portable factory scaffold and validation succeed on screen.
 - [ ] Checked-in plan verification and byte-stable rebuild succeed on screen.
 - [ ] Portable bundle creation and in-memory verification succeed on screen.
 - [ ] Qualification plan visibly leaves all nine modules runtime-ineligible.
+- [ ] Qualification assessment shows 9 verified contract bindings, 58 missing
+      runtime bindings, and zero eligible modules.
 - [ ] “The factory of software factories” hierarchy is visible.
-- [ ] `make validate` shows all 153 tests and contract checks passing.
+- [ ] `make validate` shows all 163 tests and contract checks passing.
 - [ ] Maturity limits are stated explicitly.
 - [ ] No private history, addresses, credentials, local settings, or host details.
 - [ ] Captions are included.

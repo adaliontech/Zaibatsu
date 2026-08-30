@@ -22,9 +22,21 @@ QUALIFICATION_POLICY_PATH = ROOT / "policies" / "runtime-qualification-v1.json"
 EXAMPLE_QUALIFICATION_PLAN_PATH = (
     ROOT / "examples" / "economic-factory.qualification-plan.json"
 )
+EXAMPLE_QUALIFICATION_EVIDENCE_PATH = (
+    ROOT / "examples" / "economic-factory.qualification-evidence.json"
+)
+EXAMPLE_QUALIFICATION_ASSESSMENT_PATH = (
+    ROOT / "examples" / "economic-factory.qualification-assessment.json"
+)
 
 QUALIFICATION_POLICY_SCHEMA_VERSION = "zaibatsu.module-qualification-policy.v1"
 QUALIFICATION_PLAN_SCHEMA_VERSION = "zaibatsu.factory-qualification-plan.v1"
+QUALIFICATION_EVIDENCE_SCHEMA_VERSION = (
+    "zaibatsu.factory-qualification-evidence.v1"
+)
+QUALIFICATION_ASSESSMENT_SCHEMA_VERSION = (
+    "zaibatsu.factory-qualification-assessment.v1"
+)
 QUALIFICATION_POLICY_SCHEMA_REFERENCE = (
     "https://raw.githubusercontent.com/adaliontech/Zaibatsu/"
     "v1.5.0/schemas/module-qualification-policy.schema.json"
@@ -32,6 +44,14 @@ QUALIFICATION_POLICY_SCHEMA_REFERENCE = (
 QUALIFICATION_PLAN_SCHEMA_REFERENCE = (
     "https://raw.githubusercontent.com/adaliontech/Zaibatsu/"
     "v1.5.0/schemas/factory-qualification-plan.schema.json"
+)
+QUALIFICATION_EVIDENCE_SCHEMA_REFERENCE = (
+    "https://raw.githubusercontent.com/adaliontech/Zaibatsu/"
+    "v1.6.0/schemas/factory-qualification-evidence.schema.json"
+)
+QUALIFICATION_ASSESSMENT_SCHEMA_REFERENCE = (
+    "https://raw.githubusercontent.com/adaliontech/Zaibatsu/"
+    "v1.6.0/schemas/factory-qualification-assessment.schema.json"
 )
 
 REQUIRED_SLOTS = (
@@ -121,6 +141,61 @@ PLAN_FIELDS = {
     "qualification_boundary",
     "qualification_plan_sha256",
 }
+EVIDENCE_FIELDS = {
+    "contract_schema",
+    "schema_version",
+    "factory",
+    "source",
+    "receipts",
+    "summary",
+    "evidence_boundary",
+    "qualification_evidence_sha256",
+}
+EVIDENCE_RECEIPT_FIELDS = {
+    "position",
+    "slot",
+    "module",
+    "artifact_sha256",
+    "requirement",
+    "verifier",
+    "verification_method",
+    "evidence_scope",
+    "result",
+    "receipt_sha256",
+}
+ASSESSMENT_FIELDS = {
+    "contract_schema",
+    "schema_version",
+    "factory",
+    "source",
+    "modules",
+    "summary",
+    "assessment_boundary",
+    "qualification_assessment_sha256",
+}
+CONTRACT_EVIDENCE_REQUIREMENT = "contract_conformance_receipt"
+CONTRACT_EVIDENCE_VERIFIER = "zaibatsu.factory-bundle-verifier.v1"
+CONTRACT_EVIDENCE_METHOD = "canonical_contract_catalog_and_digest"
+CONTRACT_EVIDENCE_SCOPE = "module_contract_only"
+EVIDENCE_BOUNDARY = {
+    "source_is_verified_control_bundle": True,
+    "contract_conformance_only": True,
+    "external_independent_verification_included": False,
+    "contains_runtime_implementation_evidence": False,
+    "self_attestation_accepted": False,
+    "runtime_eligibility_granted": False,
+    "activation_authorized": False,
+    "owner_approval_required_for_activation": True,
+}
+ASSESSMENT_BOUNDARY = {
+    "assesses_bundle_contract_evidence_only": True,
+    "external_independent_verification_included": False,
+    "contains_runtime_implementation_evidence": False,
+    "self_attestation_accepted": False,
+    "runtime_eligibility_granted": False,
+    "activation_authorized": False,
+    "owner_approval_required_for_activation": True,
+}
 REQUIREMENT_RE = re.compile(r"^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$")
 SLUG_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 
@@ -133,6 +208,18 @@ def load_qualification_policy(
 
 def load_qualification_plan(
     path: Path = EXAMPLE_QUALIFICATION_PLAN_PATH,
+) -> dict[str, Any]:
+    return load_json_file(path)
+
+
+def load_qualification_evidence(
+    path: Path = EXAMPLE_QUALIFICATION_EVIDENCE_PATH,
+) -> dict[str, Any]:
+    return load_json_file(path)
+
+
+def load_qualification_assessment(
+    path: Path = EXAMPLE_QUALIFICATION_ASSESSMENT_PATH,
 ) -> dict[str, Any]:
     return load_json_file(path)
 
@@ -382,3 +469,313 @@ def verify_qualification_plan_for_bundle(
     if bundle_errors or verified is None:
         return [f"factory bundle: {error}" for error in bundle_errors]
     return validate_qualification_plan(plan, verified, policy)
+
+
+def _qualification_source(
+    verified_bundle: dict[str, Any],
+    plan: dict[str, Any],
+    policy: dict[str, Any],
+) -> dict[str, Any]:
+    return {
+        "bundle_sha256": verified_bundle["bundle_sha256"],
+        "qualification_plan_sha256": plan["qualification_plan_sha256"],
+        "qualification_policy_id": policy["policy_id"],
+        "qualification_policy_sha256": sha256_json(policy),
+        "module_api_version": plan["source"]["module_api_version"],
+    }
+
+
+def build_qualification_evidence(
+    verified_bundle: dict[str, Any],
+    plan: dict[str, Any],
+    policy: dict[str, Any],
+) -> dict[str, Any]:
+    """Derive reproducible contract-only evidence from a verified bundle."""
+    receipts: list[dict[str, Any]] = []
+    required_bindings = 0
+    for module in plan["modules"]:
+        required_bindings += len(module["required_evidence"])
+        receipt_without_digest: dict[str, Any] = {
+            "position": module["position"],
+            "slot": module["slot"],
+            "module": module["module"],
+            "artifact_sha256": module["artifact_sha256"],
+            "requirement": CONTRACT_EVIDENCE_REQUIREMENT,
+            "verifier": CONTRACT_EVIDENCE_VERIFIER,
+            "verification_method": CONTRACT_EVIDENCE_METHOD,
+            "evidence_scope": CONTRACT_EVIDENCE_SCOPE,
+            "result": "passed",
+        }
+        receipt = dict(receipt_without_digest)
+        receipt["receipt_sha256"] = sha256_json(receipt_without_digest)
+        receipts.append(receipt)
+
+    evidence_without_digest: dict[str, Any] = {
+        "contract_schema": QUALIFICATION_EVIDENCE_SCHEMA_REFERENCE,
+        "schema_version": QUALIFICATION_EVIDENCE_SCHEMA_VERSION,
+        "factory": deepcopy(plan["factory"]),
+        "source": _qualification_source(verified_bundle, plan, policy),
+        "receipts": receipts,
+        "summary": {
+            "receipt_count": len(receipts),
+            "required_evidence_bindings": required_bindings,
+            "verified_evidence_bindings": len(receipts),
+            "remaining_evidence_bindings": required_bindings - len(receipts),
+            "verified_requirement_types": 1,
+            "full_qualification_evidence": False,
+        },
+        "evidence_boundary": deepcopy(EVIDENCE_BOUNDARY),
+    }
+    evidence = dict(evidence_without_digest)
+    evidence["qualification_evidence_sha256"] = sha256_json(
+        evidence_without_digest
+    )
+    return evidence
+
+
+def validate_qualification_evidence(
+    evidence: Any,
+    verified_bundle: Any,
+    plan: Any,
+    policy: Any,
+) -> list[str]:
+    errors: list[str] = []
+    if not isinstance(evidence, dict):
+        return ["qualification evidence root must be an object"]
+    if set(evidence) != EVIDENCE_FIELDS:
+        errors.append(
+            "qualification evidence contains missing or unexpected fields"
+        )
+    if evidence.get("contract_schema") != QUALIFICATION_EVIDENCE_SCHEMA_REFERENCE:
+        errors.append("qualification evidence must reference its immutable schema")
+    if evidence.get("schema_version") != QUALIFICATION_EVIDENCE_SCHEMA_VERSION:
+        errors.append("qualification evidence schema_version is invalid")
+    if not _json_exactly_equal(
+        evidence.get("evidence_boundary"),
+        EVIDENCE_BOUNDARY,
+    ):
+        errors.append(
+            "qualification evidence must preserve the contract-only boundary"
+        )
+
+    plan_errors = validate_qualification_plan(plan, verified_bundle, policy)
+    errors.extend(f"qualification plan: {error}" for error in plan_errors)
+    if plan_errors:
+        return errors
+    try:
+        expected = build_qualification_evidence(
+            verified_bundle,
+            plan,
+            policy,
+        )
+    except (KeyError, TypeError, ValueError) as exc:
+        return errors + [f"cannot rebuild expected qualification evidence: {exc}"]
+    if not _json_exactly_equal(evidence, expected):
+        errors.append(
+            "qualification evidence does not exactly match its verified "
+            "bundle, plan, and policy"
+        )
+    return errors
+
+
+def qualification_evidence_for_bundle(
+    plan: Any,
+    bundle: bytes,
+    policy: Any,
+) -> tuple[list[str], dict[str, Any] | None]:
+    bundle_errors, verified = verify_factory_bundle(bundle)
+    if bundle_errors or verified is None:
+        return [f"factory bundle: {error}" for error in bundle_errors], None
+    plan_errors = validate_qualification_plan(plan, verified, policy)
+    if plan_errors:
+        return [f"qualification plan: {error}" for error in plan_errors], None
+    return [], build_qualification_evidence(verified, plan, policy)
+
+
+def verify_qualification_evidence_for_bundle(
+    evidence: Any,
+    plan: Any,
+    bundle: bytes,
+    policy: Any,
+) -> list[str]:
+    bundle_errors, verified = verify_factory_bundle(bundle)
+    if bundle_errors or verified is None:
+        return [f"factory bundle: {error}" for error in bundle_errors]
+    return validate_qualification_evidence(evidence, verified, plan, policy)
+
+
+def build_qualification_assessment(
+    verified_bundle: dict[str, Any],
+    plan: dict[str, Any],
+    policy: dict[str, Any],
+    evidence: dict[str, Any],
+) -> dict[str, Any]:
+    """Assess bundle-derived contract evidence without granting eligibility."""
+    verified_by_module = {
+        (receipt["position"], receipt["module"]): receipt["requirement"]
+        for receipt in evidence["receipts"]
+    }
+    modules: list[dict[str, Any]] = []
+    missing_requirement_types: set[str] = set()
+    required_bindings = 0
+    verified_bindings = 0
+    for module in plan["modules"]:
+        required = list(module["required_evidence"])
+        verified_requirement = verified_by_module[
+            (module["position"], module["module"])
+        ]
+        verified = [verified_requirement]
+        missing = [item for item in required if item != verified_requirement]
+        required_bindings += len(required)
+        verified_bindings += len(verified)
+        missing_requirement_types.update(missing)
+        modules.append(
+            {
+                "position": module["position"],
+                "slot": module["slot"],
+                "module": module["module"],
+                "artifact_sha256": module["artifact_sha256"],
+                "required_evidence": required,
+                "verified_evidence": verified,
+                "missing_evidence": missing,
+                "evidence_status": "partial",
+                "runtime_eligible": False,
+                "reason": "runtime_evidence_incomplete",
+            }
+        )
+
+    assessment_without_digest: dict[str, Any] = {
+        "contract_schema": QUALIFICATION_ASSESSMENT_SCHEMA_REFERENCE,
+        "schema_version": QUALIFICATION_ASSESSMENT_SCHEMA_VERSION,
+        "factory": deepcopy(plan["factory"]),
+        "source": {
+            **_qualification_source(verified_bundle, plan, policy),
+            "qualification_evidence_sha256": evidence[
+                "qualification_evidence_sha256"
+            ],
+        },
+        "modules": modules,
+        "summary": {
+            "module_count": len(modules),
+            "runtime_eligible_modules": 0,
+            "runtime_ineligible_modules": len(modules),
+            "required_evidence_bindings": required_bindings,
+            "verified_evidence_bindings": verified_bindings,
+            "missing_evidence_bindings": required_bindings - verified_bindings,
+            "verified_requirement_types": 1,
+            "missing_requirement_types": len(missing_requirement_types),
+            "all_requirements_satisfied": False,
+        },
+        "assessment_boundary": deepcopy(ASSESSMENT_BOUNDARY),
+    }
+    assessment = dict(assessment_without_digest)
+    assessment["qualification_assessment_sha256"] = sha256_json(
+        assessment_without_digest
+    )
+    return assessment
+
+
+def validate_qualification_assessment(
+    assessment: Any,
+    evidence: Any,
+    verified_bundle: Any,
+    plan: Any,
+    policy: Any,
+) -> list[str]:
+    errors: list[str] = []
+    if not isinstance(assessment, dict):
+        return ["qualification assessment root must be an object"]
+    if set(assessment) != ASSESSMENT_FIELDS:
+        errors.append(
+            "qualification assessment contains missing or unexpected fields"
+        )
+    if (
+        assessment.get("contract_schema")
+        != QUALIFICATION_ASSESSMENT_SCHEMA_REFERENCE
+    ):
+        errors.append("qualification assessment must reference its immutable schema")
+    if (
+        assessment.get("schema_version")
+        != QUALIFICATION_ASSESSMENT_SCHEMA_VERSION
+    ):
+        errors.append("qualification assessment schema_version is invalid")
+    if not _json_exactly_equal(
+        assessment.get("assessment_boundary"),
+        ASSESSMENT_BOUNDARY,
+    ):
+        errors.append(
+            "qualification assessment must preserve the non-authorizing boundary"
+        )
+
+    evidence_errors = validate_qualification_evidence(
+        evidence,
+        verified_bundle,
+        plan,
+        policy,
+    )
+    errors.extend(
+        f"qualification evidence: {error}" for error in evidence_errors
+    )
+    if evidence_errors:
+        return errors
+    try:
+        expected = build_qualification_assessment(
+            verified_bundle,
+            plan,
+            policy,
+            evidence,
+        )
+    except (KeyError, TypeError, ValueError) as exc:
+        return errors + [f"cannot rebuild expected qualification assessment: {exc}"]
+    if not _json_exactly_equal(assessment, expected):
+        errors.append(
+            "qualification assessment does not exactly match its verified "
+            "evidence, bundle, plan, and policy"
+        )
+    return errors
+
+
+def qualification_assessment_for_bundle(
+    evidence: Any,
+    plan: Any,
+    bundle: bytes,
+    policy: Any,
+) -> tuple[list[str], dict[str, Any] | None]:
+    bundle_errors, verified = verify_factory_bundle(bundle)
+    if bundle_errors or verified is None:
+        return [f"factory bundle: {error}" for error in bundle_errors], None
+    evidence_errors = validate_qualification_evidence(
+        evidence,
+        verified,
+        plan,
+        policy,
+    )
+    if evidence_errors:
+        return [
+            f"qualification evidence: {error}" for error in evidence_errors
+        ], None
+    return [], build_qualification_assessment(
+        verified,
+        plan,
+        policy,
+        evidence,
+    )
+
+
+def verify_qualification_assessment_for_bundle(
+    assessment: Any,
+    evidence: Any,
+    plan: Any,
+    bundle: bytes,
+    policy: Any,
+) -> list[str]:
+    bundle_errors, verified = verify_factory_bundle(bundle)
+    if bundle_errors or verified is None:
+        return [f"factory bundle: {error}" for error in bundle_errors]
+    return validate_qualification_assessment(
+        assessment,
+        evidence,
+        verified,
+        plan,
+        policy,
+    )

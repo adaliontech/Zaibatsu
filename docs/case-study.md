@@ -215,6 +215,9 @@ reusable contracts while preserving evidence and limitations:
 - the versioned qualification policy and `qualification-plan` workflow turn a
   verified bundle into 67 content-addressed missing-evidence bindings without
   accepting self-attestation or granting runtime eligibility or activation;
+- bundle-derived qualification evidence converts exact contract verification
+  into nine reproducible receipts, while the deterministic assessment leaves
+  the other 58 bindings missing and all nine modules runtime-ineligible;
 - project-owned JSON Schemas describe the architecture, factory, readiness,
   and evidence documents;
 - `scripts/validate_repository.py` checks all contracts, evidence semantics,
@@ -237,6 +240,8 @@ The public package can now reject claims or architectures in which:
 - cron and systemd both own the same workload;
 - a source-only skeleton is described as deployed;
 - a missing-evidence plan is presented as qualification or activation;
+- a content-addressed claim or contract-only receipt is presented as runtime
+  implementation, independent-verifier, recovery, or activation evidence;
 - a model authorizes an external effect;
 - a factory promotes its own feedback into shared policy;
 - component and meta-factory maturity ledgers diverge.

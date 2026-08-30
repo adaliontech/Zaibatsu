@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.6.0 - Unreleased
+
+- Added deterministic bundle-derived contract-conformance receipts for every
+  selected module in a fully verified factory bundle.
+- Added `qualification-evidence`, `verify-qualification-evidence`,
+  `qualification-assessment`, and `verify-qualification-assessment` workflows.
+- Published a partial public assessment that verifies 9 of 67 evidence
+  bindings, leaves 58 missing, and marks zero of nine modules runtime-eligible.
+- Bound every receipt, evidence set, and assessment by canonical SHA-256 to the
+  exact bundle, plan, policy, module identity, and artifact digest.
+- Denied forged/replayed/duplicate evidence, false independent-verifier scope,
+  eligibility inflation, activation authority, and scalar type confusion.
+- Expanded the public adversarial suite from 153 to 163 tests.
+
 ## 1.5.0 - 2026-08-30
 
 - Added a versioned runtime-qualification policy with mandatory base and

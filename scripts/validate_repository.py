@@ -31,12 +31,20 @@ from factory_composer import (
     validate_module_catalog,
 )
 from factory_qualification import (
+    EXAMPLE_QUALIFICATION_ASSESSMENT_PATH,
+    EXAMPLE_QUALIFICATION_EVIDENCE_PATH,
     EXAMPLE_QUALIFICATION_PLAN_PATH,
+    QUALIFICATION_ASSESSMENT_SCHEMA_REFERENCE,
+    QUALIFICATION_EVIDENCE_SCHEMA_REFERENCE,
     QUALIFICATION_PLAN_SCHEMA_REFERENCE,
     QUALIFICATION_POLICY_PATH,
     QUALIFICATION_POLICY_SCHEMA_REFERENCE,
+    load_qualification_assessment,
+    load_qualification_evidence,
     load_qualification_plan,
     load_qualification_policy,
+    validate_qualification_assessment,
+    validate_qualification_evidence,
     validate_qualification_plan,
     validate_qualification_policy,
 )
@@ -83,6 +91,8 @@ REQUIRED_FILES = (
     "examples/economic-factory-cron.json",
     "examples/economic-factory.bundle-manifest.json",
     "examples/economic-factory.plan.json",
+    "examples/economic-factory.qualification-assessment.json",
+    "examples/economic-factory.qualification-evidence.json",
     "examples/economic-factory.qualification-plan.json",
     "evidence/dispatcher-validation-v1.json",
     "evidence/droid-contribution-v1.json",
@@ -106,6 +116,8 @@ REQUIRED_FILES = (
     "schemas/factory-bundle-inspection.schema.json",
     "schemas/factory-bundle-manifest.schema.json",
     "schemas/factory-plan.schema.json",
+    "schemas/factory-qualification-assessment.schema.json",
+    "schemas/factory-qualification-evidence.schema.json",
     "schemas/factory-qualification-plan.schema.json",
     "schemas/factory-model.schema.json",
     "schemas/meta-factory-foundations-receipt.schema.json",
@@ -141,7 +153,7 @@ ARCHITECTURE_SCHEMA_VERSION = "zaibatsu.architecture.v1"
 FACTORY_MODEL_SCHEMA_VERSION = "zaibatsu.factory-model.v1"
 READINESS_SCHEMA_VERSION = "zaibatsu.submission-readiness.v1"
 FACTORY_DEFINITION_SCHEMA_VERSION = "zaibatsu.factory-definition.v2"
-INTEGRATED_TEST_COUNT = 153
+INTEGRATED_TEST_COUNT = 163
 DROID_FACTORY_CLI_VERSION = "0.206.0"
 DROID_SESSION_REFERENCE = "46f941a9-82f8-4df3-a45c-b8158996360b"
 PUBLIC_REPOSITORY_URL = "https://github.com/adaliontech/Zaibatsu"
@@ -187,6 +199,12 @@ CONTRACT_SCHEMA_REFERENCES = {
     "examples/economic-factory-cron.json": PORTABLE_FACTORY_SCHEMA_REFERENCE,
     "examples/economic-factory.bundle-manifest.json": BUNDLE_MANIFEST_SCHEMA_REFERENCE,
     "examples/economic-factory.plan.json": FACTORY_PLAN_SCHEMA_REFERENCE,
+    "examples/economic-factory.qualification-assessment.json": (
+        QUALIFICATION_ASSESSMENT_SCHEMA_REFERENCE
+    ),
+    "examples/economic-factory.qualification-evidence.json": (
+        QUALIFICATION_EVIDENCE_SCHEMA_REFERENCE
+    ),
     "examples/economic-factory.qualification-plan.json": (
         QUALIFICATION_PLAN_SCHEMA_REFERENCE
     ),
@@ -209,6 +227,12 @@ REMOTE_SCHEMA_LOCAL_PATHS = {
         "schemas/factory-bundle-manifest.schema.json"
     ),
     "examples/economic-factory.plan.json": "schemas/factory-plan.schema.json",
+    "examples/economic-factory.qualification-assessment.json": (
+        "schemas/factory-qualification-assessment.schema.json"
+    ),
+    "examples/economic-factory.qualification-evidence.json": (
+        "schemas/factory-qualification-evidence.schema.json"
+    ),
     "examples/economic-factory.qualification-plan.json": (
         "schemas/factory-qualification-plan.schema.json"
     ),
@@ -1291,6 +1315,8 @@ def validate_submission_readiness(data: Any) -> list[str]:
                     "examples/economic-factory-cron.json",
                     "examples/economic-factory.bundle-manifest.json",
                     "examples/economic-factory.plan.json",
+                    "examples/economic-factory.qualification-assessment.json",
+                    "examples/economic-factory.qualification-evidence.json",
                     "examples/economic-factory.qualification-plan.json",
                     "policies/runtime-qualification-v1.json",
                 }
@@ -1707,7 +1733,13 @@ def validate_contract_schema_files(root: Path = ROOT) -> list[str]:
         if schema.get("$schema") != "https://json-schema.org/draft/2020-12/schema":
             errors.append(f"{relative}: project-owned schema must declare JSON Schema 2020-12")
         schema_release = (
-            "v1.5.0"
+            "v1.6.0"
+            if schema_path.name
+            in {
+                "factory-qualification-assessment.schema.json",
+                "factory-qualification-evidence.schema.json",
+            }
+            else "v1.5.0"
             if schema_path.name
             in {
                 "factory-qualification-plan.schema.json",
@@ -1782,6 +1814,9 @@ def main() -> int:
     bundle_manifest: Any = None
     qualification_policy: Any = None
     qualification_plan: Any = None
+    qualification_evidence: Any = None
+    qualification_assessment: Any = None
+    verified_qualification_bundle: Any = None
     readiness: Any = None
     errors.extend(validate_public_paths())
     errors.extend(validate_required_files())
@@ -1880,7 +1915,9 @@ def main() -> int:
                     module_catalog,
                     module_artifacts,
                 )
-                bundle_errors, verified_bundle = verify_factory_bundle(bundle)
+                bundle_errors, verified_qualification_bundle = verify_factory_bundle(
+                    bundle
+                )
             except (KeyError, TypeError, ValueError) as exc:
                 errors.append(f"cannot rebuild qualification input bundle: {exc}")
             else:
@@ -1888,14 +1925,47 @@ def main() -> int:
                     f"qualification input bundle: {error}"
                     for error in bundle_errors
                 )
-                if verified_bundle is not None:
+                if verified_qualification_bundle is not None:
                     errors.extend(
                         validate_qualification_plan(
                             qualification_plan,
-                            verified_bundle,
+                            verified_qualification_bundle,
                             qualification_policy,
                         )
                     )
+    try:
+        qualification_evidence = load_qualification_evidence(
+            EXAMPLE_QUALIFICATION_EVIDENCE_PATH
+        )
+    except (OSError, ValueError) as exc:
+        errors.append(f"cannot load example qualification evidence: {exc}")
+    else:
+        if verified_qualification_bundle is not None:
+            errors.extend(
+                validate_qualification_evidence(
+                    qualification_evidence,
+                    verified_qualification_bundle,
+                    qualification_plan,
+                    qualification_policy,
+                )
+            )
+    try:
+        qualification_assessment = load_qualification_assessment(
+            EXAMPLE_QUALIFICATION_ASSESSMENT_PATH
+        )
+    except (OSError, ValueError) as exc:
+        errors.append(f"cannot load example qualification assessment: {exc}")
+    else:
+        if verified_qualification_bundle is not None:
+            errors.extend(
+                validate_qualification_assessment(
+                    qualification_assessment,
+                    qualification_evidence,
+                    verified_qualification_bundle,
+                    qualification_plan,
+                    qualification_policy,
+                )
+            )
     try:
         readiness = json.loads(READINESS_PATH.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:
@@ -1923,8 +1993,8 @@ def main() -> int:
     )
     print(
         "- 2 reusable factory definitions, content-addressed modules, control "
-        "plan, bundle manifest, inspection schemas, and qualification policy "
-        "checked"
+        "plan, bundle manifest, inspection schemas, qualification policy, "
+        "evidence, and assessment checked"
     )
     print(f"- {len(EVIDENCE_CONTRACTS)} evidence receipts checked")
     print(f"- {len(REQUIRED_FACTORY_INVARIANTS)} meta-factory invariants checked")

@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.6.0/schemas/factory-qualification-evidence.schema.json",
+  "title": "Zaibatsu bundle-derived factory qualification evidence",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_schema", "schema_version", "factory", "source", "receipts", "summary", "evidence_boundary", "qualification_evidence_sha256"],
+  "properties": {
+    "contract_schema": {"const": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.6.0/schemas/factory-qualification-evidence.schema.json"},
+    "schema_version": {"const": "zaibatsu.factory-qualification-evidence.v1"},
+    "factory": {"$ref": "#/$defs/factory"},
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["bundle_sha256", "qualification_plan_sha256", "qualification_policy_id", "qualification_policy_sha256", "module_api_version"],
+      "properties": {
+        "bundle_sha256": {"$ref": "#/$defs/sha256"},
+        "qualification_plan_sha256": {"$ref": "#/$defs/sha256"},
+        "qualification_policy_id": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+        "qualification_policy_sha256": {"$ref": "#/$defs/sha256"},
+        "module_api_version": {"const": "zaibatsu.module.v1"}
+      }
+    },
+    "receipts": {
+      "type": "array",
+      "minItems": 9,
+      "maxItems": 9,
+      "items": {"$ref": "#/$defs/receipt"}
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["receipt_count", "required_evidence_bindings", "verified_evidence_bindings", "remaining_evidence_bindings", "verified_requirement_types", "full_qualification_evidence"],
+      "properties": {
+        "receipt_count": {"const": 9},
+        "required_evidence_bindings": {"type": "integer", "minimum": 67},
+        "verified_evidence_bindings": {"const": 9},
+        "remaining_evidence_bindings": {"type": "integer", "minimum": 58},
+        "verified_requirement_types": {"const": 1},
+        "full_qualification_evidence": {"const": false}
+      }
+    },
+    "evidence_boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_is_verified_control_bundle", "contract_conformance_only", "external_independent_verification_included", "contains_runtime_implementation_evidence", "self_attestation_accepted", "runtime_eligibility_granted", "activation_authorized", "owner_approval_required_for_activation"],
+      "properties": {
+        "source_is_verified_control_bundle": {"const": true},
+        "contract_conformance_only": {"const": true},
+        "external_independent_verification_included": {"const": false},
+        "contains_runtime_implementation_evidence": {"const": false},
+        "self_attestation_accepted": {"const": false},
+        "runtime_eligibility_granted": {"const": false},
+        "activation_authorized": {"const": false},
+        "owner_approval_required_for_activation": {"const": true}
+      }
+    },
+    "qualification_evidence_sha256": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "slot": {"enum": ["source_versioning", "static_secrets", "runtime_secrets", "host_reproduction", "worker_environment", "scheduling", "execution", "verification", "feedback"]},
+    "factory": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "class"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+        "class": {"enum": ["control_factory", "economic_factory"]}
+      }
+    },
+    "receipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["position", "slot", "module", "artifact_sha256", "requirement", "verifier", "verification_method", "evidence_scope", "result", "receipt_sha256"],
+      "properties": {
+        "position": {"type": "integer", "minimum": 0, "maximum": 8},
+        "slot": {"$ref": "#/$defs/slot"},
+        "module": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+        "artifact_sha256": {"$ref": "#/$defs/sha256"},
+        "requirement": {"const": "contract_conformance_receipt"},
+        "verifier": {"const": "zaibatsu.factory-bundle-verifier.v1"},
+        "verification_method": {"const": "canonical_contract_catalog_and_digest"},
+        "evidence_scope": {"const": "module_contract_only"},
+        "result": {"const": "passed"},
+        "receipt_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    }
+  }
+}

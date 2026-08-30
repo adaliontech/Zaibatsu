@@ -19,8 +19,10 @@ from a credential-disabled public clone. The immutable v1.4.0 release and its
 tag clone passed the same boundary. The v1.5.0 qualification-policy and
 missing-evidence-plan candidate passed its 153-test credential-disabled clone,
 Gitleaks, schema, determinism, and independent-CI proof. Immutable v1.5.0 and
-its tag clone passed the same release boundary. The final demo and applicant
-materials remain explicit gates in
+its tag clone passed the same release boundary. The v1.6.0 bundle-derived
+qualification-evidence and partial-assessment candidate now requires its own
+163-test public proof. The final demo and applicant materials remain explicit
+gates in
 [`architecture/submission-readiness.json`](../architecture/submission-readiness.json).
 
 ## Current project description
@@ -36,7 +38,10 @@ represented at their actual maturities. The bundle contains contracts and
 schemas, not runtime implementations. Nix environments remain planned; the
 agent scaffold is tested source but not deployed. A deterministic
 qualification plan lists the runtime evidence still missing for every selected
-module while granting no eligibility or activation.
+module while granting no eligibility or activation. Bundle verification also
+derives nine reproducible contract-conformance receipts; the partial assessment
+credits only those 9 of 67 bindings, leaves 58 missing, and grants no runtime
+eligibility or activation.
 
 The core repository works without a model or Droid credentials. For the Guild
 case study, authenticated Factory Droid used an owner-operated GGUF whose
@@ -58,7 +63,7 @@ new test moves `policy_decision` before `verify`; the pre-change validator
 accepted that unsafe ordering, while the shipped validator rejects it with a
 deterministic adjacent-stage error. Droid reported 36 passing tests, and an
 independent run reproduced all 36 before later integration, branding, release,
-and meta-factory checks brought the package to 153 passing tests. No model or
+and meta-factory checks brought the package to 163 passing tests. No model or
 Factory credential is published.
 
 ## One-line description
@@ -175,6 +180,10 @@ the public repository:
       deterministic reproduction, and independent public CI.
 - [x] Immutable v1.5.0 passes tag CI, tagged-schema byte checks, and the full
       credential-disabled tag-clone reproduction.
+- [ ] Bundle-derived qualification-evidence v1.6.0 candidate passes 163 tests,
+      forged/replayed/duplicate/scope-inflated receipt checks, schema
+      validation, deterministic evidence/assessment reproduction, Gitleaks,
+      and independent public CI.
 - [x] Public repository and article links resolve without authentication.
 - [ ] Demo clip or screenshots show a real Factory task and validation result.
 - [x] No private host, credential, recovery, or deployment detail is exposed.

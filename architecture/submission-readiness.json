@@ -20,6 +20,8 @@
           "examples/economic-factory-cron.json",
           "examples/economic-factory.bundle-manifest.json",
           "examples/economic-factory.plan.json",
+          "examples/economic-factory.qualification-assessment.json",
+          "examples/economic-factory.qualification-evidence.json",
           "examples/economic-factory.qualification-plan.json",
           "policies/runtime-qualification-v1.json"
         ],
@@ -88,21 +90,18 @@
     },
     {
       "id": "fresh_clone_reproduction",
-      "status": "complete",
+      "status": "pending_external",
       "required_for_submission": true,
-      "evidence": "Credential-disabled public clone of the v1.5.0 candidate passed 153 tests, 68-file validation, strict Git checks, Gitleaks 8.30.1 history/tree scans, deterministic bundle and qualification-plan reproduction, exact non-authorizing semantic assertions, Draft 2020-12 schema validation and negative controls, and independent GitHub Actions",
-      "proof": {
-        "candidate_commit": "85ebee8652ee87fed986aa44c2634d166b0238c8",
-        "tests_passed": 153,
-        "gitleaks_version": "8.30.1",
-        "github_actions_run": "https://github.com/adaliontech/Zaibatsu/actions/runs/33336298353"
-      }
+      "evidence": "The immutable v1.5.0 proof remains historical; the v1.6.0 bundle-derived qualification-evidence and partial-assessment candidate requires its own credential-disabled clone, 163-test, strict-Git, Gitleaks, schema, determinism, and CI proof"
     },
     {
       "id": "public_demo",
-      "status": "pending_external",
+      "status": "blocked_by_dependency",
       "required_for_submission": true,
-      "evidence": "Immutable v1.5.0 passed tag CI, tagged-schema checks, and credential-disabled tag-clone reproduction; record and publish the final clip from that released tag"
+      "evidence": "Record and publish the final clip only after the current qualification-evidence candidate passes fresh-clone proof and is released",
+      "blocked_by": [
+        "fresh_clone_reproduction"
+      ]
     },
     {
       "id": "applicant_materials",

@@ -1,0 +1,308 @@
+{
+  "contract_schema": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.6.0/schemas/factory-qualification-assessment.schema.json",
+  "schema_version": "zaibatsu.factory-qualification-assessment.v1",
+  "factory": {
+    "class": "economic_factory",
+    "id": "example-product"
+  },
+  "source": {
+    "bundle_sha256": "d4918fd16f55b907a0b2b9734422d7106d3030a511e5cae5d6efc1cb7b253aba",
+    "qualification_plan_sha256": "a9419341bf0806e1a6fc3769354e46ac6eb1c29043042ddd7eec35cca1a8ff81",
+    "qualification_policy_id": "runtime-eligibility-default",
+    "qualification_policy_sha256": "4fd359cc6dfe3eb3b555eb26a3453939fde34efd8d65a281a81dd34041468e9a",
+    "module_api_version": "zaibatsu.module.v1",
+    "qualification_evidence_sha256": "a19e1f82e13f6a7e07011c6e80e112d4981740e9188805e615ee57e12c9d1963"
+  },
+  "modules": [
+    {
+      "position": 0,
+      "slot": "source_versioning",
+      "module": "git-source",
+      "artifact_sha256": "977317056e3b4ae88471cd7aeddb1b514bd5c3310ca1d73c324599785c61e412",
+      "required_evidence": [
+        "contract_conformance_receipt",
+        "environment_lock_digest",
+        "implementation_artifact_digest",
+        "recovery_receipt",
+        "repository_lineage_receipt",
+        "source_revision"
+      ],
+      "verified_evidence": [
+        "contract_conformance_receipt"
+      ],
+      "missing_evidence": [
+        "environment_lock_digest",
+        "implementation_artifact_digest",
+        "recovery_receipt",
+        "repository_lineage_receipt",
+        "source_revision"
+      ],
+      "evidence_status": "partial",
+      "runtime_eligible": false,
+      "reason": "runtime_evidence_incomplete"
+    },
+    {
+      "position": 1,
+      "slot": "static_secrets",
+      "module": "sops-age-static-secrets",
+      "artifact_sha256": "23462ec661dfc00e330ce8e604157aba5e44b1401e17369ab43ec408e1ac251d",
+      "required_evidence": [
+        "ciphertext_policy_receipt",
+        "contract_conformance_receipt",
+        "environment_lock_digest",
+        "implementation_artifact_digest",
+        "recovery_receipt",
+        "secret_recovery_receipt",
+        "source_revision"
+      ],
+      "verified_evidence": [
+        "contract_conformance_receipt"
+      ],
+      "missing_evidence": [
+        "ciphertext_policy_receipt",
+        "environment_lock_digest",
+        "implementation_artifact_digest",
+        "recovery_receipt",
+        "secret_recovery_receipt",
+        "source_revision"
+      ],
+      "evidence_status": "partial",
+      "runtime_eligible": false,
+      "reason": "runtime_evidence_incomplete"
+    },
+    {
+      "position": 2,
+      "slot": "runtime_secrets",
+      "module": "bounded-runtime-secrets",
+      "artifact_sha256": "4c62e939782ef9b5990d81de413a809aadfdb58c0c28e2785abd0a57a06a4585",
+      "required_evidence": [
+        "contract_conformance_receipt",
+        "environment_lock_digest",
+        "implementation_artifact_digest",
+        "recovery_receipt",
+        "secret_revocation_receipt",
+        "secret_scope_receipt",
+        "source_revision"
+      ],
+      "verified_evidence": [
+        "contract_conformance_receipt"
+      ],
+      "missing_evidence": [
+        "environment_lock_digest",
+        "implementation_artifact_digest",
+        "recovery_receipt",
+        "secret_revocation_receipt",
+        "secret_scope_receipt",
+        "source_revision"
+      ],
+      "evidence_status": "partial",
+      "runtime_eligible": false,
+      "reason": "runtime_evidence_incomplete"
+    },
+    {
+      "position": 3,
+      "slot": "host_reproduction",
+      "module": "ansible-host-reproduction",
+      "artifact_sha256": "905bf55cd2fe0973a89702e8752e8dfec174606d58da15e289d984ecf8385fe9",
+      "required_evidence": [
+        "clean_host_recovery_receipt",
+        "contract_conformance_receipt",
+        "environment_lock_digest",
+        "idempotence_receipt",
+        "implementation_artifact_digest",
+        "recovery_receipt",
+        "source_revision"
+      ],
+      "verified_evidence": [
+        "contract_conformance_receipt"
+      ],
+      "missing_evidence": [
+        "clean_host_recovery_receipt",
+        "environment_lock_digest",
+        "idempotence_receipt",
+        "implementation_artifact_digest",
+        "recovery_receipt",
+        "source_revision"
+      ],
+      "evidence_status": "partial",
+      "runtime_eligible": false,
+      "reason": "runtime_evidence_incomplete"
+    },
+    {
+      "position": 4,
+      "slot": "worker_environment",
+      "module": "nix-worker-environment",
+      "artifact_sha256": "a58729508be0cda87c2db3748ae487d76d9d90e3facfb78cbcaded5385731759",
+      "required_evidence": [
+        "cache_independence_receipt",
+        "contract_conformance_receipt",
+        "cross_node_reproduction_receipt",
+        "environment_lock_digest",
+        "implementation_artifact_digest",
+        "recovery_receipt",
+        "source_revision"
+      ],
+      "verified_evidence": [
+        "contract_conformance_receipt"
+      ],
+      "missing_evidence": [
+        "cache_independence_receipt",
+        "cross_node_reproduction_receipt",
+        "environment_lock_digest",
+        "implementation_artifact_digest",
+        "recovery_receipt",
+        "source_revision"
+      ],
+      "evidence_status": "partial",
+      "runtime_eligible": false,
+      "reason": "runtime_evidence_incomplete"
+    },
+    {
+      "position": 5,
+      "slot": "scheduling",
+      "module": "systemd-scheduler",
+      "artifact_sha256": "ff549f0c47e82dcc0126907d1cb423dc8339c6e294f0a89f465142f3f5e5bdb3",
+      "required_evidence": [
+        "contract_conformance_receipt",
+        "duplicate_trigger_denial_receipt",
+        "environment_lock_digest",
+        "failure_route_receipt",
+        "implementation_artifact_digest",
+        "recovery_receipt",
+        "scheduler_authority_receipt",
+        "source_revision"
+      ],
+      "verified_evidence": [
+        "contract_conformance_receipt"
+      ],
+      "missing_evidence": [
+        "duplicate_trigger_denial_receipt",
+        "environment_lock_digest",
+        "failure_route_receipt",
+        "implementation_artifact_digest",
+        "recovery_receipt",
+        "scheduler_authority_receipt",
+        "source_revision"
+      ],
+      "evidence_status": "partial",
+      "runtime_eligible": false,
+      "reason": "runtime_evidence_incomplete"
+    },
+    {
+      "position": 6,
+      "slot": "execution",
+      "module": "typed-agent-execution",
+      "artifact_sha256": "b2a0558758afa709b2e03b3fe8e025c520c5ad6b80e4db7826d7a9b2e802e8d6",
+      "required_evidence": [
+        "budget_policy_receipt",
+        "contract_conformance_receipt",
+        "environment_lock_digest",
+        "fixed_fixture_evaluation_receipt",
+        "implementation_artifact_digest",
+        "network_policy_receipt",
+        "recovery_receipt",
+        "sandbox_isolation_receipt",
+        "secret_policy_receipt",
+        "source_revision",
+        "typed_port_conformance_receipt"
+      ],
+      "verified_evidence": [
+        "contract_conformance_receipt"
+      ],
+      "missing_evidence": [
+        "budget_policy_receipt",
+        "environment_lock_digest",
+        "fixed_fixture_evaluation_receipt",
+        "implementation_artifact_digest",
+        "network_policy_receipt",
+        "recovery_receipt",
+        "sandbox_isolation_receipt",
+        "secret_policy_receipt",
+        "source_revision",
+        "typed_port_conformance_receipt"
+      ],
+      "evidence_status": "partial",
+      "runtime_eligible": false,
+      "reason": "runtime_evidence_incomplete"
+    },
+    {
+      "position": 7,
+      "slot": "verification",
+      "module": "deterministic-verification",
+      "artifact_sha256": "636525656d07dc89683a08ae3ffefabfd592909a61b729f4efc024dc1a43df31",
+      "required_evidence": [
+        "adversarial_fixture_receipt",
+        "contract_conformance_receipt",
+        "deterministic_gate_receipt",
+        "environment_lock_digest",
+        "implementation_artifact_digest",
+        "recovery_receipt",
+        "source_revision"
+      ],
+      "verified_evidence": [
+        "contract_conformance_receipt"
+      ],
+      "missing_evidence": [
+        "adversarial_fixture_receipt",
+        "deterministic_gate_receipt",
+        "environment_lock_digest",
+        "implementation_artifact_digest",
+        "recovery_receipt",
+        "source_revision"
+      ],
+      "evidence_status": "partial",
+      "runtime_eligible": false,
+      "reason": "runtime_evidence_incomplete"
+    },
+    {
+      "position": 8,
+      "slot": "feedback",
+      "module": "owner-gated-feedback",
+      "artifact_sha256": "ecb44bb384ff295af9af5b3b121fc53302364d12b6112c7275af2d6169caff26",
+      "required_evidence": [
+        "contract_conformance_receipt",
+        "environment_lock_digest",
+        "implementation_artifact_digest",
+        "promotion_authority_receipt",
+        "recovery_receipt",
+        "rollback_receipt",
+        "source_revision"
+      ],
+      "verified_evidence": [
+        "contract_conformance_receipt"
+      ],
+      "missing_evidence": [
+        "environment_lock_digest",
+        "implementation_artifact_digest",
+        "promotion_authority_receipt",
+        "recovery_receipt",
+        "rollback_receipt",
+        "source_revision"
+      ],
+      "evidence_status": "partial",
+      "runtime_eligible": false,
+      "reason": "runtime_evidence_incomplete"
+    }
+  ],
+  "summary": {
+    "module_count": 9,
+    "runtime_eligible_modules": 0,
+    "runtime_ineligible_modules": 9,
+    "required_evidence_bindings": 67,
+    "verified_evidence_bindings": 9,
+    "missing_evidence_bindings": 58,
+    "verified_requirement_types": 1,
+    "missing_requirement_types": 26,
+    "all_requirements_satisfied": false
+  },
+  "assessment_boundary": {
+    "assesses_bundle_contract_evidence_only": true,
+    "external_independent_verification_included": false,
+    "contains_runtime_implementation_evidence": false,
+    "self_attestation_accepted": false,
+    "runtime_eligibility_granted": false,
+    "activation_authorized": false,
+    "owner_approval_required_for_activation": true
+  },
+  "qualification_assessment_sha256": "465fc52b7941bda938480767277af39b4677cc23e5817273845e9c8e0711d8d2"
+}

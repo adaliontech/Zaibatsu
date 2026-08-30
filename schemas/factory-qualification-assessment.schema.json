@@ -1,0 +1,104 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.6.0/schemas/factory-qualification-assessment.schema.json",
+  "title": "Zaibatsu partial factory qualification assessment",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_schema", "schema_version", "factory", "source", "modules", "summary", "assessment_boundary", "qualification_assessment_sha256"],
+  "properties": {
+    "contract_schema": {"const": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.6.0/schemas/factory-qualification-assessment.schema.json"},
+    "schema_version": {"const": "zaibatsu.factory-qualification-assessment.v1"},
+    "factory": {"$ref": "#/$defs/factory"},
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["bundle_sha256", "qualification_plan_sha256", "qualification_policy_id", "qualification_policy_sha256", "module_api_version", "qualification_evidence_sha256"],
+      "properties": {
+        "bundle_sha256": {"$ref": "#/$defs/sha256"},
+        "qualification_plan_sha256": {"$ref": "#/$defs/sha256"},
+        "qualification_policy_id": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+        "qualification_policy_sha256": {"$ref": "#/$defs/sha256"},
+        "module_api_version": {"const": "zaibatsu.module.v1"},
+        "qualification_evidence_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "modules": {
+      "type": "array",
+      "minItems": 9,
+      "maxItems": 9,
+      "items": {"$ref": "#/$defs/moduleAssessment"}
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["module_count", "runtime_eligible_modules", "runtime_ineligible_modules", "required_evidence_bindings", "verified_evidence_bindings", "missing_evidence_bindings", "verified_requirement_types", "missing_requirement_types", "all_requirements_satisfied"],
+      "properties": {
+        "module_count": {"const": 9},
+        "runtime_eligible_modules": {"const": 0},
+        "runtime_ineligible_modules": {"const": 9},
+        "required_evidence_bindings": {"type": "integer", "minimum": 67},
+        "verified_evidence_bindings": {"const": 9},
+        "missing_evidence_bindings": {"type": "integer", "minimum": 58},
+        "verified_requirement_types": {"const": 1},
+        "missing_requirement_types": {"type": "integer", "minimum": 26},
+        "all_requirements_satisfied": {"const": false}
+      }
+    },
+    "assessment_boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["assesses_bundle_contract_evidence_only", "external_independent_verification_included", "contains_runtime_implementation_evidence", "self_attestation_accepted", "runtime_eligibility_granted", "activation_authorized", "owner_approval_required_for_activation"],
+      "properties": {
+        "assesses_bundle_contract_evidence_only": {"const": true},
+        "external_independent_verification_included": {"const": false},
+        "contains_runtime_implementation_evidence": {"const": false},
+        "self_attestation_accepted": {"const": false},
+        "runtime_eligibility_granted": {"const": false},
+        "activation_authorized": {"const": false},
+        "owner_approval_required_for_activation": {"const": true}
+      }
+    },
+    "qualification_assessment_sha256": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "requirement": {"type": "string", "pattern": "^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$"},
+    "slot": {"enum": ["source_versioning", "static_secrets", "runtime_secrets", "host_reproduction", "worker_environment", "scheduling", "execution", "verification", "feedback"]},
+    "factory": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "class"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+        "class": {"enum": ["control_factory", "economic_factory"]}
+      }
+    },
+    "moduleAssessment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["position", "slot", "module", "artifact_sha256", "required_evidence", "verified_evidence", "missing_evidence", "evidence_status", "runtime_eligible", "reason"],
+      "properties": {
+        "position": {"type": "integer", "minimum": 0, "maximum": 8},
+        "slot": {"$ref": "#/$defs/slot"},
+        "module": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+        "artifact_sha256": {"$ref": "#/$defs/sha256"},
+        "required_evidence": {
+          "type": "array",
+          "minItems": 6,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/requirement"}
+        },
+        "verified_evidence": {"const": ["contract_conformance_receipt"]},
+        "missing_evidence": {
+          "type": "array",
+          "minItems": 5,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/requirement"}
+        },
+        "evidence_status": {"const": "partial"},
+        "runtime_eligible": {"const": false},
+        "reason": {"const": "runtime_evidence_incomplete"}
+      }
+    }
+  }
+}

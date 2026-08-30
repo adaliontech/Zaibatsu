@@ -1658,6 +1658,463 @@ class QualificationPlanningTests(unittest.TestCase):
             self.assertIn("refusing to overwrite", repeated.stderr)
 
 
+class QualificationEvidenceTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.factory = validator.load_factory_definition()
+        self.catalog = composer.load_module_catalog()
+        self.artifacts, errors = composer.load_module_artifacts(self.catalog)
+        self.assertEqual([], errors)
+        self.bundle, _ = bundler.build_factory_bundle(
+            self.factory,
+            self.catalog,
+            self.artifacts,
+        )
+        bundle_errors, self.verified = bundler.verify_factory_bundle(self.bundle)
+        self.assertEqual([], bundle_errors)
+        self.assertIsNotNone(self.verified)
+        assert self.verified is not None
+        self.policy = qualification.load_qualification_policy()
+        self.plan = qualification.load_qualification_plan()
+        self.evidence = qualification.load_qualification_evidence()
+        self.assessment = qualification.load_qualification_assessment()
+
+    @staticmethod
+    def _refresh_receipt_and_evidence_digests(
+        evidence: dict[str, object],
+        receipt_index: int,
+    ) -> None:
+        receipts = evidence["receipts"]
+        assert isinstance(receipts, list)
+        receipt = receipts[receipt_index]
+        assert isinstance(receipt, dict)
+        receipt_without_digest = copy.deepcopy(receipt)
+        receipt_without_digest.pop("receipt_sha256")
+        receipt["receipt_sha256"] = composer.sha256_json(receipt_without_digest)
+        evidence_without_digest = copy.deepcopy(evidence)
+        evidence_without_digest.pop("qualification_evidence_sha256")
+        evidence["qualification_evidence_sha256"] = composer.sha256_json(
+            evidence_without_digest
+        )
+
+    def test_repository_evidence_and_assessment_are_exact(self) -> None:
+        assert self.verified is not None
+        evidence_schema = composer.load_json_file(
+            validator.ROOT
+            / "schemas"
+            / "factory-qualification-evidence.schema.json"
+        )
+        assessment_schema = composer.load_json_file(
+            validator.ROOT
+            / "schemas"
+            / "factory-qualification-assessment.schema.json"
+        )
+        evidence_summary = evidence_schema["properties"]["summary"]["properties"]
+        assessment_summary = assessment_schema["properties"]["summary"]["properties"]
+        self.assertEqual(67, evidence_summary["required_evidence_bindings"]["minimum"])
+        self.assertEqual(58, evidence_summary["remaining_evidence_bindings"]["minimum"])
+        self.assertEqual(67, assessment_summary["required_evidence_bindings"]["minimum"])
+        self.assertEqual(58, assessment_summary["missing_evidence_bindings"]["minimum"])
+        self.assertEqual(26, assessment_summary["missing_requirement_types"]["minimum"])
+        self.assertEqual(
+            [],
+            qualification.validate_qualification_evidence(
+                self.evidence,
+                self.verified,
+                self.plan,
+                self.policy,
+            ),
+        )
+        self.assertEqual(
+            self.evidence,
+            qualification.build_qualification_evidence(
+                self.verified,
+                self.plan,
+                self.policy,
+            ),
+        )
+        self.assertEqual(
+            [],
+            qualification.validate_qualification_assessment(
+                self.assessment,
+                self.evidence,
+                self.verified,
+                self.plan,
+                self.policy,
+            ),
+        )
+        self.assertEqual(
+            self.assessment,
+            qualification.build_qualification_assessment(
+                self.verified,
+                self.plan,
+                self.policy,
+                self.evidence,
+            ),
+        )
+
+    def test_evidence_is_stable_content_addressed_and_contract_only(self) -> None:
+        assert self.verified is not None
+        rebuilt = qualification.build_qualification_evidence(
+            self.verified,
+            copy.deepcopy(self.plan),
+            copy.deepcopy(self.policy),
+        )
+        self.assertEqual(self.evidence, rebuilt)
+        without_digest = copy.deepcopy(rebuilt)
+        digest = without_digest.pop("qualification_evidence_sha256")
+        self.assertEqual(composer.sha256_json(without_digest), digest)
+        self.assertEqual(9, rebuilt["summary"]["receipt_count"])
+        self.assertEqual(9, rebuilt["summary"]["verified_evidence_bindings"])
+        self.assertEqual(58, rebuilt["summary"]["remaining_evidence_bindings"])
+        self.assertFalse(rebuilt["summary"]["full_qualification_evidence"])
+        self.assertFalse(
+            rebuilt["evidence_boundary"][
+                "external_independent_verification_included"
+            ]
+        )
+        self.assertFalse(
+            rebuilt["evidence_boundary"][
+                "contains_runtime_implementation_evidence"
+            ]
+        )
+        for receipt in rebuilt["receipts"]:
+            receipt_without_digest = copy.deepcopy(receipt)
+            receipt_digest = receipt_without_digest.pop("receipt_sha256")
+            self.assertEqual(
+                composer.sha256_json(receipt_without_digest),
+                receipt_digest,
+            )
+            self.assertEqual(
+                "contract_conformance_receipt",
+                receipt["requirement"],
+            )
+            self.assertEqual("module_contract_only", receipt["evidence_scope"])
+
+    def test_assessment_is_partial_and_non_authorizing(self) -> None:
+        without_digest = copy.deepcopy(self.assessment)
+        digest = without_digest.pop("qualification_assessment_sha256")
+        self.assertEqual(composer.sha256_json(without_digest), digest)
+        summary = self.assessment["summary"]
+        self.assertEqual(67, summary["required_evidence_bindings"])
+        self.assertEqual(9, summary["verified_evidence_bindings"])
+        self.assertEqual(58, summary["missing_evidence_bindings"])
+        self.assertEqual(0, summary["runtime_eligible_modules"])
+        self.assertFalse(summary["all_requirements_satisfied"])
+        self.assertTrue(
+            all(
+                module["verified_evidence"]
+                == ["contract_conformance_receipt"]
+                and module["evidence_status"] == "partial"
+                and not module["runtime_eligible"]
+                for module in self.assessment["modules"]
+            )
+        )
+        boundary = self.assessment["assessment_boundary"]
+        self.assertFalse(boundary["runtime_eligibility_granted"])
+        self.assertFalse(boundary["activation_authorized"])
+        self.assertTrue(boundary["owner_approval_required_for_activation"])
+
+    def test_forged_receipt_is_rejected_even_with_refreshed_digests(self) -> None:
+        forged = copy.deepcopy(self.evidence)
+        forged["receipts"][0]["artifact_sha256"] = "a" * 64
+        self._refresh_receipt_and_evidence_digests(forged, 0)
+        errors = qualification.verify_qualification_evidence_for_bundle(
+            forged,
+            self.plan,
+            self.bundle,
+            self.policy,
+        )
+        self.assertTrue(any("does not exactly match" in error for error in errors))
+
+    def test_replay_against_another_bundle_or_plan_is_rejected(self) -> None:
+        cron_factory = composer.load_json_file(
+            validator.ROOT / "examples" / "economic-factory-cron.json"
+        )
+        cron_bundle, _ = bundler.build_factory_bundle(
+            cron_factory,
+            self.catalog,
+            self.artifacts,
+        )
+        errors = qualification.verify_qualification_evidence_for_bundle(
+            self.evidence,
+            self.plan,
+            cron_bundle,
+            self.policy,
+        )
+        self.assertTrue(any("qualification plan" in error for error in errors))
+
+        cron_errors, cron_verified = bundler.verify_factory_bundle(cron_bundle)
+        self.assertEqual([], cron_errors)
+        self.assertIsNotNone(cron_verified)
+        assert cron_verified is not None
+        cron_plan = qualification.build_qualification_plan(
+            cron_verified,
+            self.policy,
+        )
+        cron_evidence = qualification.build_qualification_evidence(
+            cron_verified,
+            cron_plan,
+            self.policy,
+        )
+        self.assertEqual(
+            [],
+            qualification.validate_qualification_evidence(
+                cron_evidence,
+                cron_verified,
+                cron_plan,
+                self.policy,
+            ),
+        )
+        changed_receipts = [
+            index
+            for index, (before, after) in enumerate(
+                zip(self.evidence["receipts"], cron_evidence["receipts"])
+            )
+            if before != after
+        ]
+        self.assertEqual([5], changed_receipts)
+        cron_assessment = qualification.build_qualification_assessment(
+            cron_verified,
+            cron_plan,
+            self.policy,
+            cron_evidence,
+        )
+        self.assertEqual(9, cron_assessment["summary"]["verified_evidence_bindings"])
+        self.assertEqual(58, cron_assessment["summary"]["missing_evidence_bindings"])
+        self.assertEqual(0, cron_assessment["summary"]["runtime_eligible_modules"])
+
+        stale_plan = copy.deepcopy(self.plan)
+        stale_plan["qualification_plan_sha256"] = "b" * 64
+        errors = qualification.verify_qualification_evidence_for_bundle(
+            self.evidence,
+            stale_plan,
+            self.bundle,
+            self.policy,
+        )
+        self.assertTrue(any("qualification plan" in error for error in errors))
+
+    def test_scope_or_verifier_inflation_is_rejected(self) -> None:
+        for field, unsafe_value in (
+            ("contains_runtime_implementation_evidence", True),
+            ("external_independent_verification_included", True),
+            ("runtime_eligibility_granted", True),
+            ("activation_authorized", True),
+            ("owner_approval_required_for_activation", False),
+        ):
+            with self.subTest(field=field):
+                mutated = copy.deepcopy(self.evidence)
+                mutated["evidence_boundary"][field] = unsafe_value
+                errors = qualification.verify_qualification_evidence_for_bundle(
+                    mutated,
+                    self.plan,
+                    self.bundle,
+                    self.policy,
+                )
+                self.assertTrue(any("contract-only boundary" in error for error in errors))
+
+        verifier = copy.deepcopy(self.evidence)
+        verifier["receipts"][0]["verifier"] = "claimed-external-verifier"
+        self._refresh_receipt_and_evidence_digests(verifier, 0)
+        errors = qualification.verify_qualification_evidence_for_bundle(
+            verifier,
+            self.plan,
+            self.bundle,
+            self.policy,
+        )
+        self.assertTrue(any("does not exactly match" in error for error in errors))
+
+    def test_duplicate_or_reordered_receipts_are_rejected(self) -> None:
+        duplicate = copy.deepcopy(self.evidence)
+        duplicate["receipts"][1] = copy.deepcopy(duplicate["receipts"][0])
+        evidence_without_digest = copy.deepcopy(duplicate)
+        evidence_without_digest.pop("qualification_evidence_sha256")
+        duplicate["qualification_evidence_sha256"] = composer.sha256_json(
+            evidence_without_digest
+        )
+        errors = qualification.verify_qualification_evidence_for_bundle(
+            duplicate,
+            self.plan,
+            self.bundle,
+            self.policy,
+        )
+        self.assertTrue(any("does not exactly match" in error for error in errors))
+
+        reordered = copy.deepcopy(self.evidence)
+        reordered["receipts"].reverse()
+        evidence_without_digest = copy.deepcopy(reordered)
+        evidence_without_digest.pop("qualification_evidence_sha256")
+        reordered["qualification_evidence_sha256"] = composer.sha256_json(
+            evidence_without_digest
+        )
+        errors = qualification.verify_qualification_evidence_for_bundle(
+            reordered,
+            self.plan,
+            self.bundle,
+            self.policy,
+        )
+        self.assertTrue(any("does not exactly match" in error for error in errors))
+
+    def test_assessment_cannot_inflate_eligibility_or_activation(self) -> None:
+        eligibility = copy.deepcopy(self.assessment)
+        eligibility["modules"][0]["runtime_eligible"] = True
+        errors = qualification.verify_qualification_assessment_for_bundle(
+            eligibility,
+            self.evidence,
+            self.plan,
+            self.bundle,
+            self.policy,
+        )
+        self.assertTrue(any("does not exactly match" in error for error in errors))
+
+        authority = copy.deepcopy(self.assessment)
+        authority["assessment_boundary"]["activation_authorized"] = True
+        errors = qualification.verify_qualification_assessment_for_bundle(
+            authority,
+            self.evidence,
+            self.plan,
+            self.bundle,
+            self.policy,
+        )
+        self.assertTrue(any("non-authorizing boundary" in error for error in errors))
+
+        type_confused = copy.deepcopy(self.assessment)
+        type_confused["assessment_boundary"]["activation_authorized"] = 0
+        errors = qualification.verify_qualification_assessment_for_bundle(
+            type_confused,
+            self.evidence,
+            self.plan,
+            self.bundle,
+            self.policy,
+        )
+        self.assertTrue(any("non-authorizing boundary" in error for error in errors))
+
+    def test_stronger_policy_preserves_partial_evidence_boundary(self) -> None:
+        assert self.verified is not None
+        stronger = copy.deepcopy(self.policy)
+        stronger["base_requirements"].append("additional_runtime_receipt")
+        stronger["base_requirements"].sort()
+        self.assertEqual([], qualification.validate_qualification_policy(stronger))
+        plan = qualification.build_qualification_plan(self.verified, stronger)
+        evidence = qualification.build_qualification_evidence(
+            self.verified,
+            plan,
+            stronger,
+        )
+        assessment = qualification.build_qualification_assessment(
+            self.verified,
+            plan,
+            stronger,
+            evidence,
+        )
+        self.assertEqual(76, evidence["summary"]["required_evidence_bindings"])
+        self.assertEqual(9, evidence["summary"]["verified_evidence_bindings"])
+        self.assertEqual(67, evidence["summary"]["remaining_evidence_bindings"])
+        self.assertEqual(67, assessment["summary"]["missing_evidence_bindings"])
+        self.assertEqual(0, assessment["summary"]["runtime_eligible_modules"])
+        self.assertEqual(
+            [],
+            qualification.validate_qualification_assessment(
+                assessment,
+                evidence,
+                self.verified,
+                plan,
+                stronger,
+            ),
+        )
+
+    def test_cli_evidence_and_assessment_round_trip(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            bundle_path = root / "factory.tar"
+            evidence_path = root / "qualification-evidence.json"
+            assessment_path = root / "qualification-assessment.json"
+            bundle_path.write_bytes(self.bundle)
+            cli = [sys.executable, str(validator.ROOT / "scripts" / "zaibatsu.py")]
+            evidence_command = cli + [
+                "qualification-evidence",
+                str(qualification.EXAMPLE_QUALIFICATION_PLAN_PATH),
+                str(bundle_path),
+                "--output",
+                str(evidence_path),
+            ]
+            generated = subprocess.run(
+                evidence_command,
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(0, generated.returncode, generated.stderr)
+            self.assertEqual(
+                self.evidence,
+                json.loads(evidence_path.read_text(encoding="utf-8")),
+            )
+            verified = subprocess.run(
+                cli
+                + [
+                    "verify-qualification-evidence",
+                    str(evidence_path),
+                    str(qualification.EXAMPLE_QUALIFICATION_PLAN_PATH),
+                    str(bundle_path),
+                ],
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(0, verified.returncode, verified.stderr)
+            self.assertIn("verified evidence bindings: 9", verified.stdout)
+            assessed = subprocess.run(
+                cli
+                + [
+                    "qualification-assessment",
+                    str(evidence_path),
+                    str(qualification.EXAMPLE_QUALIFICATION_PLAN_PATH),
+                    str(bundle_path),
+                    "--output",
+                    str(assessment_path),
+                ],
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(0, assessed.returncode, assessed.stderr)
+            self.assertEqual(
+                self.assessment,
+                json.loads(assessment_path.read_text(encoding="utf-8")),
+            )
+            assessment_verified = subprocess.run(
+                cli
+                + [
+                    "verify-qualification-assessment",
+                    str(assessment_path),
+                    str(evidence_path),
+                    str(qualification.EXAMPLE_QUALIFICATION_PLAN_PATH),
+                    str(bundle_path),
+                ],
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(
+                0,
+                assessment_verified.returncode,
+                assessment_verified.stderr,
+            )
+            self.assertIn("missing evidence bindings: 58", assessment_verified.stdout)
+            repeated = subprocess.run(
+                evidence_command,
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(2, repeated.returncode)
+            self.assertIn("refusing to overwrite", repeated.stderr)
+
+
 class EvidenceReceiptTests(unittest.TestCase):
     def setUp(self) -> None:
         self.receipts = {

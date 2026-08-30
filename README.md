@@ -114,6 +114,7 @@ The target stack is intentionally boring at authority boundaries:
 | LLM harness adapters | Bind different models behind typed module contracts | Validated at bounded source/contribution scope; general unattended routing is not active |
 | Recursive improvement | Return evidence and improve shared factory patterns | Evidence return is bounded and operational; shared automatic promotion remains designed and owner-gated |
 | Qualification planner | Bind a verified control bundle to mandatory runtime evidence requirements | Implemented and tested; the public plan contains no qualification evidence and grants no eligibility or activation |
+| Qualification evidence assessment | Derive and assess reproducible proof from verified control inputs | Contract-conformance evidence is verified for all nine public modules; 58 runtime evidence bindings remain missing, with zero eligibility or activation |
 
 The machine-readable source of this hierarchy is
 [`architecture/factory-model.json`](architecture/factory-model.json). The
@@ -176,11 +177,11 @@ make validate
 
 `make validate` checks the project-owned schemas, architecture contracts,
 portable factory example, content-addressed module artifacts, resolved control
-plan, portable bundle manifest, qualification policy and plan, evidence
-receipts, factory hierarchy and lifecycle, maturity boundaries, submission
-gates, public-safety rules, local links, and adversarial mutations. No model,
-network access, cloud account, secret, Nix installation, or production system
-is required.
+plan, portable bundle manifest, qualification policy, plan, evidence and
+assessment, sanitized receipts, factory hierarchy and lifecycle, maturity
+boundaries, submission gates, public-safety rules, local links, and adversarial
+mutations. No model, network access, cloud account, secret, Nix installation,
+or production system is required.
 
 ## Apply the contract to another factory
 
@@ -290,6 +291,39 @@ modules runtime-eligible. It is a reproducible request for missing evidence,
 not evidence itself: self-attestation is rejected, qualification never grants
 activation, and owner approval remains a separate prerequisite.
 
+Derive the evidence the bundle can actually prove, then assess it against the
+complete plan:
+
+```bash
+python3 scripts/zaibatsu.py qualification-evidence \
+  /tmp/example-product.qualification-plan.json \
+  /tmp/example-product.factory.tar \
+  --output /tmp/example-product.qualification-evidence.json
+python3 scripts/zaibatsu.py verify-qualification-evidence \
+  /tmp/example-product.qualification-evidence.json \
+  /tmp/example-product.qualification-plan.json \
+  /tmp/example-product.factory.tar
+python3 scripts/zaibatsu.py qualification-assessment \
+  /tmp/example-product.qualification-evidence.json \
+  /tmp/example-product.qualification-plan.json \
+  /tmp/example-product.factory.tar \
+  --output /tmp/example-product.qualification-assessment.json
+python3 scripts/zaibatsu.py verify-qualification-assessment \
+  /tmp/example-product.qualification-assessment.json \
+  /tmp/example-product.qualification-evidence.json \
+  /tmp/example-product.qualification-plan.json \
+  /tmp/example-product.factory.tar
+```
+
+Bundle verification already proves that each selected module contract exactly
+matches its catalog entry, project schema reference, and content digest. That
+produces nine reproducible `contract_conformance_receipt` bindings. The public
+[evidence set](examples/economic-factory.qualification-evidence.json) and
+[assessment](examples/economic-factory.qualification-assessment.json) credit
+only those facts: 9 of 67 bindings verified, 58 missing, and zero modules
+runtime-eligible. They include no implementation, environment, isolation,
+recovery, independent external-verifier, activation, or deployment proof.
+
 ## Factory AI and local Qwen
 
 Zaibatsu is the meta-factory; Factory AI's Droid is one possible worker
@@ -330,6 +364,10 @@ and the complete repository suite was rerun independently.
   qualification plan](examples/economic-factory.qualification-plan.json) —
   content-addressed missing-evidence requirements with no runtime or activation
   authority.
+- [Qualification evidence](examples/economic-factory.qualification-evidence.json)
+  and [partial assessment](examples/economic-factory.qualification-assessment.json)
+  — reproducible contract-only receipts, exact remaining gaps, and no runtime
+  eligibility or activation authority.
 - [Project-owned schemas](schemas/) — JSON Schema contracts for architecture,
   readiness, portable factories, and sanitized evidence.
 - [Architecture guide](docs/architecture.md) — how the two models compose.
@@ -365,10 +403,12 @@ and the complete repository suite was rerun independently.
    digest, member, dependency, and least-authority boundary matches.
 10. A qualification plan lists missing evidence; it is not evidence, runtime
     eligibility, activation authority, or owner approval.
-11. Tests, schemas, linters, hashes, policy, receipts, and owner approval
+11. Content addressing proves evidence identity, not truth; only the exact
+    deterministic verifier scope may satisfy a qualification binding.
+12. Tests, schemas, linters, hashes, policy, receipts, and owner approval
     outrank model confidence.
-12. Feedback may propose shared improvement but cannot self-promote.
-13. Failed work remains inspectable, and the owner retains a recovery path
+13. Feedback may propose shared improvement but cannot self-promote.
+14. Failed work remains inspectable, and the owner retains a recovery path
     outside Dispatcher.
 
 ## Factory Guild submission
@@ -383,8 +423,9 @@ Immutable `v1.2.0` through `v1.4.0` then proved module composition, portable
 bundles, and semantic comparison at their scoped public boundaries. The
 qualification-plan candidate passed the same credential-disabled clone and
 independent-CI boundary; immutable `v1.5.0` and its tag clone passed the full
-release proof. The final demo and applicant-owned form materials remain the
-external submission gates.
+release proof. The current bundle-derived qualification-evidence candidate
+requires the same proof before release; the final demo and applicant-owned
+form materials remain external submission gates.
 
 Zaibatsu is an independent project and is not affiliated with or endorsed by
 Factory AI.

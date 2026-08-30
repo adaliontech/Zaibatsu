@@ -41,6 +41,11 @@ Qualification-policy changes may add requirements but may not remove the
 mandatory minimum, accept self-attestation, treat a plan as evidence, grant
 runtime eligibility or activation, or bypass owner approval. Regenerate and
 verify the checked-in qualification plan after any bundle or policy change.
+Qualification-evidence or assessment changes must remain exact rebuilds from a
+fully verified bundle, plan, and policy. Content addressing alone may not be
+called semantic verification; every credited binding must name the precise
+deterministic verifier and scope, and no partial result may grant eligibility
+or activation.
 
 ## Pull request evidence
 

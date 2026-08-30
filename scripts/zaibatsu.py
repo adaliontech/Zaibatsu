@@ -31,7 +31,11 @@ from factory_composer import (
 )
 from factory_qualification import (
     QUALIFICATION_POLICY_PATH,
+    qualification_assessment_for_bundle,
+    qualification_evidence_for_bundle,
     qualification_plan_for_bundle,
+    verify_qualification_assessment_for_bundle,
+    verify_qualification_evidence_for_bundle,
     verify_qualification_plan_for_bundle,
 )
 from validate_repository import (
@@ -396,6 +400,139 @@ def command_verify_qualification_plan(
     return 0
 
 
+def command_qualification_evidence(
+    plan_path: str,
+    bundle_path: str,
+    policy_path: str,
+    output: str | None,
+) -> int:
+    plan = load_json_document(plan_path, "qualification plan")
+    bundle = load_bundle(bundle_path, "factory bundle")
+    policy = load_json_document(policy_path, "qualification policy")
+    if plan is None or bundle is None or policy is None:
+        return 2
+    errors, evidence = qualification_evidence_for_bundle(plan, bundle, policy)
+    if errors or evidence is None:
+        print("cannot build qualification evidence", file=sys.stderr)
+        for error in errors:
+            print(f"- {error}", file=sys.stderr)
+        return 1
+    return write_document(evidence, output)
+
+
+def command_verify_qualification_evidence(
+    evidence_path: str,
+    plan_path: str,
+    bundle_path: str,
+    policy_path: str,
+) -> int:
+    evidence = load_json_document(evidence_path, "qualification evidence")
+    plan = load_json_document(plan_path, "qualification plan")
+    bundle = load_bundle(bundle_path, "factory bundle")
+    policy = load_json_document(policy_path, "qualification policy")
+    if evidence is None or plan is None or bundle is None or policy is None:
+        return 2
+    errors = verify_qualification_evidence_for_bundle(
+        evidence,
+        plan,
+        bundle,
+        policy,
+    )
+    if errors:
+        print(f"qualification evidence failed: {evidence_path}", file=sys.stderr)
+        for error in errors:
+            print(f"- {error}", file=sys.stderr)
+        return 1
+    print(f"qualification evidence passed: {evidence_path}")
+    print(
+        "qualification evidence sha256: "
+        f"{evidence['qualification_evidence_sha256']}"
+    )
+    print(
+        "verified evidence bindings: "
+        f"{evidence['summary']['verified_evidence_bindings']}"
+    )
+    print("runtime eligible: false")
+    print("activation authorized: false")
+    return 0
+
+
+def command_qualification_assessment(
+    evidence_path: str,
+    plan_path: str,
+    bundle_path: str,
+    policy_path: str,
+    output: str | None,
+) -> int:
+    evidence = load_json_document(evidence_path, "qualification evidence")
+    plan = load_json_document(plan_path, "qualification plan")
+    bundle = load_bundle(bundle_path, "factory bundle")
+    policy = load_json_document(policy_path, "qualification policy")
+    if evidence is None or plan is None or bundle is None or policy is None:
+        return 2
+    errors, assessment = qualification_assessment_for_bundle(
+        evidence,
+        plan,
+        bundle,
+        policy,
+    )
+    if errors or assessment is None:
+        print("cannot build qualification assessment", file=sys.stderr)
+        for error in errors:
+            print(f"- {error}", file=sys.stderr)
+        return 1
+    return write_document(assessment, output)
+
+
+def command_verify_qualification_assessment(
+    assessment_path: str,
+    evidence_path: str,
+    plan_path: str,
+    bundle_path: str,
+    policy_path: str,
+) -> int:
+    assessment = load_json_document(
+        assessment_path,
+        "qualification assessment",
+    )
+    evidence = load_json_document(evidence_path, "qualification evidence")
+    plan = load_json_document(plan_path, "qualification plan")
+    bundle = load_bundle(bundle_path, "factory bundle")
+    policy = load_json_document(policy_path, "qualification policy")
+    if any(
+        value is None
+        for value in (assessment, evidence, plan, bundle, policy)
+    ):
+        return 2
+    errors = verify_qualification_assessment_for_bundle(
+        assessment,
+        evidence,
+        plan,
+        bundle,
+        policy,
+    )
+    if errors:
+        print(
+            f"qualification assessment failed: {assessment_path}",
+            file=sys.stderr,
+        )
+        for error in errors:
+            print(f"- {error}", file=sys.stderr)
+        return 1
+    print(f"qualification assessment passed: {assessment_path}")
+    print(
+        "qualification assessment sha256: "
+        f"{assessment['qualification_assessment_sha256']}"
+    )
+    print(
+        "missing evidence bindings: "
+        f"{assessment['summary']['missing_evidence_bindings']}"
+    )
+    print("runtime eligible: false")
+    print("activation authorized: false")
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="zaibatsu",
@@ -485,6 +622,64 @@ def build_parser() -> argparse.ArgumentParser:
         help="qualification policy JSON",
     )
 
+    qualification_evidence = commands.add_parser(
+        "qualification-evidence",
+        help="derive contract-conformance receipts from a verified bundle",
+    )
+    qualification_evidence.add_argument("plan_path")
+    qualification_evidence.add_argument("bundle_path")
+    qualification_evidence.add_argument(
+        "--policy",
+        default=str(QUALIFICATION_POLICY_PATH),
+        help="qualification policy JSON",
+    )
+    qualification_evidence.add_argument(
+        "--output", help="write qualification-evidence JSON to a new file"
+    )
+
+    verify_qualification_evidence = commands.add_parser(
+        "verify-qualification-evidence",
+        help="verify bundle-derived qualification evidence",
+    )
+    verify_qualification_evidence.add_argument("evidence_path")
+    verify_qualification_evidence.add_argument("plan_path")
+    verify_qualification_evidence.add_argument("bundle_path")
+    verify_qualification_evidence.add_argument(
+        "--policy",
+        default=str(QUALIFICATION_POLICY_PATH),
+        help="qualification policy JSON",
+    )
+
+    qualification_assessment = commands.add_parser(
+        "qualification-assessment",
+        help="assess verified evidence without granting runtime eligibility",
+    )
+    qualification_assessment.add_argument("evidence_path")
+    qualification_assessment.add_argument("plan_path")
+    qualification_assessment.add_argument("bundle_path")
+    qualification_assessment.add_argument(
+        "--policy",
+        default=str(QUALIFICATION_POLICY_PATH),
+        help="qualification policy JSON",
+    )
+    qualification_assessment.add_argument(
+        "--output", help="write qualification-assessment JSON to a new file"
+    )
+
+    verify_qualification_assessment = commands.add_parser(
+        "verify-qualification-assessment",
+        help="verify a qualification assessment against every source input",
+    )
+    verify_qualification_assessment.add_argument("assessment_path")
+    verify_qualification_assessment.add_argument("evidence_path")
+    verify_qualification_assessment.add_argument("plan_path")
+    verify_qualification_assessment.add_argument("bundle_path")
+    verify_qualification_assessment.add_argument(
+        "--policy",
+        default=str(QUALIFICATION_POLICY_PATH),
+        help="qualification policy JSON",
+    )
+
     scaffold = commands.add_parser("scaffold", help="create a safe factory skeleton")
     scaffold.add_argument("--id", required=True, dest="factory_id")
     scaffold.add_argument(
@@ -533,6 +728,36 @@ def main() -> int:
         )
     if arguments.command == "verify-qualification-plan":
         return command_verify_qualification_plan(
+            arguments.plan_path,
+            arguments.bundle_path,
+            arguments.policy,
+        )
+    if arguments.command == "qualification-evidence":
+        return command_qualification_evidence(
+            arguments.plan_path,
+            arguments.bundle_path,
+            arguments.policy,
+            arguments.output,
+        )
+    if arguments.command == "verify-qualification-evidence":
+        return command_verify_qualification_evidence(
+            arguments.evidence_path,
+            arguments.plan_path,
+            arguments.bundle_path,
+            arguments.policy,
+        )
+    if arguments.command == "qualification-assessment":
+        return command_qualification_assessment(
+            arguments.evidence_path,
+            arguments.plan_path,
+            arguments.bundle_path,
+            arguments.policy,
+            arguments.output,
+        )
+    if arguments.command == "verify-qualification-assessment":
+        return command_verify_qualification_assessment(
+            arguments.assessment_path,
+            arguments.evidence_path,
             arguments.plan_path,
             arguments.bundle_path,
             arguments.policy,
