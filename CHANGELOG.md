@@ -1,5 +1,23 @@
 # Changelog
 
+## 1.0.1 - 2026-08-29
+
+- Closed the documentation-host placeholder substring bypass and added
+  adversarial coverage for embedded and subdomain forms.
+- Expanded public-safety validation to every repository file, global and
+  private IPv6, common client-secret and inline bearer forms, environment
+  example files, unapproved binary content, and all repository symlinks.
+- Required the exact `ZAIBATSU_QWEN_API_KEY` reference and safe metadata for
+  ignored local Droid settings.
+- Added checksum-pinned Gitleaks history and tree scans to CI, using a full
+  checkout so removed secrets cannot disappear from the validation boundary.
+- Added sanitized Dispatcher, Droid-contribution, and Qwen-observation receipts
+  with explicit public-reproducibility and model-identity limitations.
+- Added the operational bounded read-only coordinator as a distinct
+  machine-readable component while preserving the broader Dispatcher and
+  PostgreSQL contracts at validated preproduction.
+- Expanded the integrated adversarial suite from 46 to 59 tests.
+
 ## 1.0.0 - 2026-08-29
 
 - Created the Zaibatsu public architecture and Guild submission package.

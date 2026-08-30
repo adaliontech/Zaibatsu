@@ -123,9 +123,10 @@ keys to the factory floor.
 
 The core artifact remains useful without Droid. For the Guild contribution,
 Factory Droid operated only on a sanitized public clone, never the private
-fleet. The backend was the owner’s Qwen 3.8 27B GGUF using the
-`Q4_K - Small` quantization reported by authenticated llama.cpp metadata,
-through an authenticated OpenAI-compatible gateway. Its endpoint and
+fleet. The backend was an owner-operated GGUF whose authenticated
+server-reported loaded filename identifies Qwen 3.8 27B and whose server
+reports `Q4_K - Small`, through an authenticated OpenAI-compatible gateway.
+Its endpoint and
 credential stayed in ignored local configuration and the launch boundary, not
 in Git. Factory authentication remained separate from model authentication.
 

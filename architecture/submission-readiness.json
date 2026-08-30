@@ -21,7 +21,7 @@
       "id": "local_qwen_endpoint",
       "status": "complete",
       "required_for_submission": true,
-      "evidence": "Authenticated OpenAI-compatible Qwen endpoint passed health, model, streaming, native tool-call, and redacted model-metadata checks; the loaded GGUF identifies Qwen 3.8 27B and reports Q4_K - Small quantization"
+      "evidence": "Authenticated OpenAI-compatible Qwen endpoint passed health, model, streaming, and native tool-call checks; the server-reported loaded filename identifies a Qwen 3.8 27B GGUF and the server reports Q4_K - Small quantization, with limitations recorded in evidence/qwen-model-observation-v1.json"
     },
     {
       "id": "local_model_credential",
@@ -39,7 +39,7 @@
       "id": "bounded_droid_contribution",
       "status": "complete",
       "required_for_submission": true,
-      "evidence": "Qwen-backed Droid session 46f941a9-82f8-4df3-a45c-b8158996360b produced a reviewed two-file invariant and adversarial-test change; the integrated Zaibatsu package passes 46 tests"
+      "evidence": "Qwen-backed Droid session 46f941a9-82f8-4df3-a45c-b8158996360b produced a reviewed two-file invariant and adversarial-test change; evidence/droid-contribution-v1.json records the bounded receipt and the integrated Zaibatsu package passes 59 tests"
     },
     {
       "id": "public_repository",
@@ -49,15 +49,18 @@
     },
     {
       "id": "fresh_clone_reproduction",
-      "status": "complete",
+      "status": "pending_external",
       "required_for_submission": true,
-      "evidence": "Credential-free public clone of release candidate 44cc3c1f3811a77f0fddf71d6a34ba565d8331e7 passed all 46 tests, repository validation, workflow linting, strict Git checks, and history/tree secret scans"
+      "evidence": "The v1.0.0 clone proof remains recorded; the hardened v1.0.1 candidate must pass all 59 tests, repository validation, workflow linting, strict Git checks, and history/tree secret scans from the public remote"
     },
     {
       "id": "public_demo",
-      "status": "pending_external",
+      "status": "blocked_by_dependency",
       "required_for_submission": true,
-      "evidence": "Public URL and final Guild narration are ready; owner records and publishes the final clip or screenshots"
+      "evidence": "Public URL and final Guild narration are ready; recording waits for the hardened v1.0.1 fresh-clone gate",
+      "blocked_by": [
+        "fresh_clone_reproduction"
+      ]
     },
     {
       "id": "applicant_materials",

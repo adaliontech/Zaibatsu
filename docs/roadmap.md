@@ -6,8 +6,8 @@ authorize production migration.
 ## Phase 0 — Public package and Guild evidence
 
 - validate the architecture kit — complete locally;
-- connect the owner-operated Qwen 3.8 27B GGUF with verified `Q4_K - Small`
-  quantization through an
+- connect the owner-operated GGUF whose loaded filename identifies Qwen 3.8
+  27B and whose server reports `Q4_K - Small` through an
   authenticated OpenAI-compatible endpoint without committing its API key —
   complete;
 - authenticate headless Droid separately from the model credential — complete;

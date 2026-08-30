@@ -27,6 +27,9 @@ REQUIRED_FILES = (
     ".factory/settings.local.example.json",
     "architecture/system.json",
     "architecture/submission-readiness.json",
+    "evidence/dispatcher-validation-v1.json",
+    "evidence/droid-contribution-v1.json",
+    "evidence/qwen-model-observation-v1.json",
     "docs/architecture.md",
     "docs/case-study.md",
     "docs/demo-script.md",
@@ -65,6 +68,7 @@ REQUIRED_COMPONENT_IDS = {
     "opentofu-resource-lifecycle",
     "dispatcher-api-and-policy",
     "postgresql-job-state",
+    "bounded-readonly-coordinator",
     "project-sandboxes",
     "probabilistic-workers",
     "artifact-verification",
@@ -80,6 +84,7 @@ REQUIRED_COMPONENT_MATURITIES = {
     "opentofu-resource-lifecycle": "validated_preproduction",
     "dispatcher-api-and-policy": "validated_preproduction",
     "postgresql-job-state": "validated_preproduction",
+    "bounded-readonly-coordinator": "operational",
     "project-sandboxes": "planned",
     "probabilistic-workers": "designed",
     "artifact-verification": "validated_preproduction",
@@ -108,7 +113,11 @@ SUBMISSION_DEPENDENCIES = {
         "factory_cli_authentication",
     },
     "fresh_clone_reproduction": {"public_repository"},
-    "public_demo": {"bounded_droid_contribution", "public_repository"},
+    "public_demo": {
+        "bounded_droid_contribution",
+        "public_repository",
+        "fresh_clone_reproduction",
+    },
 }
 
 REQUIRED_PROJECTS = ["orchestrator", "simbapool", "ffn"]
@@ -124,20 +133,16 @@ REQUIRED_TRUE_INVARIANTS = {
     "every_terminal_state_retains_evidence",
 }
 
-PUBLIC_TEXT_SUFFIXES = {
-    ".cfg",
-    ".conf",
-    ".ini",
-    ".json",
-    ".md",
-    ".py",
-    ".sh",
-    ".toml",
-    ".txt",
-    ".yaml",
-    ".yml",
+APPROVED_BINARY_SUFFIXES = {
+    ".gif",
+    ".jpeg",
+    ".jpg",
+    ".mov",
+    ".mp4",
+    ".pdf",
+    ".png",
+    ".webp",
 }
-PUBLIC_TEXT_FILENAMES = {".env", ".gitignore", "LICENSE", "Makefile"}
 PUBLIC_SAFETY_PATTERNS = {
     "legacy pre-release brand": re.compile(
         "factory" + r"(?:²|\^2|[-_ ]squared)", re.IGNORECASE
@@ -158,17 +163,20 @@ PUBLIC_SAFETY_PATTERNS = {
     ),
     "secret assignment": re.compile(
         r"(?im)^\s*(?:[A-Za-z0-9]+[_-])*(?:api[_-]?key|token|password|"
-        r"private[_-]?key)\s*[:=]\s*\S+"
+        r"private[_-]?key|client[_-]?secret|secret[_-]?access[_-]?key|"
+        r"access[_-]?token)\s*[:=]\s*\S+"
     ),
     "literal JSON API key": re.compile(
         r'(?im)^\s*"(?:[A-Za-z0-9]+[_-])*(?:api[_-]?key|token|password|'
-        r'private[_-]?key)"\s*:\s*"(?!\$\{|<)[^"]+"\s*,?\s*$'
+        r'private[_-]?key|client[_-]?secret|secret[_-]?access[_-]?key|'
+        r'access[_-]?token)"\s*:\s*"(?!\$\{|<)[^"]+"\s*,?\s*$'
     ),
     "private key material": re.compile(
         r"(?m)^-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----$"
     ),
     "literal bearer credential": re.compile(
-        r"(?im)^\s*(?:authorization\s*:\s*)?bearer\s+(?!<|\$\{)\S+"
+        r"(?i)\bbearer\s+(?!<|\$\{|\[?redacted\]?\b|token\b|credential\b|"
+        r"authentication\b|header\b|forms?\b|scheme\b|syntax\b|value\b)\S+"
     ),
 }
 PUBLIC_SAFETY_ALLOWED_LITERALS = {
@@ -176,6 +184,10 @@ PUBLIC_SAFETY_ALLOWED_LITERALS = {
 }
 IPV4_CANDIDATE_RE = re.compile(
     r"(?<![\d.])(?:\d{1,3}\.){3}\d{1,3}(?![\d.])"
+)
+IPV6_CANDIDATE_RE = re.compile(
+    r"(?<![0-9A-Fa-f:.])\[?(?:[0-9A-Fa-f]{0,4}:){2,7}"
+    r"[0-9A-Fa-f]{0,4}\]?(?![0-9A-Fa-f:.])"
 )
 
 MARKDOWN_LINK_RE = re.compile(r"(?<!!)\[[^\]]+\]\(([^)]+)\)")
@@ -463,26 +475,58 @@ def public_files(root: Path = ROOT) -> list[Path]:
     for path in root.rglob("*"):
         if any(part in excluded_directories for part in path.relative_to(root).parts):
             continue
-        if path == ignored_local_settings or not path.is_file():
+        if path == ignored_local_settings or path.is_symlink() or not path.is_file():
             continue
-        if path.suffix in PUBLIC_TEXT_SUFFIXES or path.name in PUBLIC_TEXT_FILENAMES:
-            paths.append(path)
+        paths.append(path)
     return sorted(paths)
+
+
+def validate_public_paths(root: Path = ROOT) -> list[str]:
+    """Reject links that can hide or redirect public repository content."""
+    errors: list[str] = []
+    excluded_directories = {".git", "__pycache__", "runtime"}
+    ignored_local_settings = root / ".factory" / "settings.local.json"
+    for path in root.rglob("*"):
+        relative = path.relative_to(root)
+        if any(part in excluded_directories for part in relative.parts):
+            continue
+        if path == ignored_local_settings:
+            continue
+        if path.is_symlink():
+            errors.append(f"{relative}: public repository paths must not be symlinks")
+    return errors
+
+
+def contains_disallowed_match(label: str, pattern: re.Pattern[str], text: str) -> bool:
+    allowed = {
+        literal.casefold()
+        for literal in PUBLIC_SAFETY_ALLOWED_LITERALS.get(label, ())
+    }
+    return any(match.group(0).casefold() not in allowed for match in pattern.finditer(text))
 
 
 def validate_public_safety(root: Path = ROOT) -> list[str]:
     errors: list[str] = []
     for path in public_files(root):
         try:
-            text = path.read_text(encoding="utf-8")
-        except (OSError, UnicodeDecodeError) as exc:
+            raw = path.read_bytes()
+        except OSError as exc:
             errors.append(f"{path.relative_to(root)}: cannot scan public text: {exc}")
             continue
+        if b"\x00" in raw:
+            if path.suffix.casefold() not in APPROVED_BINARY_SUFFIXES:
+                errors.append(
+                    f"{path.relative_to(root)}: unapproved binary file cannot be safety-scanned"
+                )
+            continue
+        try:
+            text = raw.decode("utf-8")
+        except UnicodeDecodeError as exc:
+            if path.suffix.casefold() not in APPROVED_BINARY_SUFFIXES:
+                errors.append(f"{path.relative_to(root)}: cannot scan public text: {exc}")
+            continue
         for label, pattern in PUBLIC_SAFETY_PATTERNS.items():
-            scanned_text = text
-            for allowed in PUBLIC_SAFETY_ALLOWED_LITERALS.get(label, ()):
-                scanned_text = scanned_text.replace(allowed, "")
-            if pattern.search(scanned_text):
+            if contains_disallowed_match(label, pattern, text):
                 errors.append(f"{path.relative_to(root)}: contains {label}")
         for match in IPV4_CANDIDATE_RE.finditer(text):
             try:
@@ -491,6 +535,17 @@ def validate_public_safety(root: Path = ROOT) -> list[str]:
                 continue
             if address.version == 4 and address.is_global:
                 errors.append(f"{path.relative_to(root)}: contains public IPv4 address")
+                break
+        for match in IPV6_CANDIDATE_RE.finditer(text):
+            candidate = match.group(0).strip("[]")
+            try:
+                address = ipaddress.ip_address(candidate)
+            except ValueError:
+                continue
+            if address.version == 6 and not (
+                address.is_loopback or address.is_unspecified
+            ):
+                errors.append(f"{path.relative_to(root)}: contains IPv6 address")
                 break
     return errors
 
@@ -538,6 +593,7 @@ def main() -> int:
     errors: list[str] = []
     data: Any = None
     readiness: Any = None
+    errors.extend(validate_public_paths())
     errors.extend(validate_required_files())
     try:
         data = load_architecture()

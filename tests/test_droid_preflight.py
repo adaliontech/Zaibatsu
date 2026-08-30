@@ -29,7 +29,7 @@ class DroidPreflightTests(unittest.TestCase):
                     "model": "local-qwen-model-id",
                     "displayName": "Local Qwen 3.8 27B",
                     "baseUrl": "http://localhost:1234/v1",
-                    "apiKey": "${LOCAL_TEST_KEY}",
+                    "apiKey": "${ZAIBATSU_QWEN_API_KEY}",
                     "provider": "generic-chat-completion-api",
                 }
             ]
@@ -38,19 +38,22 @@ class DroidPreflightTests(unittest.TestCase):
     def test_valid_local_settings_pass_without_exposing_key(self) -> None:
         path = self.write_settings(self.valid_settings())
         self.assertEqual(
-            [], preflight.validate_settings(path, {"LOCAL_TEST_KEY": "not-printed"})
+            [],
+            preflight.validate_settings(
+                path, {"ZAIBATSU_QWEN_API_KEY": "not-printed"}
+            ),
         )
 
     def test_missing_key_fails_closed(self) -> None:
         path = self.write_settings(self.valid_settings())
         errors = preflight.validate_settings(path, {})
-        self.assertTrue(any("LOCAL_TEST_KEY" in error for error in errors))
+        self.assertTrue(any("ZAIBATSU_QWEN_API_KEY" in error for error in errors))
 
     def test_non_loopback_endpoint_is_rejected(self) -> None:
         settings = self.valid_settings()
         settings["customModels"][0]["baseUrl"] = "https://model.example/v1"
         path = self.write_settings(settings)
-        errors = preflight.validate_settings(path, {"LOCAL_TEST_KEY": "set"})
+        errors = preflight.validate_settings(path, {"ZAIBATSU_QWEN_API_KEY": "set"})
         self.assertTrue(any("loopback" in error for error in errors))
 
     def test_tailnet_dns_gateway_is_allowed(self) -> None:
@@ -58,7 +61,7 @@ class DroidPreflightTests(unittest.TestCase):
         settings["customModels"][0]["baseUrl"] = "http://gateway.example.ts.net:8443/v1"
         path = self.write_settings(settings)
         self.assertEqual(
-            [], preflight.validate_settings(path, {"LOCAL_TEST_KEY": "set"})
+            [], preflight.validate_settings(path, {"ZAIBATSU_QWEN_API_KEY": "set"})
         )
 
     def test_malformed_custom_model_fails_cleanly(self) -> None:
@@ -72,14 +75,14 @@ class DroidPreflightTests(unittest.TestCase):
             "http://user:password@localhost:1234/v1"
         )
         path = self.write_settings(settings)
-        errors = preflight.validate_settings(path, {"LOCAL_TEST_KEY": "set"})
+        errors = preflight.validate_settings(path, {"ZAIBATSU_QWEN_API_KEY": "set"})
         self.assertTrue(any("userinfo" in error for error in errors))
 
     def test_invalid_port_is_rejected(self) -> None:
         settings = self.valid_settings()
         settings["customModels"][0]["baseUrl"] = "http://localhost:notaport/v1"
         path = self.write_settings(settings)
-        errors = preflight.validate_settings(path, {"LOCAL_TEST_KEY": "set"})
+        errors = preflight.validate_settings(path, {"ZAIBATSU_QWEN_API_KEY": "set"})
         self.assertTrue(any("malformed" in error for error in errors))
 
     def test_url_query_and_fragment_are_rejected(self) -> None:
@@ -88,20 +91,20 @@ class DroidPreflightTests(unittest.TestCase):
             "http://localhost:1234/v1?token=value#fragment"
         )
         path = self.write_settings(settings)
-        errors = preflight.validate_settings(path, {"LOCAL_TEST_KEY": "set"})
+        errors = preflight.validate_settings(path, {"ZAIBATSU_QWEN_API_KEY": "set"})
         self.assertTrue(any("query" in error for error in errors))
 
     def test_placeholder_with_leading_space_is_rejected(self) -> None:
         settings = self.valid_settings()
         settings["customModels"][0]["model"] = " REPLACE_WITH_MODEL_ID"
         path = self.write_settings(settings)
-        errors = preflight.validate_settings(path, {"LOCAL_TEST_KEY": "set"})
+        errors = preflight.validate_settings(path, {"ZAIBATSU_QWEN_API_KEY": "set"})
         self.assertTrue(any("placeholder" in error for error in errors))
 
     def test_whitespace_only_key_is_rejected(self) -> None:
         path = self.write_settings(self.valid_settings())
-        errors = preflight.validate_settings(path, {"LOCAL_TEST_KEY": "   "})
-        self.assertTrue(any("LOCAL_TEST_KEY" in error for error in errors))
+        errors = preflight.validate_settings(path, {"ZAIBATSU_QWEN_API_KEY": "   "})
+        self.assertTrue(any("ZAIBATSU_QWEN_API_KEY" in error for error in errors))
 
     def test_alternate_credential_fields_are_rejected(self) -> None:
         settings = self.valid_settings()
@@ -109,8 +112,34 @@ class DroidPreflightTests(unittest.TestCase):
             "Authorization": "not-a-real-secret"
         }
         path = self.write_settings(settings)
-        errors = preflight.validate_settings(path, {"LOCAL_TEST_KEY": "set"})
+        errors = preflight.validate_settings(path, {"ZAIBATSU_QWEN_API_KEY": "set"})
         self.assertTrue(any("extraHeaders" in error for error in errors))
+
+    def test_model_key_cannot_reference_an_arbitrary_environment_secret(self) -> None:
+        settings = self.valid_settings()
+        settings["customModels"][0]["apiKey"] = "${UNRELATED_SECRET}"
+        path = self.write_settings(settings)
+        errors = preflight.validate_settings(
+            path,
+            {
+                "UNRELATED_SECRET": "must-not-be-sent",
+                preflight.MODEL_API_KEY_ENV: "set",
+            },
+        )
+        self.assertTrue(any("ZAIBATSU_QWEN_API_KEY" in error for error in errors))
+
+    def test_local_settings_symlink_is_rejected(self) -> None:
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        root = Path(temporary.name)
+        target = root / "target.json"
+        target.write_text(json.dumps(self.valid_settings()), encoding="utf-8")
+        link = root / "settings.local.json"
+        link.symlink_to(target)
+        errors = preflight.validate_settings(
+            link, {"ZAIBATSU_QWEN_API_KEY": "set"}
+        )
+        self.assertTrue(any("unsafe metadata" in error for error in errors))
 
     def test_factory_authentication_is_a_separate_required_credential(self) -> None:
         temporary = tempfile.TemporaryDirectory()

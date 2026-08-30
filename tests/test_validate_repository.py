@@ -107,6 +107,22 @@ class ArchitectureValidationTests(unittest.TestCase):
         errors = validator.validate_architecture(mutated)
         self.assertTrue(any("maturity must remain" in error for error in errors))
 
+    def test_operational_coordinator_scope_is_machine_readable(self) -> None:
+        coordinator = next(
+            component
+            for component in self.architecture["components"]
+            if component["id"] == "bounded-readonly-coordinator"
+        )
+        self.assertEqual("operational", coordinator["maturity"])
+        mutated = copy.deepcopy(self.architecture)
+        mutated["components"] = [
+            component
+            for component in mutated["components"]
+            if component["id"] != "bounded-readonly-coordinator"
+        ]
+        errors = validator.validate_architecture(mutated)
+        self.assertTrue(any("components missing required ids" in error for error in errors))
+
     def test_unhashable_component_fields_fail_cleanly(self) -> None:
         mutated = copy.deepcopy(self.architecture)
         mutated["components"][0]["maturity"] = []
@@ -172,6 +188,26 @@ class ArchitectureValidationTests(unittest.TestCase):
             errors = validator.validate_public_safety(root)
         self.assertFalse(any("Tailscale DNS name" in error for error in errors))
 
+    def test_public_scan_rejects_placeholder_embedded_in_private_hostname(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            (root / "README.md").write_text(
+                "Private host: privategateway.example." + "ts.net\n",
+                encoding="utf-8",
+            )
+            errors = validator.validate_public_safety(root)
+        self.assertTrue(any("Tailscale DNS name" in error for error in errors))
+
+    def test_public_scan_rejects_placeholder_below_private_subdomain(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            (root / "README.md").write_text(
+                "Private host: evil.gateway.example." + "ts.net\n",
+                encoding="utf-8",
+            )
+            errors = validator.validate_public_safety(root)
+        self.assertTrue(any("Tailscale DNS name" in error for error in errors))
+
     def test_public_scan_rejects_public_ipv4_address(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:
             root = Path(temporary_directory)
@@ -180,6 +216,62 @@ class ArchitectureValidationTests(unittest.TestCase):
             )
             errors = validator.validate_public_safety(root)
         self.assertTrue(any("public IPv4 address" in error for error in errors))
+
+    def test_public_scan_rejects_ipv6_address(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            (root / "README.md").write_text(
+                "Private host: 2606:4700:4700:" + ":1111\n", encoding="utf-8"
+            )
+            errors = validator.validate_public_safety(root)
+        self.assertTrue(any("IPv6 address" in error for error in errors))
+
+    def test_public_scan_covers_arbitrary_text_extensions(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            (root / "leak.js").write_text(
+                'const endpoint = "8.8.' + '8.8";\n', encoding="utf-8"
+            )
+            errors = validator.validate_public_safety(root)
+        self.assertTrue(any("public IPv4 address" in error for error in errors))
+
+    def test_public_scan_covers_environment_example_files(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            (root / ".env.example").write_text(
+                "API_" + "KEY=plaintext-example\n", encoding="utf-8"
+            )
+            errors = validator.validate_public_safety(root)
+        self.assertTrue(any("secret assignment" in error for error in errors))
+
+    def test_public_scan_rejects_common_client_secret_assignment(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            (root / "README.md").write_text(
+                "client_" + "secret=plaintext-example\n", encoding="utf-8"
+            )
+            errors = validator.validate_public_safety(root)
+        self.assertTrue(any("secret assignment" in error for error in errors))
+
+    def test_public_scan_rejects_inline_bearer_credential(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            (root / "README.md").write_text(
+                'curl -H "Authorization: Bear' + 'er plaintext-example"\n',
+                encoding="utf-8",
+            )
+            errors = validator.validate_public_safety(root)
+        self.assertTrue(any("literal bearer credential" in error for error in errors))
+
+    def test_public_scan_allows_descriptive_bearer_language(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            (root / "README.md").write_text(
+                "The client rejects inline bearer credential forms.\n",
+                encoding="utf-8",
+            )
+            errors = validator.validate_public_safety(root)
+        self.assertFalse(any("literal bearer credential" in error for error in errors))
 
     def test_public_scan_rejects_literal_json_api_key(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:
@@ -227,6 +319,23 @@ class ArchitectureValidationTests(unittest.TestCase):
             (root / "README.md").symlink_to(target)
             errors = validator.validate_required_files(root)
         self.assertTrue(any("must not be a symlink" in error for error in errors))
+
+    def test_non_required_symlink_is_rejected(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            (root / "docs").mkdir()
+            target = root / "target.md"
+            target.write_text("safe\n", encoding="utf-8")
+            (root / "docs" / "extra.md").symlink_to(target)
+            errors = validator.validate_public_paths(root)
+        self.assertTrue(any("must not be symlinks" in error for error in errors))
+
+    def test_unapproved_binary_file_fails_closed(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            (root / "opaque.bin").write_bytes(b"safe-prefix\x00opaque")
+            errors = validator.validate_public_safety(root)
+        self.assertTrue(any("unapproved binary" in error for error in errors))
 
 
 class SubmissionReadinessTests(unittest.TestCase):

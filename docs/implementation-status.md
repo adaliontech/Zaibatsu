@@ -15,9 +15,9 @@ runtime. The maturity labels are enforced by
 | Non-publishing workload shadow | Validated preproduction | Disabled timers, execution guards, regression, and dry-run evidence | Shadow execution cannot publish or become a duplicate scheduler |
 | Scoped machine-secret delivery | Validated preproduction | Destination scope, file-mode, and deny-all authorization receipts | Personal-vault or cross-project authority is not part of the design |
 | Provenance-aware knowledge retrieval | Operational | Local retrieval tests and receipts | Agents receive small routed context packets; prose is not task state |
-| Dispatcher API and policy engine | Validated preproduction | 158 focused tests covering contracts, replay protection, coordinator behavior, recovery, and local transport | The broader side-effecting API surface is implemented and evidenced without general production authority |
-| PostgreSQL jobs and leases | Validated preproduction | 104 live assertions on two disposable PostgreSQL 16.15 clusters, including leases, privilege denial, audit chains, backup/restore equivalence, and continuation after restore | The full state contract is implemented and independently exercised |
-| Bounded read-only coordinator lane | Operational | Live durable job state, deterministic time-bucket scheduling, three eligible project workers, retained failures, and receipt-bound completion | The live lane performs fixed read-only collection without a model; it does not authorize broader workload migration |
+| Dispatcher API and policy engine | Validated preproduction | 158 focused tests covering contracts, replay protection, coordinator behavior, recovery, and local transport; sanitized private-source receipt linked below | The broader side-effecting API surface is implemented and evidenced without general production authority |
+| PostgreSQL jobs and leases | Validated preproduction | 104 live assertions on two disposable PostgreSQL 16.15 clusters, including leases, privilege denial, audit chains, backup/restore equivalence, and continuation after restore | The full state contract is implemented and exercised privately; the public receipt records its reproducibility limitation |
+| Bounded read-only coordinator lane | Operational | Distinct machine-readable component plus live durable job state, deterministic time-bucket scheduling, three eligible project workers, retained failures, and receipt-bound completion | The live lane performs fixed read-only collection without a model; it does not authorize broader workload migration |
 | Project sandboxes | Planned | Isolation requirements only | No environment is called a sandbox until its boundaries pass |
 | Nix project environments | Planned | Tool-boundary design only | No current flake or cross-worker reproduction claim |
 | Factory/Droid contribution | Validated preproduction | Authenticated local-Qwen session, reviewed two-file diff, pre-change adversarial proof, and independent validation | Droid strengthened the five-stage deterministic task-flow order and added its rejection test; this grants no production authority |
@@ -26,7 +26,10 @@ The current private Dispatcher source validation passed 158 focused tests. Its
 standalone acceptance harness passed 104 live assertions against two
 disposable, socket-only PostgreSQL 16.15 clusters with production data
 explicitly excluded. These results support the bounded claims above; they do
-not promote untested side-effecting workflows or project sandboxes.
+not promote untested side-effecting workflows or project sandboxes. The
+sanitized result and source-content digest are in
+[`evidence/dispatcher-validation-v1.json`](../evidence/dispatcher-validation-v1.json);
+the private implementation itself is not publicly reproducible.
 
 ## Current authority
 

@@ -24,6 +24,9 @@ Only the latest release on the default branch is maintained.
 - Every side-effecting deterministic component declares a policy gate.
 - Unknown project identities fail closed.
 - Public documentation must pass the built-in safety scan.
+- CI runs checksum-pinned Gitleaks against full Git history and the release
+  tree; GitHub secret scanning and push protection are enabled separately.
+- Published release tags are protected by release immutability.
 
 This repository is not a substitute for a security review of any system that
 adopts the pattern.

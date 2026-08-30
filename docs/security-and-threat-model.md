@@ -49,7 +49,7 @@ artifact creation != artifact release
 | Management service becomes public | Loopback or Tailscale binding, firewall verification, and listener inventory |
 | Infrastructure plan changes after review | Saved artifact hash, expiry, cost record, and exact apply authorization |
 | Control plane failure blocks recovery | Direct owner escape hatch, Git-defined configuration, independent backup, tested restore |
-| Documentation leaks operational details | Public-safety validator and sanitized evidence ledger |
+| Documentation leaks operational details | All-file public-safety validator, symlink denial, checksum-pinned Gitleaks history/tree CI, GitHub push protection, and sanitized evidence ledger |
 | Model provider is unavailable | Capability routing treats providers as optional; deterministic core continues |
 
 ## Capability model
@@ -98,6 +98,8 @@ The omission is part of the architecture, not missing documentation.
 - A valid artifact can still have an untested business-level defect.
 - Restore evidence decays as systems and data formats change.
 - Model and tool supply chains introduce independent risk.
+- Pattern-based secret detection can miss novel credential formats; native
+  provider scanning and review remain independent layers.
 
 Mitigation is layered verification, least privilege, explicit status, regular
 restore drills, independent review, and reversible rollout.

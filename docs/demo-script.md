@@ -1,8 +1,8 @@
 # Demo script
 
 The demo has two cuts. The architecture cut and factual Droid narration are
-ready; the public repository is available and the final Guild cut is ready for
-owner recording.
+ready; recording remains blocked until the hardened v1.0.1 tag passes its
+credential-free clone and immutable-release gates.
 
 The demo uses only the public repository. Do not open terminals, tabs, history,
 or files containing private infrastructure, model credentials, or personal
@@ -56,7 +56,8 @@ diff, adversarial test, and final validation summary.
 > persistence, sandbox execution, verification, policy decision, and controlled
 > side effect in that order. It changed the validator and one adversarial test.
 > The old validator accepted policy before verification; the new test rejects
-> it, and I independently reproduced all 36 contribution-era checks.
+> it. I independently reproduced all 36 contribution-era checks, and the
+> hardened integrated package now passes 59 tests.
 
 Then return to the README diagram:
 
@@ -65,7 +66,7 @@ Then return to the README diagram:
 
 ## Before the final recording
 
-1. Use a fresh clone of the release commit.
+1. Use a fresh clone of the immutable `v1.0.1` release tag.
 2. Increase terminal font size and hide unrelated tabs and notifications.
 3. Confirm `make validate` passes once off camera.
 4. Prepare a redacted Droid receipt and reviewed diff; never show the local

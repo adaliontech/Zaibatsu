@@ -55,11 +55,13 @@ make validate
 ```
 
 `make validate` checks the architecture contract, public-safety rules, local
-documentation links, and adversarial test cases. No network access, cloud
-account, secrets, Nix installation, or production system is required.
+documentation links, every public repository path, and adversarial test cases.
+No network access, cloud account, secrets, Nix installation, or production
+system is required.
 
 The core kit does not depend on Droid. Its optional Factory integration used
-an owner-operated Qwen 3.8 27B GGUF model through an authenticated
+an owner-operated GGUF whose server-reported loaded filename identifies Qwen
+3.8 27B and whose server reports `Q4_K - Small`, through an authenticated
 OpenAI-compatible gateway. Droid produced one reviewed two-file contract
 improvement and adversarial test; independent validation accepted the result.
 
@@ -77,8 +79,9 @@ parts have different maturity levels. As of 2026-08-29:
 - the Dispatcher API/policy contract and PostgreSQL job engine have validated
   preproduction evidence from 158 focused tests and a 104-assertion disposable
   PostgreSQL 16.15 two-cluster acceptance run;
-- a narrow deterministic read-only coordinator lane uses the durable database
-  for the three allowlisted projects without invoking a model;
+- a distinct machine-readable, deterministic read-only coordinator component
+  uses the durable database for the three allowlisted projects without
+  invoking a model;
 - systemd remains the authoritative production scheduler;
 - broader Dispatcher side-effect authority, project sandboxes, and Nix flakes
   remain unclaimed or planned work.
@@ -96,6 +99,8 @@ claim ledger.
   trust boundaries, failure modes, and mitigations.
 - [Reproducibility](docs/reproducibility.md) — how to validate this package.
 - [Evidence](docs/evidence.md) — provenance and verification ledger.
+- [Sanitized evidence receipts](evidence/) — bounded machine-readable results
+  and their limitations.
 - [Factory Droid integration](docs/droid-session.md) — local-Qwen setup, exact
   command, reviewed contribution, and redacted evidence.
 - [Demo script](docs/demo-script.md) — a concise screen-recording plan.
@@ -130,9 +135,9 @@ claim ledger.
 The intended format is an **open-source project** backed by a technical article
 and short demo. Factory’s Guild asks builders to build with Factory, publish the
 work, and submit a public link. The bounded local-Qwen Droid contribution is
-complete and independently validated. The repository is public, and the final
-release candidate passed the full suite from a credential-free clone. The demo
-and applicant-owned form materials remain explicit gates in
+complete and independently validated. The repository is public; the hardened
+`v1.0.1` candidate must pass its credential-free clone gate before the final
+demo. Applicant-owned form materials remain explicit gates in
 [Submission readiness](architecture/submission-readiness.json).
 
 Zaibatsu is an independent project and is not affiliated with or endorsed by

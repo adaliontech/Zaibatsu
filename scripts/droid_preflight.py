@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import json
 import os
-import re
 import shutil
 import stat
 import subprocess
@@ -18,7 +17,8 @@ from urllib.parse import urlparse
 ROOT = Path(__file__).resolve().parents[1]
 SETTINGS_PATH = ROOT / ".factory" / "settings.local.json"
 EXPECTED_DISPLAY_NAME = "Local Qwen 3.8 27B"
-ENV_REFERENCE = re.compile(r"^\$\{([A-Z][A-Z0-9_]*)\}$")
+MODEL_API_KEY_ENV = "ZAIBATSU_QWEN_API_KEY"
+MODEL_API_KEY_REFERENCE = f"${{{MODEL_API_KEY_ENV}}}"
 LOOPBACK_HOSTS = {"localhost", "127.0.0.1", "::1"}
 TAILNET_DNS_SUFFIX = ".ts.net"
 FACTORY_API_KEY_ENV = "FACTORY_API_KEY"
@@ -32,10 +32,20 @@ def validate_settings(
     errors: list[str] = []
     environment = os.environ if environment is None else environment
 
-    if not path.is_file():
+    try:
+        metadata = path.lstat()
+    except OSError:
         return [
             "missing .factory/settings.local.json; copy the tracked example and fill local values"
         ]
+    if (
+        not stat.S_ISREG(metadata.st_mode)
+        or stat.S_ISLNK(metadata.st_mode)
+        or metadata.st_uid != os.getuid()
+        or metadata.st_nlink != 1
+        or stat.S_IMODE(metadata.st_mode) & 0o022
+    ):
+        return ["local settings file has unsafe metadata"]
 
     try:
         settings = json.loads(path.read_text(encoding="utf-8"))
@@ -121,16 +131,12 @@ def validate_settings(
             )
 
     key_reference = model.get("apiKey")
-    if not isinstance(key_reference, str):
-        errors.append("apiKey must reference a local environment variable")
+    if key_reference != MODEL_API_KEY_REFERENCE:
+        errors.append(f"apiKey must equal {MODEL_API_KEY_REFERENCE}")
     else:
-        match = ENV_REFERENCE.fullmatch(key_reference)
-        if not match:
-            errors.append("apiKey must use ${ENVIRONMENT_VARIABLE} syntax")
-        else:
-            key_value = environment.get(match.group(1))
-            if not isinstance(key_value, str) or not key_value.strip():
-                errors.append(f"required environment variable is unset: {match.group(1)}")
+        key_value = environment.get(MODEL_API_KEY_ENV)
+        if not isinstance(key_value, str) or not key_value.strip():
+            errors.append(f"required environment variable is unset: {MODEL_API_KEY_ENV}")
 
     return errors
 

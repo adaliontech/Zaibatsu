@@ -64,9 +64,10 @@ not the only record that work exists.
 The private implementation runs PostgreSQL 16 over a Unix socket and a
 deterministic read-only coordinator across the three allowlisted projects. The
 coordinator invokes no model, is idempotent by time bucket, retries once, and
-then blocks. This narrow lane is operational; the broader Dispatcher API and
-policy surface remains validated preproduction, while systemd retains
-authority for the existing production workloads.
+then blocks. `architecture/system.json` models this coordinator as its own
+operational component. The broader Dispatcher API and policy surface remains
+validated preproduction, while systemd retains authority for the existing
+production workloads.
 
 Operational state and knowledge stay separate:
 
@@ -155,6 +156,7 @@ Each tool answers a different question.
 | Nix | Which exact project tools should workers receive? | pinned development and runtime environments | Planned |
 | systemd | What executes durably on a host? | current schedules and service supervision | Operational |
 | PostgreSQL | What work exists and what state is it in? | durable bounded Dispatcher state plus broader validated contract | Validated preproduction |
+| Bounded coordinator | Which fixed read-only collection is due? | allowlisted collect-only scheduling and receipt-bound completion | Operational |
 | Factory Droid + local Qwen | Where can bounded AI repository work run? | optional public-kit contributor behind deterministic checks | Validated preproduction |
 
 The order is intentional: private access and reproducible host configuration

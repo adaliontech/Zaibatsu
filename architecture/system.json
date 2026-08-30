@@ -73,6 +73,15 @@
       "can_trigger_external_side_effects": false
     },
     {
+      "id": "bounded-readonly-coordinator",
+      "plane": "control",
+      "kind": "deterministic",
+      "maturity": "operational",
+      "responsibility": "Schedule and receipt fixed read-only collection for the closed project allowlist",
+      "can_trigger_external_side_effects": true,
+      "policy_gate": "allowlisted project, collect-only workflow, fixed schedule bucket, and receipt-bound completion"
+    },
+    {
       "id": "project-sandboxes",
       "plane": "execution",
       "kind": "deterministic",

@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "schema_version": "zaibatsu.dispatcher-validation-receipt.v1",
+  "observed_at": "2026-08-30T00:26:55Z",
+  "status": "passed",
+  "visibility": "sanitized_from_private_source",
+  "source": {
+    "base_revision": "21b3b2ef8457e77c463e8e2026fa7f8a1c692e80",
+    "scope": "dispatcher",
+    "source_file_count": 34,
+    "source_tree_sha256": "4a4281be43016bd41128ee99a2fe2d8282c81c80cd45439df55fb183ab7461ee",
+    "state": "reviewed_working_tree",
+    "limitation": "The implementation is private; this receipt binds the observed source content but does not make it publicly reproducible."
+  },
+  "focused_suite": {
+    "command": "python3 -m unittest discover -s dispatcher -p test_*.py",
+    "python_version": "3.10.12",
+    "status": "passed",
+    "tests_passed": 158,
+    "tests_failed": 0
+  },
+  "postgresql_acceptance": {
+    "command": "python3 dispatcher/postgres_acceptance.py --pg-bin-dir <reviewed PostgreSQL binary directory>",
+    "network": "unix-socket-only",
+    "production_data": false,
+    "postgresql_version": "16.15",
+    "status": "passed",
+    "assertions_passed": 104,
+    "assertions_failed": 0,
+    "migration_sha256": {
+      "0001_dispatcher_state.sql": "5348ece48af419bb5bbe6cc9aa2a14f74b0b3e28a1d31d6643b36b5738c87dc2",
+      "0002_job_leases_and_audit.sql": "8e88ba37335951785c7d23a7f9c183448a379ba415fb3d6760826540e33be92c",
+      "0003_runtime_grants.sql": "2acd1745dbfd3d732874cc1b3ecfa7ed61e44b86330b9b9a164645040d97d7bf",
+      "0004_admin_projection.sql": "b9f1d5ff59c069b9e59ac6ed7f184c35f3e949092ca33c339282ee9cba9f89f2",
+      "0005_api_idempotency.sql": "c8ed256f83ff2143ed4cf96090aac16dde3bba58694904b48cd57dbba4bd21b7",
+      "0006_coordinator_operations.sql": "02c8c8dab4166bcd382dff42dc2816a48c46bad99abdfb09bee1fa335213aeaa"
+    },
+    "restore": {
+      "dump_sha256": "e9eb98c54eb81c2349ff0821273eb981031e85f517c49c80e9100a0fbdaccc10",
+      "fingerprint_sha256": "6a58e3fde4a29cf8494f92df23cd0ed1c569ef947f824eb3bd5ef470c44ca82c",
+      "row_counts": {
+        "active_leases": 0,
+        "approval_decisions": 2,
+        "approval_requests": 2,
+        "artifacts": 1,
+        "audit_events": 68,
+        "job_attempts": 4,
+        "job_dependencies": 3,
+        "jobs": 21,
+        "policy_decisions": 1,
+        "projects": 3,
+        "request_ledger": 6,
+        "workers": 9
+      }
+    }
+  }
+}

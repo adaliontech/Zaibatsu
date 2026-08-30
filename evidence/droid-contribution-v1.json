@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "schema_version": "zaibatsu.droid-contribution-receipt.v1",
+  "observed_at": "2026-08-28",
+  "status": "passed_and_reviewed",
+  "factory_cli_version": "0.206.0",
+  "session_reference": "46f941a9-82f8-4df3-a45c-b8158996360b",
+  "scope": {
+    "files_changed": [
+      "scripts/validate_repository.py",
+      "tests/test_validate_repository.py"
+    ],
+    "model_turns": 15,
+    "factory_credits": 0,
+    "production_authority": false
+  },
+  "contribution": {
+    "invariant": "persist < execute_in_sandbox < verify < policy_decision < controlled_side_effect",
+    "adversarial_mutation": "policy_decision moved before verify",
+    "pre_change_result": "mutation accepted",
+    "post_change_result": "mutation rejected",
+    "contribution_tests_passed": 36,
+    "current_integrated_tests_passed": 59
+  },
+  "acceptance": {
+    "model_self_report_is_verification": false,
+    "diff_reviewed": true,
+    "independent_validation_passed": true,
+    "credential_values_recorded": false
+  }
+}

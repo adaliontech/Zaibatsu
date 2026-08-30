@@ -90,8 +90,8 @@ See [`.factory/prompts/review.md`](../.factory/prompts/review.md).
 | Field | Current value |
 | --- | --- |
 | CLI version | `0.206.0` |
-| Model | Owner-operated Qwen 3.8 27B GGUF, `Q4_K - Small` |
-| Model metadata | Authenticated `/props` verification; path and credential redacted |
+| Model | Owner-operated GGUF whose loaded filename identifies Qwen 3.8 27B; server-reported `Q4_K - Small` |
+| Model metadata | Authenticated `/props` observation with path, alias, and credential redacted; filename-level identity limitation recorded in [`evidence/qwen-model-observation-v1.json`](../evidence/qwen-model-observation-v1.json) |
 | Endpoint | Authenticated OpenAI-compatible gateway; health and model alias passed |
 | Local-model credential | Root-only, source-bound, and transiently injected; value never recorded |
 | Factory credential | Secure CLI login, separate from the model credential; value never recorded |
@@ -102,7 +102,7 @@ See [`.factory/prompts/review.md`](../.factory/prompts/review.md).
 | Focused contribution | Enforce `persist < execute_in_sandbox < verify < policy_decision < controlled_side_effect` |
 | Adversarial test | Move `policy_decision` before `verify`; the pre-change validator accepted this mutation |
 | Droid-reported validation | 36 tests and standalone validator passed; `git diff --check` clean |
-| Independent validation | Same two-file diff passed 36 tests; integrated Zaibatsu package later passed 46 tests |
+| Independent validation | Same two-file diff passed 36 tests; integrated Zaibatsu package later passed 59 tests |
 | Reviewed diff | 21 insertions, 9 deletions in the accepted two-file contribution |
 
 ## Promotion rule
@@ -116,6 +116,9 @@ The promotion gate was satisfied on 2026-08-28:
 4. the adversarial mutation was independently shown to pass before the change;
 5. independent `make validate` passed on the accepted diff;
 6. this redacted record names the task, session, diff, and outcome.
+
+The bounded machine-readable session summary is retained in
+[`evidence/droid-contribution-v1.json`](../evidence/droid-contribution-v1.json).
 
 An earlier broad audit was capped after repetitive read turns and no file
 change. That model-quality failure was not promoted. The successful retry used

@@ -39,11 +39,13 @@ The validator confirms:
 6. every side-effecting deterministic component declares a policy gate;
 7. required fail-closed invariants are true;
 8. persistence and verification precede a controlled side effect;
-9. public source contains no absolute home path, private address, or obvious
-   inline secret assignment;
-10. repository-local documentation links resolve;
-11. every submission gate remains required and dependency order is enforced;
-12. submission readiness cannot become true while a required gate is pending
+9. every public repository file is inspected or rejected as an unapproved
+   binary, and every repository symlink is denied;
+10. public text contains no absolute home path, tailnet name, private or
+    unapproved public address, or obvious inline credential;
+11. repository-local documentation links resolve;
+12. every submission gate remains required and dependency order is enforced;
+13. submission readiness cannot become true while a required gate is pending
     or dependency-blocked.
 
 The adversarial tests mutate valid architecture data and prove that the
@@ -83,4 +85,12 @@ worker environment is reproduced on more than one eligible node.
 
 Before publication, run the commands from a fresh clone in a temporary
 directory, record the commit and output in [Evidence](evidence.md), and retain
-the complete receipt outside the human documentation tree.
+the complete receipt outside the human documentation tree. For an immutable
+release reproduction, clone the named tag rather than the moving default
+branch:
+
+```bash
+git clone --depth 1 --branch v1.0.1 https://github.com/adaliontech/Zaibatsu.git
+cd Zaibatsu
+make validate
+```
