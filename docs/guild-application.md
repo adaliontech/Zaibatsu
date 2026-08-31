@@ -66,8 +66,9 @@ validation, and both Gitleaks modes. The v1.15 candidate-contract candidate
 passed 247 tests, 120-file validation, a credential-disabled full-history
 clone, both Gitleaks modes, sixteen strict schemas, exact candidate
 regeneration, contract-only assertions, and independent CI. Its evidence roof
-and immutable release remain the bounded release steps. The gates remain in
-[`architecture/submission-readiness.json`](../architecture/submission-readiness.json).
+and immutable release passed roof/tag CI, two live-schema byte checks, exact
+regeneration, strict external validation, and both Gitleaks modes. The gates
+remain in [`architecture/submission-readiness.json`](../architecture/submission-readiness.json).
 
 ## Current project description
 
@@ -347,6 +348,14 @@ the public repository:
       independent CI.
 - [x] Immutable v1.14.0 passes evidence-roof and tag CI, four tagged-schema
       byte checks, tag-clone reproduction, and immutable-release proof.
+- [x] Evidence-bound candidate-contract v1.15 candidate passes 247 local tests,
+      120-file validation, two strict new schemas, exact regeneration,
+      malformed/forged-record controls, and explicit contract-only semantics.
+- [x] v1.15 candidate passes a credential-disabled full-history clone, both
+      Gitleaks modes, sixteen strict schemas, exact regeneration, and
+      independent CI.
+- [x] Immutable v1.15.0 passes evidence-roof and tag CI, two tagged-schema byte
+      checks, tag-clone reproduction, and immutable-release proof.
 - [x] Public repository and article links resolve without authentication.
 - [ ] Demo clip or screenshots show a real Factory task and validation result.
 - [x] No private host, credential, recovery, or deployment detail is exposed.

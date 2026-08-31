@@ -296,7 +296,7 @@ FACTORY_MODEL_SCHEMA_VERSION = "zaibatsu.factory-model.v1"
 READINESS_SCHEMA_VERSION = "zaibatsu.submission-readiness.v1"
 FACTORY_DEFINITION_SCHEMA_VERSION = "zaibatsu.factory-definition.v2"
 INTEGRATED_TEST_COUNT = 247
-LATEST_VALIDATED_RELEASE_TEST_COUNT = 241
+LATEST_VALIDATED_RELEASE_TEST_COUNT = 247
 DROID_FACTORY_CLI_VERSION = "0.206.0"
 DROID_SESSION_REFERENCE = "46f941a9-82f8-4df3-a45c-b8158996360b"
 PUBLIC_REPOSITORY_URL = "https://github.com/adaliontech/Zaibatsu"
@@ -1570,6 +1570,14 @@ def validate_submission_readiness(data: Any) -> list[str]:
                     "examples/factory-portfolio.json",
                     "examples/factory-portfolio.plan.json",
                     "examples/economic-factory.evidence-return.json",
+                    "examples/economic-factory.improvement-proposal-spec.json",
+                    "examples/economic-factory.improvement-proposal.json",
+                    "examples/economic-factory.improvement-observation-spec.json",
+                    "examples/economic-factory.improvement-observation.json",
+                    "examples/economic-factory.improvement-classification.json",
+                    "examples/economic-factory.improvement-candidate-spec.json",
+                    "examples/economic-factory.improvement-candidate.json",
+                    "policies/improvement-classification-v1.json",
                     "policies/runtime-evidence-verifiers-v1.json",
                     "policies/runtime-qualification-v1.json",
                 }

@@ -998,7 +998,7 @@ roof `aec013d84645b5d508bf914f9184e5fd34e96c28`;
 [tag CI](https://github.com/adaliontech/Zaibatsu/actions/runs/33360102500), a
 credential-disabled full-history tag clone, fourteen strict schemas, exact
 artifact regeneration, both Gitleaks modes, and four live tagged-schema byte
-checks passed. GitHub reports v1.14.0 immutable, latest, non-draft, and
+checks passed. GitHub reports v1.14.0 immutable, non-draft, and
 non-prerelease.
 
 The v1.15 evidence-bound candidate-contract candidate at
@@ -1011,6 +1011,18 @@ independently. The checked 1,130-byte artifact is an untrusted non-executable
 contract; its exact binding proves no safety, semantic correctness,
 implementation, validation, approval, promotion, rollout, execution, or
 cross-factory authority.
+
+Immutable
+[v1.15.0](https://github.com/adaliontech/Zaibatsu/releases/tag/v1.15.0) uses
+annotated tag object `3173f5093afe8b8ce5a094d1e5b6bc57f232e570` over evidence
+roof `70b4fdf54f2874e9548e60e69628fd5c0db61378`;
+[roof CI](https://github.com/adaliontech/Zaibatsu/actions/runs/33362016190),
+[tag CI](https://github.com/adaliontech/Zaibatsu/actions/runs/33362067960), a
+credential-disabled full-history tag clone, all 247 tests, 120-file
+validation, strict Git, both Gitleaks modes, sixteen strict schemas,
+byte-identical candidate regeneration, and two live tagged-schema byte checks
+passed. GitHub reports v1.15.0 immutable, latest, non-draft, and
+non-prerelease.
 
 Zaibatsu is an independent project and is not affiliated with or endorsed by
 Factory AI.

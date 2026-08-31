@@ -51,7 +51,8 @@ changes.
   classification contracts without
   presenting canonical shape or workflow type as safety, semantic truth,
   merit, validation execution, approval, promotion, rollout, or authority;
-- publish an exact content-addressed candidate-contract binding without
+- preserve the reproduced immutable `v1.15.0` exact content-addressed
+  candidate-contract binding without
   presenting a structurally valid contract as safe, semantically correct,
   implemented, validated, promotion-eligible, or executable;
 - record the Guild demo and complete applicant-owned submission materials.

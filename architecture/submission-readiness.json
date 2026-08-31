@@ -9,7 +9,7 @@
       "id": "public_package",
       "status": "complete",
       "required_for_submission": true,
-      "evidence": "Meta-factory, component, portable factory, content-addressed module, control-plan, bundle, closed portfolio, signed-runtime-evidence-pack, route-bound evidence-return, rebuild, readiness, and evidence contracts are enforced by the offline validator and adversarial suite",
+      "evidence": "Meta-factory, component, portable factory, content-addressed module, control-plan, bundle, closed portfolio, signed-runtime-evidence-pack, route-bound evidence-return, proposal, observation, classification, candidate, rebuild, readiness, and evidence contracts are enforced by the offline validator and adversarial suite",
       "proof": {
         "contracts": [
           "architecture/factory-model.json",
@@ -29,10 +29,18 @@
           "examples/economic-factory.runtime-evidence.json",
           "examples/economic-factory.runtime-evidence-pack-manifest.json",
           "examples/economic-factory.evidence-return.json",
+          "examples/economic-factory.improvement-proposal-spec.json",
+          "examples/economic-factory.improvement-proposal.json",
+          "examples/economic-factory.improvement-observation-spec.json",
+          "examples/economic-factory.improvement-observation.json",
+          "examples/economic-factory.improvement-classification.json",
+          "examples/economic-factory.improvement-candidate-spec.json",
+          "examples/economic-factory.improvement-candidate.json",
           "examples/control-factory.json",
           "examples/service-factory.json",
           "examples/factory-portfolio.json",
           "examples/factory-portfolio.plan.json",
+          "policies/improvement-classification-v1.json",
           "policies/runtime-evidence-verifiers-v1.json",
           "policies/runtime-qualification-v1.json"
         ],
@@ -103,18 +111,18 @@
       "id": "fresh_clone_reproduction",
       "status": "complete",
       "required_for_submission": true,
-      "evidence": "Credential-disabled full-history clones of v1.14.0 candidate b4a34021ed6851c63f1ade291b5eb40128ea90f8 and immutable tag v1.14.0 passed 241 tests, 115-file validation, strict Git, both checksum-pinned Gitleaks modes, fourteen strict schemas, exact bundle, runtime-pack, observation, and classification regeneration, planning-only assertions, four live tagged-schema byte checks, and independent candidate, roof, and tag CI",
+      "evidence": "Credential-disabled full-history clones of v1.15.0 candidate 3ecb7461c817c50e4d9a78ee7d88722fd2561ccc and immutable tag v1.15.0 passed 247 tests, 120-file validation, strict Git, both checksum-pinned Gitleaks modes over the 55-commit release history and tree, sixteen strict schemas, byte-identical candidate regeneration, contract-only assertions, two live tagged-schema byte checks, and independent candidate, roof, and tag CI",
       "proof": {
-        "candidate_commit": "b4a34021ed6851c63f1ade291b5eb40128ea90f8",
-        "tests_passed": 241,
+        "candidate_commit": "3ecb7461c817c50e4d9a78ee7d88722fd2561ccc",
+        "tests_passed": 247,
         "gitleaks_version": "8.30.1",
-        "github_actions_run": "https://github.com/adaliontech/Zaibatsu/actions/runs/33359925143",
-        "roof_actions_run": "https://github.com/adaliontech/Zaibatsu/actions/runs/33360056494",
-        "release_tag": "v1.14.0",
-        "tag_commit": "aec013d84645b5d508bf914f9184e5fd34e96c28",
-        "tag_object": "c417b24070ccda8b08e707c3ec786094494629d1",
-        "tag_actions_run": "https://github.com/adaliontech/Zaibatsu/actions/runs/33360102500",
-        "release_url": "https://github.com/adaliontech/Zaibatsu/releases/tag/v1.14.0",
+        "github_actions_run": "https://github.com/adaliontech/Zaibatsu/actions/runs/33361875633",
+        "roof_actions_run": "https://github.com/adaliontech/Zaibatsu/actions/runs/33362016190",
+        "release_tag": "v1.15.0",
+        "tag_commit": "70b4fdf54f2874e9548e60e69628fd5c0db61378",
+        "tag_object": "3173f5093afe8b8ce5a094d1e5b6bc57f232e570",
+        "tag_actions_run": "https://github.com/adaliontech/Zaibatsu/actions/runs/33362067960",
+        "release_url": "https://github.com/adaliontech/Zaibatsu/releases/tag/v1.15.0",
         "release_immutable": true
       }
     },
@@ -122,7 +130,7 @@
       "id": "public_demo",
       "status": "pending_external",
       "required_for_submission": true,
-      "evidence": "The immutable v1.14.0 structural-observation and validation-planning classification release proof passed; record and publish the final clip from that tag"
+      "evidence": "The immutable v1.15.0 evidence-bound candidate-contract release proof passed; record and publish the final clip from that tag"
     },
     {
       "id": "applicant_materials",
