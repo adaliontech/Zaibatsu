@@ -24,9 +24,9 @@ The shared layer controls factory contracts. Each economic factory retains its
 own identity, data, credentials, repositories, schedules, acceptance rules,
 budgets, and production authority.
 
-## Twelve machine-readable views
+## Thirteen machine-readable views
 
-Zaibatsu deliberately separates twelve questions:
+Zaibatsu deliberately separates thirteen questions:
 
 | Contract | Question |
 | --- | --- |
@@ -41,6 +41,7 @@ Zaibatsu deliberately separates twelve questions:
 | [`examples/economic-factory.qualification-evidence.json`](../examples/economic-factory.qualification-evidence.json) plus [`examples/economic-factory.qualification-assessment.json`](../examples/economic-factory.qualification-assessment.json) | Which requirements does the verified bundle itself actually prove, and exactly which runtime proofs remain missing? |
 | [`policies/runtime-evidence-verifiers-v1.json`](../policies/runtime-evidence-verifiers-v1.json) plus [`examples/economic-factory.runtime-evidence.json`](../examples/economic-factory.runtime-evidence.json) | Which externally supplied assertions were signed by evaluator-selected keys under exact allowlists, provenance, scope, and freshness rules? |
 | [`examples/economic-factory.runtime-evidence-pack-manifest.json`](../examples/economic-factory.runtime-evidence-pack-manifest.json) plus [`examples/economic-factory.runtime-assessment.json`](../examples/economic-factory.runtime-assessment.json) | Which exact evidence artifacts and verifier descriptors were retrieved and digest-verified, and what do those bytes still not prove or authorize? |
+| [`examples/economic-factory.evidence-return.json`](../examples/economic-factory.evidence-return.json) | Which exact verified evidence pack is bound to which economic-factory bundle and declared evidence-only route, and which transport, interpretation, promotion, and effect claims remain false? |
 | [`examples/economic-factory.rebuild-plan.json`](../examples/economic-factory.rebuild-plan.json) | In which dependency order would a qualified factory be rebuilt, which direct and upstream blockers stop each action, and which separate gates still deny activation? |
 
 The validator requires the factory registry and shared component maturities to
@@ -73,6 +74,23 @@ databases, secret-manager ACLs, or scheduler state. It contains no runtime
 implementations, routes no secret, invokes no model, executes no operation,
 grants no cross-factory authority, authorizes no activation, and proves no
 deployment or recovery.
+
+## Route-bound evidence return
+
+The portfolio declares where evidence may return; it does not carry any
+evidence. The evidence-return contract joins that declared route to one
+canonical runtime-evidence pack from the named economic factory. Before
+deriving or accepting the record, the verifier rebuilds the portfolio plan,
+fully verifies every bundle, matches the source factory and its single route,
+and reverifies the pack against the exact source bundle, qualification plan,
+policy, embedded materials, signatures, and allowlists.
+
+The resulting digest makes route or source replay visible. It proves the exact
+verified bytes were selected for the exact declared route. It does not observe
+transport, scan the evidence for unsafe content or secrets, rerun verifier
+assertions, prove artifact truth, classify an improvement candidate, change
+shared policy, make anything promotion-eligible, or authorize activation,
+execution, or cross-factory effects.
 
 ## Deterministic module composition
 

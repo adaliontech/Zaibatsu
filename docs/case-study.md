@@ -233,6 +233,10 @@ reusable contracts while preserving evidence and limitations:
   artifacts, verifier descriptors, and manifest schema portable as canonical
   USTAR; verification proves byte integrity and availability without rerunning
   verifier assertions or claiming artifact semantic truth;
+- `evidence-return-record` binds that fully verified pack to the exact product
+  bundle and its declared evidence-only route into the control factory, while
+  explicitly denying transport, classification, promotion, activation,
+  execution, and cross-factory-effect claims;
 - the checked signature is fixture-only: it raises the verified count to 10,
   leaves 57 missing, and cannot create runtime eligibility; generated-key tests
   separately prove that complete `factory_runtime` evidence can reach
@@ -276,6 +280,9 @@ The public package can now reject claims or architectures in which:
 - an undeclared or duplicate factory, class-swapped bundle, secret-bearing
   route, namespace collision, or cross-factory authority claim is presented as
   the verified factory portfolio;
+- a pack replayed from another bundle or route, or an integrity record
+  presented as delivery, content safety, improvement classification, promotion
+  eligibility, or cross-factory authority;
 - a model authorizes an external effect;
 - a factory promotes its own feedback into shared policy;
 - component and meta-factory maturity ledgers diverge.
@@ -297,6 +304,8 @@ The public package can now reject claims or architectures in which:
 - The public portfolio plan makes intended scopes and evidence routes
   inspectable, but does not enforce or prove runtime process, network,
   credential, database, worker-pool, or scheduler isolation.
+- The public evidence-return record binds exact verified inputs to one route;
+  it does not transport, inspect, classify, promote, activate, or execute them.
 - The public signed receipt is a cryptographic fixture, not operational runtime
   evidence. Registry selection and the assessment clock remain evaluator trust
   inputs; verifier assertions and detached evidence artifacts are not rerun or

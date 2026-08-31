@@ -1,5 +1,26 @@
 # Changelog
 
+## 1.12.0 - 2026-08-30
+
+- Added a schema-bound factory evidence-return record that binds one fully
+  verified canonical runtime-evidence pack to the exact economic-factory
+  bundle, closed portfolio plan, and declared evidence-only route that may
+  return it to the control factory.
+- Added `evidence-return-record` and `verify-evidence-return-record` CLI
+  workflows. They fully reverify every supplied factory bundle, the portfolio
+  plan, source route, qualification policy and plan, evidence-pack archive,
+  embedded materials, signatures, allowlists, and content digests before
+  accepting the exact derived record.
+- Made the review boundary machine-readable: route and byte bindings are true,
+  while transport observation, content-safety scanning, secret absence,
+  verifier reexecution, artifact truth, classification, improvement-candidate
+  status, shared-promotion eligibility, activation, execution, and
+  cross-factory effects remain false.
+- Added fast bounded record prechecks plus route/source/bundle/pack replay,
+  digest-refresh forgery, authority-inflation, scalar-confusion, malformed,
+  size, input-order, and CLI overwrite tests. The integrated suite now
+  contains 221 tests and the validator requires 100 files.
+
 ## 1.11.0 - 2026-08-30
 
 - Added schema-bound factory-portfolio definitions and deterministic portfolio

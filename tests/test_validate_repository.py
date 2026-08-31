@@ -25,6 +25,7 @@ SPEC.loader.exec_module(validator)
 import factory_bundle as bundler
 import factory_composer as composer
 import factory_evidence_pack as evidence_pack
+import factory_evidence_return as evidence_return
 import factory_portfolio as portfolio
 import factory_qualification as qualification
 import factory_rebuild as rebuild
@@ -1782,6 +1783,384 @@ class FactoryPortfolioTests(unittest.TestCase):
             )
             self.assertEqual(2, oversized_plan_result.returncode)
             self.assertIn("input size is outside", oversized_plan_result.stderr)
+
+
+class FactoryEvidenceReturnTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.catalog = composer.load_module_catalog()
+        self.artifacts, errors = composer.load_module_artifacts(self.catalog)
+        self.assertEqual([], errors)
+        self.portfolio_definition = portfolio.load_factory_portfolio()
+        self.portfolio_plan = portfolio.load_factory_portfolio_plan()
+        self.bundles: list[bytes] = []
+        for path in validator.PORTFOLIO_FACTORY_PATHS:
+            bundle, _ = bundler.build_factory_bundle(
+                composer.load_json_file(path),
+                self.catalog,
+                self.artifacts,
+            )
+            self.bundles.append(bundle)
+        self.qualification_plan = qualification.load_qualification_plan()
+        self.qualification_policy = qualification.load_qualification_policy()
+        runtime_set = runtime_evidence.load_runtime_evidence()
+        registry = runtime_evidence.load_verifier_registry()
+        artifact = composer.load_json_file(
+            validator.ROOT
+            / "examples"
+            / "runtime-evidence"
+            / "source-revision-fixture.json"
+        )
+        implementation = composer.load_json_file(
+            validator.ROOT
+            / "examples"
+            / "runtime-evidence"
+            / "fixture-verifier-method.json"
+        )
+        pack_errors, pack, _ = evidence_pack.runtime_evidence_pack_for_bundle(
+            runtime_set,
+            registry,
+            {composer.sha256_json(artifact): artifact},
+            {composer.sha256_json(implementation): implementation},
+            self.qualification_plan,
+            self.bundles[1],
+            self.qualification_policy,
+        )
+        self.assertEqual([], pack_errors)
+        self.assertIsNotNone(pack)
+        assert pack is not None
+        self.pack = pack
+        record_errors, record = evidence_return.factory_evidence_return_for_inputs(
+            self.portfolio_plan,
+            self.portfolio_definition,
+            self.bundles,
+            "example-product",
+            self.pack,
+            self.qualification_plan,
+            self.qualification_policy,
+        )
+        self.assertEqual([], record_errors)
+        self.assertIsNotNone(record)
+        assert record is not None
+        self.record = record
+
+    @staticmethod
+    def _refresh_digest(document: dict[str, object]) -> None:
+        without_digest = copy.deepcopy(document)
+        without_digest.pop("factory_evidence_return_sha256")
+        document["factory_evidence_return_sha256"] = composer.sha256_json(
+            without_digest
+        )
+
+    def _verify(
+        self,
+        record: object,
+        *,
+        plan: object | None = None,
+        portfolio_definition: object | None = None,
+        bundles: object | None = None,
+        source_factory_id: object = "example-product",
+        pack: object | None = None,
+    ) -> list[str]:
+        return evidence_return.verify_factory_evidence_return_for_inputs(
+            record,
+            self.portfolio_plan if plan is None else plan,
+            (
+                self.portfolio_definition
+                if portfolio_definition is None
+                else portfolio_definition
+            ),
+            self.bundles if bundles is None else bundles,
+            source_factory_id,
+            self.pack if pack is None else pack,
+            self.qualification_plan,
+            self.qualification_policy,
+        )
+
+    def test_repository_record_and_schema_are_exact(self) -> None:
+        checked = evidence_return.load_factory_evidence_return()
+        self.assertEqual(self.record, checked)
+        self.assertEqual([], self._verify(checked))
+        schema = json.loads(
+            (
+                validator.ROOT
+                / "schemas"
+                / "factory-evidence-return.schema.json"
+            ).read_text(encoding="utf-8")
+        )
+        self.assertEqual(
+            "https://json-schema.org/draft/2020-12/schema",
+            schema["$schema"],
+        )
+        self.assertEqual(evidence_return.EVIDENCE_RETURN_SCHEMA_REFERENCE, schema["$id"])
+        self.assertEqual(
+            schema["$id"],
+            schema["properties"]["contract_schema"]["const"],
+        )
+
+    def test_review_boundary_is_exact_and_non_authorizing(self) -> None:
+        boundary = self.record["review_boundary"]
+        self.assertEqual(evidence_return.REVIEW_BOUNDARY, boundary)
+        true_fields = {
+            "portfolio_plan_verified",
+            "route_binding_verified",
+            "source_bundle_verified",
+            "runtime_evidence_pack_verified",
+            "evidence_only_route_declared",
+            "signatures_and_bindings_reverified",
+            "artifact_digests_verified",
+        }
+        for field in true_fields:
+            self.assertIs(boundary[field], True)
+        for field in set(boundary) - true_fields:
+            self.assertIs(boundary[field], False)
+
+    def test_source_must_be_one_declared_economic_route(self) -> None:
+        for source, expected in (
+            ("example-control", "economic factory"),
+            ("unknown-factory", "closed registry"),
+            ([], "must be a string"),
+        ):
+            with self.subTest(source=source):
+                errors, record = evidence_return.factory_evidence_return_for_inputs(
+                    self.portfolio_plan,
+                    self.portfolio_definition,
+                    self.bundles,
+                    source,
+                    self.pack,
+                    self.qualification_plan,
+                    self.qualification_policy,
+                )
+                self.assertIsNone(record)
+                self.assertTrue(any(expected in error for error in errors), errors)
+        errors, record = evidence_return.factory_evidence_return_for_inputs(
+            self.portfolio_plan,
+            self.portfolio_definition,
+            self.bundles,
+            "example-service",
+            self.pack,
+            self.qualification_plan,
+            self.qualification_policy,
+        )
+        self.assertIsNone(record)
+        self.assertTrue(any("runtime evidence" in error for error in errors), errors)
+
+    def test_plan_bundle_and_pack_replay_fail_closed(self) -> None:
+        plan = copy.deepcopy(self.portfolio_plan)
+        plan["evidence_routes"][0]["grants_authority"] = True
+        self.assertTrue(any("exact verified portfolio plan" in error for error in self._verify(self.record, plan=plan)))
+
+        cron_factory = composer.load_json_file(
+            validator.ROOT / "examples" / "economic-factory-cron.json"
+        )
+        cron_bundle, _ = bundler.build_factory_bundle(
+            cron_factory,
+            self.catalog,
+            self.artifacts,
+        )
+        replacement = [self.bundles[0], cron_bundle, self.bundles[2]]
+        self.assertTrue(self._verify(self.record, bundles=replacement))
+
+        tampered_pack = bytearray(self.pack)
+        tampered_pack[1024] ^= 1
+        errors = self._verify(self.record, pack=bytes(tampered_pack))
+        self.assertTrue(any("runtime-evidence pack" in error for error in errors))
+
+    def test_record_forgery_fails_even_after_digest_refresh(self) -> None:
+        mutations: list[dict[str, object]] = []
+        for field in (
+            "transport_observed",
+            "content_safety_scanned",
+            "contains_improvement_candidate",
+            "shared_promotion_eligible",
+            "promotion_authorized",
+            "cross_factory_effects_authorized",
+        ):
+            mutated = copy.deepcopy(self.record)
+            mutated["review_boundary"][field] = True
+            mutations.append(mutated)
+        route = copy.deepcopy(self.record)
+        route["route"]["to_factory"] = "example-service"
+        mutations.append(route)
+        evidence = copy.deepcopy(self.record)
+        evidence["evidence"]["runtime_evidence_pack_sha256"] = "0" * 64
+        mutations.append(evidence)
+        for mutated in mutations:
+            with self.subTest(mutated=mutated):
+                self._refresh_digest(mutated)
+                errors = self._verify(mutated)
+                self.assertTrue(any("must exactly match" in error for error in errors))
+
+    def test_malformed_inputs_fail_cleanly(self) -> None:
+        for malformed in (None, [], "record", 0, False, {"route": []}):
+            with self.subTest(malformed=malformed):
+                self.assertTrue(self._verify(malformed))
+        oversized = copy.deepcopy(self.record)
+        oversized["evidence"]["padding"] = "x" * (
+            evidence_return.MAX_EVIDENCE_RETURN_JSON_BYTES
+        )
+        self._refresh_digest(oversized)
+        self.assertTrue(
+            any("size is outside" in error for error in self._verify(oversized))
+        )
+        invalid_digest = copy.deepcopy(self.record)
+        invalid_digest["route"]["to_factory"] = "example-service"
+        self.assertTrue(
+            any("digest does not match" in error for error in self._verify(invalid_digest))
+        )
+        recursive = copy.deepcopy(self.record)
+        recursive_section: dict[str, object] = {}
+        recursive_section["self"] = recursive_section
+        recursive["evidence"] = recursive_section
+        self.assertTrue(
+            any("canonical JSON" in error for error in self._verify(recursive))
+        )
+        nonfinite = copy.deepcopy(self.record)
+        nonfinite["evidence"]["signed_receipt_count"] = float("nan")
+        self.assertTrue(
+            any("canonical JSON" in error for error in self._verify(nonfinite))
+        )
+        invalid_portfolio = {"factories": []}
+        errors, record = evidence_return.factory_evidence_return_for_inputs(
+            self.portfolio_plan,
+            invalid_portfolio,
+            object(),
+            "example-product",
+            object(),
+            object(),
+            object(),
+        )
+        self.assertTrue(errors)
+        self.assertIsNone(record)
+        errors, record = evidence_return.factory_evidence_return_for_inputs(
+            self.portfolio_plan,
+            self.portfolio_definition,
+            self.bundles,
+            "example-product",
+            object(),
+            self.qualification_plan,
+            self.qualification_policy,
+        )
+        self.assertTrue(any("must be bytes" in error for error in errors))
+        self.assertIsNone(record)
+
+    def test_bundle_input_order_does_not_change_record(self) -> None:
+        errors, reordered = evidence_return.factory_evidence_return_for_inputs(
+            self.portfolio_plan,
+            self.portfolio_definition,
+            list(reversed(self.bundles)),
+            "example-product",
+            self.pack,
+            self.qualification_plan,
+            self.qualification_policy,
+        )
+        self.assertEqual([], errors)
+        self.assertEqual(self.record, reordered)
+
+    def test_route_source_and_evidence_digests_are_bound(self) -> None:
+        self.assertEqual(
+            self.record["route"]["from_bundle_sha256"],
+            self.record["factory"]["bundle_sha256"],
+        )
+        self.assertEqual(
+            bundler.sha256_bytes(self.pack),
+            self.record["evidence"]["runtime_evidence_pack_sha256"],
+        )
+        self.assertEqual(
+            self.portfolio_plan["factory_portfolio_plan_sha256"],
+            self.record["portfolio"]["factory_portfolio_plan_sha256"],
+        )
+
+    def test_cli_round_trip_overwrite_and_early_count_rejection(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            bundle_paths = []
+            for index, bundle in enumerate(self.bundles):
+                path = root / f"factory-{index}.tar"
+                path.write_bytes(bundle)
+                bundle_paths.append(path)
+            pack_path = root / "runtime-evidence.tar"
+            pack_path.write_bytes(self.pack)
+            output = root / "evidence-return.json"
+            cli = [sys.executable, str(validator.ROOT / "scripts" / "zaibatsu.py")]
+            inputs = [
+                str(portfolio.EXAMPLE_PORTFOLIO_PLAN_PATH),
+                str(portfolio.EXAMPLE_PORTFOLIO_PATH),
+                "example-product",
+                str(pack_path),
+                str(qualification.EXAMPLE_QUALIFICATION_PLAN_PATH),
+                str(qualification.QUALIFICATION_POLICY_PATH),
+                *(str(path) for path in bundle_paths),
+            ]
+            create = cli + ["evidence-return-record", *inputs, "--output", str(output)]
+            created = subprocess.run(
+                create,
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(0, created.returncode, created.stderr)
+            self.assertEqual(self.record, json.loads(output.read_text(encoding="utf-8")))
+            verified = subprocess.run(
+                cli + ["verify-evidence-return-record", str(output), *inputs],
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(0, verified.returncode, verified.stderr)
+            self.assertIn("transport observed: false", verified.stdout)
+            self.assertIn("shared promotion eligible: false", verified.stdout)
+            refused = subprocess.run(
+                create,
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(2, refused.returncode)
+            self.assertIn("refusing to overwrite", refused.stderr)
+            oversized_count = subprocess.run(
+                cli
+                + [
+                    "evidence-return-record",
+                    str(root / "missing-plan.json"),
+                    str(root / "missing-portfolio.json"),
+                    "example-product",
+                    str(root / "missing-pack.tar"),
+                    str(root / "missing-qualification-plan.json"),
+                    str(root / "missing-policy.json"),
+                    *(
+                        str(root / "missing-bundle.tar")
+                        for _ in range(portfolio.MAX_FACTORIES + 1)
+                    ),
+                ],
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(2, oversized_count.returncode)
+            self.assertIn("between 2 and 64 bundles", oversized_count.stderr)
+            self.assertNotIn("cannot load", oversized_count.stderr)
+            oversized_record = root / "oversized-record.json"
+            oversized_record.write_bytes(
+                b" " * (evidence_return.MAX_EVIDENCE_RETURN_JSON_BYTES + 1)
+            )
+            oversized_record_result = subprocess.run(
+                cli
+                + [
+                    "verify-evidence-return-record",
+                    str(oversized_record),
+                    *inputs,
+                ],
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(2, oversized_record_result.returncode)
+            self.assertIn("input size is outside", oversized_record_result.stderr)
 
 
 class FactorySourceLockTests(unittest.TestCase):

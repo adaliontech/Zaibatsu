@@ -252,16 +252,17 @@ def validate_factory_portfolio(data: Any) -> list[str]:
 
 def _verified_bundle_map(
     bundle_values: Any,
-) -> tuple[list[str], dict[str, dict[str, Any]]]:
+) -> tuple[list[str], dict[str, dict[str, Any]], dict[str, bytes]]:
     errors: list[str] = []
     verified: dict[str, dict[str, Any]] = {}
+    bundle_bytes: dict[str, bytes] = {}
     if not isinstance(bundle_values, list):
-        return ["factory portfolio bundles must be a list"], {}
+        return ["factory portfolio bundles must be a list"], {}, {}
     if not MIN_FACTORIES <= len(bundle_values) <= MAX_FACTORIES:
         return [
             f"factory portfolio must receive between {MIN_FACTORIES} and "
             f"{MAX_FACTORIES} bundles"
-        ], {}
+        ], {}, {}
     for index, bundle in enumerate(bundle_values):
         if not isinstance(bundle, bytes):
             errors.append(f"factory portfolio bundle {index} must be bytes")
@@ -280,7 +281,8 @@ def _verified_bundle_map(
             errors.append(f"duplicate factory portfolio bundle id: {factory_id}")
             continue
         verified[factory_id] = result
-    return errors, verified
+        bundle_bytes[factory_id] = bundle
+    return errors, verified, bundle_bytes
 
 
 def _bundle_alignment_errors(
@@ -309,6 +311,26 @@ def _bundle_alignment_errors(
         if actual_class != declared[factory_id].get("class"):
             errors.append(f"{factory_id}: bundle class does not match portfolio registry")
     return errors
+
+
+def verified_factory_portfolio_inputs(
+    portfolio: Any,
+    bundle_values: Any,
+) -> tuple[
+    list[str],
+    dict[str, dict[str, Any]],
+    dict[str, bytes],
+]:
+    """Verify a closed registry and return exact bundle results and bytes by ID."""
+    portfolio_errors = validate_factory_portfolio(portfolio)
+    if portfolio_errors or not isinstance(portfolio, dict):
+        return list(portfolio_errors), {}, {}
+    bundle_errors, verified, bundle_bytes = _verified_bundle_map(bundle_values)
+    errors = list(bundle_errors)
+    errors.extend(_bundle_alignment_errors(portfolio, verified))
+    if errors:
+        return errors, {}, {}
+    return [], verified, bundle_bytes
 
 
 def _factory_namespaces(factory_id: str) -> dict[str, str]:
@@ -433,14 +455,13 @@ def factory_portfolio_plan_for_bundles(
     portfolio: Any,
     bundle_values: Any,
 ) -> tuple[list[str], dict[str, Any] | None]:
-    portfolio_errors = validate_factory_portfolio(portfolio)
-    if portfolio_errors or not isinstance(portfolio, dict):
-        return list(portfolio_errors), None
-    bundle_errors, verified = _verified_bundle_map(bundle_values)
-    errors = list(bundle_errors)
-    errors.extend(_bundle_alignment_errors(portfolio, verified))
+    errors, verified, _ = verified_factory_portfolio_inputs(
+        portfolio,
+        bundle_values,
+    )
     if errors:
         return errors, None
+    assert isinstance(portfolio, dict)
     try:
         plan = build_factory_portfolio_plan(portfolio, verified)
     except (KeyError, StopIteration, TypeError, ValueError) as exc:
@@ -458,14 +479,13 @@ def verify_factory_portfolio_plan_for_bundles(
     portfolio: Any,
     bundle_values: Any,
 ) -> list[str]:
-    portfolio_errors = validate_factory_portfolio(portfolio)
-    if portfolio_errors or not isinstance(portfolio, dict):
-        return list(portfolio_errors)
-    bundle_errors, verified = _verified_bundle_map(bundle_values)
-    errors = list(bundle_errors)
-    errors.extend(_bundle_alignment_errors(portfolio, verified))
+    errors, verified, _ = verified_factory_portfolio_inputs(
+        portfolio,
+        bundle_values,
+    )
     if errors:
         return errors
+    assert isinstance(portfolio, dict)
     try:
         expected = build_factory_portfolio_plan(portfolio, verified)
     except (KeyError, StopIteration, TypeError, ValueError) as exc:

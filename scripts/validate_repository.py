@@ -37,6 +37,12 @@ from factory_evidence_pack import (
     runtime_evidence_pack_for_bundle,
     verify_runtime_evidence_pack_for_bundle,
 )
+from factory_evidence_return import (
+    EVIDENCE_RETURN_SCHEMA_REFERENCE,
+    EXAMPLE_EVIDENCE_RETURN_PATH,
+    load_factory_evidence_return,
+    verify_factory_evidence_return_for_inputs,
+)
 from factory_portfolio import (
     EXAMPLE_PORTFOLIO_PATH,
     EXAMPLE_PORTFOLIO_PLAN_PATH,
@@ -147,6 +153,7 @@ REQUIRED_FILES = (
     "examples/economic-factory.runtime-assessment.json",
     "examples/economic-factory.runtime-evidence.json",
     "examples/economic-factory.runtime-evidence-pack-manifest.json",
+    "examples/economic-factory.evidence-return.json",
     "examples/control-factory.json",
     "examples/service-factory.json",
     "examples/factory-portfolio.json",
@@ -174,6 +181,7 @@ REQUIRED_FILES = (
     "schemas/factory-bundle-comparison.schema.json",
     "schemas/factory-bundle-inspection.schema.json",
     "schemas/factory-bundle-manifest.schema.json",
+    "schemas/factory-evidence-return.schema.json",
     "schemas/factory-plan.schema.json",
     "schemas/factory-portfolio.schema.json",
     "schemas/factory-portfolio-plan.schema.json",
@@ -198,6 +206,7 @@ REQUIRED_FILES = (
     "scripts/factory_bundle.py",
     "scripts/factory_composer.py",
     "scripts/factory_evidence_pack.py",
+    "scripts/factory_evidence_return.py",
     "scripts/factory_portfolio.py",
     "scripts/factory_qualification.py",
     "scripts/factory_rebuild.py",
@@ -226,7 +235,7 @@ ARCHITECTURE_SCHEMA_VERSION = "zaibatsu.architecture.v1"
 FACTORY_MODEL_SCHEMA_VERSION = "zaibatsu.factory-model.v1"
 READINESS_SCHEMA_VERSION = "zaibatsu.submission-readiness.v1"
 FACTORY_DEFINITION_SCHEMA_VERSION = "zaibatsu.factory-definition.v2"
-INTEGRATED_TEST_COUNT = 212
+INTEGRATED_TEST_COUNT = 221
 LATEST_VALIDATED_RELEASE_TEST_COUNT = 212
 DROID_FACTORY_CLI_VERSION = "0.206.0"
 DROID_SESSION_REFERENCE = "46f941a9-82f8-4df3-a45c-b8158996360b"
@@ -275,6 +284,9 @@ CONTRACT_SCHEMA_REFERENCES = {
     "examples/service-factory.json": PORTABLE_FACTORY_SCHEMA_REFERENCE,
     "examples/factory-portfolio.json": PORTFOLIO_SCHEMA_REFERENCE,
     "examples/factory-portfolio.plan.json": PORTFOLIO_PLAN_SCHEMA_REFERENCE,
+    "examples/economic-factory.evidence-return.json": (
+        EVIDENCE_RETURN_SCHEMA_REFERENCE
+    ),
     "examples/economic-factory.bundle-manifest.json": BUNDLE_MANIFEST_SCHEMA_REFERENCE,
     "examples/economic-factory.plan.json": FACTORY_PLAN_SCHEMA_REFERENCE,
     "examples/economic-factory.rebuild-plan.json": REBUILD_PLAN_SCHEMA_REFERENCE,
@@ -320,6 +332,9 @@ REMOTE_SCHEMA_LOCAL_PATHS = {
     "examples/factory-portfolio.json": "schemas/factory-portfolio.schema.json",
     "examples/factory-portfolio.plan.json": (
         "schemas/factory-portfolio-plan.schema.json"
+    ),
+    "examples/economic-factory.evidence-return.json": (
+        "schemas/factory-evidence-return.schema.json"
     ),
     "examples/economic-factory.bundle-manifest.json": (
         "schemas/factory-bundle-manifest.schema.json"
@@ -1443,6 +1458,7 @@ def validate_submission_readiness(data: Any) -> list[str]:
                     "examples/service-factory.json",
                     "examples/factory-portfolio.json",
                     "examples/factory-portfolio.plan.json",
+                    "examples/economic-factory.evidence-return.json",
                     "policies/runtime-evidence-verifiers-v1.json",
                     "policies/runtime-qualification-v1.json",
                 }
@@ -1861,7 +1877,9 @@ def validate_contract_schema_files(root: Path = ROOT) -> list[str]:
         if schema.get("$schema") != "https://json-schema.org/draft/2020-12/schema":
             errors.append(f"{relative}: project-owned schema must declare JSON Schema 2020-12")
         schema_release = (
-            "v1.11.0"
+            "v1.12.0"
+            if schema_path.name == "factory-evidence-return.schema.json"
+            else "v1.11.0"
             if schema_path.name
             in {
                 "factory-portfolio.schema.json",
@@ -1972,6 +1990,7 @@ def main() -> int:
     portfolio_document: Any = None
     portfolio_plan_document: Any = None
     portfolio_bundles: list[bytes] = []
+    evidence_return_document: Any = None
     source_lock_document: Any = None
     qualification_bundle: bytes | None = None
     verified_qualification_bundle: Any = None
@@ -2280,6 +2299,33 @@ def main() -> int:
                         for error in pack_verify_errors
                     )
     try:
+        evidence_return_document = load_factory_evidence_return(
+            EXAMPLE_EVIDENCE_RETURN_PATH
+        )
+    except (OSError, RecursionError, ValueError) as exc:
+        errors.append(f"cannot load example factory evidence-return record: {exc}")
+    else:
+        if (
+            isinstance(portfolio_document, dict)
+            and isinstance(portfolio_plan_document, dict)
+            and len(portfolio_bundles) == len(PORTFOLIO_FACTORY_PATHS)
+            and runtime_evidence_pack is not None
+            and isinstance(qualification_plan, dict)
+            and isinstance(qualification_policy, dict)
+        ):
+            errors.extend(
+                verify_factory_evidence_return_for_inputs(
+                    evidence_return_document,
+                    portfolio_plan_document,
+                    portfolio_document,
+                    portfolio_bundles,
+                    "example-product",
+                    runtime_evidence_pack,
+                    qualification_plan,
+                    qualification_policy,
+                )
+            )
+    try:
         runtime_assessment = load_runtime_assessment(
             EXAMPLE_RUNTIME_ASSESSMENT_PATH
         )
@@ -2359,7 +2405,8 @@ def main() -> int:
     print(
         "- 3-factory portfolio plus scheduler variant, content-addressed modules, "
         "control and portfolio plans, bundle manifest, source lock, signed "
-        "runtime-evidence pack, and non-executing rebuild DAG checked"
+        "runtime-evidence pack, route-bound evidence return, and non-executing "
+        "rebuild DAG checked"
     )
     print(f"- {len(EVIDENCE_CONTRACTS)} evidence receipts checked")
     print(f"- {len(REQUIRED_FACTORY_INVARIANTS)} meta-factory invariants checked")

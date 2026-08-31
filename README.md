@@ -112,11 +112,12 @@ The target stack is intentionally boring at authority boundaries:
 | PostgreSQL | Durable jobs, leases, attempts, policy, evidence, and audit | Validated preproduction broadly; a narrow read-only lane is operational |
 | Modular agent skeletons | Reusable typed modules, flows, profiles, approvals, and effect fences | Implemented and tested source; not deployed |
 | LLM harness adapters | Bind different models behind typed module contracts | Validated at bounded source/contribution scope; general unattended routing is not active |
-| Recursive improvement | Return evidence and improve shared factory patterns | Evidence return is bounded and operational; shared automatic promotion remains designed and owner-gated |
+| Recursive improvement | Return evidence and improve shared factory patterns | Route-bound evidence-return recording is operational in the public kit; transport, classification, and shared automatic promotion remain unproved or designed and owner-gated |
 | Multi-factory portfolio plan | Join verified control bundles into one closed registry with evidence-only return routes and factory-scoped intended namespaces | Implemented and tested as a non-executing control plan; it proves bundle identity and declarative separation, not deployed runtime isolation or authority |
 | Qualification planner | Bind a verified control bundle to mandatory runtime evidence requirements | Implemented and tested; the public plan contains no qualification evidence and grants no eligibility or activation |
 | Signed runtime-evidence assessment | Combine bundle-derived contract receipts with fresh, allowlisted OpenSSH-signed verifier assertions | The public fixture verifies one signature in test-only scope: 10 of 67 bindings verified, 57 missing, zero runtime-eligible modules, and no activation or execution authority |
 | Canonical runtime-evidence pack | Carry the signed evidence, verifier registry, exact evidence artifacts, verifier descriptors, and manifest schema as one reproducible archive | Implemented and tested; byte and digest integrity are verified, but verifier assertions are not rerun and artifact truth is not inferred |
+| Route-bound factory evidence return | Bind one verified pack to its exact economic-factory bundle and declared evidence-only route into the control factory | Implemented and tested as a non-authorizing record; transport, content safety, classification, promotion, activation, execution, and cross-factory effects remain false |
 | Annotated-release source lock | Bind one verified control bundle to exact versioned source inputs | Sixteen Git blobs from immutable v1.6.0 rebuild the byte-identical bundle; no remote, signature, runtime-source, qualification, eligibility, or activation proof is claimed |
 | Deterministic rebuild DAG | Join verified control provenance, module dependencies, qualification gaps, and activation gates | Implemented and tested as an inert nine-action plan; zero actions are qualification-ready, all nine remain blocked, and no execution or effect authority is granted |
 
@@ -185,7 +186,8 @@ portable factory example, content-addressed module artifacts, resolved control
 plan, portable bundle manifest, closed multi-factory portfolio plan,
 annotated-release source lock, qualification
 policy and plan, bundle-derived evidence, signed runtime evidence, runtime
-assessment, deterministic rebuild DAG, sanitized receipts, factory hierarchy
+assessment, route-bound evidence-return record, deterministic rebuild DAG,
+sanitized receipts, factory hierarchy
 and lifecycle, maturity boundaries, submission gates, public-safety rules,
 local links, and adversarial mutations. No model request, network access, cloud
 account, secret, Ansible or Nix execution, or production system is required.
@@ -466,6 +468,48 @@ Binary artifacts or executable verifier implementations need a future typed
 format; this release embeds JSON evidence and verifier descriptors, not code it
 can execute.
 
+## Bind returned evidence to its factory route
+
+After building the three bundles, portfolio plan, and runtime-evidence pack
+above, derive the exact non-authorizing record for the product factory's
+declared route into the control factory:
+
+```bash
+python3 scripts/zaibatsu.py evidence-return-record \
+  /tmp/example-portfolio.plan.json \
+  examples/factory-portfolio.json \
+  example-product \
+  /tmp/example-product.runtime-evidence.tar \
+  examples/economic-factory.qualification-plan.json \
+  policies/runtime-qualification-v1.json \
+  /tmp/example-control.factory.tar \
+  /tmp/example-product.factory.tar \
+  /tmp/example-service.factory.tar \
+  --output /tmp/example-product.evidence-return.json
+python3 scripts/zaibatsu.py verify-evidence-return-record \
+  /tmp/example-product.evidence-return.json \
+  /tmp/example-portfolio.plan.json \
+  examples/factory-portfolio.json \
+  example-product \
+  /tmp/example-product.runtime-evidence.tar \
+  examples/economic-factory.qualification-plan.json \
+  policies/runtime-qualification-v1.json \
+  /tmp/example-control.factory.tar \
+  /tmp/example-product.factory.tar \
+  /tmp/example-service.factory.tar
+```
+
+The checked [evidence-return record](examples/economic-factory.evidence-return.json)
+reverifies the closed portfolio, every bundle, the source factory and route,
+the evidence pack, its embedded materials, signatures, allowlists, and content
+digests. It then binds those exact identities into one canonical digest.
+
+This is evidence provenance and routing intent, not transport telemetry or an
+improvement decision. The record explicitly says it did not observe delivery,
+scan content safety, prove secret absence, rerun verifier assertions, establish
+artifact truth, classify an improvement, make it promotion-eligible, authorize
+activation or execution, or grant any cross-factory effect.
+
 ## Plan the factory rebuild
 
 Compile the verified control and qualification state into an ordered,
@@ -562,6 +606,10 @@ and the complete repository suite was rerun independently.
   exact public keys, allowlists, provenance, freshness, embedded artifact and
   verifier-material digests, remaining gaps, and an explicitly fixture-only
   non-authorizing signature example.
+- [Route-bound evidence-return record](examples/economic-factory.evidence-return.json)
+  — the exact verified pack, source bundle, portfolio, and evidence-only route,
+  with transport, classification, promotion, activation, execution, and
+  cross-factory effects explicitly denied.
 - [Factory rebuild plan](examples/economic-factory.rebuild-plan.json) — the
   exact nine-action dependency graph, evidence blockers, and four
   non-authorizing gates derived from fully reverified control inputs.
@@ -612,13 +660,16 @@ and the complete repository suite was rerun independently.
     it does not prove remote ownership, signature trust, or runtime source.
 15. A signature authenticates an assertion; it does not prove key ownership,
     organizational independence, verifier correctness, or artifact truth.
-16. A rebuild plan reports intended actions and blockers; it executes no action
+16. A route-bound evidence-return record proves exact provenance and declared
+    routing intent; it proves no transport, content safety, classification,
+    promotion, activation, execution, or cross-factory effect.
+17. A rebuild plan reports intended actions and blockers; it executes no action
     and grants no qualification, approval, activation, deployment, or recovery
     authority.
-17. Tests, schemas, linters, hashes, policy, receipts, and owner approval
+18. Tests, schemas, linters, hashes, policy, receipts, and owner approval
     outrank model confidence.
-18. Feedback may propose shared improvement but cannot self-promote.
-19. Failed work remains inspectable, and the owner retains a recovery path
+19. Feedback may propose shared improvement but cannot self-promote.
+20. Failed work remains inspectable, and the owner retains a recovery path
     outside Dispatcher.
 
 ## Factory Guild submission
@@ -679,7 +730,9 @@ over evidence roof `b5d2b15911a34148df18bd49f94a3ced08e52ac9`;
 a credential-disabled full-history tag clone, two live-schema byte checks,
 exact portfolio regeneration, both Gitleaks modes, and strict external schema
 validation passed. GitHub reports v1.11.0 immutable, latest, non-draft, and
-non-prerelease.
+non-prerelease. The v1.12 route-bound evidence-return working candidate passes
+221 local tests and 100-file validation. Public-clone, CI, tagged-schema, and
+immutable-release proofs are not yet claimed.
 
 Zaibatsu is an independent project and is not affiliated with or endorsed by
 Factory AI.

@@ -113,6 +113,11 @@ The validator confirms:
     gate order, dependencies, blockers, and digests; and grants no execution,
     qualification, owner approval, activation, deployment, or recovery
     authority.
+35. the route-bound evidence-return record fully reverifies the portfolio,
+    bundles, source route, qualification inputs, runtime-evidence pack,
+    signatures, allowlists, and digests; source/route replay, forgery, scalar
+    confusion, oversize input, and every transport, interpretation, promotion,
+    activation, execution, or cross-factory authority inflation fail closed.
 
 The adversarial tests mutate valid architecture data and prove that the
 validator rejects meta-factory role drift, a missing or reclassified factory,
@@ -204,6 +209,28 @@ python3 scripts/zaibatsu.py evidence-pack \
 python3 scripts/zaibatsu.py verify-evidence-pack \
   /tmp/example-product.runtime-evidence.tar \
   /tmp/example-product.factory.tar
+python3 scripts/zaibatsu.py evidence-return-record \
+  /tmp/example-portfolio.plan.json \
+  examples/factory-portfolio.json \
+  example-product \
+  /tmp/example-product.runtime-evidence.tar \
+  examples/economic-factory.qualification-plan.json \
+  policies/runtime-qualification-v1.json \
+  /tmp/example-control.factory.tar \
+  /tmp/example-product.factory.tar \
+  /tmp/example-service.factory.tar \
+  --output /tmp/example-product.evidence-return.json
+python3 scripts/zaibatsu.py verify-evidence-return-record \
+  /tmp/example-product.evidence-return.json \
+  /tmp/example-portfolio.plan.json \
+  examples/factory-portfolio.json \
+  example-product \
+  /tmp/example-product.runtime-evidence.tar \
+  examples/economic-factory.qualification-plan.json \
+  policies/runtime-qualification-v1.json \
+  /tmp/example-control.factory.tar \
+  /tmp/example-product.factory.tar \
+  /tmp/example-service.factory.tar
 python3 scripts/zaibatsu.py runtime-assessment \
   /tmp/example-product.runtime-evidence.tar \
   examples/economic-factory.qualification-evidence.json \
@@ -279,6 +306,13 @@ that payload. It does not rerun the verifier, infer the artifact's semantic
 truth, authenticate the key owner, or establish organizational independence.
 Registry selection and the assessment clock are explicit trust inputs that a
 production caller must separately review and pin.
+
+The evidence-return record then binds that exact verified pack to the product
+bundle's single declared evidence-only route in the rebuilt portfolio plan.
+It does not claim that transport happened, inspect the content for secrets or
+safety, rerun the verifier, classify an improvement, modify shared policy, make
+a change promotion-eligible, or authorize activation, execution, or any
+cross-factory effect.
 
 The rebuild plan consumes those fully reverified inputs and emits an inert
 nine-action dependency graph plus four gates. The public result has zero

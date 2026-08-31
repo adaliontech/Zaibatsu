@@ -45,7 +45,9 @@ three-bundle plan regeneration, both Gitleaks modes, seven strict schemas, and
 independent CI. Its immutable release and full-history tag clone passed
 roof/tag CI, two live-schema byte checks, exact plan regeneration, strict
 external validation, and both Gitleaks modes. The final demo and applicant
-materials remain explicit gates in
+materials remain explicit gates. The v1.12 route-bound evidence-return working
+candidate passes 221 local tests and 100-file validation; public clone, CI,
+release, and tagged-schema proofs are not yet claimed. The gates remain in
 [`architecture/submission-readiness.json`](../architecture/submission-readiness.json).
 
 ## Current project description
@@ -83,6 +85,11 @@ nine dependency-ordered action intents and four separate gates. In the public
 example all nine actions remain blocked by 57 missing evidence bindings; the
 plan executes nothing and grants no qualification, owner approval, activation,
 deployment, or recovery authority.
+The route-bound evidence-return record joins the exact verified pack to the
+product factory's declared evidence-only route in the closed portfolio. It
+does not claim observed transport, content safety, secret absence, verifier
+reexecution, artifact truth, improvement classification, promotion
+eligibility, activation, execution, or cross-factory effects.
 
 The core repository works without a model or Droid credentials. For the Guild
 case study, authenticated Factory Droid used an owner-operated GGUF whose
@@ -104,8 +111,8 @@ new test moves `policy_decision` before `verify`; the pre-change validator
 accepted that unsafe ordering, while the shipped validator rejects it with a
 deterministic adjacent-stage error. Droid reported 36 passing tests, and an
 independent run reproduced all 36 before later integration, branding, release,
-and meta-factory checks brought the current package to 212 passing tests. No model or
-Factory credential is published.
+and meta-factory checks brought the current package to 221 passing tests. No
+model or Factory credential is published.
 
 ## One-line description
 
@@ -277,6 +284,13 @@ the public repository:
       non-authorizing assertions, and independent CI.
 - [x] Immutable v1.11.0 passes evidence-roof and tag CI, two tagged-schema
       byte checks, tag-clone reproduction, and immutable-release proof.
+- [x] Route-bound evidence-return v1.12 working candidate passes 221 local
+      tests, 100-file validation, strict schema controls, exact regeneration,
+      and replay/forgery/type/size/authority adversarial tests.
+- [ ] v1.12 candidate passes credential-disabled full-history clone, both
+      Gitleaks modes, eight strict schemas, and independent CI.
+- [ ] Immutable v1.12.0 passes evidence-roof and tag CI, tagged-schema byte
+      check, tag-clone reproduction, and immutable-release proof.
 - [x] Public repository and article links resolve without authentication.
 - [ ] Demo clip or screenshots show a real Factory task and validation result.
 - [x] No private host, credential, recovery, or deployment detail is exposed.

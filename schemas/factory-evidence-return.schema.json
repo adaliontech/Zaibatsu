@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.12.0/schemas/factory-evidence-return.schema.json",
+  "title": "Zaibatsu route-bound factory evidence-return record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_schema", "schema_version", "portfolio", "route", "factory", "evidence", "review_boundary", "factory_evidence_return_sha256"],
+  "properties": {
+    "contract_schema": {"const": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.12.0/schemas/factory-evidence-return.schema.json"},
+    "schema_version": {"const": "zaibatsu.factory-evidence-return.v1"},
+    "portfolio": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "factory_portfolio_plan_sha256", "portfolio_definition_sha256", "factory_bundle_set_sha256"],
+      "properties": {
+        "id": {"$ref": "#/$defs/id"},
+        "factory_portfolio_plan_sha256": {"$ref": "#/$defs/sha256"},
+        "portfolio_definition_sha256": {"$ref": "#/$defs/sha256"},
+        "factory_bundle_set_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "route": {"$ref": "#/$defs/route"},
+    "factory": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "class", "bundle_sha256"],
+      "properties": {
+        "id": {"$ref": "#/$defs/id"},
+        "class": {"const": "economic_factory"},
+        "bundle_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "runtime_evidence_pack_sha256", "runtime_evidence_pack_manifest_sha256", "runtime_evidence_set_sha256", "verifier_registry_sha256", "qualification_plan_sha256", "qualification_policy_sha256", "qualification_scope", "signed_receipt_count"],
+      "properties": {
+        "kind": {"const": "runtime_evidence_pack"},
+        "runtime_evidence_pack_sha256": {"$ref": "#/$defs/sha256"},
+        "runtime_evidence_pack_manifest_sha256": {"$ref": "#/$defs/sha256"},
+        "runtime_evidence_set_sha256": {"$ref": "#/$defs/sha256"},
+        "verifier_registry_sha256": {"$ref": "#/$defs/sha256"},
+        "qualification_plan_sha256": {"$ref": "#/$defs/sha256"},
+        "qualification_policy_sha256": {"$ref": "#/$defs/sha256"},
+        "qualification_scope": {"$ref": "#/$defs/name"},
+        "signed_receipt_count": {"type": "integer", "minimum": 1, "maximum": 256}
+      }
+    },
+    "review_boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["portfolio_plan_verified", "route_binding_verified", "source_bundle_verified", "runtime_evidence_pack_verified", "evidence_only_route_declared", "signatures_and_bindings_reverified", "artifact_digests_verified", "transport_observed", "content_safety_scanned", "secret_absence_proved", "verifier_assertions_reexecuted", "artifact_semantic_truth_verified", "contains_improvement_candidate", "classification_performed", "changes_shared_policy", "shared_promotion_eligible", "promotion_authorized", "activation_authorized", "execution_authorized", "cross_factory_effects_authorized"],
+      "properties": {
+        "portfolio_plan_verified": {"const": true},
+        "route_binding_verified": {"const": true},
+        "source_bundle_verified": {"const": true},
+        "runtime_evidence_pack_verified": {"const": true},
+        "evidence_only_route_declared": {"const": true},
+        "signatures_and_bindings_reverified": {"const": true},
+        "artifact_digests_verified": {"const": true},
+        "transport_observed": {"const": false},
+        "content_safety_scanned": {"const": false},
+        "secret_absence_proved": {"const": false},
+        "verifier_assertions_reexecuted": {"const": false},
+        "artifact_semantic_truth_verified": {"const": false},
+        "contains_improvement_candidate": {"const": false},
+        "classification_performed": {"const": false},
+        "changes_shared_policy": {"const": false},
+        "shared_promotion_eligible": {"const": false},
+        "promotion_authorized": {"const": false},
+        "activation_authorized": {"const": false},
+        "execution_authorized": {"const": false},
+        "cross_factory_effects_authorized": {"const": false}
+      }
+    },
+    "factory_evidence_return_sha256": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "id": {"type": "string", "minLength": 1, "maxLength": 64, "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+    "name": {"type": "string", "minLength": 1, "maxLength": 64, "pattern": "^[a-z0-9]+(?:[_-][a-z0-9]+)*$"},
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "route": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["position", "from_factory", "to_factory", "kind", "payload_scope", "grants_authority", "can_self_promote", "from_bundle_sha256", "to_bundle_sha256"],
+      "properties": {
+        "position": {"type": "integer", "minimum": 0, "maximum": 62},
+        "from_factory": {"$ref": "#/$defs/id"},
+        "to_factory": {"$ref": "#/$defs/id"},
+        "kind": {"const": "evidence_return"},
+        "payload_scope": {"const": "evidence_only"},
+        "grants_authority": {"const": false},
+        "can_self_promote": {"const": false},
+        "from_bundle_sha256": {"$ref": "#/$defs/sha256"},
+        "to_bundle_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    }
+  }
+}

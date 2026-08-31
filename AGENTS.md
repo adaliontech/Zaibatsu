@@ -14,6 +14,8 @@
 - Module-change comparison: build the cron example, then run `python3 scripts/zaibatsu.py compare-bundles /tmp/example-product.factory.tar /tmp/example-product-cron.factory.tar`
 - Multi-factory portfolio: build `examples/control-factory.json`, `examples/economic-factory.json`, and `examples/service-factory.json`, then run `python3 scripts/zaibatsu.py portfolio-plan examples/factory-portfolio.json /tmp/example-control.factory.tar /tmp/example-product.factory.tar /tmp/example-service.factory.tar --output /tmp/example-portfolio.plan.json`
 - Portfolio proof: `python3 scripts/zaibatsu.py verify-portfolio-plan /tmp/example-portfolio.plan.json examples/factory-portfolio.json /tmp/example-control.factory.tar /tmp/example-product.factory.tar /tmp/example-service.factory.tar`
+- Route-bound evidence return: `python3 scripts/zaibatsu.py evidence-return-record /tmp/example-portfolio.plan.json examples/factory-portfolio.json example-product /tmp/example-product.runtime-evidence.tar examples/economic-factory.qualification-plan.json policies/runtime-qualification-v1.json /tmp/example-control.factory.tar /tmp/example-product.factory.tar /tmp/example-service.factory.tar --output /tmp/example-product.evidence-return.json`
+- Evidence-return proof: `python3 scripts/zaibatsu.py verify-evidence-return-record /tmp/example-product.evidence-return.json /tmp/example-portfolio.plan.json examples/factory-portfolio.json example-product /tmp/example-product.runtime-evidence.tar examples/economic-factory.qualification-plan.json policies/runtime-qualification-v1.json /tmp/example-control.factory.tar /tmp/example-product.factory.tar /tmp/example-service.factory.tar`
 - Annotated-release source lock: `python3 scripts/zaibatsu.py source-lock examples/economic-factory.json /tmp/example-product.factory.tar --release-tag v1.6.0 --output /tmp/example-product.source-lock.json`
 - Source-lock proof: `python3 scripts/zaibatsu.py verify-source-lock /tmp/example-product.source-lock.json /tmp/example-product.factory.tar`
 - Qualification requirements: `python3 scripts/zaibatsu.py qualification-plan /tmp/example-product.factory.tar --output /tmp/example-product.qualification-plan.json`
@@ -93,6 +95,11 @@ credentials, or bootstrap procedures.
   and evidence-only routes. It does not prove runtime isolation, carry
   evidence, route secrets, grant cross-factory authority, activate a factory,
   or execute or deploy anything.
+- Treat a factory evidence-return record only as proof that one verified pack
+  is bound to one declared economic-factory route. It does not prove transport,
+  content safety, secret absence, verifier reexecution, artifact truth,
+  classification, improvement value, promotion eligibility or authorization,
+  activation, execution, or cross-factory effects.
 - Treat every tracked or non-ignored path as public. Opaque files, symlinks,
   and Git submodules are outside the scanner's inspectable boundary and must
   fail closed.

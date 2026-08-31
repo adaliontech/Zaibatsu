@@ -38,12 +38,16 @@ changes.
   presenting retrieved bytes as verifier reexecution or artifact truth;
 - preserve the reproduced immutable `v1.11.0` closed factory-portfolio plan
   without presenting intended namespaces as deployed runtime isolation;
+- release the route-bound evidence-return record without presenting byte and
+  route integrity as observed transport, safe content, classification,
+  promotion, activation, execution, or cross-factory authority;
 - record the Guild demo and complete applicant-owned submission materials.
 
 Exit: the public narrative, architecture, portable factory, module artifacts,
-control plan, bundle, source lock, qualification plan, partial assessment,
-signed runtime assessment, rebuild plan, readiness, and evidence contracts describe the same meta-factory
-without inflating source-only or planned capabilities.
+control plan, bundle, portfolio, source lock, qualification plan, partial
+assessment, signed runtime assessment, route-bound evidence return, rebuild
+plan, readiness, and evidence contracts describe the same meta-factory without
+inflating source-only or planned capabilities.
 
 ## Phase 1 — Factory identity and versioning
 
@@ -201,6 +205,8 @@ authority grant or hard dependency.
 
 ## Phase 7 — Recursive improvement
 
+- preserve the bounded public foundation that binds one verified evidence pack
+  to one declared source-factory route without transporting or interpreting it;
 - normalize observations, failures, artifact outcomes, and owner corrections;
 - classify improvement candidates without granting mutation authority;
 - bind a proposed shared module/template/gate change to its source evidence;

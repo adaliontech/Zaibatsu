@@ -24,6 +24,11 @@ from factory_evidence_pack import (
     runtime_evidence_pack_for_bundle,
     verify_runtime_evidence_pack_for_bundle,
 )
+from factory_evidence_return import (
+    MAX_EVIDENCE_RETURN_JSON_BYTES,
+    factory_evidence_return_for_inputs,
+    verify_factory_evidence_return_for_inputs,
+)
 from factory_portfolio import (
     MAX_FACTORIES,
     MAX_PORTFOLIO_BYTES,
@@ -499,6 +504,167 @@ def command_verify_portfolio_plan(
     print("runtime isolation proved: false")
     print("cross-factory authority granted: false")
     print("operations executed: false")
+    return 0
+
+
+def load_evidence_return_inputs(
+    plan_path: str,
+    portfolio_path: str,
+    runtime_evidence_pack_path: str,
+    qualification_plan_path: str,
+    qualification_policy_path: str,
+    bundle_paths: list[str],
+) -> tuple[Any, Any, bytes, Any, Any, list[bytes]] | None:
+    if not valid_portfolio_bundle_count(bundle_paths):
+        return None
+    plan = load_bounded_json_document(
+        plan_path,
+        "factory portfolio plan",
+        MAX_PORTFOLIO_PLAN_BYTES,
+    )
+    portfolio = load_bounded_json_document(
+        portfolio_path,
+        "factory portfolio",
+        MAX_PORTFOLIO_BYTES,
+    )
+    qualification_plan = load_bounded_json_document(
+        qualification_plan_path,
+        "qualification plan",
+        MAX_EVIDENCE_RETURN_JSON_BYTES,
+    )
+    qualification_policy = load_bounded_json_document(
+        qualification_policy_path,
+        "qualification policy",
+        MAX_EVIDENCE_RETURN_JSON_BYTES,
+    )
+    runtime_evidence_pack = load_bounded_binary(
+        runtime_evidence_pack_path,
+        "runtime-evidence pack",
+        MAX_PACK_BYTES,
+    )
+    if any(
+        value is None
+        for value in (
+            plan,
+            portfolio,
+            qualification_plan,
+            qualification_policy,
+            runtime_evidence_pack,
+        )
+    ):
+        return None
+    bundles = load_portfolio_bundles(bundle_paths)
+    if bundles is None:
+        return None
+    assert isinstance(runtime_evidence_pack, bytes)
+    return (
+        plan,
+        portfolio,
+        runtime_evidence_pack,
+        qualification_plan,
+        qualification_policy,
+        bundles,
+    )
+
+
+def command_evidence_return_record(
+    plan_path: str,
+    portfolio_path: str,
+    source_factory_id: str,
+    runtime_evidence_pack_path: str,
+    qualification_plan_path: str,
+    qualification_policy_path: str,
+    bundle_paths: list[str],
+    output: str | None,
+) -> int:
+    inputs = load_evidence_return_inputs(
+        plan_path,
+        portfolio_path,
+        runtime_evidence_pack_path,
+        qualification_plan_path,
+        qualification_policy_path,
+        bundle_paths,
+    )
+    if inputs is None:
+        return 2
+    plan, portfolio, pack, qualification_plan, qualification_policy, bundles = (
+        inputs
+    )
+    errors, record = factory_evidence_return_for_inputs(
+        plan,
+        portfolio,
+        bundles,
+        source_factory_id,
+        pack,
+        qualification_plan,
+        qualification_policy,
+    )
+    if errors or record is None:
+        print("cannot build factory evidence-return record", file=sys.stderr)
+        for error in errors:
+            print(f"- {error}", file=sys.stderr)
+        return 1
+    return write_document(record, output)
+
+
+def command_verify_evidence_return_record(
+    record_path: str,
+    plan_path: str,
+    portfolio_path: str,
+    source_factory_id: str,
+    runtime_evidence_pack_path: str,
+    qualification_plan_path: str,
+    qualification_policy_path: str,
+    bundle_paths: list[str],
+) -> int:
+    if not valid_portfolio_bundle_count(bundle_paths):
+        return 2
+    record = load_bounded_json_document(
+        record_path,
+        "factory evidence-return record",
+        MAX_EVIDENCE_RETURN_JSON_BYTES,
+    )
+    if record is None:
+        return 2
+    inputs = load_evidence_return_inputs(
+        plan_path,
+        portfolio_path,
+        runtime_evidence_pack_path,
+        qualification_plan_path,
+        qualification_policy_path,
+        bundle_paths,
+    )
+    if inputs is None:
+        return 2
+    plan, portfolio, pack, qualification_plan, qualification_policy, bundles = (
+        inputs
+    )
+    errors = verify_factory_evidence_return_for_inputs(
+        record,
+        plan,
+        portfolio,
+        bundles,
+        source_factory_id,
+        pack,
+        qualification_plan,
+        qualification_policy,
+    )
+    if errors:
+        print(f"factory evidence-return record failed: {record_path}", file=sys.stderr)
+        for error in errors:
+            print(f"- {error}", file=sys.stderr)
+        return 1
+    assert isinstance(record, dict)
+    print(f"factory evidence-return record passed: {record_path}")
+    print(
+        "factory evidence-return sha256: "
+        f"{record['factory_evidence_return_sha256']}"
+    )
+    print(f"source factory: {record['factory']['id']}")
+    print(f"destination factory: {record['route']['to_factory']}")
+    print("transport observed: false")
+    print("shared promotion eligible: false")
+    print("cross-factory effects authorized: false")
     return 0
 
 
@@ -1336,6 +1502,35 @@ def build_parser() -> argparse.ArgumentParser:
     verify_portfolio_plan.add_argument("portfolio_path")
     verify_portfolio_plan.add_argument("bundle_paths", nargs="+")
 
+    evidence_return_record = commands.add_parser(
+        "evidence-return-record",
+        help="bind a verified evidence pack to one declared portfolio route",
+    )
+    evidence_return_record.add_argument("plan_path")
+    evidence_return_record.add_argument("portfolio_path")
+    evidence_return_record.add_argument("source_factory_id")
+    evidence_return_record.add_argument("runtime_evidence_pack_path")
+    evidence_return_record.add_argument("qualification_plan_path")
+    evidence_return_record.add_argument("qualification_policy_path")
+    evidence_return_record.add_argument("bundle_paths", nargs="+")
+    evidence_return_record.add_argument(
+        "--output",
+        help="write the evidence-return record to a new file instead of stdout",
+    )
+
+    verify_evidence_return_record = commands.add_parser(
+        "verify-evidence-return-record",
+        help="verify a route-bound evidence-return record against every input",
+    )
+    verify_evidence_return_record.add_argument("record_path")
+    verify_evidence_return_record.add_argument("plan_path")
+    verify_evidence_return_record.add_argument("portfolio_path")
+    verify_evidence_return_record.add_argument("source_factory_id")
+    verify_evidence_return_record.add_argument("runtime_evidence_pack_path")
+    verify_evidence_return_record.add_argument("qualification_plan_path")
+    verify_evidence_return_record.add_argument("qualification_policy_path")
+    verify_evidence_return_record.add_argument("bundle_paths", nargs="+")
+
     source_lock = commands.add_parser(
         "source-lock",
         help="lock a verified bundle to exact sources in an annotated release",
@@ -1706,6 +1901,28 @@ def main() -> int:
         return command_verify_portfolio_plan(
             arguments.plan_path,
             arguments.portfolio_path,
+            arguments.bundle_paths,
+        )
+    if arguments.command == "evidence-return-record":
+        return command_evidence_return_record(
+            arguments.plan_path,
+            arguments.portfolio_path,
+            arguments.source_factory_id,
+            arguments.runtime_evidence_pack_path,
+            arguments.qualification_plan_path,
+            arguments.qualification_policy_path,
+            arguments.bundle_paths,
+            arguments.output,
+        )
+    if arguments.command == "verify-evidence-return-record":
+        return command_verify_evidence_return_record(
+            arguments.record_path,
+            arguments.plan_path,
+            arguments.portfolio_path,
+            arguments.source_factory_id,
+            arguments.runtime_evidence_pack_path,
+            arguments.qualification_plan_path,
+            arguments.qualification_policy_path,
             arguments.bundle_paths,
         )
     if arguments.command == "source-lock":

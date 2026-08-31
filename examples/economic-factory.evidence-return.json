@@ -1,0 +1,60 @@
+{
+  "contract_schema": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.12.0/schemas/factory-evidence-return.schema.json",
+  "schema_version": "zaibatsu.factory-evidence-return.v1",
+  "portfolio": {
+    "id": "example-software-factories",
+    "factory_portfolio_plan_sha256": "dc4303fb1fc8a013d3d5f3e91f29fb4935baa3b42f503c0595abbd7ae7fbbcbb",
+    "portfolio_definition_sha256": "c993c7ecd677898d944b6abb430ca22d39e9cc48dc67f9ab8c528381ae910d8a",
+    "factory_bundle_set_sha256": "729341fdb5f2d4c032c73a86551abbb4eec7432518e360f44c8557d710644231"
+  },
+  "route": {
+    "position": 0,
+    "from_factory": "example-product",
+    "to_factory": "example-control",
+    "kind": "evidence_return",
+    "payload_scope": "evidence_only",
+    "grants_authority": false,
+    "can_self_promote": false,
+    "from_bundle_sha256": "d4918fd16f55b907a0b2b9734422d7106d3030a511e5cae5d6efc1cb7b253aba",
+    "to_bundle_sha256": "9b777fa3874485672a30b2a5f7e6db6e2895dfbd228767aded85898216c7db3c"
+  },
+  "factory": {
+    "id": "example-product",
+    "class": "economic_factory",
+    "bundle_sha256": "d4918fd16f55b907a0b2b9734422d7106d3030a511e5cae5d6efc1cb7b253aba"
+  },
+  "evidence": {
+    "kind": "runtime_evidence_pack",
+    "runtime_evidence_pack_sha256": "92357de9906842bdfaa14d2056173f24113f686e108d74ce44e7685d4b344759",
+    "runtime_evidence_pack_manifest_sha256": "46e1d909b2ed57d07688ed45306d88d13404552f7d4cb179827572277fb49f1b",
+    "runtime_evidence_set_sha256": "d084a11b7cda2ec8615f583a07ba6b219913249e35cd6d54c0dea191809eba77",
+    "verifier_registry_sha256": "9196fd8a8afbb161bdc8f5d2fad1a28bef467ff6786c3f732d2d4c187079bff6",
+    "qualification_plan_sha256": "a9419341bf0806e1a6fc3769354e46ac6eb1c29043042ddd7eec35cca1a8ff81",
+    "qualification_policy_sha256": "4fd359cc6dfe3eb3b555eb26a3453939fde34efd8d65a281a81dd34041468e9a",
+    "qualification_scope": "public_test_fixture",
+    "signed_receipt_count": 1
+  },
+  "review_boundary": {
+    "portfolio_plan_verified": true,
+    "route_binding_verified": true,
+    "source_bundle_verified": true,
+    "runtime_evidence_pack_verified": true,
+    "evidence_only_route_declared": true,
+    "signatures_and_bindings_reverified": true,
+    "artifact_digests_verified": true,
+    "transport_observed": false,
+    "content_safety_scanned": false,
+    "secret_absence_proved": false,
+    "verifier_assertions_reexecuted": false,
+    "artifact_semantic_truth_verified": false,
+    "contains_improvement_candidate": false,
+    "classification_performed": false,
+    "changes_shared_policy": false,
+    "shared_promotion_eligible": false,
+    "promotion_authorized": false,
+    "activation_authorized": false,
+    "execution_authorized": false,
+    "cross_factory_effects_authorized": false
+  },
+  "factory_evidence_return_sha256": "ac1765b07d96ffbcead1dd4270919833dae790359f7fe248b9f04f16d630c3ec"
+}
