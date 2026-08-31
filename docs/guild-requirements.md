@@ -126,3 +126,10 @@ classification regeneration, explicit planning-only output, and independent
 CI. Its evidence roof, annotated immutable release, roof/tag CI, four
 live-schema byte checks, and full-history tag-clone reproduction also passed.
 The final clip and applicant-owned form submission remain external.
+
+The v1.15 evidence-bound candidate-contract candidate passed 247 tests,
+120-file validation, a credential-disabled full-history clone, both Gitleaks
+modes, sixteen strict schemas, exact candidate regeneration, explicit
+contract-only output, and independent CI. Its evidence roof and immutable
+release are the remaining release steps; the final clip and applicant-owned
+form submission remain external.

@@ -1001,6 +1001,17 @@ artifact regeneration, both Gitleaks modes, and four live tagged-schema byte
 checks passed. GitHub reports v1.14.0 immutable, latest, non-draft, and
 non-prerelease.
 
+The v1.15 evidence-bound candidate-contract candidate at
+`3ecb7461c817c50e4d9a78ee7d88722fd2561ccc` passed 247 tests, 120-file
+validation, strict Git, both checksum-pinned Gitleaks 8.30.1 modes, sixteen
+strict Draft 2020-12 schema/instance pairs, and byte-identical candidate
+regeneration from a credential-disabled full-history clone. [Candidate
+CI](https://github.com/adaliontech/Zaibatsu/actions/runs/33361875633) passed
+independently. The checked 1,130-byte artifact is an untrusted non-executable
+contract; its exact binding proves no safety, semantic correctness,
+implementation, validation, approval, promotion, rollout, execution, or
+cross-factory authority.
+
 Zaibatsu is an independent project and is not affiliated with or endorsed by
 Factory AI.
 

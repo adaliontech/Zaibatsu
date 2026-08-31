@@ -62,7 +62,11 @@ a credential-disabled full-history clone, both Gitleaks modes, fourteen strict
 schemas, exact artifact regeneration, planning-only assertions, and
 independent CI. Its immutable release and full-history tag clone passed
 roof/tag CI, four live-schema byte checks, exact regeneration, strict external
-validation, and both Gitleaks modes. The gates remain in
+validation, and both Gitleaks modes. The v1.15 candidate-contract candidate
+passed 247 tests, 120-file validation, a credential-disabled full-history
+clone, both Gitleaks modes, sixteen strict schemas, exact candidate
+regeneration, contract-only assertions, and independent CI. Its evidence roof
+and immutable release remain the bounded release steps. The gates remain in
 [`architecture/submission-readiness.json`](../architecture/submission-readiness.json).
 
 ## Current project description
