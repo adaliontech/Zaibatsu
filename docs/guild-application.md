@@ -69,6 +69,11 @@ regeneration, contract-only assertions, and independent CI. Its evidence roof
 and immutable release passed roof/tag CI, two live-schema byte checks, exact
 regeneration, strict external validation, and both Gitleaks modes. The gates
 remain in [`architecture/submission-readiness.json`](../architecture/submission-readiness.json).
+The v1.16 deterministic validation-plan candidate passed 252 tests, 125-file
+validation, a credential-disabled full-history clone, both Gitleaks modes,
+eighteen strict schemas, byte-identical full-chain plan regeneration,
+non-executing assertions, and independent CI. Its immutable release is not yet
+claimed.
 
 ## Current project description
 
@@ -361,6 +366,12 @@ the public repository:
       Gitleaks modes, sixteen strict schemas, exact regeneration, and
       independent CI.
 - [x] Immutable v1.15.0 passes evidence-roof and tag CI, two tagged-schema byte
+      checks, tag-clone reproduction, and immutable-release proof.
+- [x] Deterministic validation-plan v1.16 candidate passes 252 tests, 125-file
+      validation, a credential-disabled full-history clone, both Gitleaks
+      modes, eighteen strict schemas, exact regeneration, non-executing
+      assertions, and independent CI.
+- [ ] Immutable v1.16.0 passes evidence-roof and tag CI, tagged-schema byte
       checks, tag-clone reproduction, and immutable-release proof.
 - [x] Public repository and article links resolve without authentication.
 - [ ] Demo clip or screenshots show a real Factory task and validation result.

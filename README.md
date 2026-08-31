@@ -1093,6 +1093,18 @@ byte-identical candidate regeneration, and two live tagged-schema byte checks
 passed. GitHub reports v1.15.0 immutable, latest, non-draft, and
 non-prerelease.
 
+The v1.16 deterministic validation-plan candidate at
+`9dbd677947d181b9a0c6fe83c92840efefe0abda` passed 252 tests, 125-file
+validation, strict Git, both checksum-pinned Gitleaks 8.30.1 modes over its
+57-commit public history and tree, eighteen strict Draft 2020-12
+schema/instance pairs, and byte-identical full-chain plan regeneration from a
+credential-disabled clone. [Candidate
+CI](https://github.com/adaliontech/Zaibatsu/actions/runs/33364240036) passed
+independently. The plan records eight `not_run` stages, twelve `missing`
+evidence artifacts, zero executed steps, no implementation, and no validation,
+approval, promotion, rollout, activation, execution, or cross-factory
+authority.
+
 Zaibatsu is an independent project and is not affiliated with or endorsed by
 Factory AI.
 

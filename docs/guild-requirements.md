@@ -134,3 +134,9 @@ contract-only output, and independent CI. Its evidence roof, annotated
 immutable release, roof/tag CI, two live-schema byte checks, and full-history
 tag-clone reproduction also passed. The final clip and applicant-owned form
 submission remain external.
+
+The v1.16 deterministic validation-plan candidate passed 252 tests, 125-file
+validation, a credential-disabled full-history clone, both Gitleaks modes,
+eighteen strict schemas, byte-identical full-chain plan regeneration, explicit
+non-executing assertions, and independent CI. Its immutable release is not yet
+claimed. The final clip and applicant-owned form submission remain external.
