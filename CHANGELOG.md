@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.16.0 - Unreleased
+## 1.16.0 - 2026-08-30
 
 - Added a schema-bound improvement-validation-plan specification and exact
   deterministic plan record that consume the bound candidate only after

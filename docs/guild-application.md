@@ -72,8 +72,9 @@ remain in [`architecture/submission-readiness.json`](../architecture/submission-
 The v1.16 deterministic validation-plan candidate passed 252 tests, 125-file
 validation, a credential-disabled full-history clone, both Gitleaks modes,
 eighteen strict schemas, byte-identical full-chain plan regeneration,
-non-executing assertions, and independent CI. Its immutable release is not yet
-claimed.
+non-executing assertions, and independent CI. Its evidence roof, annotated
+immutable release, roof/tag CI, two live-schema byte checks, and full-history
+tag-clone reproduction also passed.
 
 ## Current project description
 
@@ -371,7 +372,7 @@ the public repository:
       validation, a credential-disabled full-history clone, both Gitleaks
       modes, eighteen strict schemas, exact regeneration, non-executing
       assertions, and independent CI.
-- [ ] Immutable v1.16.0 passes evidence-roof and tag CI, tagged-schema byte
+- [x] Immutable v1.16.0 passes evidence-roof and tag CI, tagged-schema byte
       checks, tag-clone reproduction, and immutable-release proof.
 - [x] Public repository and article links resolve without authentication.
 - [ ] Demo clip or screenshots show a real Factory task and validation result.

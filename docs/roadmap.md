@@ -55,7 +55,8 @@ changes.
   candidate-contract binding without
   presenting a structurally valid contract as safe, semantically correct,
   implemented, validated, promotion-eligible, or executable;
-- publish the exact deterministic non-executing validation-plan contract while
+- preserve the reproduced immutable `v1.16.0` deterministic non-executing
+  validation-plan contract while
   keeping all eight stages `not_run`, all twelve evidence artifacts `missing`,
   and implementation, execution, validation-success, and promotion authority
   false;
@@ -65,9 +66,8 @@ Exit: the public narrative, architecture, portable factory, module artifacts,
 control plan, bundle, portfolio, source lock, qualification plan, partial
 assessment, signed runtime assessment, route-bound evidence return,
 evidence-bound improvement proposal, rebuild plan, readiness, and evidence
-contracts plus the bound candidate contract and inert validation plan describe the same meta-factory
-without inflating source-only or
-planned capabilities.
+contracts plus the bound candidate contract and inert validation plan describe
+the same meta-factory without inflating source-only or planned capabilities.
 
 ## Phase 1 — Factory identity and versioning
 

@@ -1,6 +1,6 @@
 # Demo script
 
-Use only a full-history fresh clone of immutable `v1.15.0` after its release
+Use only a full-history fresh clone of immutable `v1.16.0` after its release
 proof passes. Do not show private terminals, history, settings,
 infrastructure, model credentials, notifications, or personal data. Lead with
 the real Factory
@@ -256,6 +256,48 @@ python3 scripts/zaibatsu.py verify-improvement-candidate \
   /tmp/example-control.factory.tar \
   /tmp/example-product.factory.tar \
   /tmp/example-service.factory.tar
+python3 scripts/zaibatsu.py plan-improvement-validation \
+  examples/economic-factory.improvement-validation-plan-spec.json \
+  /tmp/example-product.improvement-candidate.json \
+  examples/economic-factory.improvement-candidate-spec.json \
+  /tmp/example-product.improvement-classification.json \
+  policies/improvement-classification-v1.json \
+  /tmp/example-product.improvement-proposal.json \
+  examples/economic-factory.improvement-proposal-spec.json \
+  /tmp/example-product.improvement-observation.json \
+  examples/economic-factory.improvement-observation-spec.json \
+  /tmp/example-product.evidence-return.json \
+  /tmp/example-portfolio.plan.json \
+  examples/factory-portfolio.json \
+  example-product \
+  /tmp/example-product.runtime-evidence.tar \
+  examples/economic-factory.qualification-plan.json \
+  policies/runtime-qualification-v1.json \
+  /tmp/example-control.factory.tar \
+  /tmp/example-product.factory.tar \
+  /tmp/example-service.factory.tar \
+  --output /tmp/example-product.improvement-validation-plan.json
+python3 scripts/zaibatsu.py verify-improvement-validation-plan \
+  /tmp/example-product.improvement-validation-plan.json \
+  examples/economic-factory.improvement-validation-plan-spec.json \
+  /tmp/example-product.improvement-candidate.json \
+  examples/economic-factory.improvement-candidate-spec.json \
+  /tmp/example-product.improvement-classification.json \
+  policies/improvement-classification-v1.json \
+  /tmp/example-product.improvement-proposal.json \
+  examples/economic-factory.improvement-proposal-spec.json \
+  /tmp/example-product.improvement-observation.json \
+  examples/economic-factory.improvement-observation-spec.json \
+  /tmp/example-product.evidence-return.json \
+  /tmp/example-portfolio.plan.json \
+  examples/factory-portfolio.json \
+  example-product \
+  /tmp/example-product.runtime-evidence.tar \
+  examples/economic-factory.qualification-plan.json \
+  policies/runtime-qualification-v1.json \
+  /tmp/example-control.factory.tar \
+  /tmp/example-product.factory.tar \
+  /tmp/example-service.factory.tar
 python3 scripts/zaibatsu.py runtime-assessment \
   /tmp/example-product.runtime-evidence.tar \
   examples/economic-factory.qualification-evidence.json \
@@ -309,12 +351,16 @@ python3 scripts/zaibatsu.py verify-rebuild-plan \
 > validating, approving, promoting, rolling out, or executing it. A separate
 > observation record puts one untrusted report into a canonical evidence-bound
 > shape without calling it safe or true. The deterministic classifier then
-> marks the aligned pair eligible for validation planning only; it creates no
-> plan and authorizes no validation, mutation, promotion, rollout, or effect. A
+> marks the aligned pair eligible for validation planning only; classification
+> itself creates no plan and authorizes no validation, mutation, promotion,
+> rollout, or effect. A
 > candidate binding then content-addresses the exact 1,130-byte gate contract
 > against that complete chain. It proves identity and target alignment, not
 > content safety, semantic correctness, implementation, validation, or
-> authority. The
+> authority. The separate planner then reverifies the entire chain and emits
+> eight fixed `not_run` stages plus twelve `missing` evidence artifacts. It runs
+> no commands, binds no implementation, and grants no validation, approval,
+> promotion, rollout, activation, execution, or cross-factory authority. The
 > combined assessment records 10 verified and 57
 > missing, marks none eligible, and authorizes no activation or execution. A
 > signature authenticates the assertion; it does not prove key ownership,
@@ -338,7 +384,7 @@ make validate
 > evidence, force-added ignored files, misleading media suffixes, and premature
 > readiness.
 
-Pause on the final 247-test pass and 120-file validator summary.
+Pause on the final 252-test pass and 125-file validator summary.
 
 ### 2:05–2:30 — Honest current boundary
 
@@ -354,7 +400,7 @@ Open `docs/implementation-status.md`.
 
 ## Before recording
 
-1. Clone the immutable `v1.15.0` tag with full history into a new temporary
+1. Clone the immutable `v1.16.0` tag with full history into a new temporary
    directory after its release proof passes. Do not use `--depth 1`; source-lock
    verification requires the referenced annotated `v1.6.0` tag and objects.
 2. Increase terminal font size and hide unrelated tabs and notifications.
@@ -365,7 +411,7 @@ Open `docs/implementation-status.md`.
 
 ## Capture checklist
 
-- [ ] Repository URL and `v1.15.0` tag visible once.
+- [ ] Repository URL and `v1.16.0` tag visible once.
 - [ ] Real Factory/Droid session receipt and shipped diff visible first.
 - [ ] Pre-change gap and adversarial post-change result are understandable.
 - [ ] Portable factory scaffold and validation succeed on screen.
@@ -391,7 +437,10 @@ Open `docs/implementation-status.md`.
       validation, approval, promotion, rollout, and execution remain false.
 - [ ] Candidate verification shows exact artifact binding while implementation,
       validation planning, promotion, and execution remain false.
-- [ ] `make validate` shows all 247 tests and 120 contract files passing.
+- [ ] Improvement-validation-plan verification shows eight `not_run` stages,
+      twelve `missing` evidence artifacts, zero executed steps, no
+      implementation, and false validation, promotion, and execution authority.
+- [ ] `make validate` shows all 252 tests and 125 contract files passing.
 - [ ] Maturity limits are stated explicitly.
 - [ ] No private history, addresses, credentials, local settings, or host details.
 - [ ] Captions are included.

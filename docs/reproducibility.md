@@ -525,12 +525,12 @@ release reproduction, clone the named tag rather than the moving default
 branch:
 
 ```bash
-git clone --branch v1.15.0 https://github.com/adaliontech/Zaibatsu.git
+git clone --branch v1.16.0 https://github.com/adaliontech/Zaibatsu.git
 cd Zaibatsu
 make validate
 ```
 
-Use a full-history clone for `v1.15.0`: its checked source lock intentionally
+Use a full-history clone for `v1.16.0`: its checked source lock intentionally
 reproduces the `v1.6.0` control bundle and therefore requires that annotated
 tag and its objects. A shallow clone that omits the referenced release must
 fail instead of silently weakening the lineage proof.

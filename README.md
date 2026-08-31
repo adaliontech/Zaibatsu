@@ -1090,7 +1090,7 @@ roof `70b4fdf54f2874e9548e60e69628fd5c0db61378`;
 credential-disabled full-history tag clone, all 247 tests, 120-file
 validation, strict Git, both Gitleaks modes, sixteen strict schemas,
 byte-identical candidate regeneration, and two live tagged-schema byte checks
-passed. GitHub reports v1.15.0 immutable, latest, non-draft, and
+passed. GitHub reports v1.15.0 immutable, non-draft, and
 non-prerelease.
 
 The v1.16 deterministic validation-plan candidate at
@@ -1104,6 +1104,19 @@ independently. The plan records eight `not_run` stages, twelve `missing`
 evidence artifacts, zero executed steps, no implementation, and no validation,
 approval, promotion, rollout, activation, execution, or cross-factory
 authority.
+
+Immutable
+[v1.16.0](https://github.com/adaliontech/Zaibatsu/releases/tag/v1.16.0) uses
+annotated tag object `4371c6248530be4f5d7b796aa0d5f67a9d62fa99` over evidence
+roof `9030bb0d56e6e1317d4340048d977f36eef04959`;
+[roof CI](https://github.com/adaliontech/Zaibatsu/actions/runs/33364481226),
+[tag CI](https://github.com/adaliontech/Zaibatsu/actions/runs/33364544156), a
+credential-disabled full-history tag clone, all 252 tests, 125-file
+validation, strict Git, both Gitleaks modes over the 58-commit public history
+and tree, eighteen strict schemas, byte-identical full-chain plan
+regeneration, exact non-executing assertions, and two live tagged-schema byte
+checks passed. GitHub reports v1.16.0 immutable, latest, non-draft, and
+non-prerelease.
 
 Zaibatsu is an independent project and is not affiliated with or endorsed by
 Factory AI.
