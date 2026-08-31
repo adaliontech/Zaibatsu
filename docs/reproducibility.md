@@ -137,6 +137,15 @@ The validator confirms:
     reproduces eight fixed `not_run` stages and twelve `missing` evidence
     bindings, and rejects implementation, execution, validation-success,
     promotion, or cross-factory authority inflation.
+41. the improvement-validation input pack canonicalizes every plan input,
+    nested archive, factory bundle, and its digest-pinned manifest schema into
+    21 USTAR members; self-contained data verification rejects archive,
+    schema, replay, ordering, size, and authority attacks while preserving the
+    explicit absence of a verifier runtime, candidate implementation, stage
+    evidence, validation execution, approval, promotion, or cross-factory
+    authority; verification needs no live production credential or state, but
+    arbitrary embedded evidence is not content-scanned and secret absence is
+    not proved.
 
 The adversarial tests mutate valid architecture data and prove that the
 validator rejects meta-factory role drift, a missing or reclassified factory,

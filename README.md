@@ -112,7 +112,7 @@ The target stack is intentionally boring at authority boundaries:
 | PostgreSQL | Durable jobs, leases, attempts, policy, evidence, and audit | Validated preproduction broadly; a narrow read-only lane is operational |
 | Modular agent skeletons | Reusable typed modules, flows, profiles, approvals, and effect fences | Implemented and tested source; not deployed |
 | LLM harness adapters | Bind different models behind typed module contracts | Validated at bounded source/contribution scope; general unattended routing is not active |
-| Recursive improvement | Return evidence and improve shared factory patterns | Route-bound evidence return, non-authorizing proposal recording, structural observation normalization, deterministic candidate classification, exact non-executable candidate-contract binding, and deterministic non-executing validation planning are operational in the public kit; transport, semantic truth, safety, implementation, validation execution, and shared promotion remain unproved or designed and owner-gated |
+| Recursive improvement | Return evidence and improve shared factory patterns | Route-bound evidence return, non-authorizing proposal recording, structural observation normalization, deterministic candidate classification, exact non-executable candidate-contract binding, deterministic non-executing validation planning, and portable validation-input packaging are operational in the public kit; transport, semantic truth, safety, implementation, validation execution, and shared promotion remain unproved or designed and owner-gated |
 | Multi-factory portfolio plan | Join verified control bundles into one closed registry with evidence-only return routes and factory-scoped intended namespaces | Implemented and tested as a non-executing control plan; it proves bundle identity and declarative separation, not deployed runtime isolation or authority |
 | Qualification planner | Bind a verified control bundle to mandatory runtime evidence requirements | Implemented and tested; the public plan contains no qualification evidence and grants no eligibility or activation |
 | Signed runtime-evidence assessment | Combine bundle-derived contract receipts with fresh, allowlisted OpenSSH-signed verifier assertions | The public fixture verifies one signature in test-only scope: 10 of 67 bindings verified, 57 missing, zero runtime-eligible modules, and no activation or execution authority |
@@ -123,6 +123,7 @@ The target stack is intentionally boring at authority boundaries:
 | Deterministic candidate classification | Join one exact proposal and normalized observation under a non-authorizing policy | Implemented and tested for workflow/type classification and validation-planning eligibility only; no safety, semantic truth, merit, validation execution, approval, promotion, rollout, activation, execution, or cross-factory effect is proved |
 | Evidence-bound candidate contract | Bind exact canonical shared-module, factory-template, or deterministic-gate contract bytes to an eligible classification and its complete source chain | Implemented and tested as an untrusted non-executable contract binding; no content safety, semantic correctness, implementation, validation plan, regression, rollback, approval, promotion, rollout, activation, execution, or cross-factory effect is proved |
 | Deterministic improvement validation plan | Reverify the exact candidate chain and enumerate its mandatory validation work and missing evidence | Implemented and tested as an inert plan: 8 fixed stages, 12 missing evidence artifacts, 0 executed steps, no candidate implementation, and no validation, approval, promotion, rollout, activation, execution, or cross-factory authority |
+| Portable improvement-validation input pack | Carry the exact plan, complete candidate chain, portfolio, qualification inputs, nested runtime-evidence pack, and factory bundles as one canonical archive | Implemented and tested as 21 deterministic USTAR members; the self-contained data verifier checks exact bytes and nested chains, but the archive embeds no pack-verifier runtime, candidate implementation, stage evidence, approval, or execution authority |
 | Annotated-release source lock | Bind one verified control bundle to exact versioned source inputs | Sixteen Git blobs from immutable v1.6.0 rebuild the byte-identical bundle; no remote, signature, runtime-source, qualification, eligibility, or activation proof is claimed |
 | Deterministic rebuild DAG | Join verified control provenance, module dependencies, qualification gaps, and activation gates | Implemented and tested as an inert nine-action plan; zero actions are qualification-ready, all nine remain blocked, and no execution or effect authority is granted |
 
@@ -195,7 +196,8 @@ assessment, route-bound evidence-return record, deterministic rebuild DAG,
 evidence-bound improvement-proposal specification and record, structurally
 normalized observation, validation-planning-only classification, exact
 candidate-contract specification and binding, deterministic non-executing
-improvement-validation-plan specification and record, sanitized
+improvement-validation-plan specification and record, canonical portable
+validation-input-pack manifest and exact regeneration, sanitized
 receipts, factory hierarchy
 and lifecycle, maturity boundaries, submission gates, public-safety rules,
 local links, and adversarial mutations. No model request, network access, cloud
@@ -759,6 +761,53 @@ verification. It proves deterministic planning and exact candidate binding
 only—not implementation, validation success, approval, promotion, rollout,
 activation, execution, or cross-factory effect.
 
+## Package validation inputs without executing them
+
+Place the exact plan and every input it depends on into one portable canonical
+archive, then reverify that archive without supplying any external data file:
+
+```bash
+python3 scripts/zaibatsu.py improvement-validation-pack \
+  examples/economic-factory.improvement-validation-plan.json \
+  examples/economic-factory.improvement-validation-plan-spec.json \
+  examples/economic-factory.improvement-candidate.json \
+  examples/economic-factory.improvement-candidate-spec.json \
+  examples/economic-factory.improvement-classification.json \
+  policies/improvement-classification-v1.json \
+  examples/economic-factory.improvement-proposal.json \
+  examples/economic-factory.improvement-proposal-spec.json \
+  examples/economic-factory.improvement-observation.json \
+  examples/economic-factory.improvement-observation-spec.json \
+  examples/economic-factory.evidence-return.json \
+  examples/factory-portfolio.plan.json \
+  examples/factory-portfolio.json example-product \
+  /tmp/example-product.runtime-evidence.tar \
+  examples/economic-factory.qualification-plan.json \
+  policies/runtime-qualification-v1.json \
+  /tmp/example-control.factory.tar \
+  /tmp/example-product.factory.tar \
+  /tmp/example-service.factory.tar \
+  --output /tmp/example-product.improvement-validation-inputs.tar
+python3 scripts/zaibatsu.py verify-improvement-validation-pack \
+  /tmp/example-product.improvement-validation-inputs.tar
+```
+
+The checked [input-pack manifest](examples/economic-factory.improvement-validation-pack-manifest.json)
+binds 20 payloads: the complete improvement chain, both policies, portfolio,
+qualification plan, nested runtime-evidence pack, immutable manifest schema,
+and three portfolio-ordered factory bundles. With `MANIFEST.json`, the archive
+has 21 canonical USTAR members and reproduces to 296,960 bytes. Verification
+rechecks both nested archive classes, reconstructs the exact manifest, and
+requires byte-identical archive regeneration offline.
+
+“Self-contained” applies to the data inputs, not the verifier executable or
+its environment: the archive does not embed the v1.17 verifier implementation,
+a Python runtime, a candidate implementation, or any validation-stage
+evidence. Verification requires no live production credential or state, but
+the generic pack contract does not scan arbitrary embedded evidence materials
+or prove them secret-free. It runs no stage and grants no readiness, approval,
+promotion, rollout, activation, execution, or cross-factory authority.
+
 ## Plan the factory rebuild
 
 Compile the verified control and qualification state into an ordered,
@@ -882,6 +931,10 @@ and the complete repository suite was rerun independently.
   and [derived plan](examples/economic-factory.improvement-validation-plan.json)
   — eight fixed validation stages and twelve missing evidence bindings for the
   exact candidate, with zero executed steps and every authority denied.
+- [Improvement-validation input-pack manifest](examples/economic-factory.improvement-validation-pack-manifest.json)
+  — exact paths, roles, media types, sizes, and digests for the portable
+  21-member archive that carries the complete plan input chain while embedding
+  no pack-verifier runtime, implementation, stage evidence, or authority.
 - [Factory rebuild plan](examples/economic-factory.rebuild-plan.json) — the
   exact nine-action dependency graph, evidence blockers, and four
   non-authorizing gates derived from fully reverified control inputs.
@@ -949,13 +1002,17 @@ and the complete repository suite was rerun independently.
     evidence; it runs no validation and grants no implementation, success,
     approval, promotion, rollout, activation, execution, or cross-factory
     authority.
-22. A rebuild plan reports intended actions and blockers; it executes no action
+22. An improvement-validation input pack carries the exact verified plan inputs
+    as canonical bytes; it embeds no pack-verifier runtime, candidate
+    implementation, stage evidence, approval, or execution authority. It needs
+    no live production credential or state, but does not prove secret absence.
+23. A rebuild plan reports intended actions and blockers; it executes no action
     and grants no qualification, approval, activation, deployment, or recovery
     authority.
-23. Tests, schemas, linters, hashes, policy, receipts, and owner approval
+24. Tests, schemas, linters, hashes, policy, receipts, and owner approval
     outrank model confidence.
-24. Feedback may propose shared improvement but cannot self-promote.
-25. Failed work remains inspectable, and the owner retains a recovery path
+25. Feedback may propose shared improvement but cannot self-promote.
+26. Failed work remains inspectable, and the owner retains a recovery path
     outside Dispatcher.
 
 ## Factory Guild submission

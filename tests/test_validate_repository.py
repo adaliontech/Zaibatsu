@@ -31,6 +31,7 @@ import factory_improvement_observation as improvement_observation
 import factory_improvement_classification as improvement_classification
 import factory_improvement_candidate as improvement_candidate
 import factory_improvement_validation_plan as improvement_validation_plan
+import factory_improvement_validation_pack as improvement_validation_pack
 import factory_portfolio as portfolio
 import factory_qualification as qualification
 import factory_rebuild as rebuild
@@ -2864,6 +2865,56 @@ class FactoryImprovementClassificationTests(unittest.TestCase):
             self.qualification_policy,
         )
 
+    def _build_validation_input_pack(
+        self,
+        *,
+        validation_plan: object | None = None,
+        candidate_specification: object | None = None,
+        bundles: object | None = None,
+        runtime_pack: object | None = None,
+        qualification_policy: object | None = None,
+    ) -> tuple[list[str], bytes | None, dict[str, object] | None]:
+        return improvement_validation_pack.factory_improvement_validation_pack_for_inputs(
+            self.validation_plan if validation_plan is None else validation_plan,
+            self.validation_plan_specification,
+            self.candidate,
+            (
+                self.candidate_specification
+                if candidate_specification is None
+                else candidate_specification
+            ),
+            self.classification,
+            self.policy,
+            self.proposal,
+            self.proposal_specification,
+            self.observation,
+            self.observation_specification,
+            self.evidence_record,
+            self.portfolio_plan,
+            self.portfolio_definition,
+            self.bundles if bundles is None else bundles,
+            self.pack if runtime_pack is None else runtime_pack,
+            self.qualification_plan,
+            (
+                self.qualification_policy
+                if qualification_policy is None
+                else qualification_policy
+            ),
+        )
+
+    def _validation_input_pack_payloads(self, pack: bytes) -> dict[str, bytes]:
+        payloads, errors = bundler.read_bounded_archive_payloads(
+            pack,
+            label="improvement-validation input pack",
+            max_archive_bytes=improvement_validation_pack.MAX_VALIDATION_PACK_BYTES,
+            max_member_bytes=(
+                improvement_validation_pack.MAX_VALIDATION_PACK_MEMBER_BYTES
+            ),
+            max_members=improvement_validation_pack.MAX_VALIDATION_PACK_MEMBERS,
+        )
+        self.assertEqual([], errors)
+        return payloads
+
     def test_checked_records_policy_and_schemas_are_exact(self) -> None:
         self.assertEqual(
             self.observation,
@@ -3695,6 +3746,437 @@ class FactoryImprovementClassificationTests(unittest.TestCase):
         )
         self.assertEqual([], errors)
         self.assertEqual(self.validation_plan, rebound)
+
+    def test_validation_input_pack_is_exact_reproducible_and_self_contained(self) -> None:
+        errors, pack, manifest = self._build_validation_input_pack()
+        self.assertEqual([], errors)
+        self.assertIsNotNone(pack)
+        self.assertIsNotNone(manifest)
+        assert pack is not None
+        assert manifest is not None
+        self.assertEqual(
+            composer.load_json_file(
+                improvement_validation_pack.EXAMPLE_VALIDATION_PACK_MANIFEST_PATH
+            ),
+            manifest,
+        )
+        repeated_errors, repeated, repeated_manifest = (
+            self._build_validation_input_pack(bundles=list(reversed(self.bundles)))
+        )
+        self.assertEqual([], repeated_errors)
+        self.assertEqual(pack, repeated)
+        self.assertEqual(manifest, repeated_manifest)
+        verify_errors, verified = (
+            improvement_validation_pack.verify_factory_improvement_validation_pack(
+                pack
+            )
+        )
+        self.assertEqual([], verify_errors)
+        self.assertEqual(manifest, verified)
+        self.assertEqual(
+            "0fa8f53d7d42d0c6d036d7bf293f410272413ffc613e60c9be36c044c34d217f",
+            bundler.sha256_bytes(pack),
+        )
+
+    def test_validation_input_pack_inventory_and_boundary_are_honest(self) -> None:
+        errors, pack, manifest = self._build_validation_input_pack()
+        self.assertEqual([], errors)
+        assert pack is not None
+        assert manifest is not None
+        self.assertEqual(20, len(manifest["files"]))
+        self.assertEqual(3, len(manifest["factories"]))
+        self.assertEqual(8, manifest["validation_summary"]["validation_step_count"])
+        self.assertEqual(12, manifest["validation_summary"]["missing_evidence_count"])
+        boundary = manifest["pack_boundary"]
+        true_fields = {
+            "canonical_archive",
+            "portable_validation_inputs",
+            "all_input_digests_verified",
+            "nested_archives_verified",
+            "complete_candidate_chain_reverified",
+            "validation_plan_reverified",
+            "candidate_artifact_untrusted",
+        }
+        for field in true_fields:
+            self.assertIs(boundary[field], True)
+        for field in set(boundary) - true_fields:
+            self.assertIs(boundary[field], False)
+        payloads = self._validation_input_pack_payloads(pack)
+        self.assertEqual(21, len(payloads))
+        self.assertEqual(
+            {improvement_validation_pack.MANIFEST_PATH}
+            | {entry["path"] for entry in manifest["files"]},
+            set(payloads),
+        )
+        with tarfile.open(fileobj=io.BytesIO(pack), mode="r:") as archive:
+            members = archive.getmembers()
+        self.assertEqual(
+            sorted(member.name for member in members),
+            [member.name for member in members],
+        )
+        for member in members:
+            self.assertTrue(member.isfile())
+            self.assertEqual(
+                (0o644, 0, 0, 0, "", ""),
+                (
+                    member.mode,
+                    member.mtime,
+                    member.uid,
+                    member.gid,
+                    member.uname,
+                    member.gname,
+                ),
+            )
+
+    def test_validation_input_pack_schema_identity_and_digest_are_pinned(self) -> None:
+        schema = composer.load_json_file(
+            improvement_validation_pack.VALIDATION_PACK_SCHEMA_PATH
+        )
+        self.assertEqual(
+            improvement_validation_pack.VALIDATION_PACK_MANIFEST_SCHEMA_REFERENCE,
+            schema["$id"],
+        )
+        self.assertEqual(
+            improvement_validation_pack.VALIDATION_PACK_MANIFEST_SCHEMA_SHA256,
+            composer.sha256_json(schema),
+        )
+        self.assertEqual(
+            "https://json-schema.org/draft/2020-12/schema",
+            schema["$schema"],
+        )
+        self.assertFalse(schema["additionalProperties"])
+        boundary_schema = schema["$defs"]["pack_boundary"]
+        self.assertFalse(boundary_schema["additionalProperties"])
+        for field, contract in boundary_schema["properties"].items():
+            self.assertIs(contract["const"], improvement_validation_pack.PACK_BOUNDARY[field])
+
+    def test_validation_input_pack_payload_and_authority_tampering_fail(self) -> None:
+        errors, pack, manifest = self._build_validation_input_pack()
+        self.assertEqual([], errors)
+        assert pack is not None
+        assert manifest is not None
+        attacks: list[tuple[str, bytes]] = []
+
+        payloads = self._validation_input_pack_payloads(pack)
+        payloads[improvement_validation_pack.CANDIDATE_PATH] += b" "
+        attacks.append(("noncanonical candidate", bundler.canonical_tar_bytes(payloads)))
+
+        payloads = self._validation_input_pack_payloads(pack)
+        schema = composer.load_json_bytes(
+            payloads[improvement_validation_pack.PACKED_SCHEMA_PATH]
+        )
+        schema["description"] = "attacker-controlled contract"
+        payloads[improvement_validation_pack.PACKED_SCHEMA_PATH] = (
+            composer.canonical_json_bytes(schema)
+        )
+        attacks.append(("schema substitution", bundler.canonical_tar_bytes(payloads)))
+
+        payloads = self._validation_input_pack_payloads(pack)
+        nested = payloads[improvement_validation_pack.RUNTIME_EVIDENCE_PACK_PATH]
+        payloads[improvement_validation_pack.RUNTIME_EVIDENCE_PACK_PATH] = (
+            nested[:-1] + bytes([nested[-1] ^ 1])
+        )
+        attacks.append(("nested pack tamper", bundler.canonical_tar_bytes(payloads)))
+
+        payloads = self._validation_input_pack_payloads(pack)
+        forged_manifest = copy.deepcopy(manifest)
+        forged_manifest["pack_boundary"]["execution_authorized"] = True
+        payloads[improvement_validation_pack.MANIFEST_PATH] = (
+            composer.canonical_json_bytes(forged_manifest)
+        )
+        attacks.append(("authority inflation", bundler.canonical_tar_bytes(payloads)))
+
+        for name, attack in attacks:
+            with self.subTest(name=name):
+                verify_errors, verified = (
+                    improvement_validation_pack.verify_factory_improvement_validation_pack(
+                        attack
+                    )
+                )
+                self.assertTrue(verify_errors)
+                self.assertIsNone(verified)
+
+    def test_validation_input_pack_archive_attacks_fail_closed(self) -> None:
+        errors, pack, _ = self._build_validation_input_pack()
+        self.assertEqual([], errors)
+        assert pack is not None
+        attacks: list[tuple[str, bytes, str]] = [
+            (
+                "traversal",
+                bundler.canonical_tar_bytes({"../escape.json": b"{}\n"}),
+                "unsafe",
+            ),
+            ("trailing data", pack + b"unexpected", "canonical"),
+        ]
+        payloads = self._validation_input_pack_payloads(pack)
+        payloads["unexpected.json"] = b"{}\n"
+        attacks.append(("extra member", bundler.canonical_tar_bytes(payloads), "unexpected"))
+
+        payloads = self._validation_input_pack_payloads(pack)
+        output = io.BytesIO()
+        with tarfile.open(fileobj=output, mode="w", format=tarfile.USTAR_FORMAT) as archive:
+            for path in reversed(sorted(payloads)):
+                member = tarfile.TarInfo(path)
+                member.size = len(payloads[path])
+                member.mode = 0o644
+                member.mtime = 0
+                member.uid = 0
+                member.gid = 0
+                archive.addfile(member, io.BytesIO(payloads[path]))
+        attacks.append(("member reorder", output.getvalue(), "canonical"))
+
+        output = io.BytesIO()
+        with tarfile.open(fileobj=output, mode="w", format=tarfile.USTAR_FORMAT) as archive:
+            member = tarfile.TarInfo("unsafe-link")
+            member.type = tarfile.SYMTYPE
+            member.linkname = "outside"
+            member.mode = 0o644
+            member.mtime = 0
+            archive.addfile(member)
+        attacks.append(("symlink", output.getvalue(), "regular file"))
+
+        output = io.BytesIO()
+        with tarfile.open(fileobj=output, mode="w", format=tarfile.USTAR_FORMAT) as archive:
+            for _ in range(2):
+                member = tarfile.TarInfo(improvement_validation_pack.MANIFEST_PATH)
+                member.size = 3
+                member.mode = 0o644
+                member.mtime = 0
+                archive.addfile(member, io.BytesIO(b"{}\n"))
+        attacks.append(("duplicate", output.getvalue(), "duplicate"))
+
+        for name, attack, expected in attacks:
+            with self.subTest(name=name):
+                verify_errors, verified = (
+                    improvement_validation_pack.verify_factory_improvement_validation_pack(
+                        attack
+                    )
+                )
+                self.assertTrue(
+                    any(expected in error for error in verify_errors),
+                    verify_errors,
+                )
+                self.assertIsNone(verified)
+
+    def test_validation_input_pack_malformed_shapes_and_bounds_fail_cleanly(self) -> None:
+        errors, pack, _ = self._build_validation_input_pack()
+        self.assertEqual([], errors)
+        assert pack is not None
+        malformed_values: tuple[object, ...] = (b"", b"not-a-tar", bytearray(pack))
+        for value in malformed_values:
+            with self.subTest(value=type(value).__name__):
+                verify_errors, verified = (
+                    improvement_validation_pack.verify_factory_improvement_validation_pack(
+                        value  # type: ignore[arg-type]
+                    )
+                )
+                self.assertTrue(verify_errors)
+                self.assertIsNone(verified)
+        with mock.patch.object(
+            improvement_validation_pack,
+            "MAX_VALIDATION_PACK_MEMBER_BYTES",
+            1,
+        ):
+            verify_errors, verified = (
+                improvement_validation_pack.verify_factory_improvement_validation_pack(
+                    pack
+                )
+            )
+        self.assertTrue(any("member size" in error for error in verify_errors))
+        self.assertIsNone(verified)
+        with mock.patch.object(
+            improvement_validation_pack,
+            "MAX_VALIDATION_PACK_MEMBERS",
+            1,
+        ):
+            verify_errors, verified = (
+                improvement_validation_pack.verify_factory_improvement_validation_pack(
+                    pack
+                )
+            )
+        self.assertTrue(any("member count" in error for error in verify_errors))
+        self.assertIsNone(verified)
+        malformed_plan = copy.deepcopy(self.validation_plan)
+        malformed_plan["source"] = []
+        build_errors, built, manifest = self._build_validation_input_pack(
+            validation_plan=malformed_plan
+        )
+        self.assertTrue(build_errors)
+        self.assertIsNone(built)
+        self.assertIsNone(manifest)
+
+    def test_validation_input_pack_replay_and_chain_forgery_fail_closed(self) -> None:
+        changed_specification = copy.deepcopy(self.candidate_specification)
+        changed_specification["candidate"]["artifact"]["behavior"]["summary"] = (
+            "A replayed candidate contract."
+        )
+        errors, pack, manifest = self._build_validation_input_pack(
+            candidate_specification=changed_specification
+        )
+        self.assertTrue(errors)
+        self.assertIsNone(pack)
+        self.assertIsNone(manifest)
+
+        stronger_policy = copy.deepcopy(self.qualification_policy)
+        stronger_policy["base_requirements"].append("additional-runtime-proof")
+        stronger_policy["base_requirements"].sort()
+        errors, pack, manifest = self._build_validation_input_pack(
+            qualification_policy=stronger_policy
+        )
+        self.assertTrue(errors)
+        self.assertIsNone(pack)
+        self.assertIsNone(manifest)
+
+        cron_factory = composer.load_json_file(
+            validator.ROOT / "examples" / "economic-factory-cron.json"
+        )
+        cron_bundle, _ = bundler.build_factory_bundle(
+            cron_factory,
+            self.catalog,
+            self.artifacts,
+        )
+        replayed_bundles = list(self.bundles)
+        replayed_bundles[1] = cron_bundle
+        errors, pack, manifest = self._build_validation_input_pack(
+            bundles=replayed_bundles
+        )
+        self.assertTrue(errors)
+        self.assertIsNone(pack)
+        self.assertIsNone(manifest)
+
+    def test_validation_input_pack_cli_round_trip_and_safe_io(self) -> None:
+        errors, expected_pack, _ = self._build_validation_input_pack()
+        self.assertEqual([], errors)
+        assert expected_pack is not None
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            bundle_paths: list[Path] = []
+            for position, bundle in enumerate(self.bundles):
+                path = root / f"factory-{position}.tar"
+                path.write_bytes(bundle)
+                bundle_paths.append(path)
+            runtime_pack_path = root / "runtime-evidence-pack.tar"
+            runtime_pack_path.write_bytes(self.pack)
+            output_path = root / "improvement-validation-inputs.tar"
+            cli = [sys.executable, str(validator.ROOT / "scripts" / "zaibatsu.py")]
+            inputs = [
+                str(improvement_validation_plan.EXAMPLE_IMPROVEMENT_VALIDATION_PLAN_PATH),
+                str(
+                    improvement_validation_plan.EXAMPLE_IMPROVEMENT_VALIDATION_PLAN_SPEC_PATH
+                ),
+                str(improvement_candidate.EXAMPLE_IMPROVEMENT_CANDIDATE_PATH),
+                str(improvement_candidate.EXAMPLE_IMPROVEMENT_CANDIDATE_SPEC_PATH),
+                str(improvement_classification.EXAMPLE_IMPROVEMENT_CLASSIFICATION_PATH),
+                str(improvement_classification.IMPROVEMENT_CLASSIFICATION_POLICY_PATH),
+                str(improvement_proposal.EXAMPLE_IMPROVEMENT_PROPOSAL_PATH),
+                str(improvement_proposal.EXAMPLE_IMPROVEMENT_PROPOSAL_SPEC_PATH),
+                str(improvement_observation.EXAMPLE_IMPROVEMENT_OBSERVATION_PATH),
+                str(improvement_observation.EXAMPLE_IMPROVEMENT_OBSERVATION_SPEC_PATH),
+                str(evidence_return.EXAMPLE_EVIDENCE_RETURN_PATH),
+                str(portfolio.EXAMPLE_PORTFOLIO_PLAN_PATH),
+                str(portfolio.EXAMPLE_PORTFOLIO_PATH),
+                "example-product",
+                str(runtime_pack_path),
+                str(qualification.EXAMPLE_QUALIFICATION_PLAN_PATH),
+                str(qualification.QUALIFICATION_POLICY_PATH),
+                *(str(path) for path in bundle_paths),
+            ]
+            create = cli + [
+                "improvement-validation-pack",
+                *inputs,
+                "--output",
+                str(output_path),
+            ]
+            created = subprocess.run(
+                create,
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(0, created.returncode, created.stderr)
+            self.assertEqual(expected_pack, output_path.read_bytes())
+            self.assertIn("archive members: 21", created.stdout)
+            self.assertIn("validation executed: false", created.stdout)
+            verified = subprocess.run(
+                cli + ["verify-improvement-validation-pack", str(output_path)],
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(0, verified.returncode, verified.stderr)
+            self.assertIn("factory bundles: 3", verified.stdout)
+            self.assertIn("validation execution authorized: false", verified.stdout)
+            refused = subprocess.run(
+                create,
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(2, refused.returncode)
+            self.assertIn("refusing to overwrite", refused.stderr)
+            mismatched = list(inputs)
+            mismatched[13] = "example-service"
+            mismatched_result = subprocess.run(
+                cli
+                + [
+                    "improvement-validation-pack",
+                    *mismatched,
+                    "--output",
+                    str(root / "mismatched.tar"),
+                ],
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(1, mismatched_result.returncode)
+            self.assertIn("source factory id does not match", mismatched_result.stderr)
+            malformed_record = copy.deepcopy(self.validation_plan)
+            malformed_record["source"] = []
+            malformed_record_path = root / "malformed-validation-plan.json"
+            malformed_record_path.write_text(
+                json.dumps(malformed_record),
+                encoding="utf-8",
+            )
+            malformed_inputs = list(inputs)
+            malformed_inputs[0] = str(malformed_record_path)
+            malformed_result = subprocess.run(
+                cli
+                + [
+                    "improvement-validation-pack",
+                    *malformed_inputs,
+                    "--output",
+                    str(root / "malformed.tar"),
+                ],
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(1, malformed_result.returncode)
+            self.assertIn("source factory id does not match", malformed_result.stderr)
+            self.assertNotIn("Traceback", malformed_result.stderr)
+            oversized_path = root / "oversized.tar"
+            with oversized_path.open("wb") as stream:
+                stream.truncate(
+                    improvement_validation_pack.MAX_VALIDATION_PACK_BYTES + 1
+                )
+            oversized = subprocess.run(
+                cli
+                + [
+                    "verify-improvement-validation-pack",
+                    str(oversized_path),
+                ],
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(2, oversized.returncode)
+            self.assertIn("input size is outside", oversized.stderr)
 
     def test_cli_round_trips_and_refuses_overwrite(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:

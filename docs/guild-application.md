@@ -142,6 +142,15 @@ content-addressed evidence artifacts. All stages are `not_run`, executed,
 passed, and failed counts are zero, no implementation exists, and the planner
 runs no validation or network access and grants no approval, promotion,
 rollout, activation, execution, or cross-factory authority.
+The canonical improvement-validation input pack then carries that plan and
+every exact dependency—including the three factory bundles and nested runtime
+pack—as 21 deterministic USTAR members. It can be reverified from the archive
+alone as data, but it embeds no trusted verifier runtime or environment,
+candidate implementation, stage evidence, validation result, approval,
+promotion, rollout, activation, execution, or cross-factory authority. That
+verification needs no live production credential or state, but the generic
+pack contract does not content-scan arbitrary embedded evidence or prove
+secret absence.
 
 The core repository works without a model or Droid credentials. For the Guild
 case study, authenticated Factory Droid used an owner-operated GGUF whose
@@ -374,6 +383,11 @@ the public repository:
       assertions, and independent CI.
 - [x] Immutable v1.16.0 passes evidence-roof and tag CI, tagged-schema byte
       checks, tag-clone reproduction, and immutable-release proof.
+- [x] Portable validation-input-pack v1.17 candidate passes 260 local tests,
+      128-file validation, exact 21-member archive regeneration, nested-chain
+      verification, malformed/archive/authority controls, and explicit
+      non-executing semantics.
+- [ ] Immutable v1.17.0 release proof and fresh tag-clone reproduction pass.
 - [x] Public repository and article links resolve without authentication.
 - [ ] Demo clip or screenshots show a real Factory task and validation result.
 - [x] No private host, credential, recovery, or deployment detail is exposed.

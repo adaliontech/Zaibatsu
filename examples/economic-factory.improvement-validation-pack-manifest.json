@@ -1,0 +1,233 @@
+{
+  "contract_schema": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.17.0/schemas/factory-improvement-validation-pack-manifest.schema.json",
+  "schema_version": "zaibatsu.factory-improvement-validation-pack-manifest.v1",
+  "source": {
+    "factory_improvement_validation_plan_sha256": "3b06f2b06075c049210447a58746f69d8c980310a56d7b3ead40e78f21990886",
+    "validation_plan_specification_sha256": "72777bd1f10bea65f97ec195da4b37c49c623d5934971bb2af91fde008028bca",
+    "factory_improvement_candidate_sha256": "ca501843375e9a93818e124e02babd33c853eedde9abfd6446a66540c44b8cdb",
+    "candidate_specification_sha256": "99e0388de57dd4809086c8bbaa7589a55e7e57668426ed8bc35862d4b8dfb26a",
+    "candidate_artifact_sha256": "15cc86aa630b48f0f3a4713e8b4e127b67f4693c36201775bf8a28a4c4abbe51",
+    "factory_improvement_classification_sha256": "a260ec6f23f0abb0832ce2fc91f3b47d5a9dce75f6e974dd640f2c4dda5d4acc",
+    "improvement_classification_policy_sha256": "91e5e912ff8c5751a0f40af9b92beddf0ffd7e801103f77b592beb2b08d376f2",
+    "factory_improvement_proposal_sha256": "b5222630580cc03b092aedf6659defff9dae994957ed406cbd598a29da8efde4",
+    "improvement_proposal_specification_sha256": "5ffb7fb09f6c5935843c3dd6eb203d5ba3a652a1f4f45e9fa807dde6366e15a4",
+    "factory_improvement_observation_sha256": "49fdf3e0845c14be7db8461461683820a2e1b23b20655165f30ce5509acb40ea",
+    "improvement_observation_specification_sha256": "b852f3df3ad8975e6f0f196917441ab401b1532bd32355e5e8dbfe14f294c16d",
+    "factory_evidence_return_sha256": "ac1765b07d96ffbcead1dd4270919833dae790359f7fe248b9f04f16d630c3ec",
+    "factory_portfolio_plan_sha256": "dc4303fb1fc8a013d3d5f3e91f29fb4935baa3b42f503c0595abbd7ae7fbbcbb",
+    "portfolio_definition_sha256": "c993c7ecd677898d944b6abb430ca22d39e9cc48dc67f9ab8c528381ae910d8a",
+    "factory_bundle_set_sha256": "729341fdb5f2d4c032c73a86551abbb4eec7432518e360f44c8557d710644231",
+    "runtime_evidence_pack_sha256": "92357de9906842bdfaa14d2056173f24113f686e108d74ce44e7685d4b344759",
+    "qualification_plan_sha256": "a9419341bf0806e1a6fc3769354e46ac6eb1c29043042ddd7eec35cca1a8ff81",
+    "qualification_policy_id": "runtime-eligibility-default",
+    "qualification_policy_sha256": "4fd359cc6dfe3eb3b555eb26a3453939fde34efd8d65a281a81dd34041468e9a",
+    "reporting_factory": "example-product",
+    "control_factory": "example-control"
+  },
+  "files": [
+    {
+      "path": "factories/example-control.factory.tar",
+      "role": "factory_bundle",
+      "media_type": "application/x-ustar",
+      "sha256": "9b777fa3874485672a30b2a5f7e6db6e2895dfbd228767aded85898216c7db3c",
+      "size": 61440
+    },
+    {
+      "path": "factories/example-product.factory.tar",
+      "role": "factory_bundle",
+      "media_type": "application/x-ustar",
+      "sha256": "d4918fd16f55b907a0b2b9734422d7106d3030a511e5cae5d6efc1cb7b253aba",
+      "size": 61440
+    },
+    {
+      "path": "factories/example-service.factory.tar",
+      "role": "factory_bundle",
+      "media_type": "application/x-ustar",
+      "sha256": "08a308198840ce633e75bd66a06160d217912280d838db02a4b8479fdafa4c75",
+      "size": 61440
+    },
+    {
+      "path": "improvement/candidate-spec.json",
+      "role": "candidate_specification",
+      "media_type": "application/json",
+      "sha256": "99e0388de57dd4809086c8bbaa7589a55e7e57668426ed8bc35862d4b8dfb26a",
+      "size": 2694
+    },
+    {
+      "path": "improvement/candidate.json",
+      "role": "improvement_candidate",
+      "media_type": "application/json",
+      "sha256": "a06df3605e04dd555081f93a499d674483f074aa4fc343f3c342f7c99994f957",
+      "size": 2837
+    },
+    {
+      "path": "improvement/classification.json",
+      "role": "improvement_classification",
+      "media_type": "application/json",
+      "sha256": "4899b773442250e16532811ef1c995454a323a6c26b35484ff5e60c75cf146e3",
+      "size": 2998
+    },
+    {
+      "path": "improvement/evidence-return.json",
+      "role": "factory_evidence_return",
+      "media_type": "application/json",
+      "sha256": "99b53898a6559b7f095d648819028da254c2703f3d19f0f634d8c90a09789450",
+      "size": 2530
+    },
+    {
+      "path": "improvement/observation-spec.json",
+      "role": "improvement_observation_specification",
+      "media_type": "application/json",
+      "sha256": "b852f3df3ad8975e6f0f196917441ab401b1532bd32355e5e8dbfe14f294c16d",
+      "size": 1233
+    },
+    {
+      "path": "improvement/observation.json",
+      "role": "improvement_observation",
+      "media_type": "application/json",
+      "sha256": "9ab1a9ce7376811e21b9405fb93f70547e3a914518c81819faaf1082f6928135",
+      "size": 2935
+    },
+    {
+      "path": "improvement/proposal-spec.json",
+      "role": "improvement_proposal_specification",
+      "media_type": "application/json",
+      "sha256": "5ffb7fb09f6c5935843c3dd6eb203d5ba3a652a1f4f45e9fa807dde6366e15a4",
+      "size": 1118
+    },
+    {
+      "path": "improvement/proposal.json",
+      "role": "improvement_proposal",
+      "media_type": "application/json",
+      "sha256": "7af4ec3e98ff15f633c675a616a78f7748b5d739bc3cdfda8fa49cec61fada5d",
+      "size": 2945
+    },
+    {
+      "path": "improvement/validation-plan-spec.json",
+      "role": "validation_plan_specification",
+      "media_type": "application/json",
+      "sha256": "72777bd1f10bea65f97ec195da4b37c49c623d5934971bb2af91fde008028bca",
+      "size": 4768
+    },
+    {
+      "path": "improvement/validation-plan.json",
+      "role": "validation_plan",
+      "media_type": "application/json",
+      "sha256": "3d3ca036d6a85bf0c88dfcb05451afda1628c16109dad6fd9c9e5d1b5d996014",
+      "size": 8726
+    },
+    {
+      "path": "policies/improvement-classification.json",
+      "role": "improvement_classification_policy",
+      "media_type": "application/json",
+      "sha256": "91e5e912ff8c5751a0f40af9b92beddf0ffd7e801103f77b592beb2b08d376f2",
+      "size": 1314
+    },
+    {
+      "path": "policies/runtime-qualification.json",
+      "role": "runtime_qualification_policy",
+      "media_type": "application/json",
+      "sha256": "4fd359cc6dfe3eb3b555eb26a3453939fde34efd8d65a281a81dd34041468e9a",
+      "size": 1746
+    },
+    {
+      "path": "portfolio/definition.json",
+      "role": "factory_portfolio_definition",
+      "media_type": "application/json",
+      "sha256": "c993c7ecd677898d944b6abb430ca22d39e9cc48dc67f9ab8c528381ae910d8a",
+      "size": 1376
+    },
+    {
+      "path": "portfolio/plan.json",
+      "role": "factory_portfolio_plan",
+      "media_type": "application/json",
+      "sha256": "c87a525752d35682546745ec6562c54265150eedc8adf149bf9ef73321f01525",
+      "size": 5914
+    },
+    {
+      "path": "qualification/plan.json",
+      "role": "qualification_plan",
+      "media_type": "application/json",
+      "sha256": "3401c7d615c5ac75b86eb5dd1676f6d1403740955f1d47370d264348d9bad922",
+      "size": 5657
+    },
+    {
+      "path": "runtime/evidence-pack.tar",
+      "role": "runtime_evidence_pack",
+      "media_type": "application/x-ustar",
+      "sha256": "92357de9906842bdfaa14d2056173f24113f686e108d74ce44e7685d4b344759",
+      "size": 20480
+    },
+    {
+      "path": "schemas/factory-improvement-validation-pack-manifest.schema.json",
+      "role": "manifest_schema",
+      "media_type": "application/json",
+      "sha256": "6558043125427d6ca6342f7d143bf0768e349738e73ad5287b6b4ad8cea54148",
+      "size": 10218
+    }
+  ],
+  "factories": [
+    {
+      "position": 0,
+      "id": "example-control",
+      "class": "control_factory",
+      "path": "factories/example-control.factory.tar",
+      "bundle_sha256": "9b777fa3874485672a30b2a5f7e6db6e2895dfbd228767aded85898216c7db3c"
+    },
+    {
+      "position": 1,
+      "id": "example-product",
+      "class": "economic_factory",
+      "path": "factories/example-product.factory.tar",
+      "bundle_sha256": "d4918fd16f55b907a0b2b9734422d7106d3030a511e5cae5d6efc1cb7b253aba"
+    },
+    {
+      "position": 2,
+      "id": "example-service",
+      "class": "economic_factory",
+      "path": "factories/example-service.factory.tar",
+      "bundle_sha256": "08a308198840ce633e75bd66a06160d217912280d838db02a4b8479fdafa4c75"
+    }
+  ],
+  "validation_summary": {
+    "validation_step_count": 8,
+    "required_evidence_count": 12,
+    "missing_evidence_count": 12,
+    "executed_steps": 0,
+    "passed_steps": 0,
+    "failed_steps": 0,
+    "candidate_implementation_bound": false,
+    "ready_for_validation_execution": false,
+    "validation_execution_authorized": false
+  },
+  "pack_boundary": {
+    "canonical_archive": true,
+    "portable_validation_inputs": true,
+    "all_input_digests_verified": true,
+    "nested_archives_verified": true,
+    "complete_candidate_chain_reverified": true,
+    "validation_plan_reverified": true,
+    "candidate_artifact_untrusted": true,
+    "contains_executable_commands": false,
+    "candidate_implementation_embedded": false,
+    "validation_stage_evidence_embedded": false,
+    "input_pack_verifier_implementation_embedded": false,
+    "verifier_execution_environment_reproduced": false,
+    "network_access_required": false,
+    "live_production_credentials_required": false,
+    "live_production_state_required": false,
+    "content_safety_scanned": false,
+    "secret_absence_proved": false,
+    "artifact_semantic_truth_verified": false,
+    "validation_executed": false,
+    "ready_for_validation_execution": false,
+    "validation_execution_authorized": false,
+    "owner_policy_approval_obtained": false,
+    "shared_promotion_eligible": false,
+    "promotion_authorized": false,
+    "rollout_authorized": false,
+    "activation_authorized": false,
+    "execution_authorized": false,
+    "cross_factory_effects_authorized": false
+  }
+}

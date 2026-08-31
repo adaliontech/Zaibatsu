@@ -160,6 +160,7 @@ Factory outcomes return evidence to Zaibatsu:
 ```text
 run -> observation/failure -> evidence -> classified improvement candidate
     -> exact candidate contract -> non-executing validation plan
+    -> portable canonical validation inputs
     -> shared module/template/gate implementation
     -> deterministic validation
     -> owner-reviewed promotion -> eligible factory rollout with rollback
@@ -169,10 +170,12 @@ Today, evidence capture, route binding, non-authorizing proposal recording,
 structural observation normalization, and deterministic workflow/type
 classification for validation planning, exact non-executable candidate
 binding, and deterministic non-executing validation planning are operational
-at bounded public-kit scope. The checked plan has eight `not_run` stages,
-twelve missing evidence artifacts, and zero executed steps. Content-safety
-results, semantic validation, implementation, validation execution,
-shared-template promotion, and cross-factory rollout are not deployed.
+at bounded public-kit scope. The plan's complete input chain can also be
+reproduced as one 21-member canonical archive for independent data
+verification. The checked plan has eight `not_run` stages, twelve missing
+evidence artifacts, and zero executed steps. Content-safety results, semantic
+validation, implementation, validation execution, shared-template promotion,
+and cross-factory rollout are not deployed.
 Recursive improvement means reviewed versioned learning, not self-modifying
 production authority.
 
@@ -350,6 +353,12 @@ The public package can now reject claims or architectures in which:
   and missing-evidence enumeration. All stages are `not_run`; it proves no
   implementation, validation result, approval, promotion, rollout, activation,
   execution, or effect.
+- The public validation-input pack makes those exact inputs portable and
+  recursively reverifiable. It does not carry its verifier runtime or
+  environment, an implementation, stage evidence, validation success,
+  approval, promotion, rollout, activation, execution, or effects. It needs no
+  live production credential or state, but does not content-scan arbitrary
+  embedded evidence or prove secret absence.
 - The public signed receipt is a cryptographic fixture, not operational runtime
   evidence. Registry selection and the assessment clock remain evaluator trust
   inputs; verifier assertions and detached evidence artifacts are not rerun or

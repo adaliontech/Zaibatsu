@@ -47,6 +47,7 @@ Zaibatsu deliberately separates fourteen questions:
 | [`policies/improvement-classification-v1.json`](../policies/improvement-classification-v1.json) plus [`examples/economic-factory.improvement-classification.json`](../examples/economic-factory.improvement-classification.json) | Does the exact proposal/observation pair meet deterministic workflow/type rules for validation planning, and which validation, promotion, rollout, and effect authorities remain false? |
 | [`examples/economic-factory.improvement-candidate-spec.json`](../examples/economic-factory.improvement-candidate-spec.json) plus [`examples/economic-factory.improvement-candidate.json`](../examples/economic-factory.improvement-candidate.json) | Which exact canonical non-executable candidate contract matches that eligible classification, and which safety, semantic, implementation, validation, promotion, and effect claims remain false? |
 | [`examples/economic-factory.improvement-validation-plan-spec.json`](../examples/economic-factory.improvement-validation-plan-spec.json) plus [`examples/economic-factory.improvement-validation-plan.json`](../examples/economic-factory.improvement-validation-plan.json) | Which fixed validation stages and content-addressed evidence would the exact candidate require, what remains missing, and which execution and promotion authorities remain false? |
+| [`examples/economic-factory.improvement-validation-pack-manifest.json`](../examples/economic-factory.improvement-validation-pack-manifest.json) | Which exact candidate-chain, portfolio, qualification, nested-pack, schema, and factory-bundle bytes form the portable input set for independent plan re-verification? |
 | [`examples/economic-factory.rebuild-plan.json`](../examples/economic-factory.rebuild-plan.json) | In which dependency order would a qualified factory be rebuilt, which direct and upstream blockers stop each action, and which separate gates still deny activation? |
 
 The validator requires the factory registry and shared component maturities to
@@ -184,6 +185,34 @@ existing artifacts. Planning proves only chain re-verification, candidate
 identity and target binding, fixed ordering, and missing-evidence enumeration.
 It grants no validation success, approval, promotion, rollout, activation,
 execution, or cross-factory authority.
+
+## Portable improvement-validation inputs
+
+The validation-input pack closes a data-portability gap without crossing into
+execution. Its canonical USTAR carries the validation plan and specification,
+candidate and specification, classification and policy, proposal and
+specification, observation and specification, evidence return, portfolio plan
+and definition, qualification plan and policy, nested runtime-evidence pack,
+immutable manifest schema, and all three portfolio-ordered factory bundles.
+
+The manifest content-addresses all 20 non-manifest members and repeats the
+verified factory order and the plan's exact 8-stage, 12-missing-evidence
+summary. The pack verifier needs only the archive as data: it bounds and parses
+without extraction, validates the pinned schema, verifies each nested archive,
+replays the complete candidate-chain verifier, reconstructs the manifest, and
+requires byte-identical canonical archive bytes. Reordering the caller's
+bundle arguments cannot change the output.
+
+This is not a hermetic verifier distribution. The archive does not carry the
+v1.17 verifier implementation, reproduce Python or operating-system state,
+contain a candidate implementation, or supply validation-stage evidence.
+Network and live production credentials or state are unnecessary for data
+verification, but a separately obtained trusted Zaibatsu v1.17 verifier
+environment is still required. Because arbitrary signed evidence materials
+are preserved as bytes rather than content-scanned, the generic pack contract
+does not prove secret absence. Nothing in the pack runs a stage or grants
+readiness, approval, promotion, rollout, activation, execution, or
+cross-factory authority.
 
 ## Deterministic module composition
 

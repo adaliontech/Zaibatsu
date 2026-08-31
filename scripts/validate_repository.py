@@ -93,6 +93,12 @@ from factory_improvement_validation_plan import (
     validate_factory_improvement_validation_plan_spec,
     verify_factory_improvement_validation_plan_for_inputs,
 )
+from factory_improvement_validation_pack import (
+    EXAMPLE_VALIDATION_PACK_MANIFEST_PATH,
+    VALIDATION_PACK_MANIFEST_SCHEMA_REFERENCE,
+    factory_improvement_validation_pack_for_inputs,
+    verify_factory_improvement_validation_pack,
+)
 from factory_portfolio import (
     EXAMPLE_PORTFOLIO_PATH,
     EXAMPLE_PORTFOLIO_PLAN_PATH,
@@ -213,6 +219,7 @@ REQUIRED_FILES = (
     "examples/economic-factory.improvement-candidate.json",
     "examples/economic-factory.improvement-validation-plan-spec.json",
     "examples/economic-factory.improvement-validation-plan.json",
+    "examples/economic-factory.improvement-validation-pack-manifest.json",
     "examples/control-factory.json",
     "examples/service-factory.json",
     "examples/factory-portfolio.json",
@@ -251,6 +258,7 @@ REQUIRED_FILES = (
     "schemas/factory-improvement-candidate.schema.json",
     "schemas/factory-improvement-validation-plan-spec.schema.json",
     "schemas/factory-improvement-validation-plan.schema.json",
+    "schemas/factory-improvement-validation-pack-manifest.schema.json",
     "schemas/factory-plan.schema.json",
     "schemas/factory-portfolio.schema.json",
     "schemas/factory-portfolio-plan.schema.json",
@@ -281,6 +289,7 @@ REQUIRED_FILES = (
     "scripts/factory_improvement_classification.py",
     "scripts/factory_improvement_candidate.py",
     "scripts/factory_improvement_validation_plan.py",
+    "scripts/factory_improvement_validation_pack.py",
     "scripts/factory_portfolio.py",
     "scripts/factory_qualification.py",
     "scripts/factory_rebuild.py",
@@ -310,7 +319,7 @@ ARCHITECTURE_SCHEMA_VERSION = "zaibatsu.architecture.v1"
 FACTORY_MODEL_SCHEMA_VERSION = "zaibatsu.factory-model.v1"
 READINESS_SCHEMA_VERSION = "zaibatsu.submission-readiness.v1"
 FACTORY_DEFINITION_SCHEMA_VERSION = "zaibatsu.factory-definition.v2"
-INTEGRATED_TEST_COUNT = 252
+INTEGRATED_TEST_COUNT = 260
 LATEST_VALIDATED_RELEASE_TEST_COUNT = 252
 DROID_FACTORY_CLI_VERSION = "0.206.0"
 DROID_SESSION_REFERENCE = "46f941a9-82f8-4df3-a45c-b8158996360b"
@@ -388,6 +397,9 @@ CONTRACT_SCHEMA_REFERENCES = {
     ),
     "examples/economic-factory.improvement-validation-plan.json": (
         IMPROVEMENT_VALIDATION_PLAN_SCHEMA_REFERENCE
+    ),
+    "examples/economic-factory.improvement-validation-pack-manifest.json": (
+        VALIDATION_PACK_MANIFEST_SCHEMA_REFERENCE
     ),
     "examples/economic-factory.bundle-manifest.json": BUNDLE_MANIFEST_SCHEMA_REFERENCE,
     "examples/economic-factory.plan.json": FACTORY_PLAN_SCHEMA_REFERENCE,
@@ -467,6 +479,9 @@ REMOTE_SCHEMA_LOCAL_PATHS = {
     ),
     "examples/economic-factory.improvement-validation-plan.json": (
         "schemas/factory-improvement-validation-plan.schema.json"
+    ),
+    "examples/economic-factory.improvement-validation-pack-manifest.json": (
+        "schemas/factory-improvement-validation-pack-manifest.schema.json"
     ),
     "examples/economic-factory.bundle-manifest.json": (
         "schemas/factory-bundle-manifest.schema.json"
@@ -1606,6 +1621,7 @@ def validate_submission_readiness(data: Any) -> list[str]:
                     "examples/economic-factory.improvement-candidate.json",
                     "examples/economic-factory.improvement-validation-plan-spec.json",
                     "examples/economic-factory.improvement-validation-plan.json",
+                    "examples/economic-factory.improvement-validation-pack-manifest.json",
                     "policies/improvement-classification-v1.json",
                     "policies/runtime-evidence-verifiers-v1.json",
                     "policies/runtime-qualification-v1.json",
@@ -2025,7 +2041,10 @@ def validate_contract_schema_files(root: Path = ROOT) -> list[str]:
         if schema.get("$schema") != "https://json-schema.org/draft/2020-12/schema":
             errors.append(f"{relative}: project-owned schema must declare JSON Schema 2020-12")
         schema_release = (
-            "v1.16.0"
+            "v1.17.0"
+            if schema_path.name
+            == "factory-improvement-validation-pack-manifest.schema.json"
+            else "v1.16.0"
             if schema_path.name
             in {
                 "factory-improvement-validation-plan-spec.schema.json",
@@ -2171,6 +2190,7 @@ def main() -> int:
     improvement_candidate: Any = None
     improvement_validation_plan_spec: Any = None
     improvement_validation_plan: Any = None
+    improvement_validation_pack_manifest: Any = None
     portfolio_document: Any = None
     portfolio_plan_document: Any = None
     portfolio_bundles: list[bytes] = []
@@ -2776,6 +2796,81 @@ def main() -> int:
                     )
                 )
     try:
+        improvement_validation_pack_manifest = load_json_file(
+            EXAMPLE_VALIDATION_PACK_MANIFEST_PATH
+        )
+    except (OSError, RecursionError, ValueError) as exc:
+        errors.append(
+            "cannot load example factory improvement-validation input-pack "
+            f"manifest: {exc}"
+        )
+    else:
+        validation_pack_inputs = (
+            improvement_validation_plan,
+            improvement_validation_plan_spec,
+            improvement_candidate,
+            improvement_candidate_spec,
+            improvement_classification,
+            improvement_classification_policy,
+            improvement_proposal,
+            improvement_proposal_spec,
+            improvement_observation,
+            improvement_observation_spec,
+            evidence_return_document,
+            portfolio_plan_document,
+            portfolio_document,
+            qualification_plan,
+            qualification_policy,
+        )
+        if (
+            all(isinstance(value, dict) for value in validation_pack_inputs)
+            and len(portfolio_bundles) == len(PORTFOLIO_FACTORY_PATHS)
+            and runtime_evidence_pack is not None
+        ):
+            pack_errors, validation_input_pack, generated_manifest = (
+                factory_improvement_validation_pack_for_inputs(
+                    improvement_validation_plan,
+                    improvement_validation_plan_spec,
+                    improvement_candidate,
+                    improvement_candidate_spec,
+                    improvement_classification,
+                    improvement_classification_policy,
+                    improvement_proposal,
+                    improvement_proposal_spec,
+                    improvement_observation,
+                    improvement_observation_spec,
+                    evidence_return_document,
+                    portfolio_plan_document,
+                    portfolio_document,
+                    portfolio_bundles,
+                    runtime_evidence_pack,
+                    qualification_plan,
+                    qualification_policy,
+                )
+            )
+            errors.extend(
+                f"improvement-validation input pack: {error}"
+                for error in pack_errors
+            )
+            if generated_manifest != improvement_validation_pack_manifest:
+                errors.append(
+                    "checked improvement-validation input-pack manifest does not "
+                    "match builder"
+                )
+            if validation_input_pack is not None:
+                pack_verify_errors, verified_validation_pack = (
+                    verify_factory_improvement_validation_pack(validation_input_pack)
+                )
+                errors.extend(
+                    f"improvement-validation input pack: {error}"
+                    for error in pack_verify_errors
+                )
+                if verified_validation_pack != improvement_validation_pack_manifest:
+                    errors.append(
+                        "verified improvement-validation input-pack manifest does "
+                        "not match checked example"
+                    )
+    try:
         runtime_assessment = load_runtime_assessment(
             EXAMPLE_RUNTIME_ASSESSMENT_PATH
         )
@@ -2858,7 +2953,8 @@ def main() -> int:
         "runtime-evidence pack, route-bound evidence return, evidence-bound "
         "improvement proposal, structurally normalized observation, "
         "validation-planning classification, bound candidate contract, "
-        "non-executing improvement validation plan, and non-executing rebuild "
+        "non-executing improvement validation plan, portable validation-input "
+        "pack, and non-executing rebuild "
         "DAG checked"
     )
     print(f"- {len(EVIDENCE_CONTRACTS)} evidence receipts checked")

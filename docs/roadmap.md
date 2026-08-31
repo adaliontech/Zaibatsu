@@ -242,6 +242,12 @@ authority grant or hard dependency.
   the bound artifact and enumerates content safety, secret absence, schema,
   deterministic behavior, reporting-factory and independent regressions,
   rollback, and cross-factory privilege review without running them;
+- preserve the portable validation-input pack that carries that plan, its
+  complete source chain, nested runtime evidence, and portfolio bundles as
+  canonical bytes while explicitly omitting the verifier runtime,
+  implementation, stage evidence, execution, and authority; require no live
+  production credential or state while keeping secret absence explicitly
+  unproved until a content-safety preflight exists;
 - test it against the reporting factory and independent regression fixtures;
 - require owner/policy promotion and an eligible-factory rollout plan;
 - retain rollback and prove no cross-factory privilege expansion;

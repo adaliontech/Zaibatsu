@@ -1,0 +1,239 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.17.0/schemas/factory-improvement-validation-pack-manifest.schema.json",
+  "title": "Zaibatsu Factory Improvement Validation Input-Pack Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_schema", "schema_version", "source", "files", "factories", "validation_summary", "pack_boundary"],
+  "properties": {
+    "contract_schema": {"const": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.17.0/schemas/factory-improvement-validation-pack-manifest.schema.json"},
+    "schema_version": {"const": "zaibatsu.factory-improvement-validation-pack-manifest.v1"},
+    "source": {"$ref": "#/$defs/source"},
+    "files": {
+      "type": "array",
+      "minItems": 19,
+      "maxItems": 81,
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/file"},
+      "allOf": [
+        {"contains": {"type": "object", "properties": {"role": {"const": "manifest_schema"}}}, "minContains": 1, "maxContains": 1},
+        {"contains": {"type": "object", "properties": {"role": {"const": "validation_plan"}}}, "minContains": 1, "maxContains": 1},
+        {"contains": {"type": "object", "properties": {"role": {"const": "validation_plan_specification"}}}, "minContains": 1, "maxContains": 1},
+        {"contains": {"type": "object", "properties": {"role": {"const": "improvement_candidate"}}}, "minContains": 1, "maxContains": 1},
+        {"contains": {"type": "object", "properties": {"role": {"const": "candidate_specification"}}}, "minContains": 1, "maxContains": 1},
+        {"contains": {"type": "object", "properties": {"role": {"const": "improvement_classification"}}}, "minContains": 1, "maxContains": 1},
+        {"contains": {"type": "object", "properties": {"role": {"const": "improvement_classification_policy"}}}, "minContains": 1, "maxContains": 1},
+        {"contains": {"type": "object", "properties": {"role": {"const": "improvement_proposal"}}}, "minContains": 1, "maxContains": 1},
+        {"contains": {"type": "object", "properties": {"role": {"const": "improvement_proposal_specification"}}}, "minContains": 1, "maxContains": 1},
+        {"contains": {"type": "object", "properties": {"role": {"const": "improvement_observation"}}}, "minContains": 1, "maxContains": 1},
+        {"contains": {"type": "object", "properties": {"role": {"const": "improvement_observation_specification"}}}, "minContains": 1, "maxContains": 1},
+        {"contains": {"type": "object", "properties": {"role": {"const": "factory_evidence_return"}}}, "minContains": 1, "maxContains": 1},
+        {"contains": {"type": "object", "properties": {"role": {"const": "factory_portfolio_plan"}}}, "minContains": 1, "maxContains": 1},
+        {"contains": {"type": "object", "properties": {"role": {"const": "factory_portfolio_definition"}}}, "minContains": 1, "maxContains": 1},
+        {"contains": {"type": "object", "properties": {"role": {"const": "qualification_plan"}}}, "minContains": 1, "maxContains": 1},
+        {"contains": {"type": "object", "properties": {"role": {"const": "runtime_qualification_policy"}}}, "minContains": 1, "maxContains": 1},
+        {"contains": {"type": "object", "properties": {"role": {"const": "runtime_evidence_pack"}}}, "minContains": 1, "maxContains": 1},
+        {"contains": {"type": "object", "properties": {"role": {"const": "factory_bundle"}}}, "minContains": 2, "maxContains": 64}
+      ]
+    },
+    "factories": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 64,
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/factory"},
+      "allOf": [
+        {"contains": {"type": "object", "properties": {"class": {"const": "control_factory"}}}, "minContains": 1, "maxContains": 1},
+        {"contains": {"type": "object", "properties": {"class": {"const": "economic_factory"}}}, "minContains": 1, "maxContains": 63}
+      ]
+    },
+    "validation_summary": {"$ref": "#/$defs/validation_summary"},
+    "pack_boundary": {"$ref": "#/$defs/pack_boundary"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "id": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$", "minLength": 1, "maxLength": 64},
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "factory_improvement_validation_plan_sha256",
+        "validation_plan_specification_sha256",
+        "factory_improvement_candidate_sha256",
+        "candidate_specification_sha256",
+        "candidate_artifact_sha256",
+        "factory_improvement_classification_sha256",
+        "improvement_classification_policy_sha256",
+        "factory_improvement_proposal_sha256",
+        "improvement_proposal_specification_sha256",
+        "factory_improvement_observation_sha256",
+        "improvement_observation_specification_sha256",
+        "factory_evidence_return_sha256",
+        "factory_portfolio_plan_sha256",
+        "portfolio_definition_sha256",
+        "factory_bundle_set_sha256",
+        "runtime_evidence_pack_sha256",
+        "qualification_plan_sha256",
+        "qualification_policy_id",
+        "qualification_policy_sha256",
+        "reporting_factory",
+        "control_factory"
+      ],
+      "properties": {
+        "factory_improvement_validation_plan_sha256": {"$ref": "#/$defs/sha256"},
+        "validation_plan_specification_sha256": {"$ref": "#/$defs/sha256"},
+        "factory_improvement_candidate_sha256": {"$ref": "#/$defs/sha256"},
+        "candidate_specification_sha256": {"$ref": "#/$defs/sha256"},
+        "candidate_artifact_sha256": {"$ref": "#/$defs/sha256"},
+        "factory_improvement_classification_sha256": {"$ref": "#/$defs/sha256"},
+        "improvement_classification_policy_sha256": {"$ref": "#/$defs/sha256"},
+        "factory_improvement_proposal_sha256": {"$ref": "#/$defs/sha256"},
+        "improvement_proposal_specification_sha256": {"$ref": "#/$defs/sha256"},
+        "factory_improvement_observation_sha256": {"$ref": "#/$defs/sha256"},
+        "improvement_observation_specification_sha256": {"$ref": "#/$defs/sha256"},
+        "factory_evidence_return_sha256": {"$ref": "#/$defs/sha256"},
+        "factory_portfolio_plan_sha256": {"$ref": "#/$defs/sha256"},
+        "portfolio_definition_sha256": {"$ref": "#/$defs/sha256"},
+        "factory_bundle_set_sha256": {"$ref": "#/$defs/sha256"},
+        "runtime_evidence_pack_sha256": {"$ref": "#/$defs/sha256"},
+        "qualification_plan_sha256": {"$ref": "#/$defs/sha256"},
+        "qualification_policy_id": {"$ref": "#/$defs/id"},
+        "qualification_policy_sha256": {"$ref": "#/$defs/sha256"},
+        "reporting_factory": {"$ref": "#/$defs/id"},
+        "control_factory": {"$ref": "#/$defs/id"}
+      }
+    },
+    "file": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "role", "media_type", "sha256", "size"],
+      "properties": {
+        "path": {"type": "string", "pattern": "^(?!.*(?:^|/)\\.{1,2}(?:/|$))[a-z0-9][a-z0-9._-]*(?:/[a-z0-9][a-z0-9._-]*)*$", "minLength": 1, "maxLength": 256},
+        "role": {
+          "enum": [
+            "manifest_schema",
+            "validation_plan",
+            "validation_plan_specification",
+            "improvement_candidate",
+            "candidate_specification",
+            "improvement_classification",
+            "improvement_classification_policy",
+            "improvement_proposal",
+            "improvement_proposal_specification",
+            "improvement_observation",
+            "improvement_observation_specification",
+            "factory_evidence_return",
+            "factory_portfolio_plan",
+            "factory_portfolio_definition",
+            "qualification_plan",
+            "runtime_qualification_policy",
+            "runtime_evidence_pack",
+            "factory_bundle"
+          ]
+        },
+        "media_type": {"enum": ["application/json", "application/x-ustar"]},
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "size": {"type": "integer", "minimum": 1, "maximum": 16777216}
+      },
+      "allOf": [
+        {
+          "if": {"type": "object", "properties": {"role": {"enum": ["runtime_evidence_pack", "factory_bundle"]}}},
+          "then": {"type": "object", "properties": {"media_type": {"const": "application/x-ustar"}}},
+          "else": {"type": "object", "properties": {"media_type": {"const": "application/json"}}}
+        }
+      ]
+    },
+    "factory": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["position", "id", "class", "path", "bundle_sha256"],
+      "properties": {
+        "position": {"type": "integer", "minimum": 0, "maximum": 63},
+        "id": {"$ref": "#/$defs/id"},
+        "class": {"enum": ["control_factory", "economic_factory"]},
+        "path": {"type": "string", "pattern": "^factories/[a-z0-9]+(?:-[a-z0-9]+)*\\.factory\\.tar$", "maxLength": 128},
+        "bundle_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "validation_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["validation_step_count", "required_evidence_count", "missing_evidence_count", "executed_steps", "passed_steps", "failed_steps", "candidate_implementation_bound", "ready_for_validation_execution", "validation_execution_authorized"],
+      "properties": {
+        "validation_step_count": {"const": 8},
+        "required_evidence_count": {"const": 12},
+        "missing_evidence_count": {"const": 12},
+        "executed_steps": {"const": 0},
+        "passed_steps": {"const": 0},
+        "failed_steps": {"const": 0},
+        "candidate_implementation_bound": {"const": false},
+        "ready_for_validation_execution": {"const": false},
+        "validation_execution_authorized": {"const": false}
+      }
+    },
+    "pack_boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "canonical_archive",
+        "portable_validation_inputs",
+        "all_input_digests_verified",
+        "nested_archives_verified",
+        "complete_candidate_chain_reverified",
+        "validation_plan_reverified",
+        "candidate_artifact_untrusted",
+        "contains_executable_commands",
+        "candidate_implementation_embedded",
+        "validation_stage_evidence_embedded",
+        "input_pack_verifier_implementation_embedded",
+        "verifier_execution_environment_reproduced",
+        "network_access_required",
+        "live_production_credentials_required",
+        "live_production_state_required",
+        "content_safety_scanned",
+        "secret_absence_proved",
+        "artifact_semantic_truth_verified",
+        "validation_executed",
+        "ready_for_validation_execution",
+        "validation_execution_authorized",
+        "owner_policy_approval_obtained",
+        "shared_promotion_eligible",
+        "promotion_authorized",
+        "rollout_authorized",
+        "activation_authorized",
+        "execution_authorized",
+        "cross_factory_effects_authorized"
+      ],
+      "properties": {
+        "canonical_archive": {"const": true},
+        "portable_validation_inputs": {"const": true},
+        "all_input_digests_verified": {"const": true},
+        "nested_archives_verified": {"const": true},
+        "complete_candidate_chain_reverified": {"const": true},
+        "validation_plan_reverified": {"const": true},
+        "candidate_artifact_untrusted": {"const": true},
+        "contains_executable_commands": {"const": false},
+        "candidate_implementation_embedded": {"const": false},
+        "validation_stage_evidence_embedded": {"const": false},
+        "input_pack_verifier_implementation_embedded": {"const": false},
+        "verifier_execution_environment_reproduced": {"const": false},
+        "network_access_required": {"const": false},
+        "live_production_credentials_required": {"const": false},
+        "live_production_state_required": {"const": false},
+        "content_safety_scanned": {"const": false},
+        "secret_absence_proved": {"const": false},
+        "artifact_semantic_truth_verified": {"const": false},
+        "validation_executed": {"const": false},
+        "ready_for_validation_execution": {"const": false},
+        "validation_execution_authorized": {"const": false},
+        "owner_policy_approval_obtained": {"const": false},
+        "shared_promotion_eligible": {"const": false},
+        "promotion_authorized": {"const": false},
+        "rollout_authorized": {"const": false},
+        "activation_authorized": {"const": false},
+        "execution_authorized": {"const": false},
+        "cross_factory_effects_authorized": {"const": false}
+      }
+    }
+  }
+}

@@ -1,5 +1,31 @@
 # Changelog
 
+## 1.17.0 - 2026-08-31
+
+- Added a canonical improvement-validation input pack that carries every exact
+  input needed to independently reverify the v1.16 validation plan: its full
+  proposal-to-candidate chain, portfolio and qualification contracts, nested
+  runtime-evidence pack, and three verified factory bundles.
+- Added a strict, digest-pinned Draft 2020-12 manifest schema. The checked
+  example is a byte-reproducible 296,960-byte USTAR with 21 members and exact
+  path, role, media type, size, digest, factory-order, and validation-summary
+  bindings.
+- Added self-contained pack verification that requires no network or external
+  input files, recursively reverifies both nested archive classes, rebuilds the
+  manifest, and requires byte-identical canonical archive reconstruction.
+- Kept the boundary deliberately narrow: the pack contains portable inputs,
+  not a validation executor, verifier runtime, candidate implementation, stage
+  evidence, or authority. Verification requires no live production credential
+  or state, but does not content-scan arbitrary embedded evidence or prove
+  secret absence. All stages remain `not_run`, all twelve evidence items remain
+  `missing`, and validation, approval, promotion, rollout, activation,
+  execution, and cross-factory authority remain false.
+- Added `improvement-validation-pack` and
+  `verify-improvement-validation-pack` plus archive, nested-payload, schema,
+  replay, authority, malformed-input, bounds, ordering, deterministic rebuild,
+  and safe-I/O tests. The integrated suite now contains 260 tests and the
+  validator requires 128 files.
+
 ## 1.16.0 - 2026-08-30
 
 - Added a schema-bound improvement-validation-plan specification and exact

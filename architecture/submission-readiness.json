@@ -9,7 +9,7 @@
       "id": "public_package",
       "status": "complete",
       "required_for_submission": true,
-      "evidence": "Meta-factory, component, portable factory, content-addressed module, control-plan, bundle, closed portfolio, signed-runtime-evidence-pack, route-bound evidence-return, proposal, observation, classification, candidate, validation-plan, rebuild, readiness, and evidence contracts are enforced by the offline validator and adversarial suite",
+      "evidence": "Meta-factory, component, portable factory, content-addressed module, control-plan, bundle, closed portfolio, signed-runtime-evidence-pack, route-bound evidence-return, proposal, observation, classification, candidate, validation-plan, portable validation-input-pack, rebuild, readiness, and evidence contracts are enforced by the offline validator and adversarial suite",
       "proof": {
         "contracts": [
           "architecture/factory-model.json",
@@ -36,8 +36,9 @@
           "examples/economic-factory.improvement-classification.json",
           "examples/economic-factory.improvement-candidate-spec.json",
           "examples/economic-factory.improvement-candidate.json",
-          "examples/economic-factory.improvement-validation-plan-spec.json",
-          "examples/economic-factory.improvement-validation-plan.json",
+        "examples/economic-factory.improvement-validation-plan-spec.json",
+        "examples/economic-factory.improvement-validation-plan.json",
+        "examples/economic-factory.improvement-validation-pack-manifest.json",
           "examples/control-factory.json",
           "examples/service-factory.json",
           "examples/factory-portfolio.json",

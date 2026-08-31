@@ -18,6 +18,7 @@
 - Evidence-return proof: `python3 scripts/zaibatsu.py verify-evidence-return-record /tmp/example-product.evidence-return.json /tmp/example-portfolio.plan.json examples/factory-portfolio.json example-product /tmp/example-product.runtime-evidence.tar examples/economic-factory.qualification-plan.json policies/runtime-qualification-v1.json /tmp/example-control.factory.tar /tmp/example-product.factory.tar /tmp/example-service.factory.tar`
 - Candidate-contract binding: after creating the checked proposal, observation, and classification chain, run `python3 scripts/zaibatsu.py bind-improvement-candidate examples/economic-factory.improvement-candidate-spec.json /tmp/example-product.improvement-classification.json policies/improvement-classification-v1.json /tmp/example-product.improvement-proposal.json examples/economic-factory.improvement-proposal-spec.json /tmp/example-product.improvement-observation.json examples/economic-factory.improvement-observation-spec.json /tmp/example-product.evidence-return.json /tmp/example-portfolio.plan.json examples/factory-portfolio.json example-product /tmp/example-product.runtime-evidence.tar examples/economic-factory.qualification-plan.json policies/runtime-qualification-v1.json /tmp/example-control.factory.tar /tmp/example-product.factory.tar /tmp/example-service.factory.tar --output /tmp/example-product.improvement-candidate.json`
 - Improvement validation plan: after binding the candidate, run `python3 scripts/zaibatsu.py plan-improvement-validation examples/economic-factory.improvement-validation-plan-spec.json /tmp/example-product.improvement-candidate.json examples/economic-factory.improvement-candidate-spec.json /tmp/example-product.improvement-classification.json policies/improvement-classification-v1.json /tmp/example-product.improvement-proposal.json examples/economic-factory.improvement-proposal-spec.json /tmp/example-product.improvement-observation.json examples/economic-factory.improvement-observation-spec.json /tmp/example-product.evidence-return.json /tmp/example-portfolio.plan.json examples/factory-portfolio.json example-product /tmp/example-product.runtime-evidence.tar examples/economic-factory.qualification-plan.json policies/runtime-qualification-v1.json /tmp/example-control.factory.tar /tmp/example-product.factory.tar /tmp/example-service.factory.tar --output /tmp/example-product.improvement-validation-plan.json`
+- Portable validation inputs: pass that plan and the same chain to `python3 scripts/zaibatsu.py improvement-validation-pack ... --output /tmp/example-product.improvement-validation-inputs.tar`, then independently run `python3 scripts/zaibatsu.py verify-improvement-validation-pack /tmp/example-product.improvement-validation-inputs.tar` with no external inputs.
 - Annotated-release source lock: `python3 scripts/zaibatsu.py source-lock examples/economic-factory.json /tmp/example-product.factory.tar --release-tag v1.6.0 --output /tmp/example-product.source-lock.json`
 - Source-lock proof: `python3 scripts/zaibatsu.py verify-source-lock /tmp/example-product.source-lock.json /tmp/example-product.factory.tar`
 - Qualification requirements: `python3 scripts/zaibatsu.py qualification-plan /tmp/example-product.factory.tar --output /tmp/example-product.qualification-plan.json`
@@ -113,6 +114,14 @@ credentials, or bootstrap procedures.
   validation, use production credentials or state, accept model output as
   verification, claim an implementation or result, or grant approval,
   promotion, rollout, activation, execution, or cross-factory effects.
+- Treat an improvement-validation input pack only as a portable,
+  content-addressed copy of the plan's verified inputs. It may reverify the
+  chain and nested archives, but it does not embed the pack verifier runtime,
+  reproduce its execution environment, supply a candidate implementation or
+  validation evidence, run any stage, or grant approval, promotion, rollout,
+  activation, execution, or cross-factory effects. Verification needs no live
+  production credential or state; arbitrary embedded evidence is not
+  content-scanned, so do not claim secret absence.
 - Treat every tracked or non-ignored path as public. Opaque files, symlinks,
   and Git submodules are outside the scanner's inspectable boundary and must
   fail closed.
