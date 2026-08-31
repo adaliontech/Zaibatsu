@@ -803,6 +803,16 @@ portfolio and evidence-return regeneration, both Gitleaks modes, and the live
 tagged-schema byte check passed. GitHub reports v1.12.0 immutable, latest,
 non-draft, and non-prerelease.
 
+The v1.13 evidence-bound improvement-proposal candidate at
+`bc3381ac7889fef4b61f837d20a030cc28ee6f0a` passed 230 tests, 105-file
+validation, strict Git, both checksum-pinned Gitleaks 8.30.1 modes, ten strict
+Draft 2020-12 schemas, and byte-identical portfolio-plan, evidence-return, and
+proposal regeneration from a credential-disabled full-history clone.
+[Candidate CI](https://github.com/adaliontech/Zaibatsu/actions/runs/33358242999)
+passed independently. The proposal records exact untrusted intent while every
+classification, validation, promotion, rollout, execution, and cross-factory
+authority claim remains false.
+
 Zaibatsu is an independent project and is not affiliated with or endorsed by
 Factory AI.
 

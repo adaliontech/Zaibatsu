@@ -110,5 +110,8 @@ full-history clone, both Gitleaks modes, eight strict schemas, exact
 regeneration, replay/forgery/type/size/authority tests, and independent CI.
 Its immutable release passed roof and tag CI, a live tagged-schema byte check,
 full-history tag-clone reproduction, exact regeneration, both Gitleaks modes,
-and strict schema validation. The final clip and applicant-owned form
-submission remain.
+and strict schema validation. The v1.13 evidence-bound improvement-proposal
+candidate passes 230 tests, 105-file validation, a credential-disabled
+full-history clone, both Gitleaks modes, ten strict schemas, exact
+portfolio/return/proposal regeneration, explicit non-authorizing output, and
+independent CI. The final clip and applicant-owned form submission remain.
