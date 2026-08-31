@@ -46,8 +46,9 @@ changes.
   improvement-proposal record without presenting typed untrusted intent as
   authentication, normalization, classification, validation, approval,
   promotion, rollout, activation, execution, or cross-factory authority;
-- publish the evidence-bound structural observation-normalization and
-  deterministic validation-planning classification contracts without
+- preserve the reproduced immutable `v1.14.0` evidence-bound structural
+  observation-normalization and deterministic validation-planning
+  classification contracts without
   presenting canonical shape or workflow type as safety, semantic truth,
   merit, validation execution, approval, promotion, rollout, or authority;
 - record the Guild demo and complete applicant-owned submission materials.

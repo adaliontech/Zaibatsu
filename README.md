@@ -913,8 +913,28 @@ roof `90921a43c2eb8fda3fe74a70db06ce52a617416c`;
 [tag CI](https://github.com/adaliontech/Zaibatsu/actions/runs/33358425856), a
 credential-disabled full-history tag clone, ten strict schemas, exact
 portfolio/return/proposal regeneration, both Gitleaks modes, and two live
-tagged-schema byte checks passed. GitHub reports v1.13.0 immutable, latest,
-non-draft, and non-prerelease.
+tagged-schema byte checks passed. GitHub reports v1.13.0 immutable, non-draft,
+and non-prerelease.
+
+The v1.14 structural-observation and deterministic-classification candidate at
+`b4a34021ed6851c63f1ade291b5eb40128ea90f8` passed 241 tests, 115-file
+validation, strict Git, both checksum-pinned Gitleaks 8.30.1 modes, fourteen
+strict Draft 2020-12 schema/instance pairs, and byte-identical bundle, pack,
+observation, and classification regeneration from a credential-disabled
+full-history clone. [Candidate
+CI](https://github.com/adaliontech/Zaibatsu/actions/runs/33359925143) passed
+independently. The classification proves workflow/type eligibility for
+validation planning only; it grants no validation, approval, promotion,
+rollout, execution, or cross-factory authority. Immutable
+[v1.14.0](https://github.com/adaliontech/Zaibatsu/releases/tag/v1.14.0) uses
+annotated tag object `c417b24070ccda8b08e707c3ec786094494629d1` over evidence
+roof `aec013d84645b5d508bf914f9184e5fd34e96c28`;
+[roof CI](https://github.com/adaliontech/Zaibatsu/actions/runs/33360056494),
+[tag CI](https://github.com/adaliontech/Zaibatsu/actions/runs/33360102500), a
+credential-disabled full-history tag clone, fourteen strict schemas, exact
+artifact regeneration, both Gitleaks modes, and four live tagged-schema byte
+checks passed. GitHub reports v1.14.0 immutable, latest, non-draft, and
+non-prerelease.
 
 Zaibatsu is an independent project and is not affiliated with or endorsed by
 Factory AI.

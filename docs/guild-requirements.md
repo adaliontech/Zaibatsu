@@ -63,7 +63,7 @@ path.
 | Real public project | This repository | Public and anonymously reachable |
 | Clear README | [`README.md`](../README.md) | Complete |
 | License | [`LICENSE`](../LICENSE) | Complete |
-| Runnable quickstart | [`docs/reproducibility.md`](reproducibility.md) | Immutable v1.13.0 passed 230-test, 105-file credential-disabled full-history candidate and tag clones, candidate/roof/tag CI, both Gitleaks modes, two live-v1.13-schema byte checks, ten strict schemas, exact three-bundle portfolio-plan, evidence-return, and improvement-proposal regeneration, and non-authorizing semantic proof |
+| Runnable quickstart | [`docs/reproducibility.md`](reproducibility.md) | Immutable v1.14.0 passed 241-test, 115-file credential-disabled full-history candidate and tag clones, candidate/roof/tag CI, both Gitleaks modes, four live-v1.14-schema byte checks, fourteen strict schemas, exact bundle, pack, observation, and classification regeneration, and planning-only semantic proof |
 | Reusable value | [`examples/economic-factory.json`](../examples/economic-factory.json), [cron variant](../examples/economic-factory-cron.json), [factory portfolio](../examples/factory-portfolio.json), [evidence-return record](../examples/economic-factory.evidence-return.json), [improvement-proposal specification](../examples/economic-factory.improvement-proposal-spec.json), [evidence-bound proposal](../examples/economic-factory.improvement-proposal.json), [observation specification](../examples/economic-factory.improvement-observation-spec.json), [normalized observation](../examples/economic-factory.improvement-observation.json), [classification policy](../policies/improvement-classification-v1.json), [checked classification](../examples/economic-factory.improvement-classification.json), [`catalog/modules.json`](../catalog/modules.json), [source lock](../examples/economic-factory.source-lock.json), [qualification policy](../policies/runtime-qualification-v1.json), [signed runtime evidence](../examples/economic-factory.runtime-evidence.json), [evidence-pack manifest](../examples/economic-factory.runtime-evidence-pack-manifest.json), [runtime assessment](../examples/economic-factory.runtime-assessment.json), [rebuild plan](../examples/economic-factory.rebuild-plan.json), and [`scripts/zaibatsu.py`](../scripts/zaibatsu.py) | Another project can scaffold a fail-closed definition, reproduce and inspect self-verifying control bundles, join them into a closed evidence-only multi-factory view, bind a verified pack to its exact source and route, record typed untrusted intent, structurally normalize an evidence-bound report, deterministically classify an aligned pair for validation planning without granting validation or promotion authority, bind one bundle to exact annotated-release control sources, compare a policy-compatible module substitution, generate a missing-evidence plan, verify scoped signed assertions, package every referenced artifact and verifier descriptor, assess exact gaps and freshness, and compile verified inputs into a non-executing rebuild DAG offline |
 | Explain Factory/Droid role | [`docs/droid-session.md`](droid-session.md) | Authenticated session, scoped diff, and independent validation recorded |
 | End-to-end case study | [`docs/case-study.md`](case-study.md) | Factory-of-software-factories narrative and real Droid result complete |
@@ -120,8 +120,9 @@ validation, and both Gitleaks modes. The final clip and applicant-owned form
 submission remain.
 
 The v1.14 structural-observation and deterministic-classification candidate
-passes 241 tests, 115-file validation, a credential-disabled full-history
+passed 241 tests, 115-file validation, a credential-disabled full-history
 clone, both Gitleaks modes, fourteen strict schemas, exact observation and
 classification regeneration, explicit planning-only output, and independent
-CI. Its evidence roof and immutable release are the remaining release steps;
-the final clip and applicant-owned form submission remain external.
+CI. Its evidence roof, annotated immutable release, roof/tag CI, four
+live-schema byte checks, and full-history tag-clone reproduction also passed.
+The final clip and applicant-owned form submission remain external.

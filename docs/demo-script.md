@@ -1,6 +1,6 @@
 # Demo script
 
-Use only a full-history fresh clone of immutable `v1.13.0` after its release
+Use only a full-history fresh clone of immutable `v1.14.0` after its release
 proof passes. Do not show private terminals, history, settings,
 infrastructure, model credentials, notifications, or personal data. Lead with
 the real Factory
@@ -296,7 +296,7 @@ make validate
 > evidence, force-added ignored files, misleading media suffixes, and premature
 > readiness.
 
-Pause on the final 230-test pass and 105-file validator summary.
+Pause on the final 241-test pass and 115-file validator summary.
 
 ### 2:05–2:30 — Honest current boundary
 
@@ -312,7 +312,7 @@ Open `docs/implementation-status.md`.
 
 ## Before recording
 
-1. Clone the immutable `v1.13.0` tag with full history into a new temporary
+1. Clone the immutable `v1.14.0` tag with full history into a new temporary
    directory after its release proof passes. Do not use `--depth 1`; source-lock
    verification requires the referenced annotated `v1.6.0` tag and objects.
 2. Increase terminal font size and hide unrelated tabs and notifications.
@@ -323,7 +323,7 @@ Open `docs/implementation-status.md`.
 
 ## Capture checklist
 
-- [ ] Repository URL and `v1.13.0` tag visible once.
+- [ ] Repository URL and `v1.14.0` tag visible once.
 - [ ] Real Factory/Droid session receipt and shipped diff visible first.
 - [ ] Pre-change gap and adversarial post-change result are understandable.
 - [ ] Portable factory scaffold and validation succeed on screen.
@@ -343,7 +343,11 @@ Open `docs/implementation-status.md`.
 - [ ] Rebuild-plan verification shows nine blocked actions, four separate gates,
       and false execution, activation, deployment, and recovery authority.
 - [ ] “The factory of software factories” hierarchy is visible.
-- [ ] `make validate` shows all 230 tests and 105 contract files passing.
+- [ ] Observation verification shows canonical structure without claiming
+      authentication, safety, truth, or merit.
+- [ ] Classification verification shows validation-planning eligibility while
+      validation, approval, promotion, rollout, and execution remain false.
+- [ ] `make validate` shows all 241 tests and 115 contract files passing.
 - [ ] Maturity limits are stated explicitly.
 - [ ] No private history, addresses, credentials, local settings, or host details.
 - [ ] Captions are included.

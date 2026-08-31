@@ -56,6 +56,12 @@ clone, both Gitleaks modes, ten strict schemas, exact
 portfolio/return/proposal regeneration, explicit non-authorizing output, and
 independent CI. Its immutable release and full-history tag clone passed
 roof/tag CI, two live-schema byte checks, exact regeneration, strict external
+validation, and both Gitleaks modes. The v1.14 structural-observation and
+deterministic-classification candidate passed 241 tests, 115-file validation,
+a credential-disabled full-history clone, both Gitleaks modes, fourteen strict
+schemas, exact artifact regeneration, planning-only assertions, and
+independent CI. Its immutable release and full-history tag clone passed
+roof/tag CI, four live-schema byte checks, exact regeneration, strict external
 validation, and both Gitleaks modes. The gates remain in
 [`architecture/submission-readiness.json`](../architecture/submission-readiness.json).
 
@@ -321,6 +327,15 @@ the public repository:
       Gitleaks modes, strict schemas, exact regeneration, and independent CI.
 - [x] Immutable v1.13.0 passes evidence-roof and tag CI, tagged-schema byte
       checks, tag-clone reproduction, and immutable-release proof.
+- [x] Structural-observation and deterministic-classification v1.14 candidate
+      passes 241 local tests, 115-file validation, four strict new schemas,
+      exact regeneration, malformed/forged-record controls, and explicit
+      planning-only semantics.
+- [x] v1.14 candidate passes a credential-disabled full-history clone, both
+      Gitleaks modes, fourteen strict schemas, exact regeneration, and
+      independent CI.
+- [x] Immutable v1.14.0 passes evidence-roof and tag CI, four tagged-schema
+      byte checks, tag-clone reproduction, and immutable-release proof.
 - [x] Public repository and article links resolve without authentication.
 - [ ] Demo clip or screenshots show a real Factory task and validation result.
 - [x] No private host, credential, recovery, or deployment detail is exposed.
