@@ -730,9 +730,12 @@ over evidence roof `b5d2b15911a34148df18bd49f94a3ced08e52ac9`;
 a credential-disabled full-history tag clone, two live-schema byte checks,
 exact portfolio regeneration, both Gitleaks modes, and strict external schema
 validation passed. GitHub reports v1.11.0 immutable, latest, non-draft, and
-non-prerelease. The v1.12 route-bound evidence-return working candidate passes
-221 local tests and 100-file validation. Public-clone, CI, tagged-schema, and
-immutable-release proofs are not yet claimed.
+non-prerelease. The v1.12 route-bound evidence-return candidate at
+`7eeb58ed132e8e32c395d0d6e2e81721cb0a83bd` passed 221 tests, 100-file
+validation, a credential-disabled full-history clone, both Gitleaks modes,
+eight strict schemas, exact regeneration, and independent
+[candidate CI](https://github.com/adaliontech/Zaibatsu/actions/runs/33356978139).
+Tagged-schema and immutable-release proofs are not yet claimed.
 
 Zaibatsu is an independent project and is not affiliated with or endorsed by
 Factory AI.

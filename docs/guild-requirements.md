@@ -105,7 +105,8 @@ Gitleaks modes, seven strict schemas, exact plan regeneration, non-authorizing
 assertions, and independent CI. Its immutable release passed roof and tag CI,
 two live-schema byte checks, full-history tag-clone reproduction, strict schema
 validation, and exact plan regeneration. The v1.12 route-bound evidence-return
-working candidate passes 221 local tests, 100-file validation, strict schema
-controls, exact regeneration, and replay/forgery/type/size/authority tests;
-public clone, CI, and release proofs remain pending. The final clip and
+candidate passes 221 tests, 100-file validation, a credential-disabled
+full-history clone, both Gitleaks modes, eight strict schemas, exact
+regeneration, replay/forgery/type/size/authority tests, and independent CI.
+Release and tagged-schema proofs remain pending. The final clip and
 applicant-owned form submission remain.
