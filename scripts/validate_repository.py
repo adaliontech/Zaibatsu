@@ -73,6 +73,16 @@ from factory_improvement_classification import (
     validate_improvement_classification_policy,
     verify_factory_improvement_classification_for_inputs,
 )
+from factory_improvement_candidate import (
+    EXAMPLE_IMPROVEMENT_CANDIDATE_PATH,
+    EXAMPLE_IMPROVEMENT_CANDIDATE_SPEC_PATH,
+    IMPROVEMENT_CANDIDATE_SCHEMA_REFERENCE,
+    IMPROVEMENT_CANDIDATE_SPEC_SCHEMA_REFERENCE,
+    load_factory_improvement_candidate,
+    load_factory_improvement_candidate_spec,
+    validate_factory_improvement_candidate_spec,
+    verify_factory_improvement_candidate_for_inputs,
+)
 from factory_portfolio import (
     EXAMPLE_PORTFOLIO_PATH,
     EXAMPLE_PORTFOLIO_PLAN_PATH,
@@ -189,6 +199,8 @@ REQUIRED_FILES = (
     "examples/economic-factory.improvement-observation-spec.json",
     "examples/economic-factory.improvement-observation.json",
     "examples/economic-factory.improvement-classification.json",
+    "examples/economic-factory.improvement-candidate-spec.json",
+    "examples/economic-factory.improvement-candidate.json",
     "examples/control-factory.json",
     "examples/service-factory.json",
     "examples/factory-portfolio.json",
@@ -223,6 +235,8 @@ REQUIRED_FILES = (
     "schemas/factory-improvement-observation.schema.json",
     "schemas/improvement-classification-policy.schema.json",
     "schemas/factory-improvement-classification.schema.json",
+    "schemas/factory-improvement-candidate-spec.schema.json",
+    "schemas/factory-improvement-candidate.schema.json",
     "schemas/factory-plan.schema.json",
     "schemas/factory-portfolio.schema.json",
     "schemas/factory-portfolio-plan.schema.json",
@@ -251,6 +265,7 @@ REQUIRED_FILES = (
     "scripts/factory_improvement_proposal.py",
     "scripts/factory_improvement_observation.py",
     "scripts/factory_improvement_classification.py",
+    "scripts/factory_improvement_candidate.py",
     "scripts/factory_portfolio.py",
     "scripts/factory_qualification.py",
     "scripts/factory_rebuild.py",
@@ -280,7 +295,7 @@ ARCHITECTURE_SCHEMA_VERSION = "zaibatsu.architecture.v1"
 FACTORY_MODEL_SCHEMA_VERSION = "zaibatsu.factory-model.v1"
 READINESS_SCHEMA_VERSION = "zaibatsu.submission-readiness.v1"
 FACTORY_DEFINITION_SCHEMA_VERSION = "zaibatsu.factory-definition.v2"
-INTEGRATED_TEST_COUNT = 241
+INTEGRATED_TEST_COUNT = 247
 LATEST_VALIDATED_RELEASE_TEST_COUNT = 241
 DROID_FACTORY_CLI_VERSION = "0.206.0"
 DROID_SESSION_REFERENCE = "46f941a9-82f8-4df3-a45c-b8158996360b"
@@ -346,6 +361,12 @@ CONTRACT_SCHEMA_REFERENCES = {
     ),
     "examples/economic-factory.improvement-classification.json": (
         IMPROVEMENT_CLASSIFICATION_SCHEMA_REFERENCE
+    ),
+    "examples/economic-factory.improvement-candidate-spec.json": (
+        IMPROVEMENT_CANDIDATE_SPEC_SCHEMA_REFERENCE
+    ),
+    "examples/economic-factory.improvement-candidate.json": (
+        IMPROVEMENT_CANDIDATE_SCHEMA_REFERENCE
     ),
     "examples/economic-factory.bundle-manifest.json": BUNDLE_MANIFEST_SCHEMA_REFERENCE,
     "examples/economic-factory.plan.json": FACTORY_PLAN_SCHEMA_REFERENCE,
@@ -413,6 +434,12 @@ REMOTE_SCHEMA_LOCAL_PATHS = {
     ),
     "examples/economic-factory.improvement-classification.json": (
         "schemas/factory-improvement-classification.schema.json"
+    ),
+    "examples/economic-factory.improvement-candidate-spec.json": (
+        "schemas/factory-improvement-candidate-spec.schema.json"
+    ),
+    "examples/economic-factory.improvement-candidate.json": (
+        "schemas/factory-improvement-candidate.schema.json"
     ),
     "examples/economic-factory.bundle-manifest.json": (
         "schemas/factory-bundle-manifest.schema.json"
@@ -1961,7 +1988,13 @@ def validate_contract_schema_files(root: Path = ROOT) -> list[str]:
         if schema.get("$schema") != "https://json-schema.org/draft/2020-12/schema":
             errors.append(f"{relative}: project-owned schema must declare JSON Schema 2020-12")
         schema_release = (
-            "v1.14.0"
+            "v1.15.0"
+            if schema_path.name
+            in {
+                "factory-improvement-candidate-spec.schema.json",
+                "factory-improvement-candidate.schema.json",
+            }
+            else "v1.14.0"
             if schema_path.name
             in {
                 "factory-improvement-observation-spec.schema.json",
@@ -2091,6 +2124,8 @@ def main() -> int:
     improvement_observation: Any = None
     improvement_classification_policy: Any = None
     improvement_classification: Any = None
+    improvement_candidate_spec: Any = None
+    improvement_candidate: Any = None
     portfolio_document: Any = None
     portfolio_plan_document: Any = None
     portfolio_bundles: list[bytes] = []
@@ -2574,6 +2609,63 @@ def main() -> int:
                     )
                 )
     try:
+        improvement_candidate_spec = load_factory_improvement_candidate_spec(
+            EXAMPLE_IMPROVEMENT_CANDIDATE_SPEC_PATH
+        )
+    except (OSError, RecursionError, ValueError) as exc:
+        errors.append(
+            "cannot load example factory improvement-candidate "
+            f"specification: {exc}"
+        )
+    else:
+        errors.extend(
+            validate_factory_improvement_candidate_spec(improvement_candidate_spec)
+        )
+        try:
+            improvement_candidate = load_factory_improvement_candidate(
+                EXAMPLE_IMPROVEMENT_CANDIDATE_PATH
+            )
+        except (OSError, RecursionError, ValueError) as exc:
+            errors.append(
+                f"cannot load example factory improvement-candidate: {exc}"
+            )
+        else:
+            if (
+                isinstance(improvement_classification, dict)
+                and isinstance(improvement_classification_policy, dict)
+                and isinstance(improvement_proposal, dict)
+                and isinstance(improvement_proposal_spec, dict)
+                and isinstance(improvement_observation, dict)
+                and isinstance(improvement_observation_spec, dict)
+                and isinstance(evidence_return_document, dict)
+                and isinstance(portfolio_document, dict)
+                and isinstance(portfolio_plan_document, dict)
+                and len(portfolio_bundles) == len(PORTFOLIO_FACTORY_PATHS)
+                and runtime_evidence_pack is not None
+                and isinstance(qualification_plan, dict)
+                and isinstance(qualification_policy, dict)
+            ):
+                errors.extend(
+                    verify_factory_improvement_candidate_for_inputs(
+                        improvement_candidate,
+                        improvement_candidate_spec,
+                        improvement_classification,
+                        improvement_classification_policy,
+                        improvement_proposal,
+                        improvement_proposal_spec,
+                        improvement_observation,
+                        improvement_observation_spec,
+                        evidence_return_document,
+                        portfolio_plan_document,
+                        portfolio_document,
+                        portfolio_bundles,
+                        "example-product",
+                        runtime_evidence_pack,
+                        qualification_plan,
+                        qualification_policy,
+                    )
+                )
+    try:
         runtime_assessment = load_runtime_assessment(
             EXAMPLE_RUNTIME_ASSESSMENT_PATH
         )
@@ -2655,7 +2747,8 @@ def main() -> int:
         "control and portfolio plans, bundle manifest, source lock, signed "
         "runtime-evidence pack, route-bound evidence return, evidence-bound "
         "improvement proposal, structurally normalized observation, "
-        "validation-planning classification, and non-executing rebuild DAG checked"
+        "validation-planning classification, bound candidate contract, and "
+        "non-executing rebuild DAG checked"
     )
     print(f"- {len(EVIDENCE_CONTRACTS)} evidence receipts checked")
     print(f"- {len(REQUIRED_FACTORY_INVARIANTS)} meta-factory invariants checked")

@@ -1,5 +1,29 @@
 # Changelog
 
+## 1.15.0 - 2026-08-30
+
+- Added a schema-bound improvement-candidate specification that embeds one
+  exact canonical shared-module, factory-template, or deterministic-gate
+  contract and preserves every later safety, semantic, regression, rollback,
+  approval, and privilege-review requirement.
+- Added an evidence-bound candidate record that fully reverifies the
+  classification, proposal, observation, evidence-return, portfolio, bundle,
+  qualification, evidence-pack, signature, allowlist, and material chain before
+  requiring exact classified-target alignment and recording the candidate
+  artifact digest and canonical byte count.
+- Kept the boundary deliberately narrow: the checked 1,130-byte gate artifact
+  is an explicitly untrusted, non-executable contract. Content safety, secret
+  absence, semantic correctness, an implementation, validation planning or
+  execution, regressions, rollback, approval, promotion, rollout, activation,
+  execution, and cross-factory effects remain false.
+- Added `bind-improvement-candidate` and `verify-improvement-candidate`, two
+  strict Draft 2020-12 schemas, checked examples, complete repository
+  re-verification, and fail-closed CLI input bounds.
+- Added requirement-weakening, authority-inflation, target-mismatch,
+  noneligible-classification, replay, refreshed-digest forgery, scalar,
+  malformed, recursive, size, order, and CLI round-trip tests. The integrated
+  suite now contains 247 tests and the validator requires 120 files.
+
 ## 1.14.0 - 2026-08-30
 
 - Added a schema-bound untrusted improvement-observation specification and

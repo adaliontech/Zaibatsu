@@ -118,6 +118,13 @@ reverifies both records and classifies an aligned pair for validation planning
 only. It creates no validation plan and proves no safety, semantic merit,
 validation execution, approval, promotion, rollout, activation, execution, or
 cross-factory effect.
+The improvement-candidate binding then joins one exact 1,130-byte canonical
+deterministic-gate contract to that eligible classification and full evidence
+chain. It proves contract identity, structure, lineage, and target alignment
+only. The artifact contains no executable implementation, and content safety,
+secret absence, semantic correctness, validation planning or execution,
+regressions, rollback, approval, promotion, rollout, activation, execution,
+and cross-factory effects remain false.
 
 The core repository works without a model or Droid credentials. For the Guild
 case study, authenticated Factory Droid used an owner-operated GGUF whose

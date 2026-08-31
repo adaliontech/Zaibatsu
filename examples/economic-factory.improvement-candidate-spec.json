@@ -1,0 +1,86 @@
+{
+  "contract_schema": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.15.0/schemas/factory-improvement-candidate-spec.schema.json",
+  "schema_version": "zaibatsu.factory-improvement-candidate-spec.v1",
+  "candidate": {
+    "id": "source-revision-binding-contract-v1",
+    "summary": "Bind an exact contract for a future deterministic gate that denies source-revision evidence when the declared revision and the content-addressed artifact revision differ.",
+    "artifact": {
+      "artifact_id": "source-revision-binding-contract-v1",
+      "artifact_type": "deterministic_gate_contract",
+      "target": {
+        "kind": "deterministic_gate",
+        "id": "source-revision-binding",
+        "operation": "add"
+      },
+      "interface": {
+        "input_contract": [
+          "declared-revision",
+          "evidence-artifact-sha256",
+          "artifact-revision"
+        ],
+        "output_contract": [
+          "decision",
+          "reason"
+        ],
+        "deterministic": true
+      },
+      "behavior": {
+        "summary": "Verify the artifact digest before comparing the exact declared revision with the revision encoded by that artifact; deny on any digest, parse, or equality failure.",
+        "checks": [
+          {
+            "position": 0,
+            "id": "artifact-digest-first",
+            "description": "Require the supplied evidence-artifact SHA-256 to match the canonical artifact bytes before reading its revision field."
+          },
+          {
+            "position": 1,
+            "id": "revision-equality",
+            "description": "Require the declared revision and the artifact revision to be exactly equal after successful artifact verification."
+          }
+        ],
+        "failure_mode": "deny"
+      },
+      "authority_boundary": {
+        "contract_only": true,
+        "contains_executable_implementation": false,
+        "reads_secrets": false,
+        "invokes_models": false,
+        "mutates_state": false,
+        "executes_operations": false,
+        "grants_authority": false
+      }
+    }
+  },
+  "binding_requirements": {
+    "classification_reverification_required": true,
+    "target_alignment_required": true,
+    "canonical_artifact_required": true,
+    "content_safety_required_before_validation_execution": true,
+    "semantic_validation_required_before_promotion": true,
+    "reporting_factory_regression_required": true,
+    "independent_regression_required": true,
+    "rollback_required": true,
+    "owner_policy_approval_required": true,
+    "cross_factory_privilege_review_required": true
+  },
+  "candidate_boundary": {
+    "candidate_artifact_untrusted": true,
+    "contains_candidate_contract": true,
+    "content_safety_scanned": false,
+    "secret_absence_proved": false,
+    "artifact_semantic_truth_verified": false,
+    "candidate_implementation_present": false,
+    "validation_plan_created": false,
+    "validation_execution_authorized": false,
+    "reporting_factory_validation_passed": false,
+    "independent_regression_validation_passed": false,
+    "rollback_plan_verified": false,
+    "owner_policy_approval_obtained": false,
+    "shared_promotion_eligible": false,
+    "promotion_authorized": false,
+    "rollout_authorized": false,
+    "activation_authorized": false,
+    "execution_authorized": false,
+    "cross_factory_effects_authorized": false
+  }
+}

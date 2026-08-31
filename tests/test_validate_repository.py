@@ -29,6 +29,7 @@ import factory_evidence_return as evidence_return
 import factory_improvement_proposal as improvement_proposal
 import factory_improvement_observation as improvement_observation
 import factory_improvement_classification as improvement_classification
+import factory_improvement_candidate as improvement_candidate
 import factory_portfolio as portfolio
 import factory_qualification as qualification
 import factory_rebuild as rebuild
@@ -2681,6 +2682,32 @@ class FactoryImprovementClassificationTests(unittest.TestCase):
         self.assertIsNotNone(classification)
         assert classification is not None
         self.classification = classification
+        self.candidate_specification = (
+            improvement_candidate.load_factory_improvement_candidate_spec()
+        )
+        candidate_errors, candidate = (
+            improvement_candidate.factory_improvement_candidate_for_inputs(
+                self.candidate_specification,
+                self.classification,
+                self.policy,
+                self.proposal,
+                self.proposal_specification,
+                self.observation,
+                self.observation_specification,
+                self.evidence_record,
+                self.portfolio_plan,
+                self.portfolio_definition,
+                self.bundles,
+                "example-product",
+                self.pack,
+                self.qualification_plan,
+                self.qualification_policy,
+            )
+        )
+        self.assertEqual([], candidate_errors)
+        self.assertIsNotNone(candidate)
+        assert candidate is not None
+        self.candidate = candidate
 
     @staticmethod
     def _refresh_digest(document: dict[str, object], field: str) -> None:
@@ -2743,6 +2770,38 @@ class FactoryImprovementClassificationTests(unittest.TestCase):
             self.qualification_policy,
         )
 
+    def _verify_candidate(
+        self,
+        record: object,
+        *,
+        specification: object | None = None,
+        classification: object | None = None,
+        policy: object | None = None,
+        bundles: object | None = None,
+    ) -> list[str]:
+        return improvement_candidate.verify_factory_improvement_candidate_for_inputs(
+            record,
+            (
+                self.candidate_specification
+                if specification is None
+                else specification
+            ),
+            self.classification if classification is None else classification,
+            self.policy if policy is None else policy,
+            self.proposal,
+            self.proposal_specification,
+            self.observation,
+            self.observation_specification,
+            self.evidence_record,
+            self.portfolio_plan,
+            self.portfolio_definition,
+            self.bundles if bundles is None else bundles,
+            "example-product",
+            self.pack,
+            self.qualification_plan,
+            self.qualification_policy,
+        )
+
     def test_checked_records_policy_and_schemas_are_exact(self) -> None:
         self.assertEqual(
             self.observation,
@@ -2752,8 +2811,13 @@ class FactoryImprovementClassificationTests(unittest.TestCase):
             self.classification,
             improvement_classification.load_factory_improvement_classification(),
         )
+        self.assertEqual(
+            self.candidate,
+            improvement_candidate.load_factory_improvement_candidate(),
+        )
         self.assertEqual([], self._verify_observation(self.observation))
         self.assertEqual([], self._verify_classification(self.classification))
+        self.assertEqual([], self._verify_candidate(self.candidate))
         for name, reference in (
             (
                 "factory-improvement-observation-spec.schema.json",
@@ -2770,6 +2834,14 @@ class FactoryImprovementClassificationTests(unittest.TestCase):
             (
                 "factory-improvement-classification.schema.json",
                 improvement_classification.IMPROVEMENT_CLASSIFICATION_SCHEMA_REFERENCE,
+            ),
+            (
+                "factory-improvement-candidate-spec.schema.json",
+                improvement_candidate.IMPROVEMENT_CANDIDATE_SPEC_SCHEMA_REFERENCE,
+            ),
+            (
+                "factory-improvement-candidate.schema.json",
+                improvement_candidate.IMPROVEMENT_CANDIDATE_SCHEMA_REFERENCE,
             ),
         ):
             with self.subTest(name=name):
@@ -3061,6 +3133,268 @@ class FactoryImprovementClassificationTests(unittest.TestCase):
         self.assertEqual([], classification_errors)
         self.assertEqual(self.classification, classification)
 
+    def test_candidate_binding_is_contract_only_and_non_authorizing(self) -> None:
+        artifact = self.candidate_specification["candidate"]["artifact"]
+        self.assertEqual(
+            composer.sha256_json(artifact),
+            self.candidate["candidate"]["artifact_sha256"],
+        )
+        self.assertIs(
+            artifact["authority_boundary"]["contains_executable_implementation"],
+            False,
+        )
+        boundary = self.candidate["binding_boundary"]
+        true_fields = {
+            "classification_chain_reverified",
+            "candidate_specification_validated",
+            "candidate_artifact_structurally_validated",
+            "candidate_target_aligned",
+            "candidate_artifact_canonical_json_bound",
+            "candidate_artifact_bound",
+        }
+        for field in true_fields:
+            self.assertIs(boundary[field], True)
+        for field in set(boundary) - true_fields:
+            self.assertIs(boundary[field], False)
+
+    def test_candidate_spec_rejects_weakened_contracts_and_bad_shapes(self) -> None:
+        for field in improvement_candidate.EXPECTED_BINDING_REQUIREMENTS:
+            mutated = copy.deepcopy(self.candidate_specification)
+            mutated["binding_requirements"][field] = False
+            errors = improvement_candidate.validate_factory_improvement_candidate_spec(
+                mutated
+            )
+            self.assertTrue(any("every later review" in error for error in errors))
+        for field in (
+            "contains_executable_implementation",
+            "reads_secrets",
+            "mutates_state",
+            "executes_operations",
+            "grants_authority",
+        ):
+            mutated = copy.deepcopy(self.candidate_specification)
+            mutated["candidate"]["artifact"]["authority_boundary"][field] = True
+            self.assertTrue(
+                improvement_candidate.validate_factory_improvement_candidate_spec(
+                    mutated
+                )
+            )
+        for field, value in (
+            ("input_contract", ["duplicate", "duplicate"]),
+            ("output_contract", []),
+            ("deterministic", 1),
+        ):
+            mutated = copy.deepcopy(self.candidate_specification)
+            mutated["candidate"]["artifact"]["interface"][field] = value
+            self.assertTrue(
+                improvement_candidate.validate_factory_improvement_candidate_spec(
+                    mutated
+                )
+            )
+        reordered = copy.deepcopy(self.candidate_specification)
+        reordered["candidate"]["artifact"]["behavior"]["checks"][0][
+            "position"
+        ] = 1
+        self.assertTrue(
+            improvement_candidate.validate_factory_improvement_candidate_spec(
+                reordered
+            )
+        )
+        open_failure = copy.deepcopy(self.candidate_specification)
+        open_failure["candidate"]["artifact"]["behavior"]["failure_mode"] = (
+            "allow"
+        )
+        self.assertTrue(
+            improvement_candidate.validate_factory_improvement_candidate_spec(
+                open_failure
+            )
+        )
+        mismatched_type = copy.deepcopy(self.candidate_specification)
+        mismatched_type["candidate"]["artifact"]["artifact_type"] = (
+            "shared_module_contract"
+        )
+        errors = improvement_candidate.validate_factory_improvement_candidate_spec(
+            mismatched_type
+        )
+        self.assertTrue(any("type must match" in error for error in errors))
+
+    def test_candidate_requires_eligible_classification_and_exact_target(self) -> None:
+        mismatched = copy.deepcopy(self.candidate_specification)
+        mismatched["candidate"]["artifact"]["target"]["id"] = "different-gate"
+        self.assertEqual(
+            [],
+            improvement_candidate.validate_factory_improvement_candidate_spec(
+                mismatched
+            ),
+        )
+        errors, record = improvement_candidate.factory_improvement_candidate_for_inputs(
+            mismatched,
+            self.classification,
+            self.policy,
+            self.proposal,
+            self.proposal_specification,
+            self.observation,
+            self.observation_specification,
+            self.evidence_record,
+            self.portfolio_plan,
+            self.portfolio_definition,
+            self.bundles,
+            "example-product",
+            self.pack,
+            self.qualification_plan,
+            self.qualification_policy,
+        )
+        self.assertIsNone(record)
+        self.assertTrue(any("target does not match" in error for error in errors))
+
+        restrictive = copy.deepcopy(self.policy)
+        restrictive["classification_rules"]["accepted_observation_kinds"] = [
+            "failure"
+        ]
+        classification_errors, rejected = (
+            improvement_classification.factory_improvement_classification_for_inputs(
+                restrictive,
+                self.proposal,
+                self.proposal_specification,
+                self.observation,
+                self.observation_specification,
+                self.evidence_record,
+                self.portfolio_plan,
+                self.portfolio_definition,
+                self.bundles,
+                "example-product",
+                self.pack,
+                self.qualification_plan,
+                self.qualification_policy,
+            )
+        )
+        self.assertEqual([], classification_errors)
+        assert rejected is not None
+        errors, record = improvement_candidate.factory_improvement_candidate_for_inputs(
+            self.candidate_specification,
+            rejected,
+            restrictive,
+            self.proposal,
+            self.proposal_specification,
+            self.observation,
+            self.observation_specification,
+            self.evidence_record,
+            self.portfolio_plan,
+            self.portfolio_definition,
+            self.bundles,
+            "example-product",
+            self.pack,
+            self.qualification_plan,
+            self.qualification_policy,
+        )
+        self.assertIsNone(record)
+        self.assertTrue(any("not eligible" in error for error in errors))
+
+    def test_candidate_replay_and_authority_forgery_fail_closed(self) -> None:
+        replacement_bundles = list(self.bundles)
+        replacement_bundles[1] = self.bundles[2]
+        self.assertTrue(
+            self._verify_candidate(
+                self.candidate,
+                bundles=replacement_bundles,
+            )
+        )
+        for field in (
+            "content_safety_scanned",
+            "artifact_semantic_truth_verified",
+            "candidate_implementation_present",
+            "validation_plan_created",
+            "promotion_authorized",
+            "execution_authorized",
+            "cross_factory_effects_authorized",
+        ):
+            forged = copy.deepcopy(self.candidate)
+            forged["binding_boundary"][field] = True
+            self._refresh_digest(
+                forged,
+                "factory_improvement_candidate_sha256",
+            )
+            errors = self._verify_candidate(forged)
+            self.assertTrue(any("must exactly match" in error for error in errors))
+
+    def test_candidate_artifact_change_rebinds_but_does_not_validate_semantics(self) -> None:
+        changed = copy.deepcopy(self.candidate_specification)
+        changed["candidate"]["artifact"]["behavior"]["summary"] = (
+            "A different untrusted candidate behavior contract."
+        )
+        self.assertEqual(
+            [],
+            improvement_candidate.validate_factory_improvement_candidate_spec(changed),
+        )
+        errors, rebound = improvement_candidate.factory_improvement_candidate_for_inputs(
+            changed,
+            self.classification,
+            self.policy,
+            self.proposal,
+            self.proposal_specification,
+            self.observation,
+            self.observation_specification,
+            self.evidence_record,
+            self.portfolio_plan,
+            self.portfolio_definition,
+            self.bundles,
+            "example-product",
+            self.pack,
+            self.qualification_plan,
+            self.qualification_policy,
+        )
+        self.assertEqual([], errors)
+        assert rebound is not None
+        self.assertNotEqual(
+            self.candidate["candidate"]["artifact_sha256"],
+            rebound["candidate"]["artifact_sha256"],
+        )
+        self.assertIs(
+            rebound["binding_boundary"]["artifact_semantic_truth_verified"],
+            False,
+        )
+        self.assertTrue(self._verify_candidate(self.candidate, specification=changed))
+
+    def test_candidate_malformed_recursive_oversized_and_reordered_inputs_fail(self) -> None:
+        for malformed in (None, [], "candidate", 0, False, {"source": []}):
+            with self.subTest(malformed=malformed):
+                self.assertTrue(self._verify_candidate(malformed))
+        recursive = copy.deepcopy(self.candidate)
+        recursive_section: dict[str, object] = {}
+        recursive_section["self"] = recursive_section
+        recursive["candidate"] = recursive_section
+        self.assertTrue(
+            any("canonical JSON" in error for error in self._verify_candidate(recursive))
+        )
+        oversized = copy.deepcopy(self.candidate)
+        oversized["candidate"]["id"] = "x" * (
+            improvement_candidate.MAX_IMPROVEMENT_CANDIDATE_BYTES
+        )
+        self._refresh_digest(oversized, "factory_improvement_candidate_sha256")
+        self.assertTrue(
+            any("size is outside" in error for error in self._verify_candidate(oversized))
+        )
+        reversed_bundles = list(reversed(self.bundles))
+        errors, rebound = improvement_candidate.factory_improvement_candidate_for_inputs(
+            self.candidate_specification,
+            self.classification,
+            self.policy,
+            self.proposal,
+            self.proposal_specification,
+            self.observation,
+            self.observation_specification,
+            self.evidence_record,
+            self.portfolio_plan,
+            self.portfolio_definition,
+            reversed_bundles,
+            "example-product",
+            self.pack,
+            self.qualification_plan,
+            self.qualification_policy,
+        )
+        self.assertEqual([], errors)
+        self.assertEqual(self.candidate, rebound)
+
     def test_cli_round_trips_and_refuses_overwrite(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:
             root = Path(temporary_directory)
@@ -3073,6 +3407,7 @@ class FactoryImprovementClassificationTests(unittest.TestCase):
             pack_path.write_bytes(self.pack)
             observation_path = root / "observation.json"
             classification_path = root / "classification.json"
+            candidate_path = root / "candidate.json"
             cli = [sys.executable, str(validator.ROOT / "scripts" / "zaibatsu.py")]
             chain = [
                 str(evidence_return.EXAMPLE_EVIDENCE_RETURN_PATH),
@@ -3161,6 +3496,53 @@ class FactoryImprovementClassificationTests(unittest.TestCase):
             self.assertEqual(0, verified.returncode, verified.stderr)
             self.assertIn("validation planning eligible: true", verified.stdout)
             self.assertIn("promotion authorized: false", verified.stdout)
+            candidate_inputs = [
+                str(improvement_candidate.EXAMPLE_IMPROVEMENT_CANDIDATE_SPEC_PATH),
+                str(classification_path),
+                *classification_inputs,
+            ]
+            create_candidate = cli + [
+                "bind-improvement-candidate",
+                *candidate_inputs,
+                "--output",
+                str(candidate_path),
+            ]
+            created = subprocess.run(
+                create_candidate,
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(0, created.returncode, created.stderr)
+            self.assertEqual(
+                self.candidate,
+                json.loads(candidate_path.read_text(encoding="utf-8")),
+            )
+            verified = subprocess.run(
+                cli
+                + [
+                    "verify-improvement-candidate",
+                    str(candidate_path),
+                    *candidate_inputs,
+                ],
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(0, verified.returncode, verified.stderr)
+            self.assertIn("candidate artifact bound: true", verified.stdout)
+            self.assertIn("candidate implementation present: false", verified.stdout)
+            refused_candidate = subprocess.run(
+                create_candidate,
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(2, refused_candidate.returncode)
+            self.assertIn("refusing to overwrite", refused_candidate.stderr)
             refused = subprocess.run(
                 create_classification,
                 check=False,
@@ -3200,6 +3582,40 @@ class FactoryImprovementClassificationTests(unittest.TestCase):
             self.assertIn("between 2 and 64 bundles", oversized_count.stderr)
             self.assertNotIn("cannot load", oversized_count.stderr)
             oversized_record = root / "oversized-classification.json"
+            oversized_candidate_count = subprocess.run(
+                cli
+                + [
+                    "bind-improvement-candidate",
+                    str(root / "missing-candidate-spec.json"),
+                    str(root / "missing-classification.json"),
+                    str(root / "missing-classification-policy.json"),
+                    str(root / "missing-proposal.json"),
+                    str(root / "missing-proposal-spec.json"),
+                    str(root / "missing-observation.json"),
+                    str(root / "missing-observation-spec.json"),
+                    str(root / "missing-return.json"),
+                    str(root / "missing-plan.json"),
+                    str(root / "missing-portfolio.json"),
+                    "example-product",
+                    str(root / "missing-pack.tar"),
+                    str(root / "missing-qualification-plan.json"),
+                    str(root / "missing-qualification-policy.json"),
+                    *(
+                        str(root / "missing-bundle.tar")
+                        for _ in range(portfolio.MAX_FACTORIES + 1)
+                    ),
+                ],
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(2, oversized_candidate_count.returncode)
+            self.assertIn(
+                "between 2 and 64 bundles",
+                oversized_candidate_count.stderr,
+            )
+            self.assertNotIn("cannot load", oversized_candidate_count.stderr)
             oversized_record.write_bytes(
                 b" "
                 * (
@@ -3221,6 +3637,27 @@ class FactoryImprovementClassificationTests(unittest.TestCase):
             )
             self.assertEqual(2, oversized_result.returncode)
             self.assertIn("input size is outside", oversized_result.stderr)
+            oversized_candidate = root / "oversized-candidate.json"
+            oversized_candidate.write_bytes(
+                b" " * (improvement_candidate.MAX_IMPROVEMENT_CANDIDATE_BYTES + 1)
+            )
+            oversized_candidate_result = subprocess.run(
+                cli
+                + [
+                    "verify-improvement-candidate",
+                    str(oversized_candidate),
+                    *candidate_inputs,
+                ],
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(2, oversized_candidate_result.returncode)
+            self.assertIn(
+                "input size is outside",
+                oversized_candidate_result.stderr,
+            )
 
 
 class FactorySourceLockTests(unittest.TestCase):

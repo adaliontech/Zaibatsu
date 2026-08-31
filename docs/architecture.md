@@ -45,6 +45,7 @@ Zaibatsu deliberately separates fourteen questions:
 | [`examples/economic-factory.improvement-proposal-spec.json`](../examples/economic-factory.improvement-proposal-spec.json) plus [`examples/economic-factory.improvement-proposal.json`](../examples/economic-factory.improvement-proposal.json) | Which exact untrusted shared-improvement suggestion is bound to that verified return, which later review gates are mandatory, and which classification, validation, promotion, rollout, and effect claims remain false? |
 | [`examples/economic-factory.improvement-observation-spec.json`](../examples/economic-factory.improvement-observation-spec.json) plus [`examples/economic-factory.improvement-observation.json`](../examples/economic-factory.improvement-observation.json) | Which exact untrusted report is structurally normalized against returned evidence and a canonical subject, without claiming safety or semantic truth? |
 | [`policies/improvement-classification-v1.json`](../policies/improvement-classification-v1.json) plus [`examples/economic-factory.improvement-classification.json`](../examples/economic-factory.improvement-classification.json) | Does the exact proposal/observation pair meet deterministic workflow/type rules for validation planning, and which validation, promotion, rollout, and effect authorities remain false? |
+| [`examples/economic-factory.improvement-candidate-spec.json`](../examples/economic-factory.improvement-candidate-spec.json) plus [`examples/economic-factory.improvement-candidate.json`](../examples/economic-factory.improvement-candidate.json) | Which exact canonical non-executable candidate contract matches that eligible classification, and which safety, semantic, implementation, validation, promotion, and effect claims remain false? |
 | [`examples/economic-factory.rebuild-plan.json`](../examples/economic-factory.rebuild-plan.json) | In which dependency order would a qualified factory be rebuilt, which direct and upstream blockers stop each action, and which separate gates still deny activation? |
 
 The validator requires the factory registry and shared component maturities to
@@ -143,6 +144,26 @@ plan. This is workflow/type classification, not a judgment that the report is
 safe, true, useful, or meritorious. It creates no validation plan, authorizes no
 test execution or mutation, changes no policy, obtains no approval, and grants
 no promotion, rollout, activation, execution, or cross-factory authority.
+
+## Evidence-bound candidate contract
+
+Classification alone names only a target and operation. The candidate contract
+closes the next reproducibility gap by embedding one exact canonical shared
+module, factory template, or deterministic-gate contract in a schema-bound
+specification. Before producing or accepting its binding record, the verifier
+repeats the complete classification, proposal, observation, evidence-return,
+portfolio, bundle, qualification, evidence-pack, signature, and material chain.
+It then requires the artifact target to exactly equal the classified target and
+records the specification digest, artifact digest, and canonical byte count.
+
+The checked artifact is a 1,130-byte deterministic-gate contract with typed
+inputs, outputs, ordered checks, fail-closed behavior, and an explicit
+contract-only authority boundary. It contains no executable implementation.
+The binding proves identity, structure, lineage, and target alignment only. It
+does not scan content or secrets, establish semantic correctness, create or run
+a validation plan, pass either regression scope, verify rollback, obtain owner
+approval, change shared policy, or authorize promotion, rollout, activation,
+execution, or cross-factory effects.
 
 ## Deterministic module composition
 
@@ -466,6 +487,7 @@ factory run
   -> observation or failure
   -> retained evidence
   -> classified improvement candidate
+  -> exact candidate contract binding
   -> change to shared module/template/gate
   -> deterministic and independent validation
   -> owner/policy promotion
@@ -473,12 +495,13 @@ factory run
 ```
 
 Evidence return, non-authorizing proposal recording, structural observation
-normalization, and deterministic workflow/type classification exist at bounded
-operational public-kit scope. Semantic review, content-safety handling,
-validation execution, shared-template promotion, and rollout are still
-designed. Recursive improvement therefore means the system learns through
-reviewed, versioned artifacts—not that an agent recursively expands its own
-authority.
+normalization, deterministic workflow/type classification, and exact
+non-executable candidate-contract binding exist at bounded operational
+public-kit scope. Semantic review, content-safety handling, implementation,
+validation planning or execution, shared-template promotion, and rollout are
+still designed. Recursive improvement therefore means the system learns
+through reviewed, versioned artifacts—not that an agent recursively expands
+its own authority.
 
 ## Infrastructure composition
 

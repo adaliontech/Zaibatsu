@@ -16,6 +16,7 @@
 - Portfolio proof: `python3 scripts/zaibatsu.py verify-portfolio-plan /tmp/example-portfolio.plan.json examples/factory-portfolio.json /tmp/example-control.factory.tar /tmp/example-product.factory.tar /tmp/example-service.factory.tar`
 - Route-bound evidence return: `python3 scripts/zaibatsu.py evidence-return-record /tmp/example-portfolio.plan.json examples/factory-portfolio.json example-product /tmp/example-product.runtime-evidence.tar examples/economic-factory.qualification-plan.json policies/runtime-qualification-v1.json /tmp/example-control.factory.tar /tmp/example-product.factory.tar /tmp/example-service.factory.tar --output /tmp/example-product.evidence-return.json`
 - Evidence-return proof: `python3 scripts/zaibatsu.py verify-evidence-return-record /tmp/example-product.evidence-return.json /tmp/example-portfolio.plan.json examples/factory-portfolio.json example-product /tmp/example-product.runtime-evidence.tar examples/economic-factory.qualification-plan.json policies/runtime-qualification-v1.json /tmp/example-control.factory.tar /tmp/example-product.factory.tar /tmp/example-service.factory.tar`
+- Candidate-contract binding: after creating the checked proposal, observation, and classification chain, run `python3 scripts/zaibatsu.py bind-improvement-candidate examples/economic-factory.improvement-candidate-spec.json /tmp/example-product.improvement-classification.json policies/improvement-classification-v1.json /tmp/example-product.improvement-proposal.json examples/economic-factory.improvement-proposal-spec.json /tmp/example-product.improvement-observation.json examples/economic-factory.improvement-observation-spec.json /tmp/example-product.evidence-return.json /tmp/example-portfolio.plan.json examples/factory-portfolio.json example-product /tmp/example-product.runtime-evidence.tar examples/economic-factory.qualification-plan.json policies/runtime-qualification-v1.json /tmp/example-control.factory.tar /tmp/example-product.factory.tar /tmp/example-service.factory.tar --output /tmp/example-product.improvement-candidate.json`
 - Annotated-release source lock: `python3 scripts/zaibatsu.py source-lock examples/economic-factory.json /tmp/example-product.factory.tar --release-tag v1.6.0 --output /tmp/example-product.source-lock.json`
 - Source-lock proof: `python3 scripts/zaibatsu.py verify-source-lock /tmp/example-product.source-lock.json /tmp/example-product.factory.tar`
 - Qualification requirements: `python3 scripts/zaibatsu.py qualification-plan /tmp/example-product.factory.tar --output /tmp/example-product.qualification-plan.json`
@@ -99,6 +100,12 @@ credentials, or bootstrap procedures.
   is bound to one declared economic-factory route. It does not prove transport,
   content safety, secret absence, verifier reexecution, artifact truth,
   classification, improvement value, promotion eligibility or authorization,
+  activation, execution, or cross-factory effects.
+- Treat an improvement-candidate binding only as proof that one exact canonical
+  non-executable contract matches an eligible classification target and its
+  fully reverified evidence chain. It does not prove content safety, secret
+  absence, semantic correctness, an implementation, a validation plan or
+  result, regression safety, rollback, owner approval, promotion, rollout,
   activation, execution, or cross-factory effects.
 - Treat every tracked or non-ignored path as public. Opaque files, symlinks,
   and Git submodules are outside the scanner's inspectable boundary and must

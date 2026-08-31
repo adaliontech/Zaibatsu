@@ -123,6 +123,16 @@ The validator confirms:
     digest, preserves all mandatory later review gates, and rejects target,
     replay, forgery, scalar, malformed, size, classification, promotion,
     rollout, execution, and cross-factory authority mutations.
+37. the improvement-observation record separately reverifies the return,
+    preserves a bounded canonical category and subject, and rejects safety,
+    truth, authority, replay, forgery, type, size, and ordering inflation.
+38. the classification record reverifies both complete chains under a hashed
+    policy, emits deterministic rejection for valid mismatches, and permits
+    validation planning only without creating or executing a plan.
+39. the candidate binding accepts only an eligible classification, requires an
+    exact target match, content-addresses one canonical non-executable contract,
+    and rejects implementation, validation, promotion, execution, or
+    cross-factory authority inflation.
 
 The adversarial tests mutate valid architecture data and prove that the
 validator rejects meta-factory role drift, a missing or reclassified factory,
@@ -262,6 +272,74 @@ python3 scripts/zaibatsu.py verify-improvement-proposal-record \
   /tmp/example-control.factory.tar \
   /tmp/example-product.factory.tar \
   /tmp/example-service.factory.tar
+python3 scripts/zaibatsu.py improvement-observation-record \
+  examples/economic-factory.improvement-observation-spec.json \
+  /tmp/example-product.evidence-return.json \
+  /tmp/example-portfolio.plan.json \
+  examples/factory-portfolio.json \
+  example-product \
+  /tmp/example-product.runtime-evidence.tar \
+  examples/economic-factory.qualification-plan.json \
+  policies/runtime-qualification-v1.json \
+  /tmp/example-control.factory.tar \
+  /tmp/example-product.factory.tar \
+  /tmp/example-service.factory.tar \
+  --output /tmp/example-product.improvement-observation.json
+python3 scripts/zaibatsu.py classify-improvement-proposal \
+  policies/improvement-classification-v1.json \
+  /tmp/example-product.improvement-proposal.json \
+  examples/economic-factory.improvement-proposal-spec.json \
+  /tmp/example-product.improvement-observation.json \
+  examples/economic-factory.improvement-observation-spec.json \
+  /tmp/example-product.evidence-return.json \
+  /tmp/example-portfolio.plan.json \
+  examples/factory-portfolio.json \
+  example-product \
+  /tmp/example-product.runtime-evidence.tar \
+  examples/economic-factory.qualification-plan.json \
+  policies/runtime-qualification-v1.json \
+  /tmp/example-control.factory.tar \
+  /tmp/example-product.factory.tar \
+  /tmp/example-service.factory.tar \
+  --output /tmp/example-product.improvement-classification.json
+python3 scripts/zaibatsu.py bind-improvement-candidate \
+  examples/economic-factory.improvement-candidate-spec.json \
+  /tmp/example-product.improvement-classification.json \
+  policies/improvement-classification-v1.json \
+  /tmp/example-product.improvement-proposal.json \
+  examples/economic-factory.improvement-proposal-spec.json \
+  /tmp/example-product.improvement-observation.json \
+  examples/economic-factory.improvement-observation-spec.json \
+  /tmp/example-product.evidence-return.json \
+  /tmp/example-portfolio.plan.json \
+  examples/factory-portfolio.json \
+  example-product \
+  /tmp/example-product.runtime-evidence.tar \
+  examples/economic-factory.qualification-plan.json \
+  policies/runtime-qualification-v1.json \
+  /tmp/example-control.factory.tar \
+  /tmp/example-product.factory.tar \
+  /tmp/example-service.factory.tar \
+  --output /tmp/example-product.improvement-candidate.json
+python3 scripts/zaibatsu.py verify-improvement-candidate \
+  /tmp/example-product.improvement-candidate.json \
+  examples/economic-factory.improvement-candidate-spec.json \
+  /tmp/example-product.improvement-classification.json \
+  policies/improvement-classification-v1.json \
+  /tmp/example-product.improvement-proposal.json \
+  examples/economic-factory.improvement-proposal-spec.json \
+  /tmp/example-product.improvement-observation.json \
+  examples/economic-factory.improvement-observation-spec.json \
+  /tmp/example-product.evidence-return.json \
+  /tmp/example-portfolio.plan.json \
+  examples/factory-portfolio.json \
+  example-product \
+  /tmp/example-product.runtime-evidence.tar \
+  examples/economic-factory.qualification-plan.json \
+  policies/runtime-qualification-v1.json \
+  /tmp/example-control.factory.tar \
+  /tmp/example-product.factory.tar \
+  /tmp/example-service.factory.tar
 python3 scripts/zaibatsu.py runtime-assessment \
   /tmp/example-product.runtime-evidence.tar \
   examples/economic-factory.qualification-evidence.json \
@@ -367,6 +445,15 @@ non-authorizing boundaries. The checked pair is eligible only for validation
 planning. No validation plan is created, no validation or mutation may run, and
 no merit, approval, promotion, rollout, activation, execution, or cross-factory
 effect follows from the classification.
+
+The improvement-candidate record then binds one exact canonical contract to
+that eligible classification. The checked artifact declares typed inputs,
+outputs, ordered fail-closed checks, and a contract-only authority boundary;
+it contains no executable implementation. Reproducible bytes and a matching
+digest do not establish content safety, secret absence, semantic correctness,
+implementation, validation planning or execution, regression safety,
+rollback, approval, promotion, rollout, activation, execution, or any
+cross-factory effect.
 
 The rebuild plan consumes those fully reverified inputs and emits an inert
 nine-action dependency graph plus four gates. The public result has zero

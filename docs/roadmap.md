@@ -51,13 +51,17 @@ changes.
   classification contracts without
   presenting canonical shape or workflow type as safety, semantic truth,
   merit, validation execution, approval, promotion, rollout, or authority;
+- publish an exact content-addressed candidate-contract binding without
+  presenting a structurally valid contract as safe, semantically correct,
+  implemented, validated, promotion-eligible, or executable;
 - record the Guild demo and complete applicant-owned submission materials.
 
 Exit: the public narrative, architecture, portable factory, module artifacts,
 control plan, bundle, portfolio, source lock, qualification plan, partial
 assessment, signed runtime assessment, route-bound evidence return,
 evidence-bound improvement proposal, rebuild plan, readiness, and evidence
-contracts describe the same meta-factory without inflating source-only or
+contracts plus the bound candidate contract describe the same meta-factory
+without inflating source-only or
 planned capabilities.
 
 ## Phase 1 — Factory identity and versioning
@@ -226,7 +230,11 @@ authority grant or hard dependency.
   canonical subjects without claiming content safety or semantic truth;
 - preserve deterministic workflow/type classification for validation planning
   without granting validation execution or mutation authority;
-- bind a proposed shared module/template/gate change to its source evidence;
+- preserve the bounded candidate-binding foundation that joins one exact,
+  non-executable shared module/template/gate contract to its complete source
+  evidence and eligible classification without trusting its content;
+- compile that bound artifact into a deterministic, non-executing validation
+  plan with reporting-factory and distinct regression scopes;
 - test it against the reporting factory and independent regression fixtures;
 - require owner/policy promotion and an eligible-factory rollout plan;
 - retain rollback and prove no cross-factory privilege expansion;

@@ -1,0 +1,84 @@
+{
+  "contract_schema": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.15.0/schemas/factory-improvement-candidate.schema.json",
+  "schema_version": "zaibatsu.factory-improvement-candidate.v1",
+  "source": {
+    "candidate_specification_sha256": "99e0388de57dd4809086c8bbaa7589a55e7e57668426ed8bc35862d4b8dfb26a",
+    "candidate_artifact_sha256": "15cc86aa630b48f0f3a4713e8b4e127b67f4693c36201775bf8a28a4c4abbe51",
+    "factory_improvement_classification_sha256": "a260ec6f23f0abb0832ce2fc91f3b47d5a9dce75f6e974dd640f2c4dda5d4acc",
+    "factory_improvement_proposal_sha256": "b5222630580cc03b092aedf6659defff9dae994957ed406cbd598a29da8efde4",
+    "factory_improvement_observation_sha256": "49fdf3e0845c14be7db8461461683820a2e1b23b20655165f30ce5509acb40ea",
+    "factory_evidence_return_sha256": "ac1765b07d96ffbcead1dd4270919833dae790359f7fe248b9f04f16d630c3ec",
+    "reporting_factory": "example-product",
+    "control_factory": "example-control"
+  },
+  "candidate": {
+    "id": "source-revision-binding-contract-v1",
+    "target": {
+      "kind": "deterministic_gate",
+      "id": "source-revision-binding",
+      "operation": "add"
+    },
+    "artifact_id": "source-revision-binding-contract-v1",
+    "artifact_type": "deterministic_gate_contract",
+    "artifact_sha256": "15cc86aa630b48f0f3a4713e8b4e127b67f4693c36201775bf8a28a4c4abbe51",
+    "artifact_canonical_bytes": 1130
+  },
+  "binding_checks": [
+    {
+      "position": 0,
+      "id": "classification_eligible",
+      "status": "passed",
+      "reason": "classification_is_eligible_for_validation_planning"
+    },
+    {
+      "position": 1,
+      "id": "target_aligned",
+      "status": "passed",
+      "reason": "candidate_target_matches_classification_target"
+    },
+    {
+      "position": 2,
+      "id": "artifact_structurally_valid",
+      "status": "passed",
+      "reason": "candidate_contract_structure_is_valid"
+    },
+    {
+      "position": 3,
+      "id": "review_requirements_preserved",
+      "status": "passed",
+      "reason": "all_later_review_requirements_preserved"
+    },
+    {
+      "position": 4,
+      "id": "non_authorizing_candidate",
+      "status": "passed",
+      "reason": "candidate_contract_grants_no_authority"
+    }
+  ],
+  "binding_boundary": {
+    "classification_chain_reverified": true,
+    "candidate_specification_validated": true,
+    "candidate_artifact_structurally_validated": true,
+    "candidate_target_aligned": true,
+    "candidate_artifact_canonical_json_bound": true,
+    "candidate_artifact_bound": true,
+    "content_safety_scanned": false,
+    "secret_absence_proved": false,
+    "artifact_semantic_truth_verified": false,
+    "candidate_implementation_present": false,
+    "validation_plan_created": false,
+    "validation_execution_authorized": false,
+    "reporting_factory_validation_passed": false,
+    "independent_regression_validation_passed": false,
+    "rollback_plan_verified": false,
+    "owner_policy_approval_obtained": false,
+    "changes_shared_policy": false,
+    "shared_promotion_eligible": false,
+    "promotion_authorized": false,
+    "rollout_authorized": false,
+    "activation_authorized": false,
+    "execution_authorized": false,
+    "cross_factory_effects_authorized": false
+  },
+  "factory_improvement_candidate_sha256": "ca501843375e9a93818e124e02babd33c853eedde9abfd6446a66540c44b8cdb"
+}
