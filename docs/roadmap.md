@@ -55,13 +55,17 @@ changes.
   candidate-contract binding without
   presenting a structurally valid contract as safe, semantically correct,
   implemented, validated, promotion-eligible, or executable;
+- publish the exact deterministic non-executing validation-plan contract while
+  keeping all eight stages `not_run`, all twelve evidence artifacts `missing`,
+  and implementation, execution, validation-success, and promotion authority
+  false;
 - record the Guild demo and complete applicant-owned submission materials.
 
 Exit: the public narrative, architecture, portable factory, module artifacts,
 control plan, bundle, portfolio, source lock, qualification plan, partial
 assessment, signed runtime assessment, route-bound evidence return,
 evidence-bound improvement proposal, rebuild plan, readiness, and evidence
-contracts plus the bound candidate contract describe the same meta-factory
+contracts plus the bound candidate contract and inert validation plan describe the same meta-factory
 without inflating source-only or
 planned capabilities.
 
@@ -234,8 +238,10 @@ authority grant or hard dependency.
 - preserve the bounded candidate-binding foundation that joins one exact,
   non-executable shared module/template/gate contract to its complete source
   evidence and eligible classification without trusting its content;
-- compile that bound artifact into a deterministic, non-executing validation
-  plan with reporting-factory and distinct regression scopes;
+- preserve the deterministic, non-executing validation plan that reverifies
+  the bound artifact and enumerates content safety, secret absence, schema,
+  deterministic behavior, reporting-factory and independent regressions,
+  rollback, and cross-factory privilege review without running them;
 - test it against the reporting factory and independent regression fixtures;
 - require owner/policy promotion and an eligible-factory rollout plan;
 - retain rollback and prove no cross-factory privilege expansion;

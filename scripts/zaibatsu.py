@@ -53,6 +53,12 @@ from factory_improvement_candidate import (
     factory_improvement_candidate_for_inputs,
     verify_factory_improvement_candidate_for_inputs,
 )
+from factory_improvement_validation_plan import (
+    MAX_IMPROVEMENT_VALIDATION_PLAN_BYTES,
+    MAX_IMPROVEMENT_VALIDATION_PLAN_SPEC_BYTES,
+    factory_improvement_validation_plan_for_inputs,
+    verify_factory_improvement_validation_plan_for_inputs,
+)
 from factory_portfolio import (
     MAX_FACTORIES,
     MAX_PORTFOLIO_BYTES,
@@ -1554,6 +1560,299 @@ def command_verify_improvement_candidate(
     return 0
 
 
+def load_improvement_validation_plan_inputs(
+    specification_path: str,
+    candidate_path: str,
+    candidate_specification_path: str,
+    classification_path: str,
+    classification_policy_path: str,
+    proposal_path: str,
+    proposal_specification_path: str,
+    observation_path: str,
+    observation_specification_path: str,
+    evidence_return_path: str,
+    plan_path: str,
+    portfolio_path: str,
+    runtime_evidence_pack_path: str,
+    qualification_plan_path: str,
+    qualification_policy_path: str,
+    bundle_paths: list[str],
+) -> tuple[
+    Any,
+    Any,
+    Any,
+    Any,
+    Any,
+    Any,
+    Any,
+    Any,
+    Any,
+    Any,
+    Any,
+    Any,
+    bytes,
+    Any,
+    Any,
+    list[bytes],
+] | None:
+    specification = load_bounded_json_document(
+        specification_path,
+        "factory improvement validation-plan specification",
+        MAX_IMPROVEMENT_VALIDATION_PLAN_SPEC_BYTES,
+    )
+    candidate = load_bounded_json_document(
+        candidate_path,
+        "factory improvement-candidate record",
+        MAX_IMPROVEMENT_CANDIDATE_BYTES,
+    )
+    candidate_inputs = load_improvement_candidate_inputs(
+        candidate_specification_path,
+        classification_path,
+        classification_policy_path,
+        proposal_path,
+        proposal_specification_path,
+        observation_path,
+        observation_specification_path,
+        evidence_return_path,
+        plan_path,
+        portfolio_path,
+        runtime_evidence_pack_path,
+        qualification_plan_path,
+        qualification_policy_path,
+        bundle_paths,
+    )
+    if any(value is None for value in (specification, candidate, candidate_inputs)):
+        return None
+    assert candidate_inputs is not None
+    (
+        candidate_specification,
+        classification,
+        classification_policy,
+        proposal,
+        proposal_specification,
+        observation,
+        observation_specification,
+        evidence_return,
+        plan,
+        portfolio,
+        pack,
+        qualification_plan,
+        qualification_policy,
+        bundles,
+    ) = candidate_inputs
+    return (
+        specification,
+        candidate,
+        candidate_specification,
+        classification,
+        classification_policy,
+        proposal,
+        proposal_specification,
+        observation,
+        observation_specification,
+        evidence_return,
+        plan,
+        portfolio,
+        pack,
+        qualification_plan,
+        qualification_policy,
+        bundles,
+    )
+
+
+def command_plan_improvement_validation(
+    specification_path: str,
+    candidate_path: str,
+    candidate_specification_path: str,
+    classification_path: str,
+    classification_policy_path: str,
+    proposal_path: str,
+    proposal_specification_path: str,
+    observation_path: str,
+    observation_specification_path: str,
+    evidence_return_path: str,
+    plan_path: str,
+    portfolio_path: str,
+    source_factory_id: str,
+    runtime_evidence_pack_path: str,
+    qualification_plan_path: str,
+    qualification_policy_path: str,
+    bundle_paths: list[str],
+    output: str | None,
+) -> int:
+    inputs = load_improvement_validation_plan_inputs(
+        specification_path,
+        candidate_path,
+        candidate_specification_path,
+        classification_path,
+        classification_policy_path,
+        proposal_path,
+        proposal_specification_path,
+        observation_path,
+        observation_specification_path,
+        evidence_return_path,
+        plan_path,
+        portfolio_path,
+        runtime_evidence_pack_path,
+        qualification_plan_path,
+        qualification_policy_path,
+        bundle_paths,
+    )
+    if inputs is None:
+        return 2
+    (
+        specification,
+        candidate,
+        candidate_specification,
+        classification,
+        classification_policy,
+        proposal,
+        proposal_specification,
+        observation,
+        observation_specification,
+        evidence_return,
+        plan,
+        portfolio,
+        pack,
+        qualification_plan,
+        qualification_policy,
+        bundles,
+    ) = inputs
+    errors, record = factory_improvement_validation_plan_for_inputs(
+        specification,
+        candidate,
+        candidate_specification,
+        classification,
+        classification_policy,
+        proposal,
+        proposal_specification,
+        observation,
+        observation_specification,
+        evidence_return,
+        plan,
+        portfolio,
+        bundles,
+        source_factory_id,
+        pack,
+        qualification_plan,
+        qualification_policy,
+    )
+    if errors or record is None:
+        print("cannot plan factory improvement validation", file=sys.stderr)
+        for error in errors:
+            print(f"- {error}", file=sys.stderr)
+        return 1
+    return write_document(record, output)
+
+
+def command_verify_improvement_validation_plan(
+    record_path: str,
+    specification_path: str,
+    candidate_path: str,
+    candidate_specification_path: str,
+    classification_path: str,
+    classification_policy_path: str,
+    proposal_path: str,
+    proposal_specification_path: str,
+    observation_path: str,
+    observation_specification_path: str,
+    evidence_return_path: str,
+    plan_path: str,
+    portfolio_path: str,
+    source_factory_id: str,
+    runtime_evidence_pack_path: str,
+    qualification_plan_path: str,
+    qualification_policy_path: str,
+    bundle_paths: list[str],
+) -> int:
+    record = load_bounded_json_document(
+        record_path,
+        "factory improvement validation-plan record",
+        MAX_IMPROVEMENT_VALIDATION_PLAN_BYTES,
+    )
+    if record is None:
+        return 2
+    inputs = load_improvement_validation_plan_inputs(
+        specification_path,
+        candidate_path,
+        candidate_specification_path,
+        classification_path,
+        classification_policy_path,
+        proposal_path,
+        proposal_specification_path,
+        observation_path,
+        observation_specification_path,
+        evidence_return_path,
+        plan_path,
+        portfolio_path,
+        runtime_evidence_pack_path,
+        qualification_plan_path,
+        qualification_policy_path,
+        bundle_paths,
+    )
+    if inputs is None:
+        return 2
+    (
+        specification,
+        candidate,
+        candidate_specification,
+        classification,
+        classification_policy,
+        proposal,
+        proposal_specification,
+        observation,
+        observation_specification,
+        evidence_return,
+        plan,
+        portfolio,
+        pack,
+        qualification_plan,
+        qualification_policy,
+        bundles,
+    ) = inputs
+    errors = verify_factory_improvement_validation_plan_for_inputs(
+        record,
+        specification,
+        candidate,
+        candidate_specification,
+        classification,
+        classification_policy,
+        proposal,
+        proposal_specification,
+        observation,
+        observation_specification,
+        evidence_return,
+        plan,
+        portfolio,
+        bundles,
+        source_factory_id,
+        pack,
+        qualification_plan,
+        qualification_policy,
+    )
+    if errors:
+        print(
+            f"factory improvement validation-plan failed: {record_path}",
+            file=sys.stderr,
+        )
+        for error in errors:
+            print(f"- {error}", file=sys.stderr)
+        return 1
+    assert isinstance(record, dict)
+    print(f"factory improvement validation-plan passed: {record_path}")
+    print(
+        "factory improvement validation-plan sha256: "
+        f"{record['factory_improvement_validation_plan_sha256']}"
+    )
+    print(f"validation steps: {record['summary']['validation_step_count']}")
+    print(f"missing evidence: {record['summary']['missing_evidence_count']}")
+    print("candidate implementation bound: false")
+    print("ready for validation execution: false")
+    print("validation execution authorized: false")
+    print("promotion authorized: false")
+    return 0
+
+
 def command_source_lock(
     factory_path: str,
     bundle_path: str,
@@ -2570,6 +2869,55 @@ def build_parser() -> argparse.ArgumentParser:
     verify_improvement_candidate.add_argument("qualification_policy_path")
     verify_improvement_candidate.add_argument("bundle_paths", nargs="+")
 
+    plan_improvement_validation = commands.add_parser(
+        "plan-improvement-validation",
+        help="bind a deterministic non-executing validation plan to one candidate",
+    )
+    plan_improvement_validation.add_argument("specification_path")
+    plan_improvement_validation.add_argument("candidate_path")
+    plan_improvement_validation.add_argument("candidate_specification_path")
+    plan_improvement_validation.add_argument("classification_path")
+    plan_improvement_validation.add_argument("classification_policy_path")
+    plan_improvement_validation.add_argument("proposal_path")
+    plan_improvement_validation.add_argument("proposal_specification_path")
+    plan_improvement_validation.add_argument("observation_path")
+    plan_improvement_validation.add_argument("observation_specification_path")
+    plan_improvement_validation.add_argument("evidence_return_path")
+    plan_improvement_validation.add_argument("plan_path")
+    plan_improvement_validation.add_argument("portfolio_path")
+    plan_improvement_validation.add_argument("source_factory_id")
+    plan_improvement_validation.add_argument("runtime_evidence_pack_path")
+    plan_improvement_validation.add_argument("qualification_plan_path")
+    plan_improvement_validation.add_argument("qualification_policy_path")
+    plan_improvement_validation.add_argument("bundle_paths", nargs="+")
+    plan_improvement_validation.add_argument(
+        "--output",
+        help="write the deterministic improvement validation plan to a new file",
+    )
+
+    verify_improvement_validation_plan = commands.add_parser(
+        "verify-improvement-validation-plan",
+        help="reverify a non-executing validation plan and its complete evidence chain",
+    )
+    verify_improvement_validation_plan.add_argument("record_path")
+    verify_improvement_validation_plan.add_argument("specification_path")
+    verify_improvement_validation_plan.add_argument("candidate_path")
+    verify_improvement_validation_plan.add_argument("candidate_specification_path")
+    verify_improvement_validation_plan.add_argument("classification_path")
+    verify_improvement_validation_plan.add_argument("classification_policy_path")
+    verify_improvement_validation_plan.add_argument("proposal_path")
+    verify_improvement_validation_plan.add_argument("proposal_specification_path")
+    verify_improvement_validation_plan.add_argument("observation_path")
+    verify_improvement_validation_plan.add_argument("observation_specification_path")
+    verify_improvement_validation_plan.add_argument("evidence_return_path")
+    verify_improvement_validation_plan.add_argument("plan_path")
+    verify_improvement_validation_plan.add_argument("portfolio_path")
+    verify_improvement_validation_plan.add_argument("source_factory_id")
+    verify_improvement_validation_plan.add_argument("runtime_evidence_pack_path")
+    verify_improvement_validation_plan.add_argument("qualification_plan_path")
+    verify_improvement_validation_plan.add_argument("qualification_policy_path")
+    verify_improvement_validation_plan.add_argument("bundle_paths", nargs="+")
+
     source_lock = commands.add_parser(
         "source-lock",
         help="lock a verified bundle to exact sources in an annotated release",
@@ -3073,6 +3421,48 @@ def main() -> int:
         return command_verify_improvement_candidate(
             arguments.record_path,
             arguments.specification_path,
+            arguments.classification_path,
+            arguments.classification_policy_path,
+            arguments.proposal_path,
+            arguments.proposal_specification_path,
+            arguments.observation_path,
+            arguments.observation_specification_path,
+            arguments.evidence_return_path,
+            arguments.plan_path,
+            arguments.portfolio_path,
+            arguments.source_factory_id,
+            arguments.runtime_evidence_pack_path,
+            arguments.qualification_plan_path,
+            arguments.qualification_policy_path,
+            arguments.bundle_paths,
+        )
+    if arguments.command == "plan-improvement-validation":
+        return command_plan_improvement_validation(
+            arguments.specification_path,
+            arguments.candidate_path,
+            arguments.candidate_specification_path,
+            arguments.classification_path,
+            arguments.classification_policy_path,
+            arguments.proposal_path,
+            arguments.proposal_specification_path,
+            arguments.observation_path,
+            arguments.observation_specification_path,
+            arguments.evidence_return_path,
+            arguments.plan_path,
+            arguments.portfolio_path,
+            arguments.source_factory_id,
+            arguments.runtime_evidence_pack_path,
+            arguments.qualification_plan_path,
+            arguments.qualification_policy_path,
+            arguments.bundle_paths,
+            arguments.output,
+        )
+    if arguments.command == "verify-improvement-validation-plan":
+        return command_verify_improvement_validation_plan(
+            arguments.record_path,
+            arguments.specification_path,
+            arguments.candidate_path,
+            arguments.candidate_specification_path,
             arguments.classification_path,
             arguments.classification_policy_path,
             arguments.proposal_path,

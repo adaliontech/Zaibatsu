@@ -109,7 +109,7 @@
       "id": "recursive-factory-improvement",
       "layer": "feedback",
       "maturity": "designed",
-      "scope": "Return evidence, record exact evidence-bound proposals, structurally normalize evidence-bound observations, classify aligned candidates for validation planning, and bind exact non-executable candidate contracts; content safety, semantic validation, validation execution, promotion, and rollout remain designed and cannot self-authorize"
+      "scope": "Return evidence, record exact evidence-bound proposals, structurally normalize evidence-bound observations, classify aligned candidates, bind exact non-executable candidate contracts, and deterministically enumerate non-executing validation plans; content-safety results, semantic validation, implementation, validation execution, promotion, and rollout remain designed and cannot self-authorize"
     }
   ],
   "reproducibility_policy": {

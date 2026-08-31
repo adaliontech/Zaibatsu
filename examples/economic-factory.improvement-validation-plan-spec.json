@@ -1,0 +1,199 @@
+{
+  "contract_schema": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.16.0/schemas/factory-improvement-validation-plan-spec.schema.json",
+  "schema_version": "zaibatsu.factory-improvement-validation-plan-spec.v1",
+  "plan": {
+    "id": "source-revision-binding-validation-v1",
+    "summary": "Plan isolated deterministic validation of the bound source-revision gate contract while recording every implementation, fixture, regression, rollback, and privilege-review artifact as missing.",
+    "candidate_id": "source-revision-binding-contract-v1",
+    "target": {
+      "kind": "deterministic_gate",
+      "id": "source-revision-binding",
+      "operation": "add"
+    },
+    "steps": [
+      {
+        "position": 0,
+        "id": "content-safety-preflight",
+        "kind": "content_safety_scan",
+        "scope": "candidate_artifact",
+        "requires_steps": [],
+        "required_evidence": [
+          {
+            "id": "content-safety-receipt",
+            "artifact_type": "deterministic_scan_receipt"
+          }
+        ]
+      },
+      {
+        "position": 1,
+        "id": "secret-absence-preflight",
+        "kind": "secret_scan",
+        "scope": "candidate_artifact",
+        "requires_steps": [
+          "content-safety-preflight"
+        ],
+        "required_evidence": [
+          {
+            "id": "secret-absence-receipt",
+            "artifact_type": "deterministic_scan_receipt"
+          }
+        ]
+      },
+      {
+        "position": 2,
+        "id": "contract-schema-validation",
+        "kind": "schema_validation",
+        "scope": "candidate_artifact",
+        "requires_steps": [
+          "content-safety-preflight",
+          "secret-absence-preflight"
+        ],
+        "required_evidence": [
+          {
+            "id": "contract-schema-validation-receipt",
+            "artifact_type": "deterministic_validation_receipt"
+          }
+        ]
+      },
+      {
+        "position": 3,
+        "id": "deterministic-behavior-validation",
+        "kind": "deterministic_test",
+        "scope": "candidate_implementation",
+        "requires_steps": [
+          "contract-schema-validation"
+        ],
+        "required_evidence": [
+          {
+            "id": "candidate-implementation-artifact",
+            "artifact_type": "content_addressed_implementation"
+          },
+          {
+            "id": "deterministic-behavior-receipt",
+            "artifact_type": "deterministic_validation_receipt"
+          }
+        ]
+      },
+      {
+        "position": 4,
+        "id": "reporting-factory-regression",
+        "kind": "regression_test",
+        "scope": "reporting_factory",
+        "requires_steps": [
+          "deterministic-behavior-validation"
+        ],
+        "required_evidence": [
+          {
+            "id": "reporting-factory-regression-fixture",
+            "artifact_type": "content_addressed_test_fixture"
+          },
+          {
+            "id": "reporting-factory-regression-receipt",
+            "artifact_type": "deterministic_validation_receipt"
+          }
+        ]
+      },
+      {
+        "position": 5,
+        "id": "independent-regression",
+        "kind": "regression_test",
+        "scope": "independent_fixture",
+        "requires_steps": [
+          "deterministic-behavior-validation"
+        ],
+        "required_evidence": [
+          {
+            "id": "independent-regression-fixture",
+            "artifact_type": "content_addressed_test_fixture"
+          },
+          {
+            "id": "independent-regression-receipt",
+            "artifact_type": "deterministic_validation_receipt"
+          }
+        ]
+      },
+      {
+        "position": 6,
+        "id": "rollback-validation",
+        "kind": "rollback_test",
+        "scope": "candidate_implementation",
+        "requires_steps": [
+          "reporting-factory-regression",
+          "independent-regression"
+        ],
+        "required_evidence": [
+          {
+            "id": "rollback-plan",
+            "artifact_type": "content_addressed_rollback_plan"
+          },
+          {
+            "id": "rollback-validation-receipt",
+            "artifact_type": "deterministic_validation_receipt"
+          }
+        ]
+      },
+      {
+        "position": 7,
+        "id": "cross-factory-privilege-review",
+        "kind": "privilege_review",
+        "scope": "closed_portfolio",
+        "requires_steps": [
+          "reporting-factory-regression",
+          "independent-regression"
+        ],
+        "required_evidence": [
+          {
+            "id": "cross-factory-privilege-review-receipt",
+            "artifact_type": "deterministic_policy_receipt"
+          }
+        ]
+      }
+    ]
+  },
+  "execution_policy": {
+    "planning_only": true,
+    "isolated_workspace_required": true,
+    "network_access_allowed": false,
+    "production_credentials_allowed": false,
+    "production_state_access_allowed": false,
+    "model_output_accepted_as_verification": false,
+    "content_addressed_evidence_required": true,
+    "explicit_authorization_required_before_execution": true,
+    "overwrite_existing_artifacts": false
+  },
+  "validation_requirements": {
+    "candidate_chain_reverification_required": true,
+    "candidate_identity_alignment_required": true,
+    "candidate_target_alignment_required": true,
+    "candidate_behavior_checks_bound": true,
+    "content_safety_preflight_required": true,
+    "secret_absence_preflight_required": true,
+    "contract_schema_validation_required": true,
+    "candidate_implementation_required": true,
+    "deterministic_behavior_validation_required": true,
+    "reporting_factory_regression_required": true,
+    "independent_regression_required": true,
+    "rollback_validation_required": true,
+    "cross_factory_privilege_review_required": true
+  },
+  "planning_boundary": {
+    "candidate_artifact_untrusted": true,
+    "planning_contract_only": true,
+    "contains_executable_commands": false,
+    "candidate_implementation_present": false,
+    "validation_plan_created": false,
+    "validation_execution_authorized": false,
+    "validation_executed": false,
+    "reporting_factory_validation_passed": false,
+    "independent_regression_validation_passed": false,
+    "rollback_plan_verified": false,
+    "cross_factory_privilege_review_passed": false,
+    "owner_policy_approval_obtained": false,
+    "shared_promotion_eligible": false,
+    "promotion_authorized": false,
+    "rollout_authorized": false,
+    "activation_authorized": false,
+    "execution_authorized": false,
+    "cross_factory_effects_authorized": false
+  }
+}

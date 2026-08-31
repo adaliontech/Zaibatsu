@@ -120,7 +120,7 @@ The improvement-observation record separately binds one typed untrusted report
 to the same evidence and a canonical subject. Its normalization is structural,
 not a safety or truth claim. The deterministic classification policy then
 reverifies both records and classifies an aligned pair for validation planning
-only. It creates no validation plan and proves no safety, semantic merit,
+only. Classification itself creates no validation plan and proves no safety, semantic merit,
 validation execution, approval, promotion, rollout, activation, execution, or
 cross-factory effect.
 The improvement-candidate binding then joins one exact 1,130-byte canonical
@@ -130,6 +130,12 @@ only. The artifact contains no executable implementation, and content safety,
 secret absence, semantic correctness, validation planning or execution,
 regressions, rollback, approval, promotion, rollout, activation, execution,
 and cross-factory effects remain false.
+The separate improvement-validation planner reverifies that exact candidate and
+its complete source chain, then derives eight fixed stages and twelve missing
+content-addressed evidence artifacts. All stages are `not_run`, executed,
+passed, and failed counts are zero, no implementation exists, and the planner
+runs no validation or network access and grants no approval, promotion,
+rollout, activation, execution, or cross-factory authority.
 
 The core repository works without a model or Droid credentials. For the Guild
 case study, authenticated Factory Droid used an owner-operated GGUF whose

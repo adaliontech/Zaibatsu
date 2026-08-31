@@ -159,16 +159,19 @@ Factory outcomes return evidence to Zaibatsu:
 
 ```text
 run -> observation/failure -> evidence -> classified improvement candidate
-    -> exact candidate contract -> shared module/template/gate implementation
+    -> exact candidate contract -> non-executing validation plan
+    -> shared module/template/gate implementation
     -> deterministic validation
     -> owner-reviewed promotion -> eligible factory rollout with rollback
 ```
 
 Today, evidence capture, route binding, non-authorizing proposal recording,
 structural observation normalization, and deterministic workflow/type
-classification for validation planning plus exact non-executable candidate
-binding are operational at bounded public-kit scope. Content-safety handling,
-semantic validation, implementation, validation planning or execution,
+classification for validation planning, exact non-executable candidate
+binding, and deterministic non-executing validation planning are operational
+at bounded public-kit scope. The checked plan has eight `not_run` stages,
+twelve missing evidence artifacts, and zero executed steps. Content-safety
+results, semantic validation, implementation, validation execution,
 shared-template promotion, and cross-factory rollout are not deployed.
 Recursive improvement means reviewed versioned learning, not self-modifying
 production authority.
@@ -252,13 +255,17 @@ reusable contracts while preserving evidence and limitations:
   not safety, reporter identity, or semantic truth;
 - `classify-improvement-proposal` reverifies both chains and a separately
   hashed deterministic policy, then classifies the aligned pair for validation
-  planning only; it creates no validation plan and grants no test, mutation,
+  planning only; classification itself creates no validation plan and grants no test, mutation,
   approval, promotion, rollout, activation, execution, or cross-factory
   authority;
 - `bind-improvement-candidate` reverifies that complete chain, requires the
   exact classified target, and content-addresses one canonical contract; the
   checked artifact contains no executable implementation and proves no safety,
   semantic correctness, validation, promotion, rollout, or effect authority;
+- `plan-improvement-validation` reverifies the exact candidate and complete
+  source chain, then derives eight fixed stages and twelve missing evidence
+  bindings without executing validation, accessing production state, or
+  granting approval, promotion, rollout, activation, execution, or effects;
 - the checked signature is fixture-only: it raises the verified count to 10,
   leaves 57 missing, and cannot create runtime eligibility; generated-key tests
   separately prove that complete `factory_runtime` evidence can reach
@@ -339,6 +346,10 @@ The public package can now reject claims or architectures in which:
   lineage, and target alignment. It does not prove that content is safe or
   correct, that an implementation exists, or that any validation or promotion
   gate passed.
+- The public validation plan proves exact planning inputs, fixed stage order,
+  and missing-evidence enumeration. All stages are `not_run`; it proves no
+  implementation, validation result, approval, promotion, rollout, activation,
+  execution, or effect.
 - The public signed receipt is a cryptographic fixture, not operational runtime
   evidence. Registry selection and the assessment clock remain evaluator trust
   inputs; verifier assertions and detached evidence artifacts are not rerun or

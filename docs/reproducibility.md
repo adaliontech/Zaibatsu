@@ -133,6 +133,10 @@ The validator confirms:
     exact target match, content-addresses one canonical non-executable contract,
     and rejects implementation, validation, promotion, execution, or
     cross-factory authority inflation.
+40. the improvement validation plan fully reverifies that candidate chain,
+    reproduces eight fixed `not_run` stages and twelve `missing` evidence
+    bindings, and rejects implementation, execution, validation-success,
+    promotion, or cross-factory authority inflation.
 
 The adversarial tests mutate valid architecture data and prove that the
 validator rejects meta-factory role drift, a missing or reclassified factory,
@@ -442,7 +446,7 @@ The improvement-classification record then reverifies both complete chains and
 the separately hashed classification policy. It deterministically checks source
 and target alignment, allowed workflow types, preserved later-review gates, and
 non-authorizing boundaries. The checked pair is eligible only for validation
-planning. No validation plan is created, no validation or mutation may run, and
+planning. Classification itself creates no validation plan, no validation or mutation may run, and
 no merit, approval, promotion, rollout, activation, execution, or cross-factory
 effect follows from the classification.
 
@@ -454,6 +458,17 @@ digest do not establish content safety, secret absence, semantic correctness,
 implementation, validation planning or execution, regression safety,
 rollback, approval, promotion, rollout, activation, execution, or any
 cross-factory effect.
+
+The separate improvement-validation planner reverifies that exact candidate
+and its complete source chain before reproducing eight fixed validation stages
+and twelve required evidence bindings. The checked record remains wholly
+inert: all stages are `not_run`, all evidence is `missing`, no implementation
+exists, and executed, passed, and failed counts are zero. Its policy forbids
+network access, production credentials or state, model output as verification,
+and overwrite. It proves planning identity and order only—not that content is
+safe, an implementation exists, validation ran or passed, rollback works,
+approval was obtained, or promotion, rollout, activation, execution, or any
+cross-factory effect is authorized.
 
 The rebuild plan consumes those fully reverified inputs and emits an inert
 nine-action dependency graph plus four gates. The public result has zero

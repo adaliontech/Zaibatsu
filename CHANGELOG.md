@@ -1,5 +1,29 @@
 # Changelog
 
+## 1.16.0 - Unreleased
+
+- Added a schema-bound improvement-validation-plan specification and exact
+  deterministic plan record that consume the bound candidate only after
+  reverifying its complete classification, proposal, observation,
+  evidence-return, portfolio, bundle, qualification, runtime-pack, and source
+  chain.
+- Enumerated eight fixed validation stages and twelve required evidence
+  artifacts without running commands, reading production credentials or
+  state, using the network, or treating model output as verification.
+- Kept the boundary deliberately narrow: every stage is `not_run`, every
+  evidence item is `missing`, executed/passed/failed counts are zero, no
+  candidate implementation exists, and readiness, execution authorization,
+  approval, promotion, rollout, activation, and cross-factory effects remain
+  false.
+- Added `plan-improvement-validation` and
+  `verify-improvement-validation-plan`, two strict Draft 2020-12 schemas,
+  checked examples, complete repository re-verification, and fail-closed CLI
+  input bounds.
+- Added stage/order/requirement weakening, candidate-chain replay,
+  authority-forgery, scalar, malformed, recursive, size, bundle-order, and CLI
+  round-trip tests. The integrated suite now contains 252 tests and the
+  validator requires 125 files.
+
 ## 1.15.0 - 2026-08-30
 
 - Added a schema-bound improvement-candidate specification that embeds one

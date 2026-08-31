@@ -1,0 +1,139 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.16.0/schemas/factory-improvement-validation-plan-spec.schema.json",
+  "title": "Zaibatsu deterministic improvement validation-plan specification",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_schema", "schema_version", "plan", "execution_policy", "validation_requirements", "planning_boundary"],
+  "properties": {
+    "contract_schema": {"const": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.16.0/schemas/factory-improvement-validation-plan-spec.schema.json"},
+    "schema_version": {"const": "zaibatsu.factory-improvement-validation-plan-spec.v1"},
+    "plan": {"$ref": "#/$defs/plan"},
+    "execution_policy": {"$ref": "#/$defs/execution_policy"},
+    "validation_requirements": {"$ref": "#/$defs/validation_requirements"},
+    "planning_boundary": {"$ref": "#/$defs/planning_boundary"}
+  },
+  "$defs": {
+    "id": {"type": "string", "minLength": 1, "maxLength": 64, "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "id", "operation"],
+      "properties": {
+        "kind": {"enum": ["shared_module", "factory_template", "deterministic_gate"]},
+        "id": {"$ref": "#/$defs/id"},
+        "operation": {"enum": ["add", "modify", "replace"]}
+      }
+    },
+    "evidence_requirement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "artifact_type"],
+      "properties": {
+        "id": {"$ref": "#/$defs/id"},
+        "artifact_type": {"enum": ["deterministic_scan_receipt", "deterministic_validation_receipt", "content_addressed_implementation", "content_addressed_test_fixture", "content_addressed_rollback_plan", "deterministic_policy_receipt"]}
+      }
+    },
+    "step": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["position", "id", "kind", "scope", "requires_steps", "required_evidence"],
+      "properties": {
+        "position": {"type": "integer", "minimum": 0, "maximum": 7},
+        "id": {"$ref": "#/$defs/id"},
+        "kind": {"enum": ["content_safety_scan", "secret_scan", "schema_validation", "deterministic_test", "regression_test", "rollback_test", "privilege_review"]},
+        "scope": {"enum": ["candidate_artifact", "candidate_implementation", "reporting_factory", "independent_fixture", "closed_portfolio"]},
+        "requires_steps": {"type": "array", "items": {"$ref": "#/$defs/id"}, "uniqueItems": true, "maxItems": 2},
+        "required_evidence": {"type": "array", "items": {"$ref": "#/$defs/evidence_requirement"}, "minItems": 1, "maxItems": 2}
+      }
+    },
+    "plan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "summary", "candidate_id", "target", "steps"],
+      "properties": {
+        "id": {"$ref": "#/$defs/id"},
+        "summary": {"type": "string", "minLength": 1, "maxLength": 512, "pattern": "^\\S(?:.*\\S)?$"},
+        "candidate_id": {"$ref": "#/$defs/id"},
+        "target": {"$ref": "#/$defs/target"},
+        "steps": {
+          "type": "array",
+          "prefixItems": [
+            {"allOf": [{"$ref": "#/$defs/step"}, {"type": "object", "properties": {"position": {"const": 0}, "id": {"const": "content-safety-preflight"}, "kind": {"const": "content_safety_scan"}, "scope": {"const": "candidate_artifact"}, "requires_steps": {"const": []}, "required_evidence": {"const": [{"id": "content-safety-receipt", "artifact_type": "deterministic_scan_receipt"}]}}}]},
+            {"allOf": [{"$ref": "#/$defs/step"}, {"type": "object", "properties": {"position": {"const": 1}, "id": {"const": "secret-absence-preflight"}, "kind": {"const": "secret_scan"}, "scope": {"const": "candidate_artifact"}, "requires_steps": {"const": ["content-safety-preflight"]}, "required_evidence": {"const": [{"id": "secret-absence-receipt", "artifact_type": "deterministic_scan_receipt"}]}}}]},
+            {"allOf": [{"$ref": "#/$defs/step"}, {"type": "object", "properties": {"position": {"const": 2}, "id": {"const": "contract-schema-validation"}, "kind": {"const": "schema_validation"}, "scope": {"const": "candidate_artifact"}, "requires_steps": {"const": ["content-safety-preflight", "secret-absence-preflight"]}, "required_evidence": {"const": [{"id": "contract-schema-validation-receipt", "artifact_type": "deterministic_validation_receipt"}]}}}]},
+            {"allOf": [{"$ref": "#/$defs/step"}, {"type": "object", "properties": {"position": {"const": 3}, "id": {"const": "deterministic-behavior-validation"}, "kind": {"const": "deterministic_test"}, "scope": {"const": "candidate_implementation"}, "requires_steps": {"const": ["contract-schema-validation"]}, "required_evidence": {"const": [{"id": "candidate-implementation-artifact", "artifact_type": "content_addressed_implementation"}, {"id": "deterministic-behavior-receipt", "artifact_type": "deterministic_validation_receipt"}]}}}]},
+            {"allOf": [{"$ref": "#/$defs/step"}, {"type": "object", "properties": {"position": {"const": 4}, "id": {"const": "reporting-factory-regression"}, "kind": {"const": "regression_test"}, "scope": {"const": "reporting_factory"}, "requires_steps": {"const": ["deterministic-behavior-validation"]}, "required_evidence": {"const": [{"id": "reporting-factory-regression-fixture", "artifact_type": "content_addressed_test_fixture"}, {"id": "reporting-factory-regression-receipt", "artifact_type": "deterministic_validation_receipt"}]}}}]},
+            {"allOf": [{"$ref": "#/$defs/step"}, {"type": "object", "properties": {"position": {"const": 5}, "id": {"const": "independent-regression"}, "kind": {"const": "regression_test"}, "scope": {"const": "independent_fixture"}, "requires_steps": {"const": ["deterministic-behavior-validation"]}, "required_evidence": {"const": [{"id": "independent-regression-fixture", "artifact_type": "content_addressed_test_fixture"}, {"id": "independent-regression-receipt", "artifact_type": "deterministic_validation_receipt"}]}}}]},
+            {"allOf": [{"$ref": "#/$defs/step"}, {"type": "object", "properties": {"position": {"const": 6}, "id": {"const": "rollback-validation"}, "kind": {"const": "rollback_test"}, "scope": {"const": "candidate_implementation"}, "requires_steps": {"const": ["reporting-factory-regression", "independent-regression"]}, "required_evidence": {"const": [{"id": "rollback-plan", "artifact_type": "content_addressed_rollback_plan"}, {"id": "rollback-validation-receipt", "artifact_type": "deterministic_validation_receipt"}]}}}]},
+            {"allOf": [{"$ref": "#/$defs/step"}, {"type": "object", "properties": {"position": {"const": 7}, "id": {"const": "cross-factory-privilege-review"}, "kind": {"const": "privilege_review"}, "scope": {"const": "closed_portfolio"}, "requires_steps": {"const": ["reporting-factory-regression", "independent-regression"]}, "required_evidence": {"const": [{"id": "cross-factory-privilege-review-receipt", "artifact_type": "deterministic_policy_receipt"}]}}}]}
+          ],
+          "items": false,
+          "minItems": 8,
+          "maxItems": 8
+        }
+      }
+    },
+    "execution_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["planning_only", "isolated_workspace_required", "network_access_allowed", "production_credentials_allowed", "production_state_access_allowed", "model_output_accepted_as_verification", "content_addressed_evidence_required", "explicit_authorization_required_before_execution", "overwrite_existing_artifacts"],
+      "properties": {
+        "planning_only": {"const": true},
+        "isolated_workspace_required": {"const": true},
+        "network_access_allowed": {"const": false},
+        "production_credentials_allowed": {"const": false},
+        "production_state_access_allowed": {"const": false},
+        "model_output_accepted_as_verification": {"const": false},
+        "content_addressed_evidence_required": {"const": true},
+        "explicit_authorization_required_before_execution": {"const": true},
+        "overwrite_existing_artifacts": {"const": false}
+      }
+    },
+    "validation_requirements": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["candidate_chain_reverification_required", "candidate_identity_alignment_required", "candidate_target_alignment_required", "candidate_behavior_checks_bound", "content_safety_preflight_required", "secret_absence_preflight_required", "contract_schema_validation_required", "candidate_implementation_required", "deterministic_behavior_validation_required", "reporting_factory_regression_required", "independent_regression_required", "rollback_validation_required", "cross_factory_privilege_review_required"],
+      "properties": {
+        "candidate_chain_reverification_required": {"const": true},
+        "candidate_identity_alignment_required": {"const": true},
+        "candidate_target_alignment_required": {"const": true},
+        "candidate_behavior_checks_bound": {"const": true},
+        "content_safety_preflight_required": {"const": true},
+        "secret_absence_preflight_required": {"const": true},
+        "contract_schema_validation_required": {"const": true},
+        "candidate_implementation_required": {"const": true},
+        "deterministic_behavior_validation_required": {"const": true},
+        "reporting_factory_regression_required": {"const": true},
+        "independent_regression_required": {"const": true},
+        "rollback_validation_required": {"const": true},
+        "cross_factory_privilege_review_required": {"const": true}
+      }
+    },
+    "planning_boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["candidate_artifact_untrusted", "planning_contract_only", "contains_executable_commands", "candidate_implementation_present", "validation_plan_created", "validation_execution_authorized", "validation_executed", "reporting_factory_validation_passed", "independent_regression_validation_passed", "rollback_plan_verified", "cross_factory_privilege_review_passed", "owner_policy_approval_obtained", "shared_promotion_eligible", "promotion_authorized", "rollout_authorized", "activation_authorized", "execution_authorized", "cross_factory_effects_authorized"],
+      "properties": {
+        "candidate_artifact_untrusted": {"const": true},
+        "planning_contract_only": {"const": true},
+        "contains_executable_commands": {"const": false},
+        "candidate_implementation_present": {"const": false},
+        "validation_plan_created": {"const": false},
+        "validation_execution_authorized": {"const": false},
+        "validation_executed": {"const": false},
+        "reporting_factory_validation_passed": {"const": false},
+        "independent_regression_validation_passed": {"const": false},
+        "rollback_plan_verified": {"const": false},
+        "cross_factory_privilege_review_passed": {"const": false},
+        "owner_policy_approval_obtained": {"const": false},
+        "shared_promotion_eligible": {"const": false},
+        "promotion_authorized": {"const": false},
+        "rollout_authorized": {"const": false},
+        "activation_authorized": {"const": false},
+        "execution_authorized": {"const": false},
+        "cross_factory_effects_authorized": {"const": false}
+      }
+    }
+  }
+}

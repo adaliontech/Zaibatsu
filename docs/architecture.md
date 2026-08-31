@@ -46,6 +46,7 @@ Zaibatsu deliberately separates fourteen questions:
 | [`examples/economic-factory.improvement-observation-spec.json`](../examples/economic-factory.improvement-observation-spec.json) plus [`examples/economic-factory.improvement-observation.json`](../examples/economic-factory.improvement-observation.json) | Which exact untrusted report is structurally normalized against returned evidence and a canonical subject, without claiming safety or semantic truth? |
 | [`policies/improvement-classification-v1.json`](../policies/improvement-classification-v1.json) plus [`examples/economic-factory.improvement-classification.json`](../examples/economic-factory.improvement-classification.json) | Does the exact proposal/observation pair meet deterministic workflow/type rules for validation planning, and which validation, promotion, rollout, and effect authorities remain false? |
 | [`examples/economic-factory.improvement-candidate-spec.json`](../examples/economic-factory.improvement-candidate-spec.json) plus [`examples/economic-factory.improvement-candidate.json`](../examples/economic-factory.improvement-candidate.json) | Which exact canonical non-executable candidate contract matches that eligible classification, and which safety, semantic, implementation, validation, promotion, and effect claims remain false? |
+| [`examples/economic-factory.improvement-validation-plan-spec.json`](../examples/economic-factory.improvement-validation-plan-spec.json) plus [`examples/economic-factory.improvement-validation-plan.json`](../examples/economic-factory.improvement-validation-plan.json) | Which fixed validation stages and content-addressed evidence would the exact candidate require, what remains missing, and which execution and promotion authorities remain false? |
 | [`examples/economic-factory.rebuild-plan.json`](../examples/economic-factory.rebuild-plan.json) | In which dependency order would a qualified factory be rebuilt, which direct and upstream blockers stop each action, and which separate gates still deny activation? |
 
 The validator requires the factory registry and shared component maturities to
@@ -161,9 +162,28 @@ inputs, outputs, ordered checks, fail-closed behavior, and an explicit
 contract-only authority boundary. It contains no executable implementation.
 The binding proves identity, structure, lineage, and target alignment only. It
 does not scan content or secrets, establish semantic correctness, create or run
-a validation plan, pass either regression scope, verify rollback, obtain owner
+a validation plan by itself, pass either regression scope, verify rollback, obtain owner
 approval, change shared policy, or authorize promotion, rollout, activation,
 execution, or cross-factory effects.
+
+## Deterministic non-executing validation plan
+
+The separate validation planner reverifies the exact candidate and every
+upstream artifact before deriving a fixed eight-stage graph: content-safety and
+secret-absence preflights, contract schema validation, deterministic behavior
+validation, reporting-factory and independent regressions, rollback
+validation, and cross-factory privilege review. The deterministic-behavior
+stage also binds the candidate contract's exact behavior-check IDs.
+
+The checked plan is a work inventory, not evidence that work happened. It
+lists twelve content-addressed evidence artifacts as `missing`; all eight
+stages are `not_run`; executed, passed, and failed counts are zero; and no
+candidate implementation exists. Its policy forbids network access,
+production credentials or state, model output as verification, and overwriting
+existing artifacts. Planning proves only chain re-verification, candidate
+identity and target binding, fixed ordering, and missing-evidence enumeration.
+It grants no validation success, approval, promotion, rollout, activation,
+execution, or cross-factory authority.
 
 ## Deterministic module composition
 
@@ -488,6 +508,7 @@ factory run
   -> retained evidence
   -> classified improvement candidate
   -> exact candidate contract binding
+  -> deterministic non-executing validation plan
   -> change to shared module/template/gate
   -> deterministic and independent validation
   -> owner/policy promotion
@@ -495,11 +516,12 @@ factory run
 ```
 
 Evidence return, non-authorizing proposal recording, structural observation
-normalization, deterministic workflow/type classification, and exact
-non-executable candidate-contract binding exist at bounded operational
-public-kit scope. Semantic review, content-safety handling, implementation,
-validation planning or execution, shared-template promotion, and rollout are
-still designed. Recursive improvement therefore means the system learns
+normalization, deterministic workflow/type classification, exact
+non-executable candidate-contract binding, and deterministic non-executing
+validation planning exist at bounded operational public-kit scope. Semantic
+review, content-safety results, implementation, validation execution,
+shared-template promotion, and rollout are still designed. Recursive
+improvement therefore means the system learns
 through reviewed, versioned artifacts—not that an agent recursively expands
 its own authority.
 

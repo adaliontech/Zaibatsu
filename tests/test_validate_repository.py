@@ -30,6 +30,7 @@ import factory_improvement_proposal as improvement_proposal
 import factory_improvement_observation as improvement_observation
 import factory_improvement_classification as improvement_classification
 import factory_improvement_candidate as improvement_candidate
+import factory_improvement_validation_plan as improvement_validation_plan
 import factory_portfolio as portfolio
 import factory_qualification as qualification
 import factory_rebuild as rebuild
@@ -2708,6 +2709,34 @@ class FactoryImprovementClassificationTests(unittest.TestCase):
         self.assertIsNotNone(candidate)
         assert candidate is not None
         self.candidate = candidate
+        self.validation_plan_specification = (
+            improvement_validation_plan.load_factory_improvement_validation_plan_spec()
+        )
+        validation_plan_errors, validation_plan = (
+            improvement_validation_plan.factory_improvement_validation_plan_for_inputs(
+                self.validation_plan_specification,
+                self.candidate,
+                self.candidate_specification,
+                self.classification,
+                self.policy,
+                self.proposal,
+                self.proposal_specification,
+                self.observation,
+                self.observation_specification,
+                self.evidence_record,
+                self.portfolio_plan,
+                self.portfolio_definition,
+                self.bundles,
+                "example-product",
+                self.pack,
+                self.qualification_plan,
+                self.qualification_policy,
+            )
+        )
+        self.assertEqual([], validation_plan_errors)
+        self.assertIsNotNone(validation_plan)
+        assert validation_plan is not None
+        self.validation_plan = validation_plan
 
     @staticmethod
     def _refresh_digest(document: dict[str, object], field: str) -> None:
@@ -2802,6 +2831,39 @@ class FactoryImprovementClassificationTests(unittest.TestCase):
             self.qualification_policy,
         )
 
+    def _verify_validation_plan(
+        self,
+        record: object,
+        *,
+        specification: object | None = None,
+        candidate: object | None = None,
+        bundles: object | None = None,
+    ) -> list[str]:
+        return improvement_validation_plan.verify_factory_improvement_validation_plan_for_inputs(
+            record,
+            (
+                self.validation_plan_specification
+                if specification is None
+                else specification
+            ),
+            self.candidate if candidate is None else candidate,
+            self.candidate_specification,
+            self.classification,
+            self.policy,
+            self.proposal,
+            self.proposal_specification,
+            self.observation,
+            self.observation_specification,
+            self.evidence_record,
+            self.portfolio_plan,
+            self.portfolio_definition,
+            self.bundles if bundles is None else bundles,
+            "example-product",
+            self.pack,
+            self.qualification_plan,
+            self.qualification_policy,
+        )
+
     def test_checked_records_policy_and_schemas_are_exact(self) -> None:
         self.assertEqual(
             self.observation,
@@ -2815,9 +2877,14 @@ class FactoryImprovementClassificationTests(unittest.TestCase):
             self.candidate,
             improvement_candidate.load_factory_improvement_candidate(),
         )
+        self.assertEqual(
+            self.validation_plan,
+            improvement_validation_plan.load_factory_improvement_validation_plan(),
+        )
         self.assertEqual([], self._verify_observation(self.observation))
         self.assertEqual([], self._verify_classification(self.classification))
         self.assertEqual([], self._verify_candidate(self.candidate))
+        self.assertEqual([], self._verify_validation_plan(self.validation_plan))
         for name, reference in (
             (
                 "factory-improvement-observation-spec.schema.json",
@@ -2842,6 +2909,14 @@ class FactoryImprovementClassificationTests(unittest.TestCase):
             (
                 "factory-improvement-candidate.schema.json",
                 improvement_candidate.IMPROVEMENT_CANDIDATE_SCHEMA_REFERENCE,
+            ),
+            (
+                "factory-improvement-validation-plan-spec.schema.json",
+                improvement_validation_plan.IMPROVEMENT_VALIDATION_PLAN_SPEC_SCHEMA_REFERENCE,
+            ),
+            (
+                "factory-improvement-validation-plan.schema.json",
+                improvement_validation_plan.IMPROVEMENT_VALIDATION_PLAN_SCHEMA_REFERENCE,
             ),
         ):
             with self.subTest(name=name):
@@ -3395,6 +3470,232 @@ class FactoryImprovementClassificationTests(unittest.TestCase):
         self.assertEqual([], errors)
         self.assertEqual(self.candidate, rebound)
 
+    def test_validation_plan_enumerates_work_without_executing_it(self) -> None:
+        self.assertEqual(8, len(self.validation_plan["validation_steps"]))
+        self.assertEqual(12, len(self.validation_plan["missing_evidence"]))
+        self.assertTrue(
+            all(
+                step["status"] == "not_run" and step["grants_authority"] is False
+                for step in self.validation_plan["validation_steps"]
+            )
+        )
+        self.assertTrue(
+            all(
+                item["status"] == "missing"
+                for item in self.validation_plan["missing_evidence"]
+            )
+        )
+        boundary = self.validation_plan["planning_boundary"]
+        true_fields = {
+            "candidate_chain_reverified",
+            "validation_plan_specification_validated",
+            "candidate_identity_aligned",
+            "candidate_target_aligned",
+            "candidate_artifact_bound",
+            "candidate_behavior_checks_bound",
+            "validation_steps_canonically_ordered",
+            "required_evidence_enumerated",
+            "validation_plan_created",
+        }
+        for field in true_fields:
+            self.assertIs(boundary[field], True)
+        for field in set(boundary) - true_fields:
+            self.assertIs(boundary[field], False)
+
+    def test_validation_plan_spec_rejects_weakened_policy_and_stages(self) -> None:
+        for field in improvement_validation_plan.EXPECTED_VALIDATION_REQUIREMENTS:
+            mutated = copy.deepcopy(self.validation_plan_specification)
+            mutated["validation_requirements"][field] = False
+            errors = improvement_validation_plan.validate_factory_improvement_validation_plan_spec(
+                mutated
+            )
+            self.assertTrue(any("every validation" in error for error in errors))
+        for field in (
+            "network_access_allowed",
+            "production_credentials_allowed",
+            "production_state_access_allowed",
+            "model_output_accepted_as_verification",
+            "overwrite_existing_artifacts",
+        ):
+            mutated = copy.deepcopy(self.validation_plan_specification)
+            mutated["execution_policy"][field] = True
+            self.assertTrue(
+                improvement_validation_plan.validate_factory_improvement_validation_plan_spec(
+                    mutated
+                )
+            )
+        reordered = copy.deepcopy(self.validation_plan_specification)
+        reordered["plan"]["steps"][0], reordered["plan"]["steps"][1] = (
+            reordered["plan"]["steps"][1],
+            reordered["plan"]["steps"][0],
+        )
+        self.assertTrue(
+            improvement_validation_plan.validate_factory_improvement_validation_plan_spec(
+                reordered
+            )
+        )
+        executable = copy.deepcopy(self.validation_plan_specification)
+        executable["planning_boundary"]["contains_executable_commands"] = True
+        self.assertTrue(
+            improvement_validation_plan.validate_factory_improvement_validation_plan_spec(
+                executable
+            )
+        )
+
+    def test_validation_plan_requires_exact_candidate_identity_and_chain(self) -> None:
+        for field, value in (
+            ("candidate_id", "different-candidate"),
+            (
+                "target",
+                {
+                    "kind": "deterministic_gate",
+                    "id": "different-gate",
+                    "operation": "add",
+                },
+            ),
+        ):
+            mutated = copy.deepcopy(self.validation_plan_specification)
+            mutated["plan"][field] = value
+            errors, record = (
+                improvement_validation_plan.factory_improvement_validation_plan_for_inputs(
+                    mutated,
+                    self.candidate,
+                    self.candidate_specification,
+                    self.classification,
+                    self.policy,
+                    self.proposal,
+                    self.proposal_specification,
+                    self.observation,
+                    self.observation_specification,
+                    self.evidence_record,
+                    self.portfolio_plan,
+                    self.portfolio_definition,
+                    self.bundles,
+                    "example-product",
+                    self.pack,
+                    self.qualification_plan,
+                    self.qualification_policy,
+                )
+            )
+            self.assertIsNone(record)
+            self.assertTrue(any("does not match" in error for error in errors))
+        forged_candidate = copy.deepcopy(self.candidate)
+        forged_candidate["binding_boundary"]["validation_plan_created"] = True
+        self._refresh_digest(
+            forged_candidate,
+            "factory_improvement_candidate_sha256",
+        )
+        self.assertTrue(
+            any(
+                "candidate" in error and "must exactly match" in error
+                for error in self._verify_validation_plan(
+                    self.validation_plan,
+                    candidate=forged_candidate,
+                )
+            )
+        )
+
+    def test_validation_plan_replay_and_authority_forgery_fail_closed(self) -> None:
+        replacement_bundles = list(self.bundles)
+        replacement_bundles[1] = self.bundles[2]
+        self.assertTrue(
+            self._verify_validation_plan(
+                self.validation_plan,
+                bundles=replacement_bundles,
+            )
+        )
+        mutations = (
+            ("boundary", "validation_execution_authorized"),
+            ("boundary", "reporting_factory_validation_passed"),
+            ("boundary", "shared_promotion_eligible"),
+            ("boundary", "execution_authorized"),
+            ("summary", "ready_for_validation_execution"),
+        )
+        for section, field in mutations:
+            forged = copy.deepcopy(self.validation_plan)
+            target = (
+                forged["planning_boundary"]
+                if section == "boundary"
+                else forged["summary"]
+            )
+            target[field] = True
+            self._refresh_digest(
+                forged,
+                "factory_improvement_validation_plan_sha256",
+            )
+            self.assertTrue(
+                any(
+                    "must exactly match" in error
+                    for error in self._verify_validation_plan(forged)
+                )
+            )
+        forged_step = copy.deepcopy(self.validation_plan)
+        forged_step["validation_steps"][0]["grants_authority"] = True
+        self._refresh_digest(
+            forged_step,
+            "factory_improvement_validation_plan_sha256",
+        )
+        self.assertTrue(self._verify_validation_plan(forged_step))
+        reordered = copy.deepcopy(self.validation_plan)
+        reordered["missing_evidence"][0], reordered["missing_evidence"][1] = (
+            reordered["missing_evidence"][1],
+            reordered["missing_evidence"][0],
+        )
+        self._refresh_digest(reordered, "factory_improvement_validation_plan_sha256")
+        self.assertTrue(self._verify_validation_plan(reordered))
+
+    def test_validation_plan_malformed_oversized_and_bundle_order_are_safe(self) -> None:
+        for malformed in (None, [], "validation-plan", 0, False, {"source": []}):
+            with self.subTest(malformed=malformed):
+                self.assertTrue(self._verify_validation_plan(malformed))
+        recursive = copy.deepcopy(self.validation_plan)
+        recursive_section: dict[str, object] = {}
+        recursive_section["self"] = recursive_section
+        recursive["summary"] = recursive_section
+        self.assertTrue(
+            any(
+                "canonical JSON" in error
+                for error in self._verify_validation_plan(recursive)
+            )
+        )
+        oversized = copy.deepcopy(self.validation_plan)
+        oversized["candidate"]["id"] = "x" * (
+            improvement_validation_plan.MAX_IMPROVEMENT_VALIDATION_PLAN_BYTES
+        )
+        self._refresh_digest(
+            oversized,
+            "factory_improvement_validation_plan_sha256",
+        )
+        self.assertTrue(
+            any(
+                "size is outside" in error
+                for error in self._verify_validation_plan(oversized)
+            )
+        )
+        errors, rebound = (
+            improvement_validation_plan.factory_improvement_validation_plan_for_inputs(
+                self.validation_plan_specification,
+                self.candidate,
+                self.candidate_specification,
+                self.classification,
+                self.policy,
+                self.proposal,
+                self.proposal_specification,
+                self.observation,
+                self.observation_specification,
+                self.evidence_record,
+                self.portfolio_plan,
+                self.portfolio_definition,
+                list(reversed(self.bundles)),
+                "example-product",
+                self.pack,
+                self.qualification_plan,
+                self.qualification_policy,
+            )
+        )
+        self.assertEqual([], errors)
+        self.assertEqual(self.validation_plan, rebound)
+
     def test_cli_round_trips_and_refuses_overwrite(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:
             root = Path(temporary_directory)
@@ -3408,6 +3709,7 @@ class FactoryImprovementClassificationTests(unittest.TestCase):
             observation_path = root / "observation.json"
             classification_path = root / "classification.json"
             candidate_path = root / "candidate.json"
+            validation_plan_path = root / "validation-plan.json"
             cli = [sys.executable, str(validator.ROOT / "scripts" / "zaibatsu.py")]
             chain = [
                 str(evidence_return.EXAMPLE_EVIDENCE_RETURN_PATH),
@@ -3534,6 +3836,56 @@ class FactoryImprovementClassificationTests(unittest.TestCase):
             self.assertEqual(0, verified.returncode, verified.stderr)
             self.assertIn("candidate artifact bound: true", verified.stdout)
             self.assertIn("candidate implementation present: false", verified.stdout)
+            validation_plan_inputs = [
+                str(
+                    improvement_validation_plan.EXAMPLE_IMPROVEMENT_VALIDATION_PLAN_SPEC_PATH
+                ),
+                str(candidate_path),
+                *candidate_inputs,
+            ]
+            create_validation_plan = cli + [
+                "plan-improvement-validation",
+                *validation_plan_inputs,
+                "--output",
+                str(validation_plan_path),
+            ]
+            created = subprocess.run(
+                create_validation_plan,
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(0, created.returncode, created.stderr)
+            self.assertEqual(
+                self.validation_plan,
+                json.loads(validation_plan_path.read_text(encoding="utf-8")),
+            )
+            verified = subprocess.run(
+                cli
+                + [
+                    "verify-improvement-validation-plan",
+                    str(validation_plan_path),
+                    *validation_plan_inputs,
+                ],
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(0, verified.returncode, verified.stderr)
+            self.assertIn("validation steps: 8", verified.stdout)
+            self.assertIn("missing evidence: 12", verified.stdout)
+            self.assertIn("ready for validation execution: false", verified.stdout)
+            refused_validation_plan = subprocess.run(
+                create_validation_plan,
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(2, refused_validation_plan.returncode)
+            self.assertIn("refusing to overwrite", refused_validation_plan.stderr)
             refused_candidate = subprocess.run(
                 create_candidate,
                 check=False,
@@ -3657,6 +4009,31 @@ class FactoryImprovementClassificationTests(unittest.TestCase):
             self.assertIn(
                 "input size is outside",
                 oversized_candidate_result.stderr,
+            )
+            oversized_validation_plan = root / "oversized-validation-plan.json"
+            oversized_validation_plan.write_bytes(
+                b" "
+                * (
+                    improvement_validation_plan.MAX_IMPROVEMENT_VALIDATION_PLAN_BYTES
+                    + 1
+                )
+            )
+            oversized_validation_plan_result = subprocess.run(
+                cli
+                + [
+                    "verify-improvement-validation-plan",
+                    str(oversized_validation_plan),
+                    *validation_plan_inputs,
+                ],
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(2, oversized_validation_plan_result.returncode)
+            self.assertIn(
+                "input size is outside",
+                oversized_validation_plan_result.stderr,
             )
 
 
