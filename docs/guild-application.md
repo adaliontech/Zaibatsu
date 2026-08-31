@@ -40,7 +40,12 @@ passed 203 tests, 90-file validation, both Gitleaks modes, five strict schemas,
 exact artifact regeneration, and independent CI. Its immutable release and
 full-history tag clone passed roof/tag CI, three live-schema byte checks,
 strict external validation, exact regeneration, and both Gitleaks modes. The
-final demo and applicant materials remain explicit gates in
+v1.11.0 closed-portfolio candidate passed 212 tests, 97-file validation, exact
+three-bundle plan regeneration, both Gitleaks modes, seven strict schemas, and
+independent CI. Its immutable release and full-history tag clone passed
+roof/tag CI, two live-schema byte checks, exact plan regeneration, strict
+external validation, and both Gitleaks modes. The final demo and applicant
+materials remain explicit gates in
 [`architecture/submission-readiness.json`](../architecture/submission-readiness.json).
 
 ## Current project description
@@ -270,8 +275,8 @@ the public repository:
 - [x] v1.11 candidate passes credential-disabled full-history clone, both
       Gitleaks modes, seven strict schemas, exact plan regeneration,
       non-authorizing assertions, and independent CI.
-- [ ] v1.11 passes evidence-roof and tag CI, two tagged-schema byte checks,
-      tag-clone reproduction, and immutable-release proof.
+- [x] Immutable v1.11.0 passes evidence-roof and tag CI, two tagged-schema
+      byte checks, tag-clone reproduction, and immutable-release proof.
 - [x] Public repository and article links resolve without authentication.
 - [ ] Demo clip or screenshots show a real Factory task and validation result.
 - [x] No private host, credential, recovery, or deployment detail is exposed.

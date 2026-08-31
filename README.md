@@ -665,7 +665,20 @@ over evidence roof `535ebadec3fa15bf4cebddef96bad345371c62f3`;
 [tag CI](https://github.com/adaliontech/Zaibatsu/actions/runs/33342972482),
 a second credential-disabled full-history tag clone, three live-schema byte
 checks, exact regeneration, both Gitleaks modes, and strict external schema
-validation passed. GitHub reports v1.10.0 immutable, latest, non-draft, and
+validation passed. GitHub reports v1.10.0 immutable, non-draft, and
+non-prerelease. The v1.11 candidate at
+`e4155072ec03f4eca502b12f5ca813e9cfaf0d8f` adds the closed multi-factory
+portfolio plan and passed 212 tests, 97-file validation, both Gitleaks modes,
+seven strict schemas, exact three-bundle plan regeneration, and independent
+[candidate CI](https://github.com/adaliontech/Zaibatsu/actions/runs/33355699088).
+Immutable [v1.11.0](https://github.com/adaliontech/Zaibatsu/releases/tag/v1.11.0)
+uses annotated tag object `ce1140db6fdcb85116ccb4ec6158b3751763a13b`
+over evidence roof `b5d2b15911a34148df18bd49f94a3ced08e52ac9`;
+[roof CI](https://github.com/adaliontech/Zaibatsu/actions/runs/33355839619),
+[tag CI](https://github.com/adaliontech/Zaibatsu/actions/runs/33355871092),
+a credential-disabled full-history tag clone, two live-schema byte checks,
+exact portfolio regeneration, both Gitleaks modes, and strict external schema
+validation passed. GitHub reports v1.11.0 immutable, latest, non-draft, and
 non-prerelease.
 
 Zaibatsu is an independent project and is not affiliated with or endorsed by

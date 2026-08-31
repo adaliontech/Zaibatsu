@@ -36,8 +36,8 @@ changes.
   assessment time as independent operational truth;
 - preserve the reproduced immutable `v1.10.0` runtime-evidence pack without
   presenting retrieved bytes as verifier reexecution or artifact truth;
-- reproduce and release the v1.11 closed factory-portfolio plan without
-  presenting intended namespaces as deployed runtime isolation;
+- preserve the reproduced immutable `v1.11.0` closed factory-portfolio plan
+  without presenting intended namespaces as deployed runtime isolation;
 - record the Guild demo and complete applicant-owned submission materials.
 
 Exit: the public narrative, architecture, portable factory, module artifacts,
