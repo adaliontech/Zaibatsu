@@ -75,6 +75,11 @@ eighteen strict schemas, byte-identical full-chain plan regeneration,
 non-executing assertions, and independent CI. Its evidence roof, annotated
 immutable release, roof/tag CI, two live-schema byte checks, and full-history
 tag-clone reproduction also passed.
+The v1.17 portable validation-input-pack candidate passed 260 tests, 128-file
+validation, a credential-disabled 60-commit full-history clone, both Gitleaks
+modes, nineteen strict schemas, byte-identical 21-member pack regeneration,
+self-verification, non-executing assertions, and independent CI. Its immutable
+release is not yet claimed.
 
 ## Current project description
 
@@ -383,10 +388,11 @@ the public repository:
       assertions, and independent CI.
 - [x] Immutable v1.16.0 passes evidence-roof and tag CI, tagged-schema byte
       checks, tag-clone reproduction, and immutable-release proof.
-- [x] Portable validation-input-pack v1.17 candidate passes 260 local tests,
-      128-file validation, exact 21-member archive regeneration, nested-chain
-      verification, malformed/archive/authority controls, and explicit
-      non-executing semantics.
+- [x] Portable validation-input-pack v1.17 candidate passes 260 tests, 128-file
+      validation, a credential-disabled 60-commit full-history clone, both
+      Gitleaks modes, nineteen strict schemas, exact 21-member archive
+      regeneration, nested-chain verification, malformed/archive/authority
+      controls, explicit non-executing semantics, and independent CI.
 - [ ] Immutable v1.17.0 release proof and fresh tag-clone reproduction pass.
 - [x] Public repository and article links resolve without authentication.
 - [ ] Demo clip or screenshots show a real Factory task and validation result.

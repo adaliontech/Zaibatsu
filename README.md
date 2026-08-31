@@ -1175,6 +1175,19 @@ regeneration, exact non-executing assertions, and two live tagged-schema byte
 checks passed. GitHub reports v1.16.0 immutable, latest, non-draft, and
 non-prerelease.
 
+The v1.17 portable validation-input-pack candidate at
+`f99fbfc3e077390767eb42daba90c5c5b8bad582` passed all 260 tests, 128-file
+validation, strict Git, both checksum-pinned Gitleaks 8.30.1 modes over its
+60-commit public history and tree, nineteen strict Draft 2020-12
+schema/instance pairs, and byte-identical regeneration and self-verification of
+the 296,960-byte, 21-member archive from a credential-disabled full-history
+clone. [Candidate
+CI](https://github.com/adaliontech/Zaibatsu/actions/runs/33367424273) passed
+independently. The pack makes exact validation inputs portable; it runs no
+stage, needs no live production credential or state, does not prove secret
+absence, and grants no approval, promotion, rollout, activation, execution, or
+cross-factory authority.
+
 Zaibatsu is an independent project and is not affiliated with or endorsed by
 Factory AI.
 

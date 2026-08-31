@@ -142,3 +142,10 @@ non-executing assertions, and independent CI. Its evidence roof, annotated
 immutable release, roof/tag CI, two live-schema byte checks, and full-history
 tag-clone reproduction also passed. The final clip and applicant-owned form
 submission remain external.
+
+The v1.17 portable validation-input-pack candidate passed 260 tests, 128-file
+validation, a credential-disabled 60-commit full-history clone, both Gitleaks
+modes, nineteen strict schemas, byte-identical 21-member pack regeneration and
+self-verification, explicit non-executing assertions, and independent CI. Its
+immutable release is not yet claimed. The final clip and applicant-owned form
+submission remain external.
