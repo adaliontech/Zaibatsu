@@ -63,7 +63,7 @@ path.
 | Real public project | This repository | Public and anonymously reachable |
 | Clear README | [`README.md`](../README.md) | Complete |
 | License | [`LICENSE`](../LICENSE) | Complete |
-| Runnable quickstart | [`docs/reproducibility.md`](reproducibility.md) | Immutable v1.11.0 passed 212-test, 97-file credential-disabled full-history candidate and tag clones, candidate/roof/tag CI, both Gitleaks modes, two live-v1.11-schema byte checks, seven strict schemas, exact three-bundle portfolio-plan regeneration, and non-authorizing semantic proof |
+| Runnable quickstart | [`docs/reproducibility.md`](reproducibility.md) | Immutable v1.12.0 passed 221-test, 100-file credential-disabled full-history candidate and tag clones, candidate/roof/tag CI, both Gitleaks modes, one live-v1.12-schema byte check, eight strict schemas, exact three-bundle portfolio-plan and evidence-return regeneration, and non-authorizing semantic proof |
 | Reusable value | [`examples/economic-factory.json`](../examples/economic-factory.json), [cron variant](../examples/economic-factory-cron.json), [factory portfolio](../examples/factory-portfolio.json), [evidence-return record](../examples/economic-factory.evidence-return.json), [`catalog/modules.json`](../catalog/modules.json), [source lock](../examples/economic-factory.source-lock.json), [qualification policy](../policies/runtime-qualification-v1.json), [signed runtime evidence](../examples/economic-factory.runtime-evidence.json), [evidence-pack manifest](../examples/economic-factory.runtime-evidence-pack-manifest.json), [runtime assessment](../examples/economic-factory.runtime-assessment.json), [rebuild plan](../examples/economic-factory.rebuild-plan.json), and [`scripts/zaibatsu.py`](../scripts/zaibatsu.py) | Another project can scaffold a fail-closed definition, reproduce and inspect self-verifying control bundles, join them into a closed evidence-only multi-factory view, bind one verified pack to its exact source bundle and declared return route, bind one bundle to exact annotated-release control sources, compare a policy-compatible module substitution, generate a missing-evidence plan, verify scoped signed assertions, package every referenced artifact and verifier descriptor, assess exact gaps and freshness, and compile those verified inputs into a non-executing rebuild DAG offline |
 | Explain Factory/Droid role | [`docs/droid-session.md`](droid-session.md) | Authenticated session, scoped diff, and independent validation recorded |
 | End-to-end case study | [`docs/case-study.md`](case-study.md) | Factory-of-software-factories narrative and real Droid result complete |
@@ -108,5 +108,7 @@ validation, and exact plan regeneration. The v1.12 route-bound evidence-return
 candidate passes 221 tests, 100-file validation, a credential-disabled
 full-history clone, both Gitleaks modes, eight strict schemas, exact
 regeneration, replay/forgery/type/size/authority tests, and independent CI.
-Release and tagged-schema proofs remain pending. The final clip and
-applicant-owned form submission remain.
+Its immutable release passed roof and tag CI, a live tagged-schema byte check,
+full-history tag-clone reproduction, exact regeneration, both Gitleaks modes,
+and strict schema validation. The final clip and applicant-owned form
+submission remain.

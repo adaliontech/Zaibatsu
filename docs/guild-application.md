@@ -48,7 +48,9 @@ external validation, and both Gitleaks modes. The final demo and applicant
 materials remain explicit gates. The v1.12 route-bound evidence-return
 candidate passed 221 tests, 100-file validation, a credential-disabled clone,
 both Gitleaks modes, eight strict schemas, exact regeneration, and independent
-CI. Release and tagged-schema proofs are not yet claimed. The gates remain in
+CI. Its immutable release and full-history tag clone passed roof/tag CI, a live
+tagged-schema byte check, exact regeneration, strict external validation, and
+both Gitleaks modes. The gates remain in
 [`architecture/submission-readiness.json`](../architecture/submission-readiness.json).
 
 ## Current project description
@@ -290,7 +292,7 @@ the public repository:
       and replay/forgery/type/size/authority adversarial tests.
 - [x] v1.12 candidate passes credential-disabled full-history clone, both
       Gitleaks modes, eight strict schemas, and independent CI.
-- [ ] Immutable v1.12.0 passes evidence-roof and tag CI, tagged-schema byte
+- [x] Immutable v1.12.0 passes evidence-roof and tag CI, tagged-schema byte
       check, tag-clone reproduction, and immutable-release proof.
 - [x] Public repository and article links resolve without authentication.
 - [ ] Demo clip or screenshots show a real Factory task and validation result.

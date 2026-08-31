@@ -38,9 +38,10 @@ changes.
   presenting retrieved bytes as verifier reexecution or artifact truth;
 - preserve the reproduced immutable `v1.11.0` closed factory-portfolio plan
   without presenting intended namespaces as deployed runtime isolation;
-- release the route-bound evidence-return record without presenting byte and
-  route integrity as observed transport, safe content, classification,
-  promotion, activation, execution, or cross-factory authority;
+- preserve the reproduced immutable `v1.12.0` route-bound evidence-return
+  record without presenting byte and route integrity as observed transport,
+  safe content, classification, promotion, activation, execution, or
+  cross-factory authority;
 - record the Guild demo and complete applicant-owned submission materials.
 
 Exit: the public narrative, architecture, portable factory, module artifacts,
