@@ -118,3 +118,10 @@ independent CI. Its immutable release and full-history tag clone passed
 roof/tag CI, two live-schema byte checks, exact regeneration, strict external
 validation, and both Gitleaks modes. The final clip and applicant-owned form
 submission remain.
+
+The v1.14 structural-observation and deterministic-classification candidate
+passes 241 tests, 115-file validation, a credential-disabled full-history
+clone, both Gitleaks modes, fourteen strict schemas, exact observation and
+classification regeneration, explicit planning-only output, and independent
+CI. Its evidence roof and immutable release are the remaining release steps;
+the final clip and applicant-owned form submission remain external.
