@@ -53,6 +53,26 @@ from factory_improvement_proposal import (
     validate_factory_improvement_proposal_spec,
     verify_factory_improvement_proposal_for_inputs,
 )
+from factory_improvement_observation import (
+    EXAMPLE_IMPROVEMENT_OBSERVATION_PATH,
+    EXAMPLE_IMPROVEMENT_OBSERVATION_SPEC_PATH,
+    IMPROVEMENT_OBSERVATION_SCHEMA_REFERENCE,
+    IMPROVEMENT_OBSERVATION_SPEC_SCHEMA_REFERENCE,
+    load_factory_improvement_observation,
+    load_factory_improvement_observation_spec,
+    validate_factory_improvement_observation_spec,
+    verify_factory_improvement_observation_for_inputs,
+)
+from factory_improvement_classification import (
+    EXAMPLE_IMPROVEMENT_CLASSIFICATION_PATH,
+    IMPROVEMENT_CLASSIFICATION_POLICY_PATH,
+    IMPROVEMENT_CLASSIFICATION_POLICY_SCHEMA_REFERENCE,
+    IMPROVEMENT_CLASSIFICATION_SCHEMA_REFERENCE,
+    load_factory_improvement_classification,
+    load_improvement_classification_policy,
+    validate_improvement_classification_policy,
+    verify_factory_improvement_classification_for_inputs,
+)
 from factory_portfolio import (
     EXAMPLE_PORTFOLIO_PATH,
     EXAMPLE_PORTFOLIO_PLAN_PATH,
@@ -166,6 +186,9 @@ REQUIRED_FILES = (
     "examples/economic-factory.evidence-return.json",
     "examples/economic-factory.improvement-proposal-spec.json",
     "examples/economic-factory.improvement-proposal.json",
+    "examples/economic-factory.improvement-observation-spec.json",
+    "examples/economic-factory.improvement-observation.json",
+    "examples/economic-factory.improvement-classification.json",
     "examples/control-factory.json",
     "examples/service-factory.json",
     "examples/factory-portfolio.json",
@@ -196,6 +219,10 @@ REQUIRED_FILES = (
     "schemas/factory-evidence-return.schema.json",
     "schemas/factory-improvement-proposal-spec.schema.json",
     "schemas/factory-improvement-proposal.schema.json",
+    "schemas/factory-improvement-observation-spec.schema.json",
+    "schemas/factory-improvement-observation.schema.json",
+    "schemas/improvement-classification-policy.schema.json",
+    "schemas/factory-improvement-classification.schema.json",
     "schemas/factory-plan.schema.json",
     "schemas/factory-portfolio.schema.json",
     "schemas/factory-portfolio-plan.schema.json",
@@ -222,6 +249,8 @@ REQUIRED_FILES = (
     "scripts/factory_evidence_pack.py",
     "scripts/factory_evidence_return.py",
     "scripts/factory_improvement_proposal.py",
+    "scripts/factory_improvement_observation.py",
+    "scripts/factory_improvement_classification.py",
     "scripts/factory_portfolio.py",
     "scripts/factory_qualification.py",
     "scripts/factory_rebuild.py",
@@ -233,6 +262,7 @@ REQUIRED_FILES = (
     "tests/test_validate_repository.py",
     "policies/runtime-qualification-v1.json",
     "policies/runtime-evidence-verifiers-v1.json",
+    "policies/improvement-classification-v1.json",
 )
 
 ALLOWED_MATURITIES = {
@@ -250,7 +280,7 @@ ARCHITECTURE_SCHEMA_VERSION = "zaibatsu.architecture.v1"
 FACTORY_MODEL_SCHEMA_VERSION = "zaibatsu.factory-model.v1"
 READINESS_SCHEMA_VERSION = "zaibatsu.submission-readiness.v1"
 FACTORY_DEFINITION_SCHEMA_VERSION = "zaibatsu.factory-definition.v2"
-INTEGRATED_TEST_COUNT = 230
+INTEGRATED_TEST_COUNT = 241
 LATEST_VALIDATED_RELEASE_TEST_COUNT = 230
 DROID_FACTORY_CLI_VERSION = "0.206.0"
 DROID_SESSION_REFERENCE = "46f941a9-82f8-4df3-a45c-b8158996360b"
@@ -308,6 +338,15 @@ CONTRACT_SCHEMA_REFERENCES = {
     "examples/economic-factory.improvement-proposal.json": (
         IMPROVEMENT_PROPOSAL_SCHEMA_REFERENCE
     ),
+    "examples/economic-factory.improvement-observation-spec.json": (
+        IMPROVEMENT_OBSERVATION_SPEC_SCHEMA_REFERENCE
+    ),
+    "examples/economic-factory.improvement-observation.json": (
+        IMPROVEMENT_OBSERVATION_SCHEMA_REFERENCE
+    ),
+    "examples/economic-factory.improvement-classification.json": (
+        IMPROVEMENT_CLASSIFICATION_SCHEMA_REFERENCE
+    ),
     "examples/economic-factory.bundle-manifest.json": BUNDLE_MANIFEST_SCHEMA_REFERENCE,
     "examples/economic-factory.plan.json": FACTORY_PLAN_SCHEMA_REFERENCE,
     "examples/economic-factory.rebuild-plan.json": REBUILD_PLAN_SCHEMA_REFERENCE,
@@ -333,6 +372,9 @@ CONTRACT_SCHEMA_REFERENCES = {
     "policies/runtime-qualification-v1.json": QUALIFICATION_POLICY_SCHEMA_REFERENCE,
     "policies/runtime-evidence-verifiers-v1.json": (
         VERIFIER_REGISTRY_SCHEMA_REFERENCE
+    ),
+    "policies/improvement-classification-v1.json": (
+        IMPROVEMENT_CLASSIFICATION_POLICY_SCHEMA_REFERENCE
     ),
     "evidence/dispatcher-validation-v1.json": "../schemas/dispatcher-validation-receipt.schema.json",
     "evidence/droid-contribution-v1.json": "../schemas/droid-contribution-receipt.schema.json",
@@ -362,6 +404,15 @@ REMOTE_SCHEMA_LOCAL_PATHS = {
     ),
     "examples/economic-factory.improvement-proposal.json": (
         "schemas/factory-improvement-proposal.schema.json"
+    ),
+    "examples/economic-factory.improvement-observation-spec.json": (
+        "schemas/factory-improvement-observation-spec.schema.json"
+    ),
+    "examples/economic-factory.improvement-observation.json": (
+        "schemas/factory-improvement-observation.schema.json"
+    ),
+    "examples/economic-factory.improvement-classification.json": (
+        "schemas/factory-improvement-classification.schema.json"
     ),
     "examples/economic-factory.bundle-manifest.json": (
         "schemas/factory-bundle-manifest.schema.json"
@@ -396,6 +447,9 @@ REMOTE_SCHEMA_LOCAL_PATHS = {
     ),
     "policies/runtime-evidence-verifiers-v1.json": (
         "schemas/runtime-evidence-verifier-registry.schema.json"
+    ),
+    "policies/improvement-classification-v1.json": (
+        "schemas/improvement-classification-policy.schema.json"
     ),
 }
 
@@ -1227,6 +1281,8 @@ def validate_factory_model(data: Any) -> list[str]:
     if not isinstance(feedback, dict) or feedback != {
         "evidence_return_maturity": "operational",
         "improvement_proposal_maturity": "operational",
+        "observation_normalization_maturity": "operational",
+        "candidate_classification_maturity": "operational",
         "shared_pattern_promotion_maturity": "designed",
         "promotion_authority": "reviewed_deterministic_policy_and_owner_gate",
         "factory_may_self_promote": False,
@@ -1905,7 +1961,15 @@ def validate_contract_schema_files(root: Path = ROOT) -> list[str]:
         if schema.get("$schema") != "https://json-schema.org/draft/2020-12/schema":
             errors.append(f"{relative}: project-owned schema must declare JSON Schema 2020-12")
         schema_release = (
-            "v1.13.0"
+            "v1.14.0"
+            if schema_path.name
+            in {
+                "factory-improvement-observation-spec.schema.json",
+                "factory-improvement-observation.schema.json",
+                "improvement-classification-policy.schema.json",
+                "factory-improvement-classification.schema.json",
+            }
+            else "v1.13.0"
             if schema_path.name
             in {
                 "factory-improvement-proposal-spec.schema.json",
@@ -2021,6 +2085,12 @@ def main() -> int:
     runtime_evidence: Any = None
     runtime_assessment: Any = None
     rebuild_plan_document: Any = None
+    improvement_proposal_spec: Any = None
+    improvement_proposal: Any = None
+    improvement_observation_spec: Any = None
+    improvement_observation: Any = None
+    improvement_classification_policy: Any = None
+    improvement_classification: Any = None
     portfolio_document: Any = None
     portfolio_plan_document: Any = None
     portfolio_bundles: list[bytes] = []
@@ -2405,6 +2475,105 @@ def main() -> int:
                     )
                 )
     try:
+        improvement_observation_spec = load_factory_improvement_observation_spec(
+            EXAMPLE_IMPROVEMENT_OBSERVATION_SPEC_PATH
+        )
+    except (OSError, RecursionError, ValueError) as exc:
+        errors.append(
+            "cannot load example factory improvement-observation "
+            f"specification: {exc}"
+        )
+    else:
+        errors.extend(
+            validate_factory_improvement_observation_spec(
+                improvement_observation_spec
+            )
+        )
+        try:
+            improvement_observation = load_factory_improvement_observation(
+                EXAMPLE_IMPROVEMENT_OBSERVATION_PATH
+            )
+        except (OSError, RecursionError, ValueError) as exc:
+            errors.append(
+                f"cannot load example factory improvement-observation record: {exc}"
+            )
+        else:
+            if (
+                isinstance(portfolio_document, dict)
+                and isinstance(portfolio_plan_document, dict)
+                and len(portfolio_bundles) == len(PORTFOLIO_FACTORY_PATHS)
+                and runtime_evidence_pack is not None
+                and isinstance(qualification_plan, dict)
+                and isinstance(qualification_policy, dict)
+                and isinstance(evidence_return_document, dict)
+            ):
+                errors.extend(
+                    verify_factory_improvement_observation_for_inputs(
+                        improvement_observation,
+                        improvement_observation_spec,
+                        evidence_return_document,
+                        portfolio_plan_document,
+                        portfolio_document,
+                        portfolio_bundles,
+                        "example-product",
+                        runtime_evidence_pack,
+                        qualification_plan,
+                        qualification_policy,
+                    )
+                )
+    try:
+        improvement_classification_policy = load_improvement_classification_policy(
+            IMPROVEMENT_CLASSIFICATION_POLICY_PATH
+        )
+    except (OSError, RecursionError, ValueError) as exc:
+        errors.append(f"cannot load improvement classification policy: {exc}")
+    else:
+        errors.extend(
+            validate_improvement_classification_policy(
+                improvement_classification_policy
+            )
+        )
+        try:
+            improvement_classification = load_factory_improvement_classification(
+                EXAMPLE_IMPROVEMENT_CLASSIFICATION_PATH
+            )
+        except (OSError, RecursionError, ValueError) as exc:
+            errors.append(
+                f"cannot load example factory improvement-classification: {exc}"
+            )
+        else:
+            if (
+                isinstance(improvement_proposal, dict)
+                and isinstance(improvement_proposal_spec, dict)
+                and isinstance(improvement_observation, dict)
+                and isinstance(improvement_observation_spec, dict)
+                and isinstance(evidence_return_document, dict)
+                and isinstance(portfolio_document, dict)
+                and isinstance(portfolio_plan_document, dict)
+                and len(portfolio_bundles) == len(PORTFOLIO_FACTORY_PATHS)
+                and runtime_evidence_pack is not None
+                and isinstance(qualification_plan, dict)
+                and isinstance(qualification_policy, dict)
+            ):
+                errors.extend(
+                    verify_factory_improvement_classification_for_inputs(
+                        improvement_classification,
+                        improvement_classification_policy,
+                        improvement_proposal,
+                        improvement_proposal_spec,
+                        improvement_observation,
+                        improvement_observation_spec,
+                        evidence_return_document,
+                        portfolio_plan_document,
+                        portfolio_document,
+                        portfolio_bundles,
+                        "example-product",
+                        runtime_evidence_pack,
+                        qualification_plan,
+                        qualification_policy,
+                    )
+                )
+    try:
         runtime_assessment = load_runtime_assessment(
             EXAMPLE_RUNTIME_ASSESSMENT_PATH
         )
@@ -2485,7 +2654,8 @@ def main() -> int:
         "- 3-factory portfolio plus scheduler variant, content-addressed modules, "
         "control and portfolio plans, bundle manifest, source lock, signed "
         "runtime-evidence pack, route-bound evidence return, evidence-bound "
-        "improvement proposal, and non-executing rebuild DAG checked"
+        "improvement proposal, structurally normalized observation, "
+        "validation-planning classification, and non-executing rebuild DAG checked"
     )
     print(f"- {len(EVIDENCE_CONTRACTS)} evidence receipts checked")
     print(f"- {len(REQUIRED_FACTORY_INVARIANTS)} meta-factory invariants checked")

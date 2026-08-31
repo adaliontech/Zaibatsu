@@ -27,6 +27,8 @@ import factory_composer as composer
 import factory_evidence_pack as evidence_pack
 import factory_evidence_return as evidence_return
 import factory_improvement_proposal as improvement_proposal
+import factory_improvement_observation as improvement_observation
+import factory_improvement_classification as improvement_classification
 import factory_portfolio as portfolio
 import factory_qualification as qualification
 import factory_rebuild as rebuild
@@ -2546,6 +2548,671 @@ class FactoryImprovementProposalTests(unittest.TestCase):
                     "verify-improvement-proposal-record",
                     str(oversized_record),
                     *inputs,
+                ],
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(2, oversized_result.returncode)
+            self.assertIn("input size is outside", oversized_result.stderr)
+
+
+class FactoryImprovementClassificationTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.catalog = composer.load_module_catalog()
+        self.artifacts, errors = composer.load_module_artifacts(self.catalog)
+        self.assertEqual([], errors)
+        self.portfolio_definition = portfolio.load_factory_portfolio()
+        self.portfolio_plan = portfolio.load_factory_portfolio_plan()
+        self.bundles: list[bytes] = []
+        for path in validator.PORTFOLIO_FACTORY_PATHS:
+            bundle, _ = bundler.build_factory_bundle(
+                composer.load_json_file(path),
+                self.catalog,
+                self.artifacts,
+            )
+            self.bundles.append(bundle)
+        self.qualification_plan = qualification.load_qualification_plan()
+        self.qualification_policy = qualification.load_qualification_policy()
+        runtime_set = runtime_evidence.load_runtime_evidence()
+        registry = runtime_evidence.load_verifier_registry()
+        artifact = composer.load_json_file(
+            validator.ROOT
+            / "examples"
+            / "runtime-evidence"
+            / "source-revision-fixture.json"
+        )
+        implementation = composer.load_json_file(
+            validator.ROOT
+            / "examples"
+            / "runtime-evidence"
+            / "fixture-verifier-method.json"
+        )
+        pack_errors, pack, _ = evidence_pack.runtime_evidence_pack_for_bundle(
+            runtime_set,
+            registry,
+            {composer.sha256_json(artifact): artifact},
+            {composer.sha256_json(implementation): implementation},
+            self.qualification_plan,
+            self.bundles[1],
+            self.qualification_policy,
+        )
+        self.assertEqual([], pack_errors)
+        self.assertIsNotNone(pack)
+        assert pack is not None
+        self.pack = pack
+        evidence_errors, evidence_record = (
+            evidence_return.factory_evidence_return_for_inputs(
+                self.portfolio_plan,
+                self.portfolio_definition,
+                self.bundles,
+                "example-product",
+                self.pack,
+                self.qualification_plan,
+                self.qualification_policy,
+            )
+        )
+        self.assertEqual([], evidence_errors)
+        self.assertIsNotNone(evidence_record)
+        assert evidence_record is not None
+        self.evidence_record = evidence_record
+        self.proposal_specification = (
+            improvement_proposal.load_factory_improvement_proposal_spec()
+        )
+        proposal_errors, proposal = (
+            improvement_proposal.factory_improvement_proposal_for_inputs(
+                self.proposal_specification,
+                self.evidence_record,
+                self.portfolio_plan,
+                self.portfolio_definition,
+                self.bundles,
+                "example-product",
+                self.pack,
+                self.qualification_plan,
+                self.qualification_policy,
+            )
+        )
+        self.assertEqual([], proposal_errors)
+        self.assertIsNotNone(proposal)
+        assert proposal is not None
+        self.proposal = proposal
+        self.observation_specification = (
+            improvement_observation.load_factory_improvement_observation_spec()
+        )
+        observation_errors, observation = (
+            improvement_observation.factory_improvement_observation_for_inputs(
+                self.observation_specification,
+                self.evidence_record,
+                self.portfolio_plan,
+                self.portfolio_definition,
+                self.bundles,
+                "example-product",
+                self.pack,
+                self.qualification_plan,
+                self.qualification_policy,
+            )
+        )
+        self.assertEqual([], observation_errors)
+        self.assertIsNotNone(observation)
+        assert observation is not None
+        self.observation = observation
+        self.policy = (
+            improvement_classification.load_improvement_classification_policy()
+        )
+        classification_errors, classification = (
+            improvement_classification.factory_improvement_classification_for_inputs(
+                self.policy,
+                self.proposal,
+                self.proposal_specification,
+                self.observation,
+                self.observation_specification,
+                self.evidence_record,
+                self.portfolio_plan,
+                self.portfolio_definition,
+                self.bundles,
+                "example-product",
+                self.pack,
+                self.qualification_plan,
+                self.qualification_policy,
+            )
+        )
+        self.assertEqual([], classification_errors)
+        self.assertIsNotNone(classification)
+        assert classification is not None
+        self.classification = classification
+
+    @staticmethod
+    def _refresh_digest(document: dict[str, object], field: str) -> None:
+        without_digest = copy.deepcopy(document)
+        without_digest.pop(field)
+        document[field] = composer.sha256_json(without_digest)
+
+    def _verify_observation(
+        self,
+        record: object,
+        *,
+        specification: object | None = None,
+        evidence_record: object | None = None,
+        bundles: object | None = None,
+    ) -> list[str]:
+        return improvement_observation.verify_factory_improvement_observation_for_inputs(
+            record,
+            (
+                self.observation_specification
+                if specification is None
+                else specification
+            ),
+            self.evidence_record if evidence_record is None else evidence_record,
+            self.portfolio_plan,
+            self.portfolio_definition,
+            self.bundles if bundles is None else bundles,
+            "example-product",
+            self.pack,
+            self.qualification_plan,
+            self.qualification_policy,
+        )
+
+    def _verify_classification(
+        self,
+        record: object,
+        *,
+        policy: object | None = None,
+        observation: object | None = None,
+        observation_specification: object | None = None,
+        bundles: object | None = None,
+    ) -> list[str]:
+        return improvement_classification.verify_factory_improvement_classification_for_inputs(
+            record,
+            self.policy if policy is None else policy,
+            self.proposal,
+            self.proposal_specification,
+            self.observation if observation is None else observation,
+            (
+                self.observation_specification
+                if observation_specification is None
+                else observation_specification
+            ),
+            self.evidence_record,
+            self.portfolio_plan,
+            self.portfolio_definition,
+            self.bundles if bundles is None else bundles,
+            "example-product",
+            self.pack,
+            self.qualification_plan,
+            self.qualification_policy,
+        )
+
+    def test_checked_records_policy_and_schemas_are_exact(self) -> None:
+        self.assertEqual(
+            self.observation,
+            improvement_observation.load_factory_improvement_observation(),
+        )
+        self.assertEqual(
+            self.classification,
+            improvement_classification.load_factory_improvement_classification(),
+        )
+        self.assertEqual([], self._verify_observation(self.observation))
+        self.assertEqual([], self._verify_classification(self.classification))
+        for name, reference in (
+            (
+                "factory-improvement-observation-spec.schema.json",
+                improvement_observation.IMPROVEMENT_OBSERVATION_SPEC_SCHEMA_REFERENCE,
+            ),
+            (
+                "factory-improvement-observation.schema.json",
+                improvement_observation.IMPROVEMENT_OBSERVATION_SCHEMA_REFERENCE,
+            ),
+            (
+                "improvement-classification-policy.schema.json",
+                improvement_classification.IMPROVEMENT_CLASSIFICATION_POLICY_SCHEMA_REFERENCE,
+            ),
+            (
+                "factory-improvement-classification.schema.json",
+                improvement_classification.IMPROVEMENT_CLASSIFICATION_SCHEMA_REFERENCE,
+            ),
+        ):
+            with self.subTest(name=name):
+                schema = composer.load_json_file(validator.ROOT / "schemas" / name)
+                self.assertEqual(
+                    "https://json-schema.org/draft/2020-12/schema",
+                    schema["$schema"],
+                )
+                self.assertEqual(reference, schema["$id"])
+
+    def test_normalization_boundary_claims_only_structural_facts(self) -> None:
+        boundary = self.observation["normalization_boundary"]
+        self.assertEqual(improvement_observation.NORMALIZATION_BOUNDARY, boundary)
+        true_fields = {
+            "evidence_return_reverified",
+            "evidence_return_bound",
+            "observation_structure_validated",
+            "observation_canonical_json_bound",
+            "observation_structurally_normalized",
+        }
+        for field in true_fields:
+            self.assertIs(boundary[field], True)
+        for field in set(boundary) - true_fields:
+            self.assertIs(boundary[field], False)
+
+    def test_classification_is_planning_only_and_non_authorizing(self) -> None:
+        decision = self.classification["classification"]
+        self.assertEqual("classified_for_validation_planning", decision["decision"])
+        self.assertEqual("deterministic_gate_candidate", decision["candidate_class"])
+        self.assertIs(decision["eligible_for_validation_planning"], True)
+        boundary = self.classification["classification_boundary"]
+        true_fields = {
+            "proposal_reverified",
+            "observation_reverified",
+            "classification_policy_validated",
+            "observation_structural_normalization_verified",
+            "source_alignment_checked",
+            "target_alignment_checked",
+            "classification_performed",
+            "improvement_candidate_classified",
+            "validation_planning_eligible",
+        }
+        for field in true_fields:
+            self.assertIs(boundary[field], True)
+        for field in set(boundary) - true_fields:
+            self.assertIs(boundary[field], False)
+
+    def test_observation_spec_rejects_weakened_gates_and_bad_types(self) -> None:
+        for field in improvement_observation.EXPECTED_NORMALIZATION_REQUIREMENTS:
+            mutated = copy.deepcopy(self.observation_specification)
+            mutated["normalization_requirements"][field] = False
+            errors = improvement_observation.validate_factory_improvement_observation_spec(
+                mutated
+            )
+            self.assertTrue(any("every normalization" in error for error in errors))
+        for field in ("grants_authority", "can_self_promote", "execution_authorized"):
+            mutated = copy.deepcopy(self.observation_specification)
+            mutated["observation_boundary"][field] = True
+            errors = improvement_observation.validate_factory_improvement_observation_spec(
+                mutated
+            )
+            self.assertTrue(any("non-authorizing" in error for error in errors))
+        for field, value in (("kind", []), ("id", {})):
+            mutated = copy.deepcopy(self.observation_specification)
+            mutated["observation"][field] = value
+            errors = improvement_observation.validate_factory_improvement_observation_spec(
+                mutated
+            )
+            self.assertTrue(errors)
+        oversized = copy.deepcopy(self.observation_specification)
+        oversized["observation"]["summary"] = "x" * 513
+        self.assertTrue(
+            improvement_observation.validate_factory_improvement_observation_spec(
+                oversized
+            )
+        )
+
+    def test_policy_rejects_weakening_noncanonical_order_and_bad_types(self) -> None:
+        for field in (
+            "require_same_evidence_return",
+            "require_subject_target_match",
+            "require_complete_review_requirements",
+            "require_non_authorizing_inputs",
+        ):
+            mutated = copy.deepcopy(self.policy)
+            mutated["classification_rules"][field] = False
+            errors = improvement_classification.validate_improvement_classification_policy(
+                mutated
+            )
+            self.assertTrue(any(field in error for error in errors))
+        for value in (
+            ["observation", "failure"],
+            [[]],
+            [],
+        ):
+            mutated = copy.deepcopy(self.policy)
+            mutated["classification_rules"]["accepted_observation_kinds"] = value
+            self.assertTrue(
+                improvement_classification.validate_improvement_classification_policy(
+                    mutated
+                )
+            )
+        inflated = copy.deepcopy(self.policy)
+        inflated["decision_boundary"]["policy_grants_execution_authority"] = True
+        self.assertTrue(
+            improvement_classification.validate_improvement_classification_policy(
+                inflated
+            )
+        )
+
+    def test_evidence_replay_and_observation_authority_forgery_fail(self) -> None:
+        replacement_bundles = list(self.bundles)
+        replacement_bundles[1] = self.bundles[2]
+        self.assertTrue(
+            self._verify_observation(
+                self.observation,
+                bundles=replacement_bundles,
+            )
+        )
+        for field in (
+            "content_safety_scanned",
+            "observation_semantic_truth_verified",
+            "improvement_candidate_classified",
+            "promotion_authorized",
+            "execution_authorized",
+        ):
+            mutated = copy.deepcopy(self.observation)
+            mutated["normalization_boundary"][field] = True
+            self._refresh_digest(
+                mutated,
+                "factory_improvement_observation_sha256",
+            )
+            errors = self._verify_observation(mutated)
+            self.assertTrue(any("must exactly match" in error for error in errors))
+
+    def test_subject_target_mismatch_is_a_deterministic_rejection(self) -> None:
+        mismatched_spec = copy.deepcopy(self.observation_specification)
+        mismatched_spec["subject"]["id"] = "different-gate"
+        errors, mismatched_observation = (
+            improvement_observation.factory_improvement_observation_for_inputs(
+                mismatched_spec,
+                self.evidence_record,
+                self.portfolio_plan,
+                self.portfolio_definition,
+                self.bundles,
+                "example-product",
+                self.pack,
+                self.qualification_plan,
+                self.qualification_policy,
+            )
+        )
+        self.assertEqual([], errors)
+        assert mismatched_observation is not None
+        errors, result = (
+            improvement_classification.factory_improvement_classification_for_inputs(
+                self.policy,
+                self.proposal,
+                self.proposal_specification,
+                mismatched_observation,
+                mismatched_spec,
+                self.evidence_record,
+                self.portfolio_plan,
+                self.portfolio_definition,
+                self.bundles,
+                "example-product",
+                self.pack,
+                self.qualification_plan,
+                self.qualification_policy,
+            )
+        )
+        self.assertEqual([], errors)
+        assert result is not None
+        self.assertEqual("not_classified", result["classification"]["decision"])
+        self.assertIsNone(result["classification"]["candidate_class"])
+        self.assertIs(
+            result["classification"]["eligible_for_validation_planning"],
+            False,
+        )
+        failed = result["classification"]["checks"][1]
+        self.assertEqual("subject_target_match", failed["id"])
+        self.assertEqual("failed", failed["status"])
+
+    def test_valid_restrictive_policy_deterministically_rejects(self) -> None:
+        restrictive = copy.deepcopy(self.policy)
+        restrictive["classification_rules"]["accepted_observation_kinds"] = [
+            "failure"
+        ]
+        self.assertEqual(
+            [],
+            improvement_classification.validate_improvement_classification_policy(
+                restrictive
+            ),
+        )
+        errors, result = (
+            improvement_classification.factory_improvement_classification_for_inputs(
+                restrictive,
+                self.proposal,
+                self.proposal_specification,
+                self.observation,
+                self.observation_specification,
+                self.evidence_record,
+                self.portfolio_plan,
+                self.portfolio_definition,
+                self.bundles,
+                "example-product",
+                self.pack,
+                self.qualification_plan,
+                self.qualification_policy,
+            )
+        )
+        self.assertEqual([], errors)
+        assert result is not None
+        self.assertEqual("not_classified", result["classification"]["decision"])
+        self.assertEqual("failed", result["classification"]["checks"][2]["status"])
+
+    def test_malformed_recursive_oversized_and_forged_records_fail_cleanly(self) -> None:
+        for malformed in (None, [], "classification", 0, False, {"source": []}):
+            with self.subTest(malformed=malformed):
+                self.assertTrue(self._verify_classification(malformed))
+        recursive = copy.deepcopy(self.classification)
+        recursive_section: dict[str, object] = {}
+        recursive_section["self"] = recursive_section
+        recursive["classification"] = recursive_section
+        self.assertTrue(
+            any("canonical JSON" in error for error in self._verify_classification(recursive))
+        )
+        oversized = copy.deepcopy(self.classification)
+        oversized["classification"]["padding"] = "x" * (
+            improvement_classification.MAX_IMPROVEMENT_CLASSIFICATION_BYTES
+        )
+        self._refresh_digest(
+            oversized,
+            "factory_improvement_classification_sha256",
+        )
+        self.assertTrue(
+            any("size is outside" in error for error in self._verify_classification(oversized))
+        )
+        for field in (
+            "content_safety_scanned",
+            "proposal_merit_verified",
+            "promotion_authorized",
+            "execution_authorized",
+            "cross_factory_effects_authorized",
+        ):
+            forged = copy.deepcopy(self.classification)
+            forged["classification_boundary"][field] = True
+            self._refresh_digest(
+                forged,
+                "factory_improvement_classification_sha256",
+            )
+            self.assertTrue(
+                any("must exactly match" in error for error in self._verify_classification(forged))
+            )
+
+    def test_bundle_order_does_not_change_observation_or_classification(self) -> None:
+        reversed_bundles = list(reversed(self.bundles))
+        observation_errors, observation = (
+            improvement_observation.factory_improvement_observation_for_inputs(
+                self.observation_specification,
+                self.evidence_record,
+                self.portfolio_plan,
+                self.portfolio_definition,
+                reversed_bundles,
+                "example-product",
+                self.pack,
+                self.qualification_plan,
+                self.qualification_policy,
+            )
+        )
+        self.assertEqual([], observation_errors)
+        self.assertEqual(self.observation, observation)
+        classification_errors, classification = (
+            improvement_classification.factory_improvement_classification_for_inputs(
+                self.policy,
+                self.proposal,
+                self.proposal_specification,
+                self.observation,
+                self.observation_specification,
+                self.evidence_record,
+                self.portfolio_plan,
+                self.portfolio_definition,
+                reversed_bundles,
+                "example-product",
+                self.pack,
+                self.qualification_plan,
+                self.qualification_policy,
+            )
+        )
+        self.assertEqual([], classification_errors)
+        self.assertEqual(self.classification, classification)
+
+    def test_cli_round_trips_and_refuses_overwrite(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            bundle_paths: list[Path] = []
+            for index, bundle in enumerate(self.bundles):
+                path = root / f"factory-{index}.tar"
+                path.write_bytes(bundle)
+                bundle_paths.append(path)
+            pack_path = root / "runtime-evidence.tar"
+            pack_path.write_bytes(self.pack)
+            observation_path = root / "observation.json"
+            classification_path = root / "classification.json"
+            cli = [sys.executable, str(validator.ROOT / "scripts" / "zaibatsu.py")]
+            chain = [
+                str(evidence_return.EXAMPLE_EVIDENCE_RETURN_PATH),
+                str(portfolio.EXAMPLE_PORTFOLIO_PLAN_PATH),
+                str(portfolio.EXAMPLE_PORTFOLIO_PATH),
+                "example-product",
+                str(pack_path),
+                str(qualification.EXAMPLE_QUALIFICATION_PLAN_PATH),
+                str(qualification.QUALIFICATION_POLICY_PATH),
+                *(str(path) for path in bundle_paths),
+            ]
+            observation_inputs = [
+                str(improvement_observation.EXAMPLE_IMPROVEMENT_OBSERVATION_SPEC_PATH),
+                *chain,
+            ]
+            create_observation = cli + [
+                "improvement-observation-record",
+                *observation_inputs,
+                "--output",
+                str(observation_path),
+            ]
+            created = subprocess.run(
+                create_observation,
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(0, created.returncode, created.stderr)
+            self.assertEqual(
+                self.observation,
+                json.loads(observation_path.read_text(encoding="utf-8")),
+            )
+            verified = subprocess.run(
+                cli
+                + [
+                    "verify-improvement-observation-record",
+                    str(observation_path),
+                    *observation_inputs,
+                ],
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(0, verified.returncode, verified.stderr)
+            self.assertIn("semantic truth verified: false", verified.stdout)
+            classification_inputs = [
+                str(improvement_classification.IMPROVEMENT_CLASSIFICATION_POLICY_PATH),
+                str(improvement_proposal.EXAMPLE_IMPROVEMENT_PROPOSAL_PATH),
+                str(improvement_proposal.EXAMPLE_IMPROVEMENT_PROPOSAL_SPEC_PATH),
+                str(observation_path),
+                str(improvement_observation.EXAMPLE_IMPROVEMENT_OBSERVATION_SPEC_PATH),
+                *chain,
+            ]
+            create_classification = cli + [
+                "classify-improvement-proposal",
+                *classification_inputs,
+                "--output",
+                str(classification_path),
+            ]
+            created = subprocess.run(
+                create_classification,
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(0, created.returncode, created.stderr)
+            self.assertEqual(
+                self.classification,
+                json.loads(classification_path.read_text(encoding="utf-8")),
+            )
+            verified = subprocess.run(
+                cli
+                + [
+                    "verify-improvement-classification",
+                    str(classification_path),
+                    *classification_inputs,
+                ],
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(0, verified.returncode, verified.stderr)
+            self.assertIn("validation planning eligible: true", verified.stdout)
+            self.assertIn("promotion authorized: false", verified.stdout)
+            refused = subprocess.run(
+                create_classification,
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(2, refused.returncode)
+            self.assertIn("refusing to overwrite", refused.stderr)
+            oversized_count = subprocess.run(
+                cli
+                + [
+                    "classify-improvement-proposal",
+                    str(root / "missing-classification-policy.json"),
+                    str(root / "missing-proposal.json"),
+                    str(root / "missing-proposal-spec.json"),
+                    str(root / "missing-observation.json"),
+                    str(root / "missing-observation-spec.json"),
+                    str(root / "missing-return.json"),
+                    str(root / "missing-plan.json"),
+                    str(root / "missing-portfolio.json"),
+                    "example-product",
+                    str(root / "missing-pack.tar"),
+                    str(root / "missing-qualification-plan.json"),
+                    str(root / "missing-qualification-policy.json"),
+                    *(
+                        str(root / "missing-bundle.tar")
+                        for _ in range(portfolio.MAX_FACTORIES + 1)
+                    ),
+                ],
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(2, oversized_count.returncode)
+            self.assertIn("between 2 and 64 bundles", oversized_count.stderr)
+            self.assertNotIn("cannot load", oversized_count.stderr)
+            oversized_record = root / "oversized-classification.json"
+            oversized_record.write_bytes(
+                b" "
+                * (
+                    improvement_classification.MAX_IMPROVEMENT_CLASSIFICATION_BYTES
+                    + 1
+                )
+            )
+            oversized_result = subprocess.run(
+                cli
+                + [
+                    "verify-improvement-classification",
+                    str(oversized_record),
+                    *classification_inputs,
                 ],
                 check=False,
                 stdout=subprocess.PIPE,

@@ -1,5 +1,33 @@
 # Changelog
 
+## 1.14.0 - 2026-08-30
+
+- Added a schema-bound untrusted improvement-observation specification and
+  evidence-bound record for observations, failures, artifact outcomes, and
+  corrections. The complete evidence-return chain is reverified before the
+  canonical category, subject, narrative, and digest are recorded.
+- Defined structural normalization narrowly: exact form and provenance are
+  proved, while reporter identity, content safety, secret absence, source or
+  report semantic truth, merit, promotion, execution, and cross-factory effects
+  remain false.
+- Added a separately hashed deterministic classification policy and exact
+  classification record. Fixed-order checks join the complete proposal and
+  observation chains, require source and subject alignment, preserve later
+  review gates, and map valid targets to canonical candidate classes.
+- Made classification scope explicit: a positive result is eligible only for
+  validation planning. No validation plan is created; validation execution,
+  mutation, approval, promotion, rollout, activation, execution, and
+  cross-factory effects remain false. Valid policy or target mismatches produce
+  deterministic `not_classified` records; forged inputs fail verification.
+- Added `improvement-observation-record`,
+  `verify-improvement-observation-record`, `classify-improvement-proposal`, and
+  `verify-improvement-classification` CLI workflows plus four strict Draft
+  2020-12 schemas and checked examples.
+- Added gate-weakening, noncanonical policy, type-confusion, evidence-replay,
+  target-mismatch, restrictive-policy, digest-refresh authority forgery,
+  recursive, size, input-order, and CLI round-trip tests. The integrated suite
+  now contains 241 tests and the validator requires 115 files.
+
 ## 1.13.0 - 2026-08-30
 
 - Added a schema-bound, untrusted factory improvement-proposal specification

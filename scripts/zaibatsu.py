@@ -35,6 +35,18 @@ from factory_improvement_proposal import (
     factory_improvement_proposal_for_inputs,
     verify_factory_improvement_proposal_for_inputs,
 )
+from factory_improvement_observation import (
+    MAX_IMPROVEMENT_OBSERVATION_BYTES,
+    MAX_IMPROVEMENT_OBSERVATION_SPEC_BYTES,
+    factory_improvement_observation_for_inputs,
+    verify_factory_improvement_observation_for_inputs,
+)
+from factory_improvement_classification import (
+    MAX_IMPROVEMENT_CLASSIFICATION_BYTES,
+    MAX_IMPROVEMENT_CLASSIFICATION_POLICY_BYTES,
+    factory_improvement_classification_for_inputs,
+    verify_factory_improvement_classification_for_inputs,
+)
 from factory_portfolio import (
     MAX_FACTORIES,
     MAX_PORTFOLIO_BYTES,
@@ -852,6 +864,434 @@ def command_verify_improvement_proposal_record(
     print("shared promotion eligible: false")
     print("execution authorized: false")
     print("cross-factory effects authorized: false")
+    return 0
+
+
+def load_improvement_observation_inputs(
+    specification_path: str,
+    evidence_return_path: str,
+    plan_path: str,
+    portfolio_path: str,
+    runtime_evidence_pack_path: str,
+    qualification_plan_path: str,
+    qualification_policy_path: str,
+    bundle_paths: list[str],
+) -> tuple[Any, Any, Any, Any, bytes, Any, Any, list[bytes]] | None:
+    if not valid_portfolio_bundle_count(bundle_paths):
+        return None
+    specification = load_bounded_json_document(
+        specification_path,
+        "factory improvement-observation specification",
+        MAX_IMPROVEMENT_OBSERVATION_SPEC_BYTES,
+    )
+    evidence_return = load_bounded_json_document(
+        evidence_return_path,
+        "factory evidence-return record",
+        MAX_EVIDENCE_RETURN_JSON_BYTES,
+    )
+    if specification is None or evidence_return is None:
+        return None
+    evidence_inputs = load_evidence_return_inputs(
+        plan_path,
+        portfolio_path,
+        runtime_evidence_pack_path,
+        qualification_plan_path,
+        qualification_policy_path,
+        bundle_paths,
+    )
+    if evidence_inputs is None:
+        return None
+    plan, portfolio, pack, qualification_plan, qualification_policy, bundles = (
+        evidence_inputs
+    )
+    return (
+        specification,
+        evidence_return,
+        plan,
+        portfolio,
+        pack,
+        qualification_plan,
+        qualification_policy,
+        bundles,
+    )
+
+
+def command_improvement_observation_record(
+    specification_path: str,
+    evidence_return_path: str,
+    plan_path: str,
+    portfolio_path: str,
+    source_factory_id: str,
+    runtime_evidence_pack_path: str,
+    qualification_plan_path: str,
+    qualification_policy_path: str,
+    bundle_paths: list[str],
+    output: str | None,
+) -> int:
+    inputs = load_improvement_observation_inputs(
+        specification_path,
+        evidence_return_path,
+        plan_path,
+        portfolio_path,
+        runtime_evidence_pack_path,
+        qualification_plan_path,
+        qualification_policy_path,
+        bundle_paths,
+    )
+    if inputs is None:
+        return 2
+    (
+        specification,
+        evidence_return,
+        plan,
+        portfolio,
+        pack,
+        qualification_plan,
+        qualification_policy,
+        bundles,
+    ) = inputs
+    errors, record = factory_improvement_observation_for_inputs(
+        specification,
+        evidence_return,
+        plan,
+        portfolio,
+        bundles,
+        source_factory_id,
+        pack,
+        qualification_plan,
+        qualification_policy,
+    )
+    if errors or record is None:
+        print("cannot build factory improvement-observation record", file=sys.stderr)
+        for error in errors:
+            print(f"- {error}", file=sys.stderr)
+        return 1
+    return write_document(record, output)
+
+
+def command_verify_improvement_observation_record(
+    record_path: str,
+    specification_path: str,
+    evidence_return_path: str,
+    plan_path: str,
+    portfolio_path: str,
+    source_factory_id: str,
+    runtime_evidence_pack_path: str,
+    qualification_plan_path: str,
+    qualification_policy_path: str,
+    bundle_paths: list[str],
+) -> int:
+    if not valid_portfolio_bundle_count(bundle_paths):
+        return 2
+    record = load_bounded_json_document(
+        record_path,
+        "factory improvement-observation record",
+        MAX_IMPROVEMENT_OBSERVATION_BYTES,
+    )
+    if record is None:
+        return 2
+    inputs = load_improvement_observation_inputs(
+        specification_path,
+        evidence_return_path,
+        plan_path,
+        portfolio_path,
+        runtime_evidence_pack_path,
+        qualification_plan_path,
+        qualification_policy_path,
+        bundle_paths,
+    )
+    if inputs is None:
+        return 2
+    (
+        specification,
+        evidence_return,
+        plan,
+        portfolio,
+        pack,
+        qualification_plan,
+        qualification_policy,
+        bundles,
+    ) = inputs
+    errors = verify_factory_improvement_observation_for_inputs(
+        record,
+        specification,
+        evidence_return,
+        plan,
+        portfolio,
+        bundles,
+        source_factory_id,
+        pack,
+        qualification_plan,
+        qualification_policy,
+    )
+    if errors:
+        print(
+            f"factory improvement-observation record failed: {record_path}",
+            file=sys.stderr,
+        )
+        for error in errors:
+            print(f"- {error}", file=sys.stderr)
+        return 1
+    assert isinstance(record, dict)
+    print(f"factory improvement-observation record passed: {record_path}")
+    print(
+        "factory improvement-observation sha256: "
+        f"{record['factory_improvement_observation_sha256']}"
+    )
+    print("observation structurally normalized: true")
+    print("observation semantic truth verified: false")
+    print("improvement candidate classified: false")
+    print("execution authorized: false")
+    return 0
+
+
+def load_improvement_classification_inputs(
+    policy_path: str,
+    proposal_path: str,
+    proposal_specification_path: str,
+    observation_path: str,
+    observation_specification_path: str,
+    evidence_return_path: str,
+    plan_path: str,
+    portfolio_path: str,
+    runtime_evidence_pack_path: str,
+    qualification_plan_path: str,
+    qualification_policy_path: str,
+    bundle_paths: list[str],
+) -> tuple[Any, Any, Any, Any, Any, Any, Any, Any, bytes, Any, Any, list[bytes]] | None:
+    if not valid_portfolio_bundle_count(bundle_paths):
+        return None
+    policy = load_bounded_json_document(
+        policy_path,
+        "improvement classification policy",
+        MAX_IMPROVEMENT_CLASSIFICATION_POLICY_BYTES,
+    )
+    proposal = load_bounded_json_document(
+        proposal_path,
+        "factory improvement-proposal record",
+        MAX_IMPROVEMENT_PROPOSAL_BYTES,
+    )
+    observation = load_bounded_json_document(
+        observation_path,
+        "factory improvement-observation record",
+        MAX_IMPROVEMENT_OBSERVATION_BYTES,
+    )
+    proposal_inputs = load_improvement_proposal_inputs(
+        proposal_specification_path,
+        evidence_return_path,
+        plan_path,
+        portfolio_path,
+        runtime_evidence_pack_path,
+        qualification_plan_path,
+        qualification_policy_path,
+        bundle_paths,
+    )
+    observation_specification = load_bounded_json_document(
+        observation_specification_path,
+        "factory improvement-observation specification",
+        MAX_IMPROVEMENT_OBSERVATION_SPEC_BYTES,
+    )
+    if any(
+        value is None
+        for value in (
+            policy,
+            proposal,
+            observation,
+            proposal_inputs,
+            observation_specification,
+        )
+    ):
+        return None
+    assert proposal_inputs is not None
+    (
+        proposal_specification,
+        evidence_return,
+        plan,
+        portfolio,
+        pack,
+        qualification_plan,
+        qualification_policy,
+        bundles,
+    ) = proposal_inputs
+    return (
+        policy,
+        proposal,
+        proposal_specification,
+        observation,
+        observation_specification,
+        evidence_return,
+        plan,
+        portfolio,
+        pack,
+        qualification_plan,
+        qualification_policy,
+        bundles,
+    )
+
+
+def command_classify_improvement_proposal(
+    policy_path: str,
+    proposal_path: str,
+    proposal_specification_path: str,
+    observation_path: str,
+    observation_specification_path: str,
+    evidence_return_path: str,
+    plan_path: str,
+    portfolio_path: str,
+    source_factory_id: str,
+    runtime_evidence_pack_path: str,
+    qualification_plan_path: str,
+    qualification_policy_path: str,
+    bundle_paths: list[str],
+    output: str | None,
+) -> int:
+    inputs = load_improvement_classification_inputs(
+        policy_path,
+        proposal_path,
+        proposal_specification_path,
+        observation_path,
+        observation_specification_path,
+        evidence_return_path,
+        plan_path,
+        portfolio_path,
+        runtime_evidence_pack_path,
+        qualification_plan_path,
+        qualification_policy_path,
+        bundle_paths,
+    )
+    if inputs is None:
+        return 2
+    (
+        policy,
+        proposal,
+        proposal_specification,
+        observation,
+        observation_specification,
+        evidence_return,
+        plan,
+        portfolio,
+        pack,
+        qualification_plan,
+        qualification_policy,
+        bundles,
+    ) = inputs
+    errors, record = factory_improvement_classification_for_inputs(
+        policy,
+        proposal,
+        proposal_specification,
+        observation,
+        observation_specification,
+        evidence_return,
+        plan,
+        portfolio,
+        bundles,
+        source_factory_id,
+        pack,
+        qualification_plan,
+        qualification_policy,
+    )
+    if errors or record is None:
+        print("cannot classify factory improvement proposal", file=sys.stderr)
+        for error in errors:
+            print(f"- {error}", file=sys.stderr)
+        return 1
+    return write_document(record, output)
+
+
+def command_verify_improvement_classification(
+    record_path: str,
+    policy_path: str,
+    proposal_path: str,
+    proposal_specification_path: str,
+    observation_path: str,
+    observation_specification_path: str,
+    evidence_return_path: str,
+    plan_path: str,
+    portfolio_path: str,
+    source_factory_id: str,
+    runtime_evidence_pack_path: str,
+    qualification_plan_path: str,
+    qualification_policy_path: str,
+    bundle_paths: list[str],
+) -> int:
+    if not valid_portfolio_bundle_count(bundle_paths):
+        return 2
+    record = load_bounded_json_document(
+        record_path,
+        "factory improvement-classification record",
+        MAX_IMPROVEMENT_CLASSIFICATION_BYTES,
+    )
+    if record is None:
+        return 2
+    inputs = load_improvement_classification_inputs(
+        policy_path,
+        proposal_path,
+        proposal_specification_path,
+        observation_path,
+        observation_specification_path,
+        evidence_return_path,
+        plan_path,
+        portfolio_path,
+        runtime_evidence_pack_path,
+        qualification_plan_path,
+        qualification_policy_path,
+        bundle_paths,
+    )
+    if inputs is None:
+        return 2
+    (
+        policy,
+        proposal,
+        proposal_specification,
+        observation,
+        observation_specification,
+        evidence_return,
+        plan,
+        portfolio,
+        pack,
+        qualification_plan,
+        qualification_policy,
+        bundles,
+    ) = inputs
+    errors = verify_factory_improvement_classification_for_inputs(
+        record,
+        policy,
+        proposal,
+        proposal_specification,
+        observation,
+        observation_specification,
+        evidence_return,
+        plan,
+        portfolio,
+        bundles,
+        source_factory_id,
+        pack,
+        qualification_plan,
+        qualification_policy,
+    )
+    if errors:
+        print(
+            f"factory improvement-classification failed: {record_path}",
+            file=sys.stderr,
+        )
+        for error in errors:
+            print(f"- {error}", file=sys.stderr)
+        return 1
+    assert isinstance(record, dict)
+    print(f"factory improvement-classification passed: {record_path}")
+    print(
+        "factory improvement-classification sha256: "
+        f"{record['factory_improvement_classification_sha256']}"
+    )
+    print(f"decision: {record['classification']['decision']}")
+    print(
+        "validation planning eligible: "
+        f"{str(record['classification']['eligible_for_validation_planning']).lower()}"
+    )
+    print("content safety scanned: false")
+    print("proposal merit verified: false")
+    print("promotion authorized: false")
+    print("execution authorized: false")
     return 0
 
 
@@ -1751,6 +2191,80 @@ def build_parser() -> argparse.ArgumentParser:
     verify_improvement_proposal_record.add_argument("qualification_policy_path")
     verify_improvement_proposal_record.add_argument("bundle_paths", nargs="+")
 
+    improvement_observation_record = commands.add_parser(
+        "improvement-observation-record",
+        help="structurally normalize one untrusted observation against returned evidence",
+    )
+    improvement_observation_record.add_argument("specification_path")
+    improvement_observation_record.add_argument("evidence_return_path")
+    improvement_observation_record.add_argument("plan_path")
+    improvement_observation_record.add_argument("portfolio_path")
+    improvement_observation_record.add_argument("source_factory_id")
+    improvement_observation_record.add_argument("runtime_evidence_pack_path")
+    improvement_observation_record.add_argument("qualification_plan_path")
+    improvement_observation_record.add_argument("qualification_policy_path")
+    improvement_observation_record.add_argument("bundle_paths", nargs="+")
+    improvement_observation_record.add_argument(
+        "--output",
+        help="write the improvement-observation record to a new file",
+    )
+
+    verify_improvement_observation_record = commands.add_parser(
+        "verify-improvement-observation-record",
+        help="reverify a normalized observation and its complete evidence chain",
+    )
+    verify_improvement_observation_record.add_argument("record_path")
+    verify_improvement_observation_record.add_argument("specification_path")
+    verify_improvement_observation_record.add_argument("evidence_return_path")
+    verify_improvement_observation_record.add_argument("plan_path")
+    verify_improvement_observation_record.add_argument("portfolio_path")
+    verify_improvement_observation_record.add_argument("source_factory_id")
+    verify_improvement_observation_record.add_argument("runtime_evidence_pack_path")
+    verify_improvement_observation_record.add_argument("qualification_plan_path")
+    verify_improvement_observation_record.add_argument("qualification_policy_path")
+    verify_improvement_observation_record.add_argument("bundle_paths", nargs="+")
+
+    classify_improvement_proposal = commands.add_parser(
+        "classify-improvement-proposal",
+        help="classify a verified proposal and observation for validation planning",
+    )
+    classify_improvement_proposal.add_argument("policy_path")
+    classify_improvement_proposal.add_argument("proposal_path")
+    classify_improvement_proposal.add_argument("proposal_specification_path")
+    classify_improvement_proposal.add_argument("observation_path")
+    classify_improvement_proposal.add_argument("observation_specification_path")
+    classify_improvement_proposal.add_argument("evidence_return_path")
+    classify_improvement_proposal.add_argument("plan_path")
+    classify_improvement_proposal.add_argument("portfolio_path")
+    classify_improvement_proposal.add_argument("source_factory_id")
+    classify_improvement_proposal.add_argument("runtime_evidence_pack_path")
+    classify_improvement_proposal.add_argument("qualification_plan_path")
+    classify_improvement_proposal.add_argument("qualification_policy_path")
+    classify_improvement_proposal.add_argument("bundle_paths", nargs="+")
+    classify_improvement_proposal.add_argument(
+        "--output",
+        help="write the improvement-classification record to a new file",
+    )
+
+    verify_improvement_classification = commands.add_parser(
+        "verify-improvement-classification",
+        help="reverify a planning-only classification and its complete source chain",
+    )
+    verify_improvement_classification.add_argument("record_path")
+    verify_improvement_classification.add_argument("policy_path")
+    verify_improvement_classification.add_argument("proposal_path")
+    verify_improvement_classification.add_argument("proposal_specification_path")
+    verify_improvement_classification.add_argument("observation_path")
+    verify_improvement_classification.add_argument("observation_specification_path")
+    verify_improvement_classification.add_argument("evidence_return_path")
+    verify_improvement_classification.add_argument("plan_path")
+    verify_improvement_classification.add_argument("portfolio_path")
+    verify_improvement_classification.add_argument("source_factory_id")
+    verify_improvement_classification.add_argument("runtime_evidence_pack_path")
+    verify_improvement_classification.add_argument("qualification_plan_path")
+    verify_improvement_classification.add_argument("qualification_policy_path")
+    verify_improvement_classification.add_argument("bundle_paths", nargs="+")
+
     source_lock = commands.add_parser(
         "source-lock",
         help="lock a verified bundle to exact sources in an annotated release",
@@ -2162,6 +2676,66 @@ def main() -> int:
         return command_verify_improvement_proposal_record(
             arguments.record_path,
             arguments.specification_path,
+            arguments.evidence_return_path,
+            arguments.plan_path,
+            arguments.portfolio_path,
+            arguments.source_factory_id,
+            arguments.runtime_evidence_pack_path,
+            arguments.qualification_plan_path,
+            arguments.qualification_policy_path,
+            arguments.bundle_paths,
+        )
+    if arguments.command == "improvement-observation-record":
+        return command_improvement_observation_record(
+            arguments.specification_path,
+            arguments.evidence_return_path,
+            arguments.plan_path,
+            arguments.portfolio_path,
+            arguments.source_factory_id,
+            arguments.runtime_evidence_pack_path,
+            arguments.qualification_plan_path,
+            arguments.qualification_policy_path,
+            arguments.bundle_paths,
+            arguments.output,
+        )
+    if arguments.command == "verify-improvement-observation-record":
+        return command_verify_improvement_observation_record(
+            arguments.record_path,
+            arguments.specification_path,
+            arguments.evidence_return_path,
+            arguments.plan_path,
+            arguments.portfolio_path,
+            arguments.source_factory_id,
+            arguments.runtime_evidence_pack_path,
+            arguments.qualification_plan_path,
+            arguments.qualification_policy_path,
+            arguments.bundle_paths,
+        )
+    if arguments.command == "classify-improvement-proposal":
+        return command_classify_improvement_proposal(
+            arguments.policy_path,
+            arguments.proposal_path,
+            arguments.proposal_specification_path,
+            arguments.observation_path,
+            arguments.observation_specification_path,
+            arguments.evidence_return_path,
+            arguments.plan_path,
+            arguments.portfolio_path,
+            arguments.source_factory_id,
+            arguments.runtime_evidence_pack_path,
+            arguments.qualification_plan_path,
+            arguments.qualification_policy_path,
+            arguments.bundle_paths,
+            arguments.output,
+        )
+    if arguments.command == "verify-improvement-classification":
+        return command_verify_improvement_classification(
+            arguments.record_path,
+            arguments.policy_path,
+            arguments.proposal_path,
+            arguments.proposal_specification_path,
+            arguments.observation_path,
+            arguments.observation_specification_path,
             arguments.evidence_return_path,
             arguments.plan_path,
             arguments.portfolio_path,

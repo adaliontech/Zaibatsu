@@ -20,7 +20,7 @@
     "pre_change_result": "mutation accepted",
     "post_change_result": "mutation rejected",
     "contribution_tests_passed": 36,
-    "current_integrated_tests_passed": 230
+    "current_integrated_tests_passed": 241
   },
   "acceptance": {
     "model_self_report_is_verification": false,

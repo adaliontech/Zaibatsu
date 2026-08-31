@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.14.0/schemas/improvement-classification-policy.schema.json",
+  "title": "Zaibatsu deterministic improvement-classification policy",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_schema", "schema_version", "policy_id", "classification_rules", "decision_boundary"],
+  "properties": {
+    "contract_schema": {"const": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.14.0/schemas/improvement-classification-policy.schema.json"},
+    "schema_version": {"const": "zaibatsu.improvement-classification-policy.v1"},
+    "policy_id": {"$ref": "#/$defs/id"},
+    "classification_rules": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["accepted_observation_kinds", "accepted_operations", "target_classifications", "require_same_evidence_return", "require_subject_target_match", "require_complete_review_requirements", "require_non_authorizing_inputs"],
+      "properties": {
+        "accepted_observation_kinds": {"type": "array", "minItems": 1, "maxItems": 4, "uniqueItems": true, "items": {"enum": ["failure", "artifact_outcome", "correction", "observation"]}},
+        "accepted_operations": {"type": "array", "minItems": 1, "maxItems": 3, "uniqueItems": true, "items": {"enum": ["add", "modify", "replace"]}},
+        "target_classifications": {
+          "const": [
+            {"position": 0, "target_kind": "shared_module", "candidate_class": "shared_module_candidate"},
+            {"position": 1, "target_kind": "factory_template", "candidate_class": "factory_template_candidate"},
+            {"position": 2, "target_kind": "deterministic_gate", "candidate_class": "deterministic_gate_candidate"}
+          ]
+        },
+        "require_same_evidence_return": {"const": true},
+        "require_subject_target_match": {"const": true},
+        "require_complete_review_requirements": {"const": true},
+        "require_non_authorizing_inputs": {"const": true}
+      }
+    },
+    "decision_boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["classification_scope", "content_safety_required_before_validation_execution", "semantic_evidence_required_before_promotion", "owner_approval_required_before_promotion", "rollback_required_before_rollout", "policy_grants_mutation_authority", "policy_grants_promotion_authority", "policy_grants_execution_authority", "policy_grants_cross_factory_authority"],
+      "properties": {
+        "classification_scope": {"const": "validation_planning_only"},
+        "content_safety_required_before_validation_execution": {"const": true},
+        "semantic_evidence_required_before_promotion": {"const": true},
+        "owner_approval_required_before_promotion": {"const": true},
+        "rollback_required_before_rollout": {"const": true},
+        "policy_grants_mutation_authority": {"const": false},
+        "policy_grants_promotion_authority": {"const": false},
+        "policy_grants_execution_authority": {"const": false},
+        "policy_grants_cross_factory_authority": {"const": false}
+      }
+    }
+  },
+  "$defs": {
+    "id": {"type": "string", "minLength": 1, "maxLength": 64, "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"}
+  }
+}

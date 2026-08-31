@@ -105,6 +105,13 @@ suggestion to it. Mandatory later review gates cannot be dropped, but proposer
 authentication, content safety, normalization, classification, merit,
 regression, rollback, approval, promotion, rollout, activation, execution,
 and cross-factory effects all remain false.
+The improvement-observation record separately binds one typed untrusted report
+to the same evidence and a canonical subject. Its normalization is structural,
+not a safety or truth claim. The deterministic classification policy then
+reverifies both records and classifies an aligned pair for validation planning
+only. It creates no validation plan and proves no safety, semantic merit,
+validation execution, approval, promotion, rollout, activation, execution, or
+cross-factory effect.
 
 The core repository works without a model or Droid credentials. For the Guild
 case study, authenticated Factory Droid used an owner-operated GGUF whose

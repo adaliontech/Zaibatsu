@@ -1,0 +1,29 @@
+{
+  "contract_schema": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.14.0/schemas/improvement-classification-policy.schema.json",
+  "schema_version": "zaibatsu.improvement-classification-policy.v1",
+  "policy_id": "improvement-classification-v1",
+  "classification_rules": {
+    "accepted_observation_kinds": ["failure", "artifact_outcome", "correction", "observation"],
+    "accepted_operations": ["add", "modify", "replace"],
+    "target_classifications": [
+      {"position": 0, "target_kind": "shared_module", "candidate_class": "shared_module_candidate"},
+      {"position": 1, "target_kind": "factory_template", "candidate_class": "factory_template_candidate"},
+      {"position": 2, "target_kind": "deterministic_gate", "candidate_class": "deterministic_gate_candidate"}
+    ],
+    "require_same_evidence_return": true,
+    "require_subject_target_match": true,
+    "require_complete_review_requirements": true,
+    "require_non_authorizing_inputs": true
+  },
+  "decision_boundary": {
+    "classification_scope": "validation_planning_only",
+    "content_safety_required_before_validation_execution": true,
+    "semantic_evidence_required_before_promotion": true,
+    "owner_approval_required_before_promotion": true,
+    "rollback_required_before_rollout": true,
+    "policy_grants_mutation_authority": false,
+    "policy_grants_promotion_authority": false,
+    "policy_grants_execution_authority": false,
+    "policy_grants_cross_factory_authority": false
+  }
+}

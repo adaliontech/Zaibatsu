@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.14.0/schemas/factory-improvement-classification.schema.json",
+  "title": "Zaibatsu validation-planning-only improvement classification",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_schema", "schema_version", "source", "classification", "classification_boundary", "factory_improvement_classification_sha256"],
+  "properties": {
+    "contract_schema": {"const": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.14.0/schemas/factory-improvement-classification.schema.json"},
+    "schema_version": {"const": "zaibatsu.factory-improvement-classification.v1"},
+    "source": {"$ref": "#/$defs/source"},
+    "classification": {"$ref": "#/$defs/classification"},
+    "classification_boundary": {"$ref": "#/$defs/classification_boundary"},
+    "factory_improvement_classification_sha256": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "id": {"type": "string", "minLength": 1, "maxLength": 64, "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["classification_policy_id", "classification_policy_sha256", "factory_improvement_proposal_sha256", "factory_improvement_observation_sha256", "factory_evidence_return_sha256", "reporting_factory", "control_factory"],
+      "properties": {
+        "classification_policy_id": {"$ref": "#/$defs/id"},
+        "classification_policy_sha256": {"$ref": "#/$defs/sha256"},
+        "factory_improvement_proposal_sha256": {"$ref": "#/$defs/sha256"},
+        "factory_improvement_observation_sha256": {"$ref": "#/$defs/sha256"},
+        "factory_evidence_return_sha256": {"$ref": "#/$defs/sha256"},
+        "reporting_factory": {"$ref": "#/$defs/id"},
+        "control_factory": {"$ref": "#/$defs/id"}
+      }
+    },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "id", "operation"],
+      "properties": {
+        "kind": {"enum": ["shared_module", "factory_template", "deterministic_gate"]},
+        "id": {"$ref": "#/$defs/id"},
+        "operation": {"enum": ["add", "modify", "replace"]}
+      }
+    },
+    "check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["position", "id", "status", "reason"],
+      "properties": {
+        "position": {"type": "integer", "minimum": 0, "maximum": 5},
+        "id": {"enum": ["same_evidence_return", "subject_target_match", "observation_kind_allowed", "target_operation_allowed", "review_requirements_preserved", "non_authorizing_inputs"]},
+        "status": {"enum": ["passed", "failed"]},
+        "reason": {"enum": ["exact_evidence_return_and_route_match", "evidence_return_or_route_mismatch", "observation_subject_matches_proposal_target", "observation_subject_does_not_match_proposal_target", "observation_kind_allowed_by_policy", "observation_kind_denied_by_policy", "target_operation_allowed_by_policy", "target_operation_denied_by_policy", "all_later_review_requirements_preserved", "later_review_requirements_incomplete", "proposal_and_observation_are_non_authorizing", "input_authority_boundary_inflated"]}
+      }
+    },
+    "classification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["proposal_id", "observation_id", "observation_kind", "target", "checks", "decision", "candidate_class", "eligible_for_validation_planning"],
+      "properties": {
+        "proposal_id": {"$ref": "#/$defs/id"},
+        "observation_id": {"$ref": "#/$defs/id"},
+        "observation_kind": {"enum": ["failure", "artifact_outcome", "correction", "observation"]},
+        "target": {"$ref": "#/$defs/target"},
+        "checks": {"type": "array", "minItems": 6, "maxItems": 6, "items": {"$ref": "#/$defs/check"}},
+        "decision": {"enum": ["classified_for_validation_planning", "not_classified"]},
+        "candidate_class": {"type": ["string", "null"], "enum": ["shared_module_candidate", "factory_template_candidate", "deterministic_gate_candidate", null]},
+        "eligible_for_validation_planning": {"type": "boolean"}
+      }
+    },
+    "classification_boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["proposal_reverified", "observation_reverified", "classification_policy_validated", "observation_structural_normalization_verified", "source_alignment_checked", "target_alignment_checked", "classification_performed", "improvement_candidate_classified", "validation_planning_eligible", "content_safety_scanned", "secret_absence_proved", "reporter_authenticated", "proposer_authenticated", "source_artifact_semantic_truth_verified", "observation_semantic_truth_verified", "proposal_merit_verified", "validation_plan_created", "validation_execution_authorized", "reporting_factory_validation_passed", "independent_regression_validation_passed", "rollback_plan_verified", "owner_policy_approval_obtained", "changes_shared_policy", "shared_promotion_eligible", "promotion_authorized", "rollout_authorized", "activation_authorized", "execution_authorized", "cross_factory_effects_authorized"],
+      "properties": {
+        "proposal_reverified": {"const": true},
+        "observation_reverified": {"const": true},
+        "classification_policy_validated": {"const": true},
+        "observation_structural_normalization_verified": {"const": true},
+        "source_alignment_checked": {"const": true},
+        "target_alignment_checked": {"const": true},
+        "classification_performed": {"const": true},
+        "improvement_candidate_classified": {"type": "boolean"},
+        "validation_planning_eligible": {"type": "boolean"},
+        "content_safety_scanned": {"const": false},
+        "secret_absence_proved": {"const": false},
+        "reporter_authenticated": {"const": false},
+        "proposer_authenticated": {"const": false},
+        "source_artifact_semantic_truth_verified": {"const": false},
+        "observation_semantic_truth_verified": {"const": false},
+        "proposal_merit_verified": {"const": false},
+        "validation_plan_created": {"const": false},
+        "validation_execution_authorized": {"const": false},
+        "reporting_factory_validation_passed": {"const": false},
+        "independent_regression_validation_passed": {"const": false},
+        "rollback_plan_verified": {"const": false},
+        "owner_policy_approval_obtained": {"const": false},
+        "changes_shared_policy": {"const": false},
+        "shared_promotion_eligible": {"const": false},
+        "promotion_authorized": {"const": false},
+        "rollout_authorized": {"const": false},
+        "activation_authorized": {"const": false},
+        "execution_authorized": {"const": false},
+        "cross_factory_effects_authorized": {"const": false}
+      }
+    }
+  }
+}

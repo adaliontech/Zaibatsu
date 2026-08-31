@@ -354,6 +354,20 @@ narrative, normalize an observation, classify a candidate, establish merit,
 run a test, verify rollback, change policy, approve promotion, authorize
 rollout, activate, execute, or grant any cross-factory effect.
 
+The improvement-observation record separately rechecks that chain and binds
+one typed, explicitly untrusted report to a canonical subject and digest.
+Structural normalization means bounded canonical JSON, source binding, and a
+known category; it does not authenticate the reporter, scan content safety or
+secrets, or establish the semantic truth of the report or source artifact.
+
+The improvement-classification record then reverifies both complete chains and
+the separately hashed classification policy. It deterministically checks source
+and target alignment, allowed workflow types, preserved later-review gates, and
+non-authorizing boundaries. The checked pair is eligible only for validation
+planning. No validation plan is created, no validation or mutation may run, and
+no merit, approval, promotion, rollout, activation, execution, or cross-factory
+effect follows from the classification.
+
 The rebuild plan consumes those fully reverified inputs and emits an inert
 nine-action dependency graph plus four gates. The public result has zero
 qualification-ready actions, all nine blocked, and 57 missing evidence

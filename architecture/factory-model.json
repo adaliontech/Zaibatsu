@@ -109,7 +109,7 @@
       "id": "recursive-factory-improvement",
       "layer": "feedback",
       "maturity": "designed",
-      "scope": "Return evidence and record exact evidence-bound proposals; classification, validation, promotion, and rollout remain designed and cannot self-authorize"
+      "scope": "Return evidence, record exact evidence-bound proposals, structurally normalize evidence-bound observations, and classify aligned candidates for validation planning; semantic validation, promotion, and rollout remain designed and cannot self-authorize"
     }
   ],
   "reproducibility_policy": {
@@ -152,6 +152,8 @@
   "feedback_policy": {
     "evidence_return_maturity": "operational",
     "improvement_proposal_maturity": "operational",
+    "observation_normalization_maturity": "operational",
+    "candidate_classification_maturity": "operational",
     "shared_pattern_promotion_maturity": "designed",
     "promotion_authority": "reviewed_deterministic_policy_and_owner_gate",
     "factory_may_self_promote": false

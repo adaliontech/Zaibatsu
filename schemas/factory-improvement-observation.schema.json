@@ -1,0 +1,138 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.14.0/schemas/factory-improvement-observation.schema.json",
+  "title": "Zaibatsu evidence-bound structurally normalized improvement observation",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_schema", "schema_version", "portfolio", "route", "source", "observation", "normalization_boundary", "factory_improvement_observation_sha256"],
+  "properties": {
+    "contract_schema": {"const": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.14.0/schemas/factory-improvement-observation.schema.json"},
+    "schema_version": {"const": "zaibatsu.factory-improvement-observation.v1"},
+    "portfolio": {"$ref": "#/$defs/portfolio"},
+    "route": {"$ref": "#/$defs/route"},
+    "source": {"$ref": "#/$defs/source"},
+    "observation": {"$ref": "#/$defs/observation"},
+    "normalization_boundary": {"$ref": "#/$defs/normalization_boundary"},
+    "factory_improvement_observation_sha256": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "id": {"type": "string", "minLength": 1, "maxLength": 64, "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+    "text": {"type": "string", "minLength": 1, "maxLength": 512, "pattern": "\\S"},
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "portfolio": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "factory_portfolio_plan_sha256", "control_factory"],
+      "properties": {
+        "id": {"$ref": "#/$defs/id"},
+        "factory_portfolio_plan_sha256": {"$ref": "#/$defs/sha256"},
+        "control_factory": {"$ref": "#/$defs/id"}
+      }
+    },
+    "route": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["position", "from_factory", "to_factory", "kind", "payload_scope", "grants_authority", "can_self_promote", "from_bundle_sha256", "to_bundle_sha256"],
+      "properties": {
+        "position": {"type": "integer", "minimum": 0, "maximum": 62},
+        "from_factory": {"$ref": "#/$defs/id"},
+        "to_factory": {"$ref": "#/$defs/id"},
+        "kind": {"const": "evidence_return"},
+        "payload_scope": {"const": "evidence_only"},
+        "grants_authority": {"const": false},
+        "can_self_promote": {"const": false},
+        "from_bundle_sha256": {"$ref": "#/$defs/sha256"},
+        "to_bundle_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["factory_evidence_return_sha256", "runtime_evidence_pack_sha256", "reporting_factory"],
+      "properties": {
+        "factory_evidence_return_sha256": {"$ref": "#/$defs/sha256"},
+        "runtime_evidence_pack_sha256": {"$ref": "#/$defs/sha256"},
+        "reporting_factory": {"$ref": "#/$defs/id"}
+      }
+    },
+    "subject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "id"],
+      "properties": {
+        "kind": {"enum": ["shared_module", "factory_template", "deterministic_gate"]},
+        "id": {"$ref": "#/$defs/id"}
+      }
+    },
+    "normalization_requirements": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_evidence_required", "canonical_category_required", "content_safety_scan_required", "semantic_review_required", "classification_required"],
+      "properties": {
+        "source_evidence_required": {"const": true},
+        "canonical_category_required": {"const": true},
+        "content_safety_scan_required": {"const": true},
+        "semantic_review_required": {"const": true},
+        "classification_required": {"const": true}
+      }
+    },
+    "observation_boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["untrusted_report", "content_safety_scanned", "secret_absence_proved", "reporter_authenticated", "semantic_truth_claimed", "grants_authority", "can_self_promote", "execution_authorized"],
+      "properties": {
+        "untrusted_report": {"const": true},
+        "content_safety_scanned": {"const": false},
+        "secret_absence_proved": {"const": false},
+        "reporter_authenticated": {"const": false},
+        "semantic_truth_claimed": {"const": false},
+        "grants_authority": {"const": false},
+        "can_self_promote": {"const": false},
+        "execution_authorized": {"const": false}
+      }
+    },
+    "observation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["specification_sha256", "id", "kind", "summary", "observed_condition", "expected_condition", "subject", "normalization_requirements", "observation_boundary"],
+      "properties": {
+        "specification_sha256": {"$ref": "#/$defs/sha256"},
+        "id": {"$ref": "#/$defs/id"},
+        "kind": {"enum": ["failure", "artifact_outcome", "correction", "observation"]},
+        "summary": {"$ref": "#/$defs/text"},
+        "observed_condition": {"$ref": "#/$defs/text"},
+        "expected_condition": {"$ref": "#/$defs/text"},
+        "subject": {"$ref": "#/$defs/subject"},
+        "normalization_requirements": {"$ref": "#/$defs/normalization_requirements"},
+        "observation_boundary": {"$ref": "#/$defs/observation_boundary"}
+      }
+    },
+    "normalization_boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["evidence_return_reverified", "evidence_return_bound", "observation_structure_validated", "observation_canonical_json_bound", "observation_structurally_normalized", "transport_observed", "content_safety_scanned", "secret_absence_proved", "reporter_authenticated", "source_artifact_semantic_truth_verified", "observation_semantic_truth_verified", "improvement_candidate_classified", "proposal_merit_verified", "changes_shared_policy", "shared_promotion_eligible", "promotion_authorized", "rollout_authorized", "activation_authorized", "execution_authorized", "cross_factory_effects_authorized"],
+      "properties": {
+        "evidence_return_reverified": {"const": true},
+        "evidence_return_bound": {"const": true},
+        "observation_structure_validated": {"const": true},
+        "observation_canonical_json_bound": {"const": true},
+        "observation_structurally_normalized": {"const": true},
+        "transport_observed": {"const": false},
+        "content_safety_scanned": {"const": false},
+        "secret_absence_proved": {"const": false},
+        "reporter_authenticated": {"const": false},
+        "source_artifact_semantic_truth_verified": {"const": false},
+        "observation_semantic_truth_verified": {"const": false},
+        "improvement_candidate_classified": {"const": false},
+        "proposal_merit_verified": {"const": false},
+        "changes_shared_policy": {"const": false},
+        "shared_promotion_eligible": {"const": false},
+        "promotion_authorized": {"const": false},
+        "rollout_authorized": {"const": false},
+        "activation_authorized": {"const": false},
+        "execution_authorized": {"const": false},
+        "cross_factory_effects_authorized": {"const": false}
+      }
+    }
+  }
+}

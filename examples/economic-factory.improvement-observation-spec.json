@@ -1,0 +1,32 @@
+{
+  "contract_schema": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.14.0/schemas/factory-improvement-observation-spec.schema.json",
+  "schema_version": "zaibatsu.factory-improvement-observation-spec.v1",
+  "observation": {
+    "id": "source-revision-binding-observation",
+    "kind": "observation",
+    "summary": "Record an untrusted report that source-revision evidence needs an explicit declared-revision to artifact-content binding.",
+    "observed_condition": "The returned evidence identifies a source-revision evidence class; this report does not claim that any mismatch occurred.",
+    "expected_condition": "A future reviewed validation step should test that the declared revision matches the content-addressed evidence artifact."
+  },
+  "subject": {
+    "kind": "deterministic_gate",
+    "id": "source-revision-binding"
+  },
+  "normalization_requirements": {
+    "source_evidence_required": true,
+    "canonical_category_required": true,
+    "content_safety_scan_required": true,
+    "semantic_review_required": true,
+    "classification_required": true
+  },
+  "observation_boundary": {
+    "untrusted_report": true,
+    "content_safety_scanned": false,
+    "secret_absence_proved": false,
+    "reporter_authenticated": false,
+    "semantic_truth_claimed": false,
+    "grants_authority": false,
+    "can_self_promote": false,
+    "execution_authorized": false
+  }
+}

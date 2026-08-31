@@ -46,6 +46,10 @@ changes.
   improvement-proposal record without presenting typed untrusted intent as
   authentication, normalization, classification, validation, approval,
   promotion, rollout, activation, execution, or cross-factory authority;
+- publish the evidence-bound structural observation-normalization and
+  deterministic validation-planning classification contracts without
+  presenting canonical shape or workflow type as safety, semantic truth,
+  merit, validation execution, approval, promotion, rollout, or authority;
 - record the Guild demo and complete applicant-owned submission materials.
 
 Exit: the public narrative, architecture, portable factory, module artifacts,
@@ -216,8 +220,11 @@ authority grant or hard dependency.
 - preserve the bounded proposal foundation that binds one typed, untrusted
   shared-module, factory-template, or deterministic-gate suggestion to one
   fully reverified evidence return while leaving every later decision false;
-- normalize observations, failures, artifact outcomes, and owner corrections;
-- classify improvement candidates without granting mutation authority;
+- preserve the bounded normalization foundation that binds typed observations,
+  failures, artifact outcomes, and reported corrections to exact evidence and
+  canonical subjects without claiming content safety or semantic truth;
+- preserve deterministic workflow/type classification for validation planning
+  without granting validation execution or mutation authority;
 - bind a proposed shared module/template/gate change to its source evidence;
 - test it against the reporting factory and independent regression fixtures;
 - require owner/policy promotion and an eligible-factory rollout plan;

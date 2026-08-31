@@ -1,0 +1,96 @@
+{
+  "contract_schema": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.14.0/schemas/factory-improvement-classification.schema.json",
+  "schema_version": "zaibatsu.factory-improvement-classification.v1",
+  "source": {
+    "classification_policy_id": "improvement-classification-v1",
+    "classification_policy_sha256": "91e5e912ff8c5751a0f40af9b92beddf0ffd7e801103f77b592beb2b08d376f2",
+    "factory_improvement_proposal_sha256": "b5222630580cc03b092aedf6659defff9dae994957ed406cbd598a29da8efde4",
+    "factory_improvement_observation_sha256": "49fdf3e0845c14be7db8461461683820a2e1b23b20655165f30ce5509acb40ea",
+    "factory_evidence_return_sha256": "ac1765b07d96ffbcead1dd4270919833dae790359f7fe248b9f04f16d630c3ec",
+    "reporting_factory": "example-product",
+    "control_factory": "example-control"
+  },
+  "classification": {
+    "proposal_id": "harden-source-revision-gate",
+    "observation_id": "source-revision-binding-observation",
+    "observation_kind": "observation",
+    "target": {
+      "kind": "deterministic_gate",
+      "id": "source-revision-binding",
+      "operation": "add"
+    },
+    "checks": [
+      {
+        "position": 0,
+        "id": "same_evidence_return",
+        "status": "passed",
+        "reason": "exact_evidence_return_and_route_match"
+      },
+      {
+        "position": 1,
+        "id": "subject_target_match",
+        "status": "passed",
+        "reason": "observation_subject_matches_proposal_target"
+      },
+      {
+        "position": 2,
+        "id": "observation_kind_allowed",
+        "status": "passed",
+        "reason": "observation_kind_allowed_by_policy"
+      },
+      {
+        "position": 3,
+        "id": "target_operation_allowed",
+        "status": "passed",
+        "reason": "target_operation_allowed_by_policy"
+      },
+      {
+        "position": 4,
+        "id": "review_requirements_preserved",
+        "status": "passed",
+        "reason": "all_later_review_requirements_preserved"
+      },
+      {
+        "position": 5,
+        "id": "non_authorizing_inputs",
+        "status": "passed",
+        "reason": "proposal_and_observation_are_non_authorizing"
+      }
+    ],
+    "decision": "classified_for_validation_planning",
+    "candidate_class": "deterministic_gate_candidate",
+    "eligible_for_validation_planning": true
+  },
+  "classification_boundary": {
+    "proposal_reverified": true,
+    "observation_reverified": true,
+    "classification_policy_validated": true,
+    "observation_structural_normalization_verified": true,
+    "source_alignment_checked": true,
+    "target_alignment_checked": true,
+    "classification_performed": true,
+    "improvement_candidate_classified": true,
+    "validation_planning_eligible": true,
+    "content_safety_scanned": false,
+    "secret_absence_proved": false,
+    "reporter_authenticated": false,
+    "proposer_authenticated": false,
+    "source_artifact_semantic_truth_verified": false,
+    "observation_semantic_truth_verified": false,
+    "proposal_merit_verified": false,
+    "validation_plan_created": false,
+    "validation_execution_authorized": false,
+    "reporting_factory_validation_passed": false,
+    "independent_regression_validation_passed": false,
+    "rollback_plan_verified": false,
+    "owner_policy_approval_obtained": false,
+    "changes_shared_policy": false,
+    "shared_promotion_eligible": false,
+    "promotion_authorized": false,
+    "rollout_authorized": false,
+    "activation_authorized": false,
+    "execution_authorized": false,
+    "cross_factory_effects_authorized": false
+  },
+  "factory_improvement_classification_sha256": "a260ec6f23f0abb0832ce2fc91f3b47d5a9dce75f6e974dd640f2c4dda5d4acc"
+}

@@ -163,11 +163,13 @@ run -> observation/failure -> evidence -> classified improvement candidate
     -> owner-reviewed promotion -> eligible factory rollout with rollback
 ```
 
-Today, evidence capture, route binding, and non-authorizing proposal recording
-are operational at bounded public-kit scope. General automatic normalization,
-classification, validation, shared-template promotion, and cross-factory
-rollout are not deployed. Recursive improvement means reviewed versioned
-learning, not self-modifying production authority.
+Today, evidence capture, route binding, non-authorizing proposal recording,
+structural observation normalization, and deterministic workflow/type
+classification for validation planning are operational at bounded public-kit
+scope. Content-safety handling, semantic validation, validation execution,
+shared-template promotion, and cross-factory rollout are not deployed.
+Recursive improvement means reviewed versioned learning, not self-modifying
+production authority.
 
 ## Factory/Droid contribution
 
@@ -243,6 +245,14 @@ reusable contracts while preserving evidence and limitations:
   suggestion to it, while mandatory later gates remain unmet and all
   classification, validation, promotion, rollout, and effect authority stays
   false;
+- `improvement-observation-record` binds one typed untrusted report to the same
+  exact evidence and a canonical subject; this proves structural normalization,
+  not safety, reporter identity, or semantic truth;
+- `classify-improvement-proposal` reverifies both chains and a separately
+  hashed deterministic policy, then classifies the aligned pair for validation
+  planning only; it creates no validation plan and grants no test, mutation,
+  approval, promotion, rollout, activation, execution, or cross-factory
+  authority;
 - the checked signature is fixture-only: it raises the verified count to 10,
   leaves 57 missing, and cannot create runtime eligibility; generated-key tests
   separately prove that complete `factory_runtime` evidence can reach
@@ -313,8 +323,12 @@ The public package can now reject claims or architectures in which:
 - The public evidence-return record binds exact verified inputs to one route;
   it does not transport, inspect, classify, promote, activate, or execute them.
 - The public improvement-proposal record binds exact untrusted intent to that
-  return; it does not authenticate, normalize, classify, validate, approve,
-  promote, roll out, activate, or execute the suggestion.
+  return; that record alone does not authenticate, normalize, classify,
+  validate, approve, promote, roll out, activate, or execute the suggestion.
+- The public normalized observation proves canonical shape and evidence
+  binding, not safety or truth. The public classification proves workflow/type
+  eligibility for validation planning, not merit, validation execution,
+  approval, promotion, rollout, activation, execution, or effects.
 - The public signed receipt is a cryptographic fixture, not operational runtime
   evidence. Registry selection and the assessment clock remain evaluator trust
   inputs; verifier assertions and detached evidence artifacts are not rerun or

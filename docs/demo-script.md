@@ -171,6 +171,53 @@ python3 scripts/zaibatsu.py verify-improvement-proposal-record \
   /tmp/example-control.factory.tar \
   /tmp/example-product.factory.tar \
   /tmp/example-service.factory.tar
+python3 scripts/zaibatsu.py improvement-observation-record \
+  examples/economic-factory.improvement-observation-spec.json \
+  /tmp/example-product.evidence-return.json \
+  /tmp/example-portfolio.plan.json \
+  examples/factory-portfolio.json \
+  example-product \
+  /tmp/example-product.runtime-evidence.tar \
+  examples/economic-factory.qualification-plan.json \
+  policies/runtime-qualification-v1.json \
+  /tmp/example-control.factory.tar \
+  /tmp/example-product.factory.tar \
+  /tmp/example-service.factory.tar \
+  --output /tmp/example-product.improvement-observation.json
+python3 scripts/zaibatsu.py classify-improvement-proposal \
+  policies/improvement-classification-v1.json \
+  /tmp/example-product.improvement-proposal.json \
+  examples/economic-factory.improvement-proposal-spec.json \
+  /tmp/example-product.improvement-observation.json \
+  examples/economic-factory.improvement-observation-spec.json \
+  /tmp/example-product.evidence-return.json \
+  /tmp/example-portfolio.plan.json \
+  examples/factory-portfolio.json \
+  example-product \
+  /tmp/example-product.runtime-evidence.tar \
+  examples/economic-factory.qualification-plan.json \
+  policies/runtime-qualification-v1.json \
+  /tmp/example-control.factory.tar \
+  /tmp/example-product.factory.tar \
+  /tmp/example-service.factory.tar \
+  --output /tmp/example-product.improvement-classification.json
+python3 scripts/zaibatsu.py verify-improvement-classification \
+  /tmp/example-product.improvement-classification.json \
+  policies/improvement-classification-v1.json \
+  /tmp/example-product.improvement-proposal.json \
+  examples/economic-factory.improvement-proposal-spec.json \
+  /tmp/example-product.improvement-observation.json \
+  examples/economic-factory.improvement-observation-spec.json \
+  /tmp/example-product.evidence-return.json \
+  /tmp/example-portfolio.plan.json \
+  examples/factory-portfolio.json \
+  example-product \
+  /tmp/example-product.runtime-evidence.tar \
+  examples/economic-factory.qualification-plan.json \
+  policies/runtime-qualification-v1.json \
+  /tmp/example-control.factory.tar \
+  /tmp/example-product.factory.tar \
+  /tmp/example-service.factory.tar
 python3 scripts/zaibatsu.py runtime-assessment \
   /tmp/example-product.runtime-evidence.tar \
   examples/economic-factory.qualification-evidence.json \
@@ -221,7 +268,11 @@ python3 scripts/zaibatsu.py verify-rebuild-plan \
 > classification, promotion, activation, execution, or cross-factory effect.
 > The proposal record then binds one typed, untrusted deterministic-gate
 > suggestion to that exact return. It records the input without authenticating,
-> classifying, validating, approving, promoting, rolling out, or executing it. The
+> validating, approving, promoting, rolling out, or executing it. A separate
+> observation record puts one untrusted report into a canonical evidence-bound
+> shape without calling it safe or true. The deterministic classifier then
+> marks the aligned pair eligible for validation planning only; it creates no
+> plan and authorizes no validation, mutation, promotion, rollout, or effect. The
 > combined assessment records 10 verified and 57
 > missing, marks none eligible, and authorizes no activation or execution. A
 > signature authenticates the assertion; it does not prove key ownership,

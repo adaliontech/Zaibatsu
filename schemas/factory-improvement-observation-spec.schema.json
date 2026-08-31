@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.14.0/schemas/factory-improvement-observation-spec.schema.json",
+  "title": "Zaibatsu untrusted factory improvement-observation specification",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_schema", "schema_version", "observation", "subject", "normalization_requirements", "observation_boundary"],
+  "properties": {
+    "contract_schema": {"const": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.14.0/schemas/factory-improvement-observation-spec.schema.json"},
+    "schema_version": {"const": "zaibatsu.factory-improvement-observation-spec.v1"},
+    "observation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "kind", "summary", "observed_condition", "expected_condition"],
+      "properties": {
+        "id": {"$ref": "#/$defs/id"},
+        "kind": {"enum": ["failure", "artifact_outcome", "correction", "observation"]},
+        "summary": {"$ref": "#/$defs/text"},
+        "observed_condition": {"$ref": "#/$defs/text"},
+        "expected_condition": {"$ref": "#/$defs/text"}
+      }
+    },
+    "subject": {"$ref": "#/$defs/subject"},
+    "normalization_requirements": {"$ref": "#/$defs/normalization_requirements"},
+    "observation_boundary": {"$ref": "#/$defs/observation_boundary"}
+  },
+  "$defs": {
+    "id": {"type": "string", "minLength": 1, "maxLength": 64, "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+    "text": {"type": "string", "minLength": 1, "maxLength": 512, "pattern": "\\S"},
+    "subject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "id"],
+      "properties": {
+        "kind": {"enum": ["shared_module", "factory_template", "deterministic_gate"]},
+        "id": {"$ref": "#/$defs/id"}
+      }
+    },
+    "normalization_requirements": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_evidence_required", "canonical_category_required", "content_safety_scan_required", "semantic_review_required", "classification_required"],
+      "properties": {
+        "source_evidence_required": {"const": true},
+        "canonical_category_required": {"const": true},
+        "content_safety_scan_required": {"const": true},
+        "semantic_review_required": {"const": true},
+        "classification_required": {"const": true}
+      }
+    },
+    "observation_boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["untrusted_report", "content_safety_scanned", "secret_absence_proved", "reporter_authenticated", "semantic_truth_claimed", "grants_authority", "can_self_promote", "execution_authorized"],
+      "properties": {
+        "untrusted_report": {"const": true},
+        "content_safety_scanned": {"const": false},
+        "secret_absence_proved": {"const": false},
+        "reporter_authenticated": {"const": false},
+        "semantic_truth_claimed": {"const": false},
+        "grants_authority": {"const": false},
+        "can_self_promote": {"const": false},
+        "execution_authorized": {"const": false}
+      }
+    }
+  }
+}

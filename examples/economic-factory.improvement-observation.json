@@ -1,0 +1,77 @@
+{
+  "contract_schema": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.14.0/schemas/factory-improvement-observation.schema.json",
+  "schema_version": "zaibatsu.factory-improvement-observation.v1",
+  "portfolio": {
+    "id": "example-software-factories",
+    "factory_portfolio_plan_sha256": "dc4303fb1fc8a013d3d5f3e91f29fb4935baa3b42f503c0595abbd7ae7fbbcbb",
+    "control_factory": "example-control"
+  },
+  "route": {
+    "position": 0,
+    "from_factory": "example-product",
+    "to_factory": "example-control",
+    "kind": "evidence_return",
+    "payload_scope": "evidence_only",
+    "grants_authority": false,
+    "can_self_promote": false,
+    "from_bundle_sha256": "d4918fd16f55b907a0b2b9734422d7106d3030a511e5cae5d6efc1cb7b253aba",
+    "to_bundle_sha256": "9b777fa3874485672a30b2a5f7e6db6e2895dfbd228767aded85898216c7db3c"
+  },
+  "source": {
+    "factory_evidence_return_sha256": "ac1765b07d96ffbcead1dd4270919833dae790359f7fe248b9f04f16d630c3ec",
+    "runtime_evidence_pack_sha256": "92357de9906842bdfaa14d2056173f24113f686e108d74ce44e7685d4b344759",
+    "reporting_factory": "example-product"
+  },
+  "observation": {
+    "specification_sha256": "b852f3df3ad8975e6f0f196917441ab401b1532bd32355e5e8dbfe14f294c16d",
+    "id": "source-revision-binding-observation",
+    "kind": "observation",
+    "summary": "Record an untrusted report that source-revision evidence needs an explicit declared-revision to artifact-content binding.",
+    "observed_condition": "The returned evidence identifies a source-revision evidence class; this report does not claim that any mismatch occurred.",
+    "expected_condition": "A future reviewed validation step should test that the declared revision matches the content-addressed evidence artifact.",
+    "subject": {
+      "kind": "deterministic_gate",
+      "id": "source-revision-binding"
+    },
+    "normalization_requirements": {
+      "source_evidence_required": true,
+      "canonical_category_required": true,
+      "content_safety_scan_required": true,
+      "semantic_review_required": true,
+      "classification_required": true
+    },
+    "observation_boundary": {
+      "untrusted_report": true,
+      "content_safety_scanned": false,
+      "secret_absence_proved": false,
+      "reporter_authenticated": false,
+      "semantic_truth_claimed": false,
+      "grants_authority": false,
+      "can_self_promote": false,
+      "execution_authorized": false
+    }
+  },
+  "normalization_boundary": {
+    "evidence_return_reverified": true,
+    "evidence_return_bound": true,
+    "observation_structure_validated": true,
+    "observation_canonical_json_bound": true,
+    "observation_structurally_normalized": true,
+    "transport_observed": false,
+    "content_safety_scanned": false,
+    "secret_absence_proved": false,
+    "reporter_authenticated": false,
+    "source_artifact_semantic_truth_verified": false,
+    "observation_semantic_truth_verified": false,
+    "improvement_candidate_classified": false,
+    "proposal_merit_verified": false,
+    "changes_shared_policy": false,
+    "shared_promotion_eligible": false,
+    "promotion_authorized": false,
+    "rollout_authorized": false,
+    "activation_authorized": false,
+    "execution_authorized": false,
+    "cross_factory_effects_authorized": false
+  },
+  "factory_improvement_observation_sha256": "49fdf3e0845c14be7db8461461683820a2e1b23b20655165f30ce5509acb40ea"
+}
