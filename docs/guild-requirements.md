@@ -99,6 +99,8 @@ immutable release passed roof and tag CI, three live-schema byte checks, exact
 tag-clone regeneration, both Gitleaks modes, and strict schema validation. The
 v1.11 closed-portfolio working candidate passes 212 local tests, 97-file
 validation, two strict schemas, exact three-bundle regeneration, seeded
-malformed and forged-plan controls, and least-authority adversarial tests. Its
-clean-clone, CI, release, tagged-schema, and tag-clone gates remain. The final
-clip and applicant-owned form submission remain.
+malformed and forged-plan controls, and least-authority adversarial tests. The
+exact candidate also passed a credential-disabled full-history clone, both
+Gitleaks modes, seven strict schemas, exact plan regeneration, non-authorizing
+assertions, and independent CI. Its roof, release, tagged-schema, and tag-clone
+gates remain. The final clip and applicant-owned form submission remain.

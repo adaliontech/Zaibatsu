@@ -267,9 +267,11 @@ the public repository:
       validation, two strict schemas, exact three-bundle plan regeneration,
       seeded malformed/forged-plan controls, and identity/class/route/scope/
       replay/type/authority adversarial tests.
-- [ ] v1.11 candidate passes credential-disabled full-history clone, both
-      Gitleaks modes, independent CI, evidence-roof/tag CI, tagged-schema byte
-      checks, tag-clone reproduction, and immutable-release proof.
+- [x] v1.11 candidate passes credential-disabled full-history clone, both
+      Gitleaks modes, seven strict schemas, exact plan regeneration,
+      non-authorizing assertions, and independent CI.
+- [ ] v1.11 passes evidence-roof and tag CI, two tagged-schema byte checks,
+      tag-clone reproduction, and immutable-release proof.
 - [x] Public repository and article links resolve without authentication.
 - [ ] Demo clip or screenshots show a real Factory task and validation result.
 - [x] No private host, credential, recovery, or deployment detail is exposed.
