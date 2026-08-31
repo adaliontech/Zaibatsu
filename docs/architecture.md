@@ -24,9 +24,9 @@ The shared layer controls factory contracts. Each economic factory retains its
 own identity, data, credentials, repositories, schedules, acceptance rules,
 budgets, and production authority.
 
-## Eleven machine-readable views
+## Twelve machine-readable views
 
-Zaibatsu deliberately separates eleven questions:
+Zaibatsu deliberately separates twelve questions:
 
 | Contract | Question |
 | --- | --- |
@@ -35,6 +35,7 @@ Zaibatsu deliberately separates eleven questions:
 | [`examples/economic-factory.json`](../examples/economic-factory.json) | Which policies and evidence bindings define one portable factory? |
 | [`catalog/modules.json`](../catalog/modules.json) plus [`examples/economic-factory.plan.json`](../examples/economic-factory.plan.json) | Which compatible module implementations resolve into its deterministic control plan? |
 | [`examples/economic-factory.bundle-manifest.json`](../examples/economic-factory.bundle-manifest.json) | Which exact definition, catalog, plan, selected module contracts, and schemas form its portable control bundle? |
+| [`examples/factory-portfolio.json`](../examples/factory-portfolio.json) plus [`examples/factory-portfolio.plan.json`](../examples/factory-portfolio.plan.json) | Which verified factory bundles belong to one closed control portfolio, where may evidence return, and which intended namespaces remain factory-scoped? |
 | [`examples/economic-factory.source-lock.json`](../examples/economic-factory.source-lock.json) | Which immutable annotated-release Git objects supplied the exact control files that reproduce that bundle? |
 | [`policies/runtime-qualification-v1.json`](../policies/runtime-qualification-v1.json) plus [`examples/economic-factory.qualification-plan.json`](../examples/economic-factory.qualification-plan.json) | Which content-addressed evidence bindings are still required before those contracts can become runtime-eligible? |
 | [`examples/economic-factory.qualification-evidence.json`](../examples/economic-factory.qualification-evidence.json) plus [`examples/economic-factory.qualification-assessment.json`](../examples/economic-factory.qualification-assessment.json) | Which requirements does the verified bundle itself actually prove, and exactly which runtime proofs remain missing? |
@@ -45,6 +46,33 @@ Zaibatsu deliberately separates eleven questions:
 The validator requires the factory registry and shared component maturities to
 agree. A narrative edit cannot silently turn planned Nix reproduction or
 source-only agents into operational capability.
+
+## Multi-factory portfolio control
+
+The portable factory contract proves one factory at a time. The portfolio
+contract is the next control-layer join: it declares a closed registry with
+exactly one control factory, at least one economic factory, and exactly one
+evidence-only return route from every economic factory to the control factory.
+Unknown or duplicate factories, class drift, missing routes, route reorder,
+secret-bearing routes, authority grants, and self-promotion fail closed.
+
+`portfolio-plan` receives the declarative portfolio and a set of canonical
+factory bundles. It fully verifies every bundle before use, matches bundle
+identity and class to the closed registry, and emits one deterministic plan in
+declaration order. Bundle input order is irrelevant. Each factory record binds
+the exact bundle, definition, catalog, factory-plan, module-API, and selected
+scheduler-module digests. The example joins one control bundle and two
+economic-factory bundles, including systemd and cron adapters.
+
+The plan derives separate intended authority, repository, static-secret,
+runtime-secret, worker-pool, artifact, and scheduler namespaces for every
+factory. These 21 strings are disjoint by construction and make scope
+collisions reviewable. They are not runtime isolation evidence: the plan does
+not inspect process credentials, operating-system users, network policy,
+databases, secret-manager ACLs, or scheduler state. It contains no runtime
+implementations, routes no secret, invokes no model, executes no operation,
+grants no cross-factory authority, authorizes no activation, and proves no
+deployment or recovery.
 
 ## Deterministic module composition
 

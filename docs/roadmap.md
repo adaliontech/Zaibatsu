@@ -34,6 +34,10 @@ changes.
 - preserve the reproduced immutable `v1.9.0` signed runtime-evidence proof
   without presenting a fixture key, evaluator-selected registry, or historical
   assessment time as independent operational truth;
+- preserve the reproduced immutable `v1.10.0` runtime-evidence pack without
+  presenting retrieved bytes as verifier reexecution or artifact truth;
+- reproduce and release the v1.11 closed factory-portfolio plan without
+  presenting intended namespaces as deployed runtime isolation;
 - record the Guild demo and complete applicant-owned submission materials.
 
 Exit: the public narrative, architecture, portable factory, module artifacts,
@@ -149,6 +153,10 @@ Implemented source foundation:
 - a deterministic nine-action rebuild DAG that preserves module dependencies,
   direct evidence gaps, upstream blockers, and four non-authorizing gates while
   executing no operation;
+- a deterministic multi-factory portfolio plan that fully verifies one control
+  bundle and multiple economic-factory bundles, binds factory-scoped intended
+  namespaces, and permits evidence-only return routes without granting
+  cross-factory authority;
 - typed module, artifact, flow, fragment, implementation, handler, profile,
   runtime, placement, worker, evaluation, approval, and effect contracts;
 - 21 logical modules, 6 flows, 12 deployment profiles, and 23 implementation

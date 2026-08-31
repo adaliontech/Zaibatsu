@@ -12,6 +12,8 @@
 - Bundle proof: `python3 scripts/zaibatsu.py verify-bundle /tmp/example-product.factory.tar`
 - Bundle inspection: `python3 scripts/zaibatsu.py inspect-bundle /tmp/example-product.factory.tar`
 - Module-change comparison: build the cron example, then run `python3 scripts/zaibatsu.py compare-bundles /tmp/example-product.factory.tar /tmp/example-product-cron.factory.tar`
+- Multi-factory portfolio: build `examples/control-factory.json`, `examples/economic-factory.json`, and `examples/service-factory.json`, then run `python3 scripts/zaibatsu.py portfolio-plan examples/factory-portfolio.json /tmp/example-control.factory.tar /tmp/example-product.factory.tar /tmp/example-service.factory.tar --output /tmp/example-portfolio.plan.json`
+- Portfolio proof: `python3 scripts/zaibatsu.py verify-portfolio-plan /tmp/example-portfolio.plan.json examples/factory-portfolio.json /tmp/example-control.factory.tar /tmp/example-product.factory.tar /tmp/example-service.factory.tar`
 - Annotated-release source lock: `python3 scripts/zaibatsu.py source-lock examples/economic-factory.json /tmp/example-product.factory.tar --release-tag v1.6.0 --output /tmp/example-product.source-lock.json`
 - Source-lock proof: `python3 scripts/zaibatsu.py verify-source-lock /tmp/example-product.source-lock.json /tmp/example-product.factory.tar`
 - Qualification requirements: `python3 scripts/zaibatsu.py qualification-plan /tmp/example-product.factory.tar --output /tmp/example-product.qualification-plan.json`
@@ -19,9 +21,11 @@
 - Bundle-derived evidence: `python3 scripts/zaibatsu.py qualification-evidence /tmp/example-product.qualification-plan.json /tmp/example-product.factory.tar --output /tmp/example-product.qualification-evidence.json`
 - Partial assessment: `python3 scripts/zaibatsu.py qualification-assessment /tmp/example-product.qualification-evidence.json /tmp/example-product.qualification-plan.json /tmp/example-product.factory.tar --output /tmp/example-product.qualification-assessment.json`
 - Signed runtime-evidence proof: `python3 scripts/zaibatsu.py verify-runtime-evidence examples/economic-factory.runtime-evidence.json /tmp/example-product.factory.tar`
-- Combined runtime assessment: `python3 scripts/zaibatsu.py runtime-assessment examples/economic-factory.runtime-evidence.json examples/economic-factory.qualification-evidence.json examples/economic-factory.qualification-plan.json /tmp/example-product.factory.tar --as-of 2026-08-30T23:00:00Z --output /tmp/example-product.runtime-assessment.json`
-- Factory rebuild DAG: `python3 scripts/zaibatsu.py rebuild-plan /tmp/example-product.factory.tar --output /tmp/example-product.rebuild-plan.json`
-- Rebuild-DAG proof: `python3 scripts/zaibatsu.py verify-rebuild-plan /tmp/example-product.rebuild-plan.json /tmp/example-product.factory.tar`
+- Runtime-evidence pack: `python3 scripts/zaibatsu.py evidence-pack examples/economic-factory.runtime-evidence.json /tmp/example-product.factory.tar --evidence-artifact examples/runtime-evidence/source-revision-fixture.json --verifier-implementation examples/runtime-evidence/fixture-verifier-method.json --output /tmp/example-product.runtime-evidence.tar`
+- Runtime-evidence-pack proof: `python3 scripts/zaibatsu.py verify-evidence-pack /tmp/example-product.runtime-evidence.tar /tmp/example-product.factory.tar`
+- Combined runtime assessment: `python3 scripts/zaibatsu.py runtime-assessment /tmp/example-product.runtime-evidence.tar examples/economic-factory.qualification-evidence.json examples/economic-factory.qualification-plan.json /tmp/example-product.factory.tar --as-of 2026-08-30T23:00:00Z --output /tmp/example-product.runtime-assessment.json`
+- Factory rebuild DAG: `python3 scripts/zaibatsu.py rebuild-plan /tmp/example-product.factory.tar --runtime-evidence-pack /tmp/example-product.runtime-evidence.tar --output /tmp/example-product.rebuild-plan.json`
+- Rebuild-DAG proof: `python3 scripts/zaibatsu.py verify-rebuild-plan /tmp/example-product.rebuild-plan.json /tmp/example-product.factory.tar --runtime-evidence-pack /tmp/example-product.runtime-evidence.tar`
 - Tests only: `python3 -m unittest discover -s tests -v`
 - Deferred local-model preflight: `make droid-preflight`
 
@@ -84,6 +88,11 @@ credentials, or bootstrap procedures.
   read secrets, install a scheduler, invoke a model, manufacture qualification
   evidence or owner approval, activate a factory, deploy infrastructure, or
   claim runtime recovery.
+- Treat a factory portfolio plan only as a deterministic join over fully
+  verified control bundles, an ordered closed registry, intended namespaces,
+  and evidence-only routes. It does not prove runtime isolation, carry
+  evidence, route secrets, grant cross-factory authority, activate a factory,
+  or execute or deploy anything.
 - Treat every tracked or non-ignored path as public. Opaque files, symlinks,
   and Git submodules are outside the scanner's inspectable boundary and must
   fail closed.

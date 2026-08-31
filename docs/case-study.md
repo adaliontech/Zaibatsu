@@ -212,6 +212,10 @@ reusable contracts while preserving evidence and limitations:
 - `zaibatsu inspect-bundle` and `compare-bundles` expose the exact semantic
   delta between the public systemd and cron variants only after both bundles
   pass complete verification;
+- `zaibatsu portfolio-plan` and `verify-portfolio-plan` join one verified
+  control bundle and two verified economic-factory bundles into a closed,
+  content-addressed control view with disjoint intended namespaces and
+  evidence-only return routes;
 - `zaibatsu source-lock` binds the verified systemd bundle to sixteen exact
   blobs in an annotated Git release, records native object IDs and independent
   SHA-256 hashes, and rebuilds the bundle without trusting checkout files;
@@ -269,6 +273,9 @@ The public package can now reject claims or architectures in which:
   module, scope, method, or validity boundary;
 - a reordered, replayed, dependency-edited, or authority-inflated rebuild plan
   is presented as the verified factory DAG or permission to execute it;
+- an undeclared or duplicate factory, class-swapped bundle, secret-bearing
+  route, namespace collision, or cross-factory authority claim is presented as
+  the verified factory portfolio;
 - a model authorizes an external effect;
 - a factory promotes its own feedback into shared policy;
 - component and meta-factory maturity ledgers diverge.
@@ -287,6 +294,9 @@ The public package can now reject claims or architectures in which:
 - The public rebuild plan is an inert dependency and blocker graph, not an
   Ansible/Nix executor, scheduler installer, runtime qualifier, activation
   mechanism, deployment workflow, or recovery proof.
+- The public portfolio plan makes intended scopes and evidence routes
+  inspectable, but does not enforce or prove runtime process, network,
+  credential, database, worker-pool, or scheduler isolation.
 - The public signed receipt is a cryptographic fixture, not operational runtime
   evidence. Registry selection and the assessment clock remain evaluator trust
   inputs; verifier assertions and detached evidence artifacts are not rerun or

@@ -1,0 +1,182 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.11.0/schemas/factory-portfolio-plan.schema.json",
+  "title": "Zaibatsu deterministic multi-factory control plan",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_schema", "schema_version", "portfolio", "source", "control_factory", "factories", "evidence_routes", "isolation", "summary", "control_claim", "factory_portfolio_plan_sha256"],
+  "properties": {
+    "contract_schema": {"const": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.11.0/schemas/factory-portfolio-plan.schema.json"},
+    "schema_version": {"const": "zaibatsu.factory-portfolio-plan.v1"},
+    "portfolio": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "purpose", "control_factory"],
+      "properties": {
+        "id": {"$ref": "#/$defs/id"},
+        "purpose": {"type": "string", "minLength": 1, "maxLength": 512, "pattern": "\\S"},
+        "control_factory": {"$ref": "#/$defs/id"}
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["portfolio_definition_sha256", "factory_bundle_set_sha256"],
+      "properties": {
+        "portfolio_definition_sha256": {"$ref": "#/$defs/sha256"},
+        "factory_bundle_set_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "control_factory": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "bundle_sha256"],
+      "properties": {
+        "id": {"$ref": "#/$defs/id"},
+        "bundle_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "factories": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 64,
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/factory"}
+    },
+    "evidence_routes": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 63,
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/evidence_route"}
+    },
+    "isolation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["closed_registry", "unknown_factories_fail_closed", "intended_namespaces_are_disjoint", "runtime_isolation_proved", "cross_factory_secret_access_granted", "cross_factory_worker_access_granted", "cross_factory_artifact_access_granted", "cross_factory_authority_granted", "evidence_routes_only"],
+      "properties": {
+        "closed_registry": {"const": true},
+        "unknown_factories_fail_closed": {"const": true},
+        "intended_namespaces_are_disjoint": {"const": true},
+        "runtime_isolation_proved": {"const": false},
+        "cross_factory_secret_access_granted": {"const": false},
+        "cross_factory_worker_access_granted": {"const": false},
+        "cross_factory_artifact_access_granted": {"const": false},
+        "cross_factory_authority_granted": {"const": false},
+        "evidence_routes_only": {"const": true}
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["factory_count", "control_factory_count", "economic_factory_count", "evidence_route_count", "intended_namespace_count"],
+      "properties": {
+        "factory_count": {"type": "integer", "minimum": 2, "maximum": 64},
+        "control_factory_count": {"const": 1},
+        "economic_factory_count": {"type": "integer", "minimum": 1, "maximum": 63},
+        "evidence_route_count": {"type": "integer", "minimum": 1, "maximum": 63},
+        "intended_namespace_count": {"type": "integer", "minimum": 14, "maximum": 448}
+      }
+    },
+    "control_claim": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["scope", "all_factory_bundles_verified", "contains_runtime_implementations", "proves_runtime_isolation", "deploys_infrastructure", "routes_secrets", "invokes_models", "executes_operations", "authorizes_activation", "authorizes_cross_factory_effects", "proves_runtime_recovery"],
+      "properties": {
+        "scope": {"const": "multi_factory_control_plan_only"},
+        "all_factory_bundles_verified": {"const": true},
+        "contains_runtime_implementations": {"const": false},
+        "proves_runtime_isolation": {"const": false},
+        "deploys_infrastructure": {"const": false},
+        "routes_secrets": {"const": false},
+        "invokes_models": {"const": false},
+        "executes_operations": {"const": false},
+        "authorizes_activation": {"const": false},
+        "authorizes_cross_factory_effects": {"const": false},
+        "proves_runtime_recovery": {"const": false}
+      }
+    },
+    "factory_portfolio_plan_sha256": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "id": {"type": "string", "minLength": 1, "maxLength": 64, "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "factory_source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["factory_definition_sha256", "module_catalog_sha256", "factory_plan_sha256", "module_api_version"],
+      "properties": {
+        "factory_definition_sha256": {"$ref": "#/$defs/sha256"},
+        "module_catalog_sha256": {"$ref": "#/$defs/sha256"},
+        "factory_plan_sha256": {"$ref": "#/$defs/sha256"},
+        "module_api_version": {"const": "zaibatsu.module.v1"}
+      }
+    },
+    "namespaces": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["authority", "repository", "static_secrets", "runtime_secrets", "worker_pool", "artifacts", "scheduler"],
+      "properties": {
+        "authority": {"type": "string", "pattern": "^factory/[a-z0-9]+(?:-[a-z0-9]+)*/authority$"},
+        "repository": {"type": "string", "pattern": "^factory/[a-z0-9]+(?:-[a-z0-9]+)*/repository$"},
+        "static_secrets": {"type": "string", "pattern": "^factory/[a-z0-9]+(?:-[a-z0-9]+)*/static-secrets$"},
+        "runtime_secrets": {"type": "string", "pattern": "^factory/[a-z0-9]+(?:-[a-z0-9]+)*/runtime-secrets$"},
+        "worker_pool": {"type": "string", "pattern": "^factory/[a-z0-9]+(?:-[a-z0-9]+)*/worker-pool$"},
+        "artifacts": {"type": "string", "pattern": "^factory/[a-z0-9]+(?:-[a-z0-9]+)*/artifacts$"},
+        "scheduler": {"type": "string", "pattern": "^factory/[a-z0-9]+(?:-[a-z0-9]+)*/scheduler$"}
+      }
+    },
+    "runtime_boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["bundle_verified", "runtime_qualified", "activation_authorized", "execution_authorized", "side_effect_authority"],
+      "properties": {
+        "bundle_verified": {"const": true},
+        "runtime_qualified": {"const": false},
+        "activation_authorized": {"const": false},
+        "execution_authorized": {"const": false},
+        "side_effect_authority": {"const": false}
+      }
+    },
+    "selected_module": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "artifact_sha256"],
+      "properties": {
+        "id": {"$ref": "#/$defs/id"},
+        "artifact_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "factory": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["position", "id", "class", "bundle_sha256", "source", "selected_scheduler_module", "namespaces", "runtime_boundary"],
+      "properties": {
+        "position": {"type": "integer", "minimum": 0, "maximum": 63},
+        "id": {"$ref": "#/$defs/id"},
+        "class": {"enum": ["control_factory", "economic_factory"]},
+        "bundle_sha256": {"$ref": "#/$defs/sha256"},
+        "source": {"$ref": "#/$defs/factory_source"},
+        "selected_scheduler_module": {"$ref": "#/$defs/selected_module"},
+        "namespaces": {"$ref": "#/$defs/namespaces"},
+        "runtime_boundary": {"$ref": "#/$defs/runtime_boundary"}
+      }
+    },
+    "evidence_route": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["position", "from_factory", "to_factory", "kind", "payload_scope", "grants_authority", "can_self_promote", "from_bundle_sha256", "to_bundle_sha256"],
+      "properties": {
+        "position": {"type": "integer", "minimum": 0, "maximum": 62},
+        "from_factory": {"$ref": "#/$defs/id"},
+        "to_factory": {"$ref": "#/$defs/id"},
+        "kind": {"const": "evidence_return"},
+        "payload_scope": {"const": "evidence_only"},
+        "grants_authority": {"const": false},
+        "can_self_promote": {"const": false},
+        "from_bundle_sha256": {"$ref": "#/$defs/sha256"},
+        "to_bundle_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    }
+  }
+}

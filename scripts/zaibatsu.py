@@ -24,9 +24,18 @@ from factory_evidence_pack import (
     runtime_evidence_pack_for_bundle,
     verify_runtime_evidence_pack_for_bundle,
 )
+from factory_portfolio import (
+    MAX_FACTORIES,
+    MAX_PORTFOLIO_BYTES,
+    MAX_PORTFOLIO_PLAN_BYTES,
+    MIN_FACTORIES,
+    factory_portfolio_plan_for_bundles,
+    verify_factory_portfolio_plan_for_bundles,
+)
 from factory_composer import (
     MODULE_CATALOG_PATH,
     build_factory_plan,
+    load_json_bytes,
     load_json_file,
     load_module_artifacts,
     rebuild_check,
@@ -338,6 +347,21 @@ def load_bundle(path: str, label: str) -> bytes | None:
     return load_bounded_binary(path, label, MAX_BUNDLE_BYTES)
 
 
+def load_bounded_json_document(
+    path: str,
+    label: str,
+    max_bytes: int,
+) -> Any | None:
+    value = load_bounded_binary(path, label, max_bytes)
+    if value is None:
+        return None
+    try:
+        return load_json_bytes(value)
+    except (RecursionError, UnicodeDecodeError, ValueError) as exc:
+        print(f"cannot load {label}: {exc}", file=sys.stderr)
+        return None
+
+
 def command_verify_bundle(path: str) -> int:
     bundle = load_bundle(path, "factory bundle")
     if bundle is None:
@@ -385,6 +409,97 @@ def command_compare_bundles(
             print(f"- {error}", file=sys.stderr)
         return 1
     return write_document(comparison, output)
+
+
+def valid_portfolio_bundle_count(paths: list[str]) -> bool:
+    if not MIN_FACTORIES <= len(paths) <= MAX_FACTORIES:
+        print(
+            f"factory portfolio requires between {MIN_FACTORIES} and "
+            f"{MAX_FACTORIES} bundles",
+            file=sys.stderr,
+        )
+        return False
+    return True
+
+
+def load_portfolio_bundles(paths: list[str]) -> list[bytes] | None:
+    if not valid_portfolio_bundle_count(paths):
+        return None
+    bundles: list[bytes] = []
+    for index, path in enumerate(paths):
+        bundle = load_bundle(path, f"factory portfolio bundle {index}")
+        if bundle is None:
+            return None
+        bundles.append(bundle)
+    return bundles
+
+
+def command_portfolio_plan(
+    portfolio_path: str,
+    bundle_paths: list[str],
+    output: str | None,
+) -> int:
+    if not valid_portfolio_bundle_count(bundle_paths):
+        return 2
+    portfolio = load_bounded_json_document(
+        portfolio_path,
+        "factory portfolio",
+        MAX_PORTFOLIO_BYTES,
+    )
+    if portfolio is None:
+        return 2
+    bundles = load_portfolio_bundles(bundle_paths)
+    if bundles is None:
+        return 2
+    errors, plan = factory_portfolio_plan_for_bundles(portfolio, bundles)
+    if errors or plan is None:
+        print("cannot build factory portfolio plan", file=sys.stderr)
+        for error in errors:
+            print(f"- {error}", file=sys.stderr)
+        return 1
+    return write_document(plan, output)
+
+
+def command_verify_portfolio_plan(
+    plan_path: str,
+    portfolio_path: str,
+    bundle_paths: list[str],
+) -> int:
+    if not valid_portfolio_bundle_count(bundle_paths):
+        return 2
+    plan = load_bounded_json_document(
+        plan_path,
+        "factory portfolio plan",
+        MAX_PORTFOLIO_PLAN_BYTES,
+    )
+    portfolio = load_bounded_json_document(
+        portfolio_path,
+        "factory portfolio",
+        MAX_PORTFOLIO_BYTES,
+    )
+    if plan is None or portfolio is None:
+        return 2
+    bundles = load_portfolio_bundles(bundle_paths)
+    if bundles is None:
+        return 2
+    errors = verify_factory_portfolio_plan_for_bundles(plan, portfolio, bundles)
+    if errors:
+        print(f"factory portfolio plan failed: {plan_path}", file=sys.stderr)
+        for error in errors:
+            print(f"- {error}", file=sys.stderr)
+        return 1
+    assert isinstance(plan, dict)
+    print(f"factory portfolio plan passed: {plan_path}")
+    print(
+        "factory portfolio plan sha256: "
+        f"{plan['factory_portfolio_plan_sha256']}"
+    )
+    print(f"factories: {plan['summary']['factory_count']}")
+    print(f"evidence-only routes: {plan['summary']['evidence_route_count']}")
+    print("runtime isolation proved: false")
+    print("cross-factory authority granted: false")
+    print("operations executed: false")
+    return 0
 
 
 def command_source_lock(
@@ -1195,6 +1310,32 @@ def build_parser() -> argparse.ArgumentParser:
         "--output", help="write comparison JSON to a new file"
     )
 
+    portfolio_plan = commands.add_parser(
+        "portfolio-plan",
+        help="compose verified bundles into a closed multi-factory control plan",
+    )
+    portfolio_plan.add_argument(
+        "portfolio_path",
+        help="schema-bound closed factory portfolio definition",
+    )
+    portfolio_plan.add_argument(
+        "bundle_paths",
+        nargs="+",
+        help="verified factory control bundles in any input order",
+    )
+    portfolio_plan.add_argument(
+        "--output",
+        help="write the portfolio plan to a new file instead of stdout",
+    )
+
+    verify_portfolio_plan = commands.add_parser(
+        "verify-portfolio-plan",
+        help="verify a multi-factory plan against its registry and bundles",
+    )
+    verify_portfolio_plan.add_argument("plan_path")
+    verify_portfolio_plan.add_argument("portfolio_path")
+    verify_portfolio_plan.add_argument("bundle_paths", nargs="+")
+
     source_lock = commands.add_parser(
         "source-lock",
         help="lock a verified bundle to exact sources in an annotated release",
@@ -1554,6 +1695,18 @@ def main() -> int:
             arguments.before_path,
             arguments.after_path,
             arguments.output,
+        )
+    if arguments.command == "portfolio-plan":
+        return command_portfolio_plan(
+            arguments.portfolio_path,
+            arguments.bundle_paths,
+            arguments.output,
+        )
+    if arguments.command == "verify-portfolio-plan":
+        return command_verify_portfolio_plan(
+            arguments.plan_path,
+            arguments.portfolio_path,
+            arguments.bundle_paths,
         )
     if arguments.command == "source-lock":
         return command_source_lock(

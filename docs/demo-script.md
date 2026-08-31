@@ -1,6 +1,6 @@
 # Demo script
 
-Use only a full-history fresh clone of immutable `v1.10.0` after its release
+Use only a full-history fresh clone of immutable `v1.11.0` after its release
 proof passes. Do not show private terminals, history, settings,
 infrastructure, model credentials, notifications, or personal data. Lead with
 the real Factory
@@ -75,6 +75,22 @@ python3 scripts/zaibatsu.py bundle examples/economic-factory-cron.json \
 python3 scripts/zaibatsu.py compare-bundles \
   /tmp/example-product.factory.tar \
   /tmp/example-product-cron.factory.tar
+python3 scripts/zaibatsu.py bundle examples/control-factory.json \
+  --output /tmp/example-control.factory.tar
+python3 scripts/zaibatsu.py bundle examples/service-factory.json \
+  --output /tmp/example-service.factory.tar
+python3 scripts/zaibatsu.py portfolio-plan \
+  examples/factory-portfolio.json \
+  /tmp/example-control.factory.tar \
+  /tmp/example-product.factory.tar \
+  /tmp/example-service.factory.tar \
+  --output /tmp/example-portfolio.plan.json
+python3 scripts/zaibatsu.py verify-portfolio-plan \
+  /tmp/example-portfolio.plan.json \
+  examples/factory-portfolio.json \
+  /tmp/example-control.factory.tar \
+  /tmp/example-product.factory.tar \
+  /tmp/example-service.factory.tar
 python3 scripts/zaibatsu.py qualification-plan \
   /tmp/example-product.factory.tar \
   --output /tmp/example-product.qualification-plan.json
@@ -140,6 +156,11 @@ python3 scripts/zaibatsu.py verify-rebuild-plan \
 > qualification. The comparison
 > changes only the scheduling implementation from systemd to cron while the
 > catalog and schemas stay fixed, making modularity directly inspectable. The
+> portfolio then joins one verified control bundle and two verified economic
+> factory bundles into the actual factory-of-factories view. It binds 21
+> disjoint intended namespaces and permits only evidence-return routes. Those
+> names do not prove runtime isolation, and the plan grants no cross-factory
+> authority or execution. The
 > qualification plan then lists 67 evidence bindings still missing across all
 > nine modules. Bundle verification then derives nine real but narrow
 > contract-conformance receipts. The signed fixture adds one fresh
@@ -170,7 +191,7 @@ make validate
 > evidence, force-added ignored files, misleading media suffixes, and premature
 > readiness.
 
-Pause on the final 203-test pass and 90-file validator summary.
+Pause on the final 212-test pass and 97-file validator summary.
 
 ### 2:05–2:30 — Honest current boundary
 
@@ -186,7 +207,7 @@ Open `docs/implementation-status.md`.
 
 ## Before recording
 
-1. Clone the immutable `v1.10.0` tag with full history into a new temporary
+1. Clone the immutable `v1.11.0` tag with full history into a new temporary
    directory after its release proof passes. Do not use `--depth 1`; source-lock
    verification requires the referenced annotated `v1.6.0` tag and objects.
 2. Increase terminal font size and hide unrelated tabs and notifications.
@@ -197,12 +218,14 @@ Open `docs/implementation-status.md`.
 
 ## Capture checklist
 
-- [ ] Repository URL and `v1.10.0` tag visible once.
+- [ ] Repository URL and `v1.11.0` tag visible once.
 - [ ] Real Factory/Droid session receipt and shipped diff visible first.
 - [ ] Pre-change gap and adversarial post-change result are understandable.
 - [ ] Portable factory scaffold and validation succeed on screen.
 - [ ] Checked-in plan verification and byte-stable rebuild succeed on screen.
 - [ ] Portable bundle creation and in-memory verification succeed on screen.
+- [ ] Portfolio verification shows one control factory, two economic factories,
+      two evidence-only routes, and false runtime-isolation/authority claims.
 - [ ] Source-lock verification reports the annotated `v1.6.0` tag, sixteen
       inputs, and false qualification, eligibility, and activation flags.
 - [ ] Qualification plan visibly leaves all nine modules runtime-ineligible.
@@ -213,7 +236,7 @@ Open `docs/implementation-status.md`.
 - [ ] Rebuild-plan verification shows nine blocked actions, four separate gates,
       and false execution, activation, deployment, and recovery authority.
 - [ ] “The factory of software factories” hierarchy is visible.
-- [ ] `make validate` shows all 203 tests and 90 contract files passing.
+- [ ] `make validate` shows all 212 tests and 97 contract files passing.
 - [ ] Maturity limits are stated explicitly.
 - [ ] No private history, addresses, credentials, local settings, or host details.
 - [ ] Captions are included.

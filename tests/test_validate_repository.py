@@ -25,6 +25,7 @@ SPEC.loader.exec_module(validator)
 import factory_bundle as bundler
 import factory_composer as composer
 import factory_evidence_pack as evidence_pack
+import factory_portfolio as portfolio
 import factory_qualification as qualification
 import factory_rebuild as rebuild
 import factory_runtime_evidence as runtime_evidence
@@ -1423,6 +1424,364 @@ class FactoryBundleTests(unittest.TestCase):
                     )
                     self.assertEqual(2, result.returncode)
                     self.assertIn("cannot load", result.stderr)
+
+
+class FactoryPortfolioTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.catalog = composer.load_module_catalog()
+        self.artifacts, errors = composer.load_module_artifacts(self.catalog)
+        self.assertEqual([], errors)
+        self.definition = portfolio.load_factory_portfolio()
+        self.bundles: list[bytes] = []
+        for path in validator.PORTFOLIO_FACTORY_PATHS:
+            factory = composer.load_json_file(path)
+            bundle, _ = bundler.build_factory_bundle(
+                factory,
+                self.catalog,
+                self.artifacts,
+            )
+            self.bundles.append(bundle)
+        errors, plan = portfolio.factory_portfolio_plan_for_bundles(
+            self.definition,
+            self.bundles,
+        )
+        self.assertEqual([], errors)
+        self.assertIsNotNone(plan)
+        assert plan is not None
+        self.plan = plan
+
+    @staticmethod
+    def _refresh_digest(document: dict[str, object]) -> None:
+        without_digest = copy.deepcopy(document)
+        without_digest.pop("factory_portfolio_plan_sha256")
+        document["factory_portfolio_plan_sha256"] = composer.sha256_json(
+            without_digest
+        )
+
+    def test_repository_portfolio_plan_and_schemas_are_exact(self) -> None:
+        checked = portfolio.load_factory_portfolio_plan()
+        self.assertEqual(self.plan, checked)
+        self.assertEqual(
+            [],
+            portfolio.verify_factory_portfolio_plan_for_bundles(
+                checked,
+                self.definition,
+                self.bundles,
+            ),
+        )
+        for path, schema_id in (
+            (
+                validator.ROOT / "schemas" / "factory-portfolio.schema.json",
+                portfolio.PORTFOLIO_SCHEMA_REFERENCE,
+            ),
+            (
+                validator.ROOT / "schemas" / "factory-portfolio-plan.schema.json",
+                portfolio.PORTFOLIO_PLAN_SCHEMA_REFERENCE,
+            ),
+        ):
+            schema = json.loads(path.read_text(encoding="utf-8"))
+            self.assertEqual("https://json-schema.org/draft/2020-12/schema", schema["$schema"])
+            self.assertEqual(schema_id, schema["$id"])
+            self.assertEqual(schema_id, schema["properties"]["contract_schema"]["const"])
+
+    def test_portfolio_is_closed_ordered_and_evidence_only(self) -> None:
+        self.assertEqual([], portfolio.validate_factory_portfolio(self.definition))
+        for mutation, expected in (
+            (("factories", 1, "id", "unknown-factory"), "unknown"),
+            (("factories", 1, "id", "a" * 65), "invalid id"),
+            (("factories", 1, "position", True), "position"),
+            (("factories", 1, "class", []), "invalid factory class"),
+            (("factories", 1, "class", "control_factory"), "exactly one"),
+            (("evidence_routes", 0, "grants_authority", True), "grant authority"),
+            (("evidence_routes", 0, "can_self_promote", True), "self-promote"),
+            (("evidence_routes", 0, "payload_scope", "secrets"), "evidence-only"),
+        ):
+            with self.subTest(mutation=mutation):
+                mutated = copy.deepcopy(self.definition)
+                collection, index, field, value = mutation
+                mutated[collection][index][field] = value
+                errors = portfolio.validate_factory_portfolio(mutated)
+                self.assertTrue(any(expected in error for error in errors), errors)
+        missing_route = copy.deepcopy(self.definition)
+        missing_route["evidence_routes"].pop()
+        errors = portfolio.validate_factory_portfolio(missing_route)
+        self.assertTrue(any("exactly one evidence-return" in error for error in errors))
+        blank_purpose = copy.deepcopy(self.definition)
+        blank_purpose["portfolio"]["purpose"] = " \t"
+        errors = portfolio.validate_factory_portfolio(blank_purpose)
+        self.assertTrue(any("purpose" in error for error in errors))
+        scalar_policy = copy.deepcopy(self.definition)
+        scalar_policy["policies"]["closed_registry"] = 1
+        errors = portfolio.validate_factory_portfolio(scalar_policy)
+        self.assertTrue(any("least-authority" in error for error in errors))
+
+    def test_bundle_registry_alignment_fails_closed(self) -> None:
+        errors, plan = portfolio.factory_portfolio_plan_for_bundles(
+            self.definition,
+            [self.bundles[0], self.bundles[1], self.bundles[1]],
+        )
+        self.assertIsNone(plan)
+        self.assertTrue(any("duplicate" in error for error in errors))
+        self.assertTrue(any("missing ids" in error for error in errors))
+
+        wrong_class = copy.deepcopy(self.definition)
+        wrong_class["factories"][2]["class"] = "control_factory"
+        wrong_class["factories"][0]["class"] = "economic_factory"
+        wrong_class["portfolio"]["control_factory"] = "example-service"
+        wrong_class["evidence_routes"][0]["from_factory"] = "example-control"
+        wrong_class["evidence_routes"][0]["to_factory"] = "example-service"
+        wrong_class["evidence_routes"][1]["from_factory"] = "example-product"
+        wrong_class["evidence_routes"][1]["to_factory"] = "example-service"
+        errors, plan = portfolio.factory_portfolio_plan_for_bundles(
+            wrong_class,
+            self.bundles,
+        )
+        self.assertIsNone(plan)
+        self.assertTrue(any("bundle class" in error for error in errors))
+
+    def test_tampered_bundle_is_rejected_before_planning(self) -> None:
+        tampered = bytearray(self.bundles[1])
+        tampered[1024] ^= 1
+        errors, plan = portfolio.factory_portfolio_plan_for_bundles(
+            self.definition,
+            [self.bundles[0], bytes(tampered), self.bundles[2]],
+        )
+        self.assertIsNone(plan)
+        self.assertTrue(any("bundle 1" in error for error in errors))
+
+    def test_plan_replay_against_replacement_bundle_is_rejected(self) -> None:
+        cron_factory = composer.load_json_file(
+            validator.ROOT / "examples" / "economic-factory-cron.json"
+        )
+        cron_bundle, _ = bundler.build_factory_bundle(
+            cron_factory,
+            self.catalog,
+            self.artifacts,
+        )
+        errors = portfolio.verify_factory_portfolio_plan_for_bundles(
+            self.plan,
+            self.definition,
+            [self.bundles[0], cron_bundle, self.bundles[2]],
+        )
+        self.assertTrue(any("exactly match" in error for error in errors))
+
+    def test_namespace_route_and_authority_inflation_fail_after_digest_refresh(self) -> None:
+        mutations = []
+        authority = copy.deepcopy(self.plan)
+        authority["control_claim"]["authorizes_cross_factory_effects"] = True
+        mutations.append(authority)
+        scalar = copy.deepcopy(self.plan)
+        scalar["isolation"]["cross_factory_secret_access_granted"] = 0
+        mutations.append(scalar)
+        collision = copy.deepcopy(self.plan)
+        collision["factories"][1]["namespaces"]["worker_pool"] = collision[
+            "factories"
+        ][0]["namespaces"]["worker_pool"]
+        mutations.append(collision)
+        route = copy.deepcopy(self.plan)
+        route["evidence_routes"][0]["to_factory"] = "example-service"
+        mutations.append(route)
+        scheduler = copy.deepcopy(self.plan)
+        scheduler["factories"][2]["selected_scheduler_module"][
+            "artifact_sha256"
+        ] = "0" * 64
+        mutations.append(scheduler)
+        for mutated in mutations:
+            with self.subTest(mutated=mutated):
+                self._refresh_digest(mutated)
+                errors = portfolio.verify_factory_portfolio_plan_for_bundles(
+                    mutated,
+                    self.definition,
+                    self.bundles,
+                )
+                self.assertTrue(any("exactly match" in error for error in errors))
+
+    def test_bundle_input_order_does_not_change_plan(self) -> None:
+        errors, reordered = portfolio.factory_portfolio_plan_for_bundles(
+            self.definition,
+            list(reversed(self.bundles)),
+        )
+        self.assertEqual([], errors)
+        self.assertEqual(self.plan, reordered)
+
+    def test_malformed_portfolio_inputs_fail_cleanly(self) -> None:
+        malformed = [None, [], "portfolio", 0, False, {"factories": []}]
+        for value in malformed:
+            with self.subTest(value=value):
+                errors = portfolio.validate_factory_portfolio(value)
+                self.assertTrue(errors)
+                errors, plan = portfolio.factory_portfolio_plan_for_bundles(
+                    value,
+                    object(),
+                )
+                self.assertTrue(errors)
+                self.assertIsNone(plan)
+                self.assertTrue(
+                    portfolio.verify_factory_portfolio_plan_for_bundles(
+                        value,
+                        self.definition,
+                        self.bundles,
+                    )
+                )
+                self.assertTrue(
+                    portfolio.verify_factory_portfolio_plan_for_bundles(
+                        self.plan,
+                        value,
+                        object(),
+                    )
+                )
+        oversized_factories = copy.deepcopy(self.definition)
+        oversized_factories["factories"] = [
+            copy.deepcopy(self.definition["factories"][0])
+            for _ in range(portfolio.MAX_FACTORIES + 1)
+        ]
+        errors = portfolio.validate_factory_portfolio(oversized_factories)
+        self.assertTrue(any("between 2 and 64 factories" in error for error in errors))
+        oversized_routes = copy.deepcopy(self.definition)
+        oversized_routes["evidence_routes"] = [
+            copy.deepcopy(self.definition["evidence_routes"][0])
+            for _ in range(portfolio.MAX_FACTORIES)
+        ]
+        errors = portfolio.validate_factory_portfolio(oversized_routes)
+        self.assertTrue(any("between 1 and 63" in error for error in errors))
+        errors, plan = portfolio.factory_portfolio_plan_for_bundles(
+            self.definition,
+            [b"not-a-bundle"] * (portfolio.MAX_FACTORIES + 1),
+        )
+        self.assertIsNone(plan)
+        self.assertTrue(any("between 2 and 64 bundles" in error for error in errors))
+        self.assertFalse(any("bundle 0" in error for error in errors))
+
+    def test_cli_portfolio_plan_round_trip_and_overwrite_refusal(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            bundle_paths: list[Path] = []
+            for index, bundle in enumerate(self.bundles):
+                path = root / f"factory-{index}.tar"
+                path.write_bytes(bundle)
+                bundle_paths.append(path)
+            output = root / "portfolio-plan.json"
+            cli = [
+                sys.executable,
+                str(validator.ROOT / "scripts" / "zaibatsu.py"),
+                "portfolio-plan",
+                str(portfolio.EXAMPLE_PORTFOLIO_PATH),
+                *(str(path) for path in bundle_paths),
+                "--output",
+                str(output),
+            ]
+            created = subprocess.run(
+                cli,
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(0, created.returncode, created.stderr)
+            self.assertEqual(self.plan, json.loads(output.read_text(encoding="utf-8")))
+            verified = subprocess.run(
+                [
+                    sys.executable,
+                    str(validator.ROOT / "scripts" / "zaibatsu.py"),
+                    "verify-portfolio-plan",
+                    str(output),
+                    str(portfolio.EXAMPLE_PORTFOLIO_PATH),
+                    *(str(path) for path in bundle_paths),
+                ],
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(0, verified.returncode, verified.stderr)
+            self.assertIn("runtime isolation proved: false", verified.stdout)
+            refused = subprocess.run(
+                cli,
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(2, refused.returncode)
+            self.assertIn("refusing to overwrite", refused.stderr)
+            oversized = subprocess.run(
+                [
+                    sys.executable,
+                    str(validator.ROOT / "scripts" / "zaibatsu.py"),
+                    "portfolio-plan",
+                    str(root / "missing-portfolio.json"),
+                    *(
+                        str(root / "missing-bundle.tar")
+                        for _ in range(portfolio.MAX_FACTORIES + 1)
+                    ),
+                ],
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(2, oversized.returncode)
+            self.assertIn("between 2 and 64 bundles", oversized.stderr)
+            self.assertNotIn("cannot load", oversized.stderr)
+            oversized_verify = subprocess.run(
+                [
+                    sys.executable,
+                    str(validator.ROOT / "scripts" / "zaibatsu.py"),
+                    "verify-portfolio-plan",
+                    str(root / "missing-plan.json"),
+                    str(root / "missing-portfolio.json"),
+                    *(
+                        str(root / "missing-bundle.tar")
+                        for _ in range(portfolio.MAX_FACTORIES + 1)
+                    ),
+                ],
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(2, oversized_verify.returncode)
+            self.assertIn("between 2 and 64 bundles", oversized_verify.stderr)
+            self.assertNotIn("cannot load", oversized_verify.stderr)
+            oversized_portfolio = root / "oversized-portfolio.json"
+            oversized_portfolio.write_bytes(
+                b" " * (portfolio.MAX_PORTFOLIO_BYTES + 1)
+            )
+            oversized_document = subprocess.run(
+                [
+                    sys.executable,
+                    str(validator.ROOT / "scripts" / "zaibatsu.py"),
+                    "portfolio-plan",
+                    str(oversized_portfolio),
+                    *(str(path) for path in bundle_paths),
+                ],
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(2, oversized_document.returncode)
+            self.assertIn("input size is outside", oversized_document.stderr)
+            oversized_plan = root / "oversized-plan.json"
+            oversized_plan.write_bytes(
+                b" " * (portfolio.MAX_PORTFOLIO_PLAN_BYTES + 1)
+            )
+            oversized_plan_result = subprocess.run(
+                [
+                    sys.executable,
+                    str(validator.ROOT / "scripts" / "zaibatsu.py"),
+                    "verify-portfolio-plan",
+                    str(oversized_plan),
+                    str(portfolio.EXAMPLE_PORTFOLIO_PATH),
+                    *(str(path) for path in bundle_paths),
+                ],
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(2, oversized_plan_result.returncode)
+            self.assertIn("input size is outside", oversized_plan_result.stderr)
 
 
 class FactorySourceLockTests(unittest.TestCase):

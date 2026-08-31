@@ -113,6 +113,7 @@ The target stack is intentionally boring at authority boundaries:
 | Modular agent skeletons | Reusable typed modules, flows, profiles, approvals, and effect fences | Implemented and tested source; not deployed |
 | LLM harness adapters | Bind different models behind typed module contracts | Validated at bounded source/contribution scope; general unattended routing is not active |
 | Recursive improvement | Return evidence and improve shared factory patterns | Evidence return is bounded and operational; shared automatic promotion remains designed and owner-gated |
+| Multi-factory portfolio plan | Join verified control bundles into one closed registry with evidence-only return routes and factory-scoped intended namespaces | Implemented and tested as a non-executing control plan; it proves bundle identity and declarative separation, not deployed runtime isolation or authority |
 | Qualification planner | Bind a verified control bundle to mandatory runtime evidence requirements | Implemented and tested; the public plan contains no qualification evidence and grants no eligibility or activation |
 | Signed runtime-evidence assessment | Combine bundle-derived contract receipts with fresh, allowlisted OpenSSH-signed verifier assertions | The public fixture verifies one signature in test-only scope: 10 of 67 bindings verified, 57 missing, zero runtime-eligible modules, and no activation or execution authority |
 | Canonical runtime-evidence pack | Carry the signed evidence, verifier registry, exact evidence artifacts, verifier descriptors, and manifest schema as one reproducible archive | Implemented and tested; byte and digest integrity are verified, but verifier assertions are not rerun and artifact truth is not inferred |
@@ -181,7 +182,8 @@ make validate
 
 `make validate` checks the project-owned schemas, architecture contracts,
 portable factory example, content-addressed module artifacts, resolved control
-plan, portable bundle manifest, annotated-release source lock, qualification
+plan, portable bundle manifest, closed multi-factory portfolio plan,
+annotated-release source lock, qualification
 policy and plan, bundle-derived evidence, signed runtime evidence, runtime
 assessment, deterministic rebuild DAG, sanitized receipts, factory hierarchy
 and lifecycle, maturity boundaries, submission gates, public-safety rules,
@@ -271,6 +273,45 @@ The comparison reports one `scheduling` implementation replacement from
 remain unchanged, while the factory definition and resolved plan receive new
 content digests. Both sides still report runtime ineligible: comparison proves
 a modular control-contract change, not scheduler activation.
+
+## Coordinate a closed portfolio of factories
+
+Build separate control bundles for one control factory and two economic
+factories, then compile them into one deterministic factory-of-factories view:
+
+```bash
+python3 scripts/zaibatsu.py bundle examples/control-factory.json \
+  --output /tmp/example-control.factory.tar
+python3 scripts/zaibatsu.py bundle examples/service-factory.json \
+  --output /tmp/example-service.factory.tar
+python3 scripts/zaibatsu.py portfolio-plan \
+  examples/factory-portfolio.json \
+  /tmp/example-control.factory.tar \
+  /tmp/example-product.factory.tar \
+  /tmp/example-service.factory.tar \
+  --output /tmp/example-portfolio.plan.json
+python3 scripts/zaibatsu.py verify-portfolio-plan \
+  /tmp/example-portfolio.plan.json \
+  examples/factory-portfolio.json \
+  /tmp/example-control.factory.tar \
+  /tmp/example-product.factory.tar \
+  /tmp/example-service.factory.tar
+```
+
+The checked [portfolio](examples/factory-portfolio.json) declares exactly one
+control factory, two economic factories, and one evidence-only return route
+from each economic factory. The generated [portfolio
+plan](examples/factory-portfolio.plan.json) fully verifies every bundle, binds
+their exact digests and selected scheduler adapters, and generates 21 disjoint
+intended authority, repository, secret, worker, artifact, and scheduler
+namespaces. Bundle input order does not affect the plan; declared registry
+order does.
+
+This is the missing public control-layer join, not a deployment claim. The
+namespaces are deterministic intended scopes rather than evidence of operating
+system, network, process, credential, or database isolation. The plan contains
+no runtime implementations, routes no secrets, invokes no model, executes no
+operation, grants no cross-factory authority, and authorizes no activation.
 
 ## Lock bundle sources to an immutable release
 
@@ -492,6 +533,10 @@ and the complete repository suite was rerun independently.
 - [Portable factory definitions](examples/economic-factory.json) — reusable
   systemd and [cron](examples/economic-factory-cron.json) contract variants
   for a new control or economic factory.
+- [Factory portfolio](examples/factory-portfolio.json) and [deterministic
+  portfolio plan](examples/factory-portfolio.plan.json) — one verified control
+  bundle plus two verified economic-factory bundles joined through a closed
+  registry, disjoint intended namespaces, and non-authorizing evidence routes.
 - [Reusable module catalog](catalog/modules.json), [module contract
   artifacts](catalog/modules/), [example control
   plan](examples/economic-factory.plan.json), and [bundle
@@ -542,33 +587,38 @@ and the complete repository suite was rerun independently.
 
 1. Zaibatsu is the meta-factory; economic factories remain project-scoped.
 2. Unknown factories, identities, capabilities, and transitions fail closed.
-3. Every workload has exactly one scheduler of record.
-4. Git versions intended state; plaintext secrets never enter Git.
-5. Ansible and Nix serve different reproduction boundaries, and Nix remains
+3. A portfolio has exactly one control factory; each economic factory retains
+   separate intended authority, repository, secret, worker, artifact, and
+   scheduler namespaces.
+4. Cross-factory routes carry evidence only and grant no authority or
+   self-promotion.
+5. Every workload has exactly one scheduler of record.
+6. Git versions intended state; plaintext secrets never enter Git.
+7. Ansible and Nix serve different reproduction boundaries, and Nix remains
    planned until independently reproduced.
-6. Agent skeletons are modular contracts, not autonomous production authority.
-7. LLM harnesses are interchangeable workers behind deterministic entry and
+8. Agent skeletons are modular contracts, not autonomous production authority.
+9. LLM harnesses are interchangeable workers behind deterministic entry and
    exit gates.
-8. Module IDs select implementations; declared policy compatibility decides
+10. Module IDs select implementations; declared policy compatibility decides
    whether a module may fill a factory slot.
-9. A module artifact, plan, or bundle is accepted only when every canonical
+11. A module artifact, plan, or bundle is accepted only when every canonical
    digest, member, dependency, and least-authority boundary matches.
-10. A qualification plan lists missing evidence; it is not evidence, runtime
+12. A qualification plan lists missing evidence; it is not evidence, runtime
     eligibility, activation authority, or owner approval.
-11. Content addressing proves evidence identity, not truth; a signed assertion
+13. Content addressing proves evidence identity, not truth; a signed assertion
     counts only under the exact evaluator-selected key, factory, scope,
     requirement, method, implementation digest, and validity interval.
-12. A source lock proves exact local Git-object lineage for control contracts;
+14. A source lock proves exact local Git-object lineage for control contracts;
     it does not prove remote ownership, signature trust, or runtime source.
-13. A signature authenticates an assertion; it does not prove key ownership,
+15. A signature authenticates an assertion; it does not prove key ownership,
     organizational independence, verifier correctness, or artifact truth.
-14. A rebuild plan reports intended actions and blockers; it executes no action
+16. A rebuild plan reports intended actions and blockers; it executes no action
     and grants no qualification, approval, activation, deployment, or recovery
     authority.
-15. Tests, schemas, linters, hashes, policy, receipts, and owner approval
+17. Tests, schemas, linters, hashes, policy, receipts, and owner approval
     outrank model confidence.
-16. Feedback may propose shared improvement but cannot self-promote.
-17. Failed work remains inspectable, and the owner retains a recovery path
+18. Feedback may propose shared improvement but cannot self-promote.
+19. Failed work remains inspectable, and the owner retains a recovery path
     outside Dispatcher.
 
 ## Factory Guild submission

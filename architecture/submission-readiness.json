@@ -9,7 +9,7 @@
       "id": "public_package",
       "status": "complete",
       "required_for_submission": true,
-      "evidence": "Meta-factory, component, portable factory, content-addressed module, control-plan, bundle, signed-runtime-evidence-pack, rebuild, readiness, and evidence contracts are enforced by the offline validator and adversarial suite",
+      "evidence": "Meta-factory, component, portable factory, content-addressed module, control-plan, bundle, closed portfolio, signed-runtime-evidence-pack, rebuild, readiness, and evidence contracts are enforced by the offline validator and adversarial suite",
       "proof": {
         "contracts": [
           "architecture/factory-model.json",
@@ -28,6 +28,10 @@
           "examples/economic-factory.runtime-assessment.json",
           "examples/economic-factory.runtime-evidence.json",
           "examples/economic-factory.runtime-evidence-pack-manifest.json",
+          "examples/control-factory.json",
+          "examples/service-factory.json",
+          "examples/factory-portfolio.json",
+          "examples/factory-portfolio.plan.json",
           "policies/runtime-evidence-verifiers-v1.json",
           "policies/runtime-qualification-v1.json"
         ],
@@ -117,7 +121,7 @@
       "id": "public_demo",
       "status": "pending_external",
       "required_for_submission": true,
-      "evidence": "The immutable v1.10.0 release proof passed; record and publish the final clip from that tag"
+      "evidence": "Wait for the v1.11.0 portfolio release proof, then record and publish the final clip from that immutable tag"
     },
     {
       "id": "applicant_materials",

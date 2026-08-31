@@ -1,0 +1,171 @@
+{
+  "contract_schema": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.11.0/schemas/factory-portfolio-plan.schema.json",
+  "schema_version": "zaibatsu.factory-portfolio-plan.v1",
+  "portfolio": {
+    "id": "example-software-factories",
+    "purpose": "Demonstrate one control factory coordinating two separately scoped economic software factories through evidence-only return routes",
+    "control_factory": "example-control"
+  },
+  "source": {
+    "portfolio_definition_sha256": "c993c7ecd677898d944b6abb430ca22d39e9cc48dc67f9ab8c528381ae910d8a",
+    "factory_bundle_set_sha256": "729341fdb5f2d4c032c73a86551abbb4eec7432518e360f44c8557d710644231"
+  },
+  "control_factory": {
+    "id": "example-control",
+    "bundle_sha256": "9b777fa3874485672a30b2a5f7e6db6e2895dfbd228767aded85898216c7db3c"
+  },
+  "factories": [
+    {
+      "position": 0,
+      "id": "example-control",
+      "class": "control_factory",
+      "bundle_sha256": "9b777fa3874485672a30b2a5f7e6db6e2895dfbd228767aded85898216c7db3c",
+      "source": {
+        "factory_definition_sha256": "be2ab293f5fc5429b075b7084e02864db010d5e688cecd389f77b2ab39466130",
+        "factory_plan_sha256": "2182f3143b5a97d5c79260b427deca00ce366395cc73d48a96ec72bf50197a5d",
+        "module_api_version": "zaibatsu.module.v1",
+        "module_catalog_sha256": "16db832de54aaba7775461df7e8b4f4e1684deebe32be608806161aac1b2628d"
+      },
+      "selected_scheduler_module": {
+        "id": "systemd-scheduler",
+        "artifact_sha256": "ff549f0c47e82dcc0126907d1cb423dc8339c6e294f0a89f465142f3f5e5bdb3"
+      },
+      "namespaces": {
+        "authority": "factory/example-control/authority",
+        "repository": "factory/example-control/repository",
+        "static_secrets": "factory/example-control/static-secrets",
+        "runtime_secrets": "factory/example-control/runtime-secrets",
+        "worker_pool": "factory/example-control/worker-pool",
+        "artifacts": "factory/example-control/artifacts",
+        "scheduler": "factory/example-control/scheduler"
+      },
+      "runtime_boundary": {
+        "bundle_verified": true,
+        "runtime_qualified": false,
+        "activation_authorized": false,
+        "execution_authorized": false,
+        "side_effect_authority": false
+      }
+    },
+    {
+      "position": 1,
+      "id": "example-product",
+      "class": "economic_factory",
+      "bundle_sha256": "d4918fd16f55b907a0b2b9734422d7106d3030a511e5cae5d6efc1cb7b253aba",
+      "source": {
+        "factory_definition_sha256": "b9e0f0e7dcfc850f835d5f56ca8596a4b45419a943777afc889c64f508457eac",
+        "factory_plan_sha256": "64c5b94ebb155de22293c12d7c0eaa86c523b24627d8eea3d236725893f8c08f",
+        "module_api_version": "zaibatsu.module.v1",
+        "module_catalog_sha256": "16db832de54aaba7775461df7e8b4f4e1684deebe32be608806161aac1b2628d"
+      },
+      "selected_scheduler_module": {
+        "id": "systemd-scheduler",
+        "artifact_sha256": "ff549f0c47e82dcc0126907d1cb423dc8339c6e294f0a89f465142f3f5e5bdb3"
+      },
+      "namespaces": {
+        "authority": "factory/example-product/authority",
+        "repository": "factory/example-product/repository",
+        "static_secrets": "factory/example-product/static-secrets",
+        "runtime_secrets": "factory/example-product/runtime-secrets",
+        "worker_pool": "factory/example-product/worker-pool",
+        "artifacts": "factory/example-product/artifacts",
+        "scheduler": "factory/example-product/scheduler"
+      },
+      "runtime_boundary": {
+        "bundle_verified": true,
+        "runtime_qualified": false,
+        "activation_authorized": false,
+        "execution_authorized": false,
+        "side_effect_authority": false
+      }
+    },
+    {
+      "position": 2,
+      "id": "example-service",
+      "class": "economic_factory",
+      "bundle_sha256": "08a308198840ce633e75bd66a06160d217912280d838db02a4b8479fdafa4c75",
+      "source": {
+        "factory_definition_sha256": "8e19911d4ce62860f43fd11a6fe33f7ba1045072ad7657a98d60f7f130ff6bb6",
+        "factory_plan_sha256": "2dda1197a7b20a9bf728d222e3d3aacff550de38c080a00e15a4afc0c2fba6b5",
+        "module_api_version": "zaibatsu.module.v1",
+        "module_catalog_sha256": "16db832de54aaba7775461df7e8b4f4e1684deebe32be608806161aac1b2628d"
+      },
+      "selected_scheduler_module": {
+        "id": "cron-scheduler",
+        "artifact_sha256": "1b5164e2535a539a7ae514e696042439af8703c77ad5584a64bfb94fba17dd30"
+      },
+      "namespaces": {
+        "authority": "factory/example-service/authority",
+        "repository": "factory/example-service/repository",
+        "static_secrets": "factory/example-service/static-secrets",
+        "runtime_secrets": "factory/example-service/runtime-secrets",
+        "worker_pool": "factory/example-service/worker-pool",
+        "artifacts": "factory/example-service/artifacts",
+        "scheduler": "factory/example-service/scheduler"
+      },
+      "runtime_boundary": {
+        "bundle_verified": true,
+        "runtime_qualified": false,
+        "activation_authorized": false,
+        "execution_authorized": false,
+        "side_effect_authority": false
+      }
+    }
+  ],
+  "evidence_routes": [
+    {
+      "position": 0,
+      "from_factory": "example-product",
+      "to_factory": "example-control",
+      "kind": "evidence_return",
+      "payload_scope": "evidence_only",
+      "grants_authority": false,
+      "can_self_promote": false,
+      "from_bundle_sha256": "d4918fd16f55b907a0b2b9734422d7106d3030a511e5cae5d6efc1cb7b253aba",
+      "to_bundle_sha256": "9b777fa3874485672a30b2a5f7e6db6e2895dfbd228767aded85898216c7db3c"
+    },
+    {
+      "position": 1,
+      "from_factory": "example-service",
+      "to_factory": "example-control",
+      "kind": "evidence_return",
+      "payload_scope": "evidence_only",
+      "grants_authority": false,
+      "can_self_promote": false,
+      "from_bundle_sha256": "08a308198840ce633e75bd66a06160d217912280d838db02a4b8479fdafa4c75",
+      "to_bundle_sha256": "9b777fa3874485672a30b2a5f7e6db6e2895dfbd228767aded85898216c7db3c"
+    }
+  ],
+  "isolation": {
+    "closed_registry": true,
+    "unknown_factories_fail_closed": true,
+    "intended_namespaces_are_disjoint": true,
+    "runtime_isolation_proved": false,
+    "cross_factory_secret_access_granted": false,
+    "cross_factory_worker_access_granted": false,
+    "cross_factory_artifact_access_granted": false,
+    "cross_factory_authority_granted": false,
+    "evidence_routes_only": true
+  },
+  "summary": {
+    "factory_count": 3,
+    "control_factory_count": 1,
+    "economic_factory_count": 2,
+    "evidence_route_count": 2,
+    "intended_namespace_count": 21
+  },
+  "control_claim": {
+    "scope": "multi_factory_control_plan_only",
+    "all_factory_bundles_verified": true,
+    "contains_runtime_implementations": false,
+    "proves_runtime_isolation": false,
+    "deploys_infrastructure": false,
+    "routes_secrets": false,
+    "invokes_models": false,
+    "executes_operations": false,
+    "authorizes_activation": false,
+    "authorizes_cross_factory_effects": false,
+    "proves_runtime_recovery": false
+  },
+  "factory_portfolio_plan_sha256": "dc4303fb1fc8a013d3d5f3e91f29fb4935baa3b42f503c0595abbd7ae7fbbcbb"
+}

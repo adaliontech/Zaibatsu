@@ -1,0 +1,59 @@
+{
+  "contract_schema": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.11.0/schemas/factory-portfolio.schema.json",
+  "schema_version": "zaibatsu.factory-portfolio.v1",
+  "portfolio": {
+    "id": "example-software-factories",
+    "purpose": "Demonstrate one control factory coordinating two separately scoped economic software factories through evidence-only return routes",
+    "control_factory": "example-control"
+  },
+  "factories": [
+    {
+      "position": 0,
+      "id": "example-control",
+      "class": "control_factory"
+    },
+    {
+      "position": 1,
+      "id": "example-product",
+      "class": "economic_factory"
+    },
+    {
+      "position": 2,
+      "id": "example-service",
+      "class": "economic_factory"
+    }
+  ],
+  "evidence_routes": [
+    {
+      "position": 0,
+      "from_factory": "example-product",
+      "to_factory": "example-control",
+      "kind": "evidence_return",
+      "payload_scope": "evidence_only",
+      "grants_authority": false,
+      "can_self_promote": false
+    },
+    {
+      "position": 1,
+      "from_factory": "example-service",
+      "to_factory": "example-control",
+      "kind": "evidence_return",
+      "payload_scope": "evidence_only",
+      "grants_authority": false,
+      "can_self_promote": false
+    }
+  ],
+  "policies": {
+    "closed_registry": true,
+    "unknown_factories_fail_closed": true,
+    "one_control_factory": true,
+    "factory_scoped_authority": true,
+    "factory_scoped_secrets": true,
+    "factory_scoped_workers": true,
+    "factory_scoped_artifacts": true,
+    "evidence_only_cross_factory_routes": true,
+    "cross_factory_route_grants_authority": false,
+    "factory_may_self_promote": false,
+    "plan_executes_operations": false
+  }
+}

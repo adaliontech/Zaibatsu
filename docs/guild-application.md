@@ -99,7 +99,7 @@ new test moves `policy_decision` before `verify`; the pre-change validator
 accepted that unsafe ordering, while the shipped validator rejects it with a
 deterministic adjacent-stage error. Droid reported 36 passing tests, and an
 independent run reproduced all 36 before later integration, branding, release,
-and meta-factory checks brought the current package to 203 passing tests. No model or
+and meta-factory checks brought the current package to 212 passing tests. No model or
 Factory credential is published.
 
 ## One-line description
@@ -118,7 +118,9 @@ I built Zaibatsu, the factory of software factories: an evidence-gated control
 layer for versioning, scheduling, verifying, and improving project-scoped
 software factories. It includes content-addressed module contracts and a
 byte-reproducible, self-verifying control bundle with exact annotated-release
-source lineage; Git/SOPS and Ansible have bounded evidence, Nix remains
+source lineage. A deterministic portfolio plan joins one control bundle and
+multiple economic-factory bundles through separate intended scopes and
+evidence-only return routes; Git/SOPS and Ansible have bounded evidence, Nix remains
 planned, and modular agent skeletons remain tested source rather than deployed
 authority.
 Local-Qwen-backed Factory Droid strengthened and tested one deterministic
@@ -139,6 +141,11 @@ policy-compatible hashed module artifact and reproduce the same canonical
 control bundle without granting it runtime or deployment authority. The source
 lock proves exact local Git-object lineage for those control contracts, not
 repository ownership, runtime source, qualification, or deployment. The
+portfolio planner then verifies and binds multiple factory bundles into one
+closed control view with exactly one control factory, separate intended
+authority/secret/worker/artifact/scheduler scopes, and declared evidence-only
+return routes. Those names do not prove runtime isolation or grant
+cross-factory authority. The
 rebuild planner adds the exact dependency graph and blockers without executing
 the graph or converting verified control contracts into runtime authority.
 
@@ -256,6 +263,13 @@ the public repository:
 - [x] Immutable v1.10.0 passes evidence-roof and tag CI, three tagged-schema
       byte checks, full-history tag-clone reproduction, and immutable-release
       proof.
+- [x] Closed-portfolio v1.11 working candidate passes 212 local tests, 97-file
+      validation, two strict schemas, exact three-bundle plan regeneration,
+      seeded malformed/forged-plan controls, and identity/class/route/scope/
+      replay/type/authority adversarial tests.
+- [ ] v1.11 candidate passes credential-disabled full-history clone, both
+      Gitleaks modes, independent CI, evidence-roof/tag CI, tagged-schema byte
+      checks, tag-clone reproduction, and immutable-release proof.
 - [x] Public repository and article links resolve without authentication.
 - [ ] Demo clip or screenshots show a real Factory task and validation result.
 - [x] No private host, credential, recovery, or deployment detail is exposed.

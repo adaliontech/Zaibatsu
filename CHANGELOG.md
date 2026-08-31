@@ -1,5 +1,26 @@
 # Changelog
 
+## 1.11.0 - 2026-08-30
+
+- Added schema-bound factory-portfolio definitions and deterministic portfolio
+  plans so Zaibatsu can join multiple verified factory bundles into one
+  machine-verifiable factory-of-factories control view.
+- Added `portfolio-plan` and `verify-portfolio-plan` CLI workflows. They fully
+  verify every canonical bundle, match identity and class to an ordered closed
+  registry, bind exact bundle/source/scheduler-module digests, and remain
+  independent of bundle argument order.
+- Added a public three-factory example with exactly one control factory, two
+  economic factories, systemd and cron module choices, 21 disjoint intended
+  namespaces, and one evidence-only return route per economic factory.
+- Preserved the authority boundary: intended namespaces do not prove runtime
+  isolation; the plan contains no runtime implementations, routes no secrets,
+  invokes no model, executes no operation, grants no cross-factory authority,
+  authorizes no activation, and proves no deployment or recovery.
+- Added duplicate, missing, tampered, replacement, class-drift, route,
+  namespace-collision, authority-inflation, scalar-confusion, malformed-input,
+  input-order, and CLI overwrite tests. The integrated suite now contains 212
+  tests and the validator requires 97 files.
+
 ## 1.10.0 - 2026-08-30
 
 - Added a canonical, self-verifying runtime-evidence pack that embeds the

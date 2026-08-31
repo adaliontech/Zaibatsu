@@ -81,29 +81,32 @@ The validator confirms:
 26. inspection and comparison accept only fully verified canonical bundles,
     report a scheduler substitution at the module slot, and preserve the
     explicit no-runtime and no-deployment boundary;
-27. the qualification policy preserves every mandatory evidence class, and
+27. the closed factory portfolio accepts only fully verified bundles, exactly
+    one control factory, ordered economic factories, disjoint intended
+    namespaces, and evidence-only non-authorizing return routes;
+28. the qualification policy preserves every mandatory evidence class, and
     the checked-in plan exactly matches its verified bundle and policy while
     granting no runtime eligibility, activation, or owner approval;
-28. bundle-derived qualification receipts and the partial assessment exactly
+29. bundle-derived qualification receipts and the partial assessment exactly
     rebuild from the verified bundle, plan, and policy; forged, replayed,
     duplicate, reordered, scope-inflated, or authority-inflated evidence fails
     closed.
-29. the annotated-release source lock resolves exact tag, commit, tree, and
+30. the annotated-release source lock resolves exact tag, commit, tree, and
     blob objects with Git replacements disabled, reproduces the byte-identical
     bundle, and preserves explicit remote-ownership, signature, runtime-source,
     qualification, eligibility, activation, and deployment denials.
-30. the signed runtime-evidence registry and receipts bind exact public keys,
+31. the signed runtime-evidence registry and receipts bind exact public keys,
     allowlists, provenance, scope, verifier implementation, validity, and false
     authority flags; tampering, replay, wrong keys, duplicates, stale evidence,
     type confusion, and missing OpenSSH fail closed;
-31. the canonical runtime-evidence pack embeds the signed set, registry, exact
+32. the canonical runtime-evidence pack embeds the signed set, registry, exact
     evidence artifacts, verifier descriptors, and immutable manifest schema;
     archive, schema, digest, replay, size, and authority mutations fail closed,
     while verifier reexecution and artifact truth remain explicit nonclaims;
-32. the public signature is restricted to fixture scope, while an ephemeral-key
+33. the public signature is restricted to fixture scope, while an ephemeral-key
     positive test proves a complete `factory_runtime` set can qualify one module
     without granting execution, side effects, owner approval, or activation;
-33. the factory rebuild plan fully reverifies the bundle, source lock, policy,
+34. the factory rebuild plan fully reverifies the bundle, source lock, policy,
     qualification plan, both evidence classes, runtime-evidence pack, embedded
     materials, registry, and assessment;
     preserves exact action and
@@ -141,6 +144,22 @@ python3 scripts/zaibatsu.py bundle examples/economic-factory-cron.json \
 python3 scripts/zaibatsu.py compare-bundles \
   /tmp/example-product.factory.tar \
   /tmp/example-product-cron.factory.tar
+python3 scripts/zaibatsu.py bundle examples/control-factory.json \
+  --output /tmp/example-control.factory.tar
+python3 scripts/zaibatsu.py bundle examples/service-factory.json \
+  --output /tmp/example-service.factory.tar
+python3 scripts/zaibatsu.py portfolio-plan \
+  examples/factory-portfolio.json \
+  /tmp/example-control.factory.tar \
+  /tmp/example-product.factory.tar \
+  /tmp/example-service.factory.tar \
+  --output /tmp/example-portfolio.plan.json
+python3 scripts/zaibatsu.py verify-portfolio-plan \
+  /tmp/example-portfolio.plan.json \
+  examples/factory-portfolio.json \
+  /tmp/example-control.factory.tar \
+  /tmp/example-product.factory.tar \
+  /tmp/example-service.factory.tar
 python3 scripts/zaibatsu.py source-lock \
   examples/economic-factory.json \
   /tmp/example-product.factory.tar \
@@ -218,6 +237,16 @@ The rebuild check and portable bundle cover the deterministic contract layer.
 They are path-independent and offline, but do not run Ansible, realize Nix,
 activate cron/systemd, contact a model, deploy a service, or demonstrate
 recovery. Those are separate promotion gates.
+
+The portfolio plan adds the public factory-of-factories join. It verifies one
+control bundle and two economic-factory bundles, matches them to a closed
+ordered registry, binds their exact source and scheduler-module digests, and
+derives 21 disjoint intended namespaces. Both economic factories may return
+evidence only through their declared return routes; no declared route permits
+secrets, grants authority, or self-promotion. The names are declarative scopes,
+not proof that runtime
+users, processes, networks, credentials, databases, workers, or schedulers are
+isolated.
 
 The source lock strengthens that contract-layer proof by ignoring the working
 tree and rebuilding from sixteen exact blobs reachable through an annotated
