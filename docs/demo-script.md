@@ -1,6 +1,6 @@
 # Demo script
 
-Use only a full-history fresh clone of immutable `v1.9.0` after its release
+Use only a full-history fresh clone of immutable `v1.10.0` after its release
 proof passes. Do not show private terminals, history, settings,
 infrastructure, model credentials, notifications, or personal data. Lead with
 the real Factory
@@ -98,8 +98,17 @@ python3 scripts/zaibatsu.py verify-qualification-assessment \
 python3 scripts/zaibatsu.py verify-runtime-evidence \
   examples/economic-factory.runtime-evidence.json \
   /tmp/example-product.factory.tar
-python3 scripts/zaibatsu.py runtime-assessment \
+python3 scripts/zaibatsu.py evidence-pack \
   examples/economic-factory.runtime-evidence.json \
+  /tmp/example-product.factory.tar \
+  --evidence-artifact examples/runtime-evidence/source-revision-fixture.json \
+  --verifier-implementation examples/runtime-evidence/fixture-verifier-method.json \
+  --output /tmp/example-product.runtime-evidence.tar
+python3 scripts/zaibatsu.py verify-evidence-pack \
+  /tmp/example-product.runtime-evidence.tar \
+  /tmp/example-product.factory.tar
+python3 scripts/zaibatsu.py runtime-assessment \
+  /tmp/example-product.runtime-evidence.tar \
   examples/economic-factory.qualification-evidence.json \
   examples/economic-factory.qualification-plan.json \
   /tmp/example-product.factory.tar \
@@ -107,16 +116,18 @@ python3 scripts/zaibatsu.py runtime-assessment \
   --output /tmp/example-product.runtime-assessment.json
 python3 scripts/zaibatsu.py verify-runtime-assessment \
   /tmp/example-product.runtime-assessment.json \
-  examples/economic-factory.runtime-evidence.json \
+  /tmp/example-product.runtime-evidence.tar \
   examples/economic-factory.qualification-evidence.json \
   examples/economic-factory.qualification-plan.json \
   /tmp/example-product.factory.tar
 python3 scripts/zaibatsu.py rebuild-plan \
   /tmp/example-product.factory.tar \
+  --runtime-evidence-pack /tmp/example-product.runtime-evidence.tar \
   --output /tmp/example-product.rebuild-plan.json
 python3 scripts/zaibatsu.py verify-rebuild-plan \
   /tmp/example-product.rebuild-plan.json \
-  /tmp/example-product.factory.tar
+  /tmp/example-product.factory.tar \
+  --runtime-evidence-pack /tmp/example-product.runtime-evidence.tar
 ```
 
 > The factory definition selects policy-compatible reusable modules. The plan
@@ -133,7 +144,10 @@ python3 scripts/zaibatsu.py verify-rebuild-plan \
 > nine modules. Bundle verification then derives nine real but narrow
 > contract-conformance receipts. The signed fixture adds one fresh
 > source-revision assertion under a scope that is cryptographically valid but
-> permanently ineligible. The combined assessment records 10 verified and 57
+> permanently ineligible. Its canonical evidence pack retrieves and
+> digest-verifies the exact JSON artifact and verifier descriptor. It does not
+> rerun that verifier or prove the artifact or assertion semantically true. The
+> combined assessment records 10 verified and 57
 > missing, marks none eligible, and authorizes no activation or execution. A
 > signature authenticates the assertion; it does not prove key ownership,
 > verifier correctness, or artifact truth. The rebuild graph preserves the
@@ -156,7 +170,7 @@ make validate
 > evidence, force-added ignored files, misleading media suffixes, and premature
 > readiness.
 
-Pause on the final 194-test pass and 87-file validator summary.
+Pause on the final 203-test pass and 90-file validator summary.
 
 ### 2:05–2:30 — Honest current boundary
 
@@ -172,7 +186,7 @@ Open `docs/implementation-status.md`.
 
 ## Before recording
 
-1. Clone the immutable `v1.9.0` tag with full history into a new temporary
+1. Clone the immutable `v1.10.0` tag with full history into a new temporary
    directory after its release proof passes. Do not use `--depth 1`; source-lock
    verification requires the referenced annotated `v1.6.0` tag and objects.
 2. Increase terminal font size and hide unrelated tabs and notifications.
@@ -183,7 +197,7 @@ Open `docs/implementation-status.md`.
 
 ## Capture checklist
 
-- [ ] Repository URL and `v1.9.0` tag visible once.
+- [ ] Repository URL and `v1.10.0` tag visible once.
 - [ ] Real Factory/Droid session receipt and shipped diff visible first.
 - [ ] Pre-change gap and adversarial post-change result are understandable.
 - [ ] Portable factory scaffold and validation succeed on screen.
@@ -194,10 +208,12 @@ Open `docs/implementation-status.md`.
 - [ ] Qualification plan visibly leaves all nine modules runtime-ineligible.
 - [ ] Runtime assessment shows 10 verified bindings, 57 missing runtime
       bindings, fixture-only scope, and zero eligible modules.
+- [ ] Runtime-evidence-pack verification reports exact embedded materials while
+      the narration preserves the no-reexecution and no-artifact-truth boundary.
 - [ ] Rebuild-plan verification shows nine blocked actions, four separate gates,
       and false execution, activation, deployment, and recovery authority.
 - [ ] “The factory of software factories” hierarchy is visible.
-- [ ] `make validate` shows all 194 tests and 87 contract files passing.
+- [ ] `make validate` shows all 203 tests and 90 contract files passing.
 - [ ] Maturity limits are stated explicitly.
 - [ ] No private history, addresses, credentials, local settings, or host details.
 - [ ] Captions are included.

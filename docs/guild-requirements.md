@@ -63,7 +63,7 @@ path.
 | Real public project | This repository | Public and anonymously reachable |
 | Clear README | [`README.md`](../README.md) | Complete |
 | License | [`LICENSE`](../LICENSE) | Complete |
-| Runnable quickstart | [`docs/reproducibility.md`](reproducibility.md) | Immutable v1.9.0 passed 194-test, 87-file credential-disabled full-history candidate and tag clones, candidate/roof/tag CI, both Gitleaks modes, four live-schema byte checks, strict schemas, exact signed-artifact regeneration, and non-authorizing semantic proof |
+| Runnable quickstart | [`docs/reproducibility.md`](reproducibility.md) | Immutable v1.10.0 passed 203-test, 90-file credential-disabled full-history candidate and tag clones, candidate/roof/tag CI, both Gitleaks modes, three live-v1.10-schema byte checks, five strict schemas, exact bundle/pack/assessment/rebuild regeneration, and non-authorizing semantic proof |
 | Reusable value | [`examples/economic-factory.json`](../examples/economic-factory.json), [cron variant](../examples/economic-factory-cron.json), [`catalog/modules.json`](../catalog/modules.json), [source lock](../examples/economic-factory.source-lock.json), [qualification policy](../policies/runtime-qualification-v1.json), [signed runtime evidence](../examples/economic-factory.runtime-evidence.json), [evidence-pack manifest](../examples/economic-factory.runtime-evidence-pack-manifest.json), [runtime assessment](../examples/economic-factory.runtime-assessment.json), [rebuild plan](../examples/economic-factory.rebuild-plan.json), and [`scripts/zaibatsu.py`](../scripts/zaibatsu.py) | Another project can scaffold a fail-closed definition, reproduce and inspect a self-verifying control bundle, bind it to exact annotated-release control sources, compare a policy-compatible module substitution, generate a missing-evidence plan, verify scoped signed assertions, package every referenced artifact and verifier descriptor, assess exact gaps and freshness, and compile those verified inputs into a non-executing rebuild DAG offline |
 | Explain Factory/Droid role | [`docs/droid-session.md`](droid-session.md) | Authenticated session, scoped diff, and independent validation recorded |
 | End-to-end case study | [`docs/case-study.md`](case-study.md) | Factory-of-software-factories narrative and real Droid result complete |
@@ -95,5 +95,6 @@ tag CI, live-schema byte checks, and full-history tag-clone reproduction. The
 v1.10 runtime-evidence-pack candidate passed 203 tests, 90-file validation,
 exact pack/assessment/rebuild regeneration, both Gitleaks modes, five strict
 schemas, and independent CI from a credential-disabled full-history clone. Its
-roof, tag, tagged-schema, tag-clone, and immutable-release gates remain. The
+immutable release passed roof and tag CI, three live-schema byte checks, exact
+tag-clone regeneration, both Gitleaks modes, and strict schema validation. The
 final clip and applicant-owned form submission remain.

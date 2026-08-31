@@ -35,8 +35,12 @@ release proof. The v1.9.0 signed runtime-evidence candidate passed its 194-test,
 exact-regeneration, signature, non-authorizing semantic, and independent-CI
 proof. Its immutable release and full-history tag clone passed roof/tag CI,
 four live-schema byte checks, strict external validation, exact regeneration,
-and both Gitleaks modes. The final demo and
-applicant materials remain explicit gates in
+and both Gitleaks modes. The v1.10.0 canonical runtime-evidence-pack candidate
+passed 203 tests, 90-file validation, both Gitleaks modes, five strict schemas,
+exact artifact regeneration, and independent CI. Its immutable release and
+full-history tag clone passed roof/tag CI, three live-schema byte checks,
+strict external validation, exact regeneration, and both Gitleaks modes. The
+final demo and applicant materials remain explicit gates in
 [`architecture/submission-readiness.json`](../architecture/submission-readiness.json).
 
 ## Current project description
@@ -243,14 +247,15 @@ the public repository:
       full-history clone.
 - [x] Immutable v1.9.0 passes roof and tag CI, four tagged-schema byte checks,
       and the full credential-disabled tag-clone reproduction.
-- [x] Runtime-evidence-pack v1.10 working candidate passes 203 local tests,
+- [x] Runtime-evidence-pack v1.10 candidate passes 203 local tests,
       90-file validation, strict pack/assessment/rebuild schemas, exact artifact
       regeneration, and archive/schema/material/replay/type/authority attacks.
 - [x] v1.10 candidate commit passes credential-disabled full-history clone,
       both Gitleaks modes, exact regeneration, five strict schemas, and
       independent CI.
-- [ ] v1.10 passes evidence-roof and tag CI, tagged-schema byte checks,
-      full-history tag-clone reproduction, and immutable-release proof.
+- [x] Immutable v1.10.0 passes evidence-roof and tag CI, three tagged-schema
+      byte checks, full-history tag-clone reproduction, and immutable-release
+      proof.
 - [x] Public repository and article links resolve without authentication.
 - [ ] Demo clip or screenshots show a real Factory task and validation result.
 - [x] No private host, credential, recovery, or deployment detail is exposed.
