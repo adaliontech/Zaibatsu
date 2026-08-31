@@ -93,6 +93,12 @@ product factory's declared evidence-only route in the closed portfolio. It
 does not claim observed transport, content safety, secret absence, verifier
 reexecution, artifact truth, improvement classification, promotion
 eligibility, activation, execution, or cross-factory effects.
+The improvement-proposal record rechecks that complete chain and binds one
+typed, untrusted shared-module, factory-template, or deterministic-gate
+suggestion to it. Mandatory later review gates cannot be dropped, but proposer
+authentication, content safety, normalization, classification, merit,
+regression, rollback, approval, promotion, rollout, activation, execution,
+and cross-factory effects all remain false.
 
 The core repository works without a model or Droid credentials. For the Guild
 case study, authenticated Factory Droid used an owner-operated GGUF whose
@@ -114,7 +120,7 @@ new test moves `policy_decision` before `verify`; the pre-change validator
 accepted that unsafe ordering, while the shipped validator rejects it with a
 deterministic adjacent-stage error. Droid reported 36 passing tests, and an
 independent run reproduced all 36 before later integration, branding, release,
-and meta-factory checks brought the current package to 221 passing tests. No
+and meta-factory checks brought the current package to 230 passing tests. No
 model or Factory credential is published.
 
 ## One-line description
@@ -294,6 +300,14 @@ the public repository:
       Gitleaks modes, eight strict schemas, and independent CI.
 - [x] Immutable v1.12.0 passes evidence-roof and tag CI, tagged-schema byte
       check, tag-clone reproduction, and immutable-release proof.
+- [x] Evidence-bound improvement-proposal v1.13 working candidate passes 230
+      local tests, 105-file validation, two strict schemas, exact regeneration,
+      seeded malformed/forged-record controls, and gate/target/replay/type/
+      authority adversarial tests.
+- [ ] v1.13 candidate passes credential-disabled full-history clone, both
+      Gitleaks modes, strict schemas, exact regeneration, and independent CI.
+- [ ] Immutable v1.13.0 passes evidence-roof and tag CI, tagged-schema byte
+      checks, tag-clone reproduction, and immutable-release proof.
 - [x] Public repository and article links resolve without authentication.
 - [ ] Demo clip or screenshots show a real Factory task and validation result.
 - [x] No private host, credential, recovery, or deployment detail is exposed.

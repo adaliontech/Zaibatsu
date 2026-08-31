@@ -26,6 +26,7 @@ import factory_bundle as bundler
 import factory_composer as composer
 import factory_evidence_pack as evidence_pack
 import factory_evidence_return as evidence_return
+import factory_improvement_proposal as improvement_proposal
 import factory_portfolio as portfolio
 import factory_qualification as qualification
 import factory_rebuild as rebuild
@@ -2161,6 +2162,398 @@ class FactoryEvidenceReturnTests(unittest.TestCase):
             )
             self.assertEqual(2, oversized_record_result.returncode)
             self.assertIn("input size is outside", oversized_record_result.stderr)
+
+
+class FactoryImprovementProposalTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.catalog = composer.load_module_catalog()
+        self.artifacts, errors = composer.load_module_artifacts(self.catalog)
+        self.assertEqual([], errors)
+        self.portfolio_definition = portfolio.load_factory_portfolio()
+        self.portfolio_plan = portfolio.load_factory_portfolio_plan()
+        self.bundles: list[bytes] = []
+        for path in validator.PORTFOLIO_FACTORY_PATHS:
+            bundle, _ = bundler.build_factory_bundle(
+                composer.load_json_file(path),
+                self.catalog,
+                self.artifacts,
+            )
+            self.bundles.append(bundle)
+        self.qualification_plan = qualification.load_qualification_plan()
+        self.qualification_policy = qualification.load_qualification_policy()
+        runtime_set = runtime_evidence.load_runtime_evidence()
+        registry = runtime_evidence.load_verifier_registry()
+        artifact = composer.load_json_file(
+            validator.ROOT
+            / "examples"
+            / "runtime-evidence"
+            / "source-revision-fixture.json"
+        )
+        implementation = composer.load_json_file(
+            validator.ROOT
+            / "examples"
+            / "runtime-evidence"
+            / "fixture-verifier-method.json"
+        )
+        pack_errors, pack, _ = evidence_pack.runtime_evidence_pack_for_bundle(
+            runtime_set,
+            registry,
+            {composer.sha256_json(artifact): artifact},
+            {composer.sha256_json(implementation): implementation},
+            self.qualification_plan,
+            self.bundles[1],
+            self.qualification_policy,
+        )
+        self.assertEqual([], pack_errors)
+        self.assertIsNotNone(pack)
+        assert pack is not None
+        self.pack = pack
+        evidence_errors, evidence_record = (
+            evidence_return.factory_evidence_return_for_inputs(
+                self.portfolio_plan,
+                self.portfolio_definition,
+                self.bundles,
+                "example-product",
+                self.pack,
+                self.qualification_plan,
+                self.qualification_policy,
+            )
+        )
+        self.assertEqual([], evidence_errors)
+        self.assertIsNotNone(evidence_record)
+        assert evidence_record is not None
+        self.evidence_record = evidence_record
+        self.specification = (
+            improvement_proposal.load_factory_improvement_proposal_spec()
+        )
+        proposal_errors, proposal = (
+            improvement_proposal.factory_improvement_proposal_for_inputs(
+                self.specification,
+                self.evidence_record,
+                self.portfolio_plan,
+                self.portfolio_definition,
+                self.bundles,
+                "example-product",
+                self.pack,
+                self.qualification_plan,
+                self.qualification_policy,
+            )
+        )
+        self.assertEqual([], proposal_errors)
+        self.assertIsNotNone(proposal)
+        assert proposal is not None
+        self.proposal = proposal
+
+    @staticmethod
+    def _refresh_digest(document: dict[str, object]) -> None:
+        without_digest = copy.deepcopy(document)
+        without_digest.pop("factory_improvement_proposal_sha256")
+        document["factory_improvement_proposal_sha256"] = composer.sha256_json(
+            without_digest
+        )
+
+    def _verify(
+        self,
+        record: object,
+        *,
+        specification: object | None = None,
+        evidence_record: object | None = None,
+        bundles: object | None = None,
+    ) -> list[str]:
+        return improvement_proposal.verify_factory_improvement_proposal_for_inputs(
+            record,
+            self.specification if specification is None else specification,
+            self.evidence_record if evidence_record is None else evidence_record,
+            self.portfolio_plan,
+            self.portfolio_definition,
+            self.bundles if bundles is None else bundles,
+            "example-product",
+            self.pack,
+            self.qualification_plan,
+            self.qualification_policy,
+        )
+
+    def test_repository_proposal_spec_record_and_schemas_are_exact(self) -> None:
+        checked = improvement_proposal.load_factory_improvement_proposal()
+        self.assertEqual(self.proposal, checked)
+        self.assertEqual([], self._verify(checked))
+        for name, reference in (
+            (
+                "factory-improvement-proposal-spec.schema.json",
+                improvement_proposal.IMPROVEMENT_PROPOSAL_SPEC_SCHEMA_REFERENCE,
+            ),
+            (
+                "factory-improvement-proposal.schema.json",
+                improvement_proposal.IMPROVEMENT_PROPOSAL_SCHEMA_REFERENCE,
+            ),
+        ):
+            with self.subTest(name=name):
+                schema = json.loads(
+                    (validator.ROOT / "schemas" / name).read_text(encoding="utf-8")
+                )
+                self.assertEqual(
+                    "https://json-schema.org/draft/2020-12/schema",
+                    schema["$schema"],
+                )
+                self.assertEqual(reference, schema["$id"])
+
+    def test_review_boundary_records_only_byte_and_structure_facts(self) -> None:
+        boundary = self.proposal["review_boundary"]
+        self.assertEqual(improvement_proposal.REVIEW_BOUNDARY, boundary)
+        true_fields = {
+            "evidence_return_reverified",
+            "evidence_return_bound",
+            "proposal_structure_validated",
+            "proposal_canonical_json_bound",
+            "proposal_recorded",
+        }
+        for field in true_fields:
+            self.assertIs(boundary[field], True)
+        for field in set(boundary) - true_fields:
+            self.assertIs(boundary[field], False)
+
+    def test_specification_cannot_weaken_review_or_authority_gates(self) -> None:
+        mutations: list[tuple[dict[str, object], str]] = []
+        for field in improvement_proposal.EXPECTED_VALIDATION_REQUIREMENTS:
+            mutated = copy.deepcopy(self.specification)
+            mutated["validation_requirements"][field] = False
+            mutations.append((mutated, "every review gate"))
+        for field in ("grants_authority", "can_self_promote", "execution_authorized"):
+            mutated = copy.deepcopy(self.specification)
+            mutated["proposal_boundary"][field] = True
+            mutations.append((mutated, "non-authorizing"))
+        scalar = copy.deepcopy(self.specification)
+        scalar["proposal_boundary"]["grants_authority"] = 0
+        mutations.append((scalar, "non-authorizing"))
+        for mutated, expected in mutations:
+            with self.subTest(mutated=mutated):
+                errors = improvement_proposal.validate_factory_improvement_proposal_spec(
+                    mutated
+                )
+                self.assertTrue(any(expected in error for error in errors), errors)
+
+    def test_specification_rejects_unknown_targets_and_unbounded_text(self) -> None:
+        for field, value, expected in (
+            ("kind", "model_output", "kind"),
+            ("kind", [], "kind"),
+            ("operation", "deploy", "operation"),
+            ("operation", {}, "operation"),
+            ("id", "Not Valid", "target id"),
+        ):
+            mutated = copy.deepcopy(self.specification)
+            mutated["target"][field] = value
+            errors = improvement_proposal.validate_factory_improvement_proposal_spec(
+                mutated
+            )
+            self.assertTrue(any(expected in error for error in errors), errors)
+        blank = copy.deepcopy(self.specification)
+        blank["proposal"]["summary"] = " \t"
+        self.assertTrue(
+            any(
+                "summary" in error
+                for error in improvement_proposal.validate_factory_improvement_proposal_spec(
+                    blank
+                )
+            )
+        )
+        oversized = copy.deepcopy(self.specification)
+        oversized["proposal"]["expected_outcome"] = "x" * 513
+        self.assertTrue(
+            any(
+                "expected_outcome" in error
+                for error in improvement_proposal.validate_factory_improvement_proposal_spec(
+                    oversized
+                )
+            )
+        )
+
+    def test_evidence_return_replay_and_tamper_fail_closed(self) -> None:
+        tampered = copy.deepcopy(self.evidence_record)
+        tampered["review_boundary"]["contains_improvement_candidate"] = True
+        without_digest = copy.deepcopy(tampered)
+        without_digest.pop("factory_evidence_return_sha256")
+        tampered["factory_evidence_return_sha256"] = composer.sha256_json(
+            without_digest
+        )
+        errors = self._verify(self.proposal, evidence_record=tampered)
+        self.assertTrue(any("evidence return" in error for error in errors), errors)
+        replacement_bundles = list(self.bundles)
+        replacement_bundles[1] = self.bundles[2]
+        self.assertTrue(self._verify(self.proposal, bundles=replacement_bundles))
+
+    def test_specification_or_record_replay_fails_after_digest_refresh(self) -> None:
+        changed_spec = copy.deepcopy(self.specification)
+        changed_spec["proposal"]["summary"] = "A different bounded proposal."
+        errors = self._verify(self.proposal, specification=changed_spec)
+        self.assertTrue(any("must exactly match" in error for error in errors), errors)
+        for field in (
+            "improvement_candidate_classified",
+            "reporting_factory_validation_passed",
+            "shared_promotion_eligible",
+            "promotion_authorized",
+            "execution_authorized",
+            "cross_factory_effects_authorized",
+        ):
+            mutated = copy.deepcopy(self.proposal)
+            mutated["review_boundary"][field] = True
+            self._refresh_digest(mutated)
+            errors = self._verify(mutated)
+            self.assertTrue(any("must exactly match" in error for error in errors))
+
+    def test_malformed_and_oversized_inputs_fail_cleanly(self) -> None:
+        for malformed in (None, [], "proposal", 0, False, {"proposal": []}):
+            with self.subTest(malformed=malformed):
+                self.assertTrue(self._verify(malformed))
+        recursive = copy.deepcopy(self.proposal)
+        recursive_section: dict[str, object] = {}
+        recursive_section["self"] = recursive_section
+        recursive["proposal"] = recursive_section
+        self.assertTrue(
+            any("canonical JSON" in error for error in self._verify(recursive))
+        )
+        oversized = copy.deepcopy(self.proposal)
+        oversized["proposal"]["padding"] = "x" * (
+            improvement_proposal.MAX_IMPROVEMENT_PROPOSAL_BYTES
+        )
+        self._refresh_digest(oversized)
+        self.assertTrue(
+            any("size is outside" in error for error in self._verify(oversized))
+        )
+        bad_spec = copy.deepcopy(self.specification)
+        bad_spec["proposal"] = []
+        errors, proposal = improvement_proposal.factory_improvement_proposal_for_inputs(
+            bad_spec,
+            self.evidence_record,
+            self.portfolio_plan,
+            self.portfolio_definition,
+            self.bundles,
+            "example-product",
+            self.pack,
+            self.qualification_plan,
+            self.qualification_policy,
+        )
+        self.assertTrue(errors)
+        self.assertIsNone(proposal)
+
+    def test_bundle_argument_order_does_not_change_proposal(self) -> None:
+        errors, reordered = improvement_proposal.factory_improvement_proposal_for_inputs(
+            self.specification,
+            self.evidence_record,
+            self.portfolio_plan,
+            self.portfolio_definition,
+            list(reversed(self.bundles)),
+            "example-product",
+            self.pack,
+            self.qualification_plan,
+            self.qualification_policy,
+        )
+        self.assertEqual([], errors)
+        self.assertEqual(self.proposal, reordered)
+
+    def test_cli_round_trip_overwrite_size_and_count_boundaries(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            bundle_paths = []
+            for index, bundle in enumerate(self.bundles):
+                path = root / f"factory-{index}.tar"
+                path.write_bytes(bundle)
+                bundle_paths.append(path)
+            pack_path = root / "runtime-evidence.tar"
+            pack_path.write_bytes(self.pack)
+            output = root / "improvement-proposal.json"
+            cli = [sys.executable, str(validator.ROOT / "scripts" / "zaibatsu.py")]
+            inputs = [
+                str(improvement_proposal.EXAMPLE_IMPROVEMENT_PROPOSAL_SPEC_PATH),
+                str(evidence_return.EXAMPLE_EVIDENCE_RETURN_PATH),
+                str(portfolio.EXAMPLE_PORTFOLIO_PLAN_PATH),
+                str(portfolio.EXAMPLE_PORTFOLIO_PATH),
+                "example-product",
+                str(pack_path),
+                str(qualification.EXAMPLE_QUALIFICATION_PLAN_PATH),
+                str(qualification.QUALIFICATION_POLICY_PATH),
+                *(str(path) for path in bundle_paths),
+            ]
+            create = cli + [
+                "improvement-proposal-record",
+                *inputs,
+                "--output",
+                str(output),
+            ]
+            created = subprocess.run(
+                create,
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(0, created.returncode, created.stderr)
+            self.assertEqual(
+                self.proposal,
+                json.loads(output.read_text(encoding="utf-8")),
+            )
+            verified = subprocess.run(
+                cli + ["verify-improvement-proposal-record", str(output), *inputs],
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(0, verified.returncode, verified.stderr)
+            self.assertIn("proposal recorded: true", verified.stdout)
+            self.assertIn("improvement candidate classified: false", verified.stdout)
+            self.assertIn("execution authorized: false", verified.stdout)
+            refused = subprocess.run(
+                create,
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(2, refused.returncode)
+            self.assertIn("refusing to overwrite", refused.stderr)
+            oversized_count = subprocess.run(
+                cli
+                + [
+                    "improvement-proposal-record",
+                    str(root / "missing-spec.json"),
+                    str(root / "missing-return.json"),
+                    str(root / "missing-plan.json"),
+                    str(root / "missing-portfolio.json"),
+                    "example-product",
+                    str(root / "missing-pack.tar"),
+                    str(root / "missing-qualification-plan.json"),
+                    str(root / "missing-policy.json"),
+                    *(
+                        str(root / "missing-bundle.tar")
+                        for _ in range(portfolio.MAX_FACTORIES + 1)
+                    ),
+                ],
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(2, oversized_count.returncode)
+            self.assertIn("between 2 and 64 bundles", oversized_count.stderr)
+            self.assertNotIn("cannot load", oversized_count.stderr)
+            oversized_record = root / "oversized-proposal.json"
+            oversized_record.write_bytes(
+                b" " * (improvement_proposal.MAX_IMPROVEMENT_PROPOSAL_BYTES + 1)
+            )
+            oversized_result = subprocess.run(
+                cli
+                + [
+                    "verify-improvement-proposal-record",
+                    str(oversized_record),
+                    *inputs,
+                ],
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            self.assertEqual(2, oversized_result.returncode)
+            self.assertIn("input size is outside", oversized_result.stderr)
 
 
 class FactorySourceLockTests(unittest.TestCase):

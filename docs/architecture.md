@@ -24,9 +24,9 @@ The shared layer controls factory contracts. Each economic factory retains its
 own identity, data, credentials, repositories, schedules, acceptance rules,
 budgets, and production authority.
 
-## Thirteen machine-readable views
+## Fourteen machine-readable views
 
-Zaibatsu deliberately separates thirteen questions:
+Zaibatsu deliberately separates fourteen questions:
 
 | Contract | Question |
 | --- | --- |
@@ -42,6 +42,7 @@ Zaibatsu deliberately separates thirteen questions:
 | [`policies/runtime-evidence-verifiers-v1.json`](../policies/runtime-evidence-verifiers-v1.json) plus [`examples/economic-factory.runtime-evidence.json`](../examples/economic-factory.runtime-evidence.json) | Which externally supplied assertions were signed by evaluator-selected keys under exact allowlists, provenance, scope, and freshness rules? |
 | [`examples/economic-factory.runtime-evidence-pack-manifest.json`](../examples/economic-factory.runtime-evidence-pack-manifest.json) plus [`examples/economic-factory.runtime-assessment.json`](../examples/economic-factory.runtime-assessment.json) | Which exact evidence artifacts and verifier descriptors were retrieved and digest-verified, and what do those bytes still not prove or authorize? |
 | [`examples/economic-factory.evidence-return.json`](../examples/economic-factory.evidence-return.json) | Which exact verified evidence pack is bound to which economic-factory bundle and declared evidence-only route, and which transport, interpretation, promotion, and effect claims remain false? |
+| [`examples/economic-factory.improvement-proposal-spec.json`](../examples/economic-factory.improvement-proposal-spec.json) plus [`examples/economic-factory.improvement-proposal.json`](../examples/economic-factory.improvement-proposal.json) | Which exact untrusted shared-improvement suggestion is bound to that verified return, which later review gates are mandatory, and which classification, validation, promotion, rollout, and effect claims remain false? |
 | [`examples/economic-factory.rebuild-plan.json`](../examples/economic-factory.rebuild-plan.json) | In which dependency order would a qualified factory be rebuilt, which direct and upstream blockers stop each action, and which separate gates still deny activation? |
 
 The validator requires the factory registry and shared component maturities to
@@ -91,6 +92,31 @@ transport, scan the evidence for unsafe content or secrets, rerun verifier
 assertions, prove artifact truth, classify an improvement candidate, change
 shared policy, make anything promotion-eligible, or authorize activation,
 execution, or cross-factory effects.
+
+## Evidence-bound improvement proposal
+
+The proposal contract is the next deliberately narrow recursive-improvement
+join. Its first input is a typed but untrusted specification naming one shared
+module, factory template, or deterministic gate and describing a proposed
+addition, modification, or replacement. Its second input is the exact
+route-bound evidence-return record. Before producing or accepting a proposal
+record, the verifier repeats the complete evidence-return verification chain,
+including the closed portfolio, every bundle, the source route, qualification
+inputs, evidence pack, embedded materials, signatures, allowlists, and content
+digests.
+
+The resulting record binds the proposal specification's canonical JSON digest
+to the evidence-return digest, runtime-evidence pack, reporting factory,
+control factory, and route. The specification cannot omit content-safety,
+candidate-classification, reporting-factory, independent-regression,
+owner-policy, rollback, or cross-factory-privilege review requirements.
+
+This records a suggestion; it does not accept one. The checked example does
+not authenticate the proposer, scan the narrative, prove secret absence,
+interpret source artifacts, normalize an observation, classify an improvement
+candidate, establish merit, run a regression, verify rollback, change shared
+policy, obtain owner approval, grant promotion or rollout eligibility,
+activate anything, execute anything, or authorize a cross-factory effect.
 
 ## Deterministic module composition
 
@@ -420,10 +446,11 @@ factory run
   -> eligible factory rollout with rollback
 ```
 
-Evidence return exists at bounded operational scope. General automatic
-classification, shared-template promotion, and rollout are still designed.
-Recursive improvement therefore means the system learns through reviewed,
-versioned artifacts—not that an agent recursively expands its own authority.
+Evidence return and non-authorizing proposal recording exist at bounded
+operational scope. General automatic classification, shared-template
+validation, promotion, and rollout are still designed. Recursive improvement
+therefore means the system learns through reviewed, versioned artifacts—not
+that an agent recursively expands its own authority.
 
 ## Infrastructure composition
 

@@ -112,12 +112,13 @@ The target stack is intentionally boring at authority boundaries:
 | PostgreSQL | Durable jobs, leases, attempts, policy, evidence, and audit | Validated preproduction broadly; a narrow read-only lane is operational |
 | Modular agent skeletons | Reusable typed modules, flows, profiles, approvals, and effect fences | Implemented and tested source; not deployed |
 | LLM harness adapters | Bind different models behind typed module contracts | Validated at bounded source/contribution scope; general unattended routing is not active |
-| Recursive improvement | Return evidence and improve shared factory patterns | Route-bound evidence-return recording is operational in the public kit; transport, classification, and shared automatic promotion remain unproved or designed and owner-gated |
+| Recursive improvement | Return evidence and improve shared factory patterns | Route-bound evidence return and non-authorizing proposal recording are operational in the public kit; transport, normalization, classification, validation, and shared promotion remain unproved or designed and owner-gated |
 | Multi-factory portfolio plan | Join verified control bundles into one closed registry with evidence-only return routes and factory-scoped intended namespaces | Implemented and tested as a non-executing control plan; it proves bundle identity and declarative separation, not deployed runtime isolation or authority |
 | Qualification planner | Bind a verified control bundle to mandatory runtime evidence requirements | Implemented and tested; the public plan contains no qualification evidence and grants no eligibility or activation |
 | Signed runtime-evidence assessment | Combine bundle-derived contract receipts with fresh, allowlisted OpenSSH-signed verifier assertions | The public fixture verifies one signature in test-only scope: 10 of 67 bindings verified, 57 missing, zero runtime-eligible modules, and no activation or execution authority |
 | Canonical runtime-evidence pack | Carry the signed evidence, verifier registry, exact evidence artifacts, verifier descriptors, and manifest schema as one reproducible archive | Implemented and tested; byte and digest integrity are verified, but verifier assertions are not rerun and artifact truth is not inferred |
 | Route-bound factory evidence return | Bind one verified pack to its exact economic-factory bundle and declared evidence-only route into the control factory | Implemented and tested as a non-authorizing record; transport, content safety, classification, promotion, activation, execution, and cross-factory effects remain false |
+| Evidence-bound improvement proposal | Bind one typed, untrusted shared-module, factory-template, or deterministic-gate suggestion to exact returned evidence | Implemented and tested as a review input; proposer authentication, safety, normalization, classification, merit, regression, rollback, approval, promotion, rollout, activation, execution, and cross-factory effects remain false |
 | Annotated-release source lock | Bind one verified control bundle to exact versioned source inputs | Sixteen Git blobs from immutable v1.6.0 rebuild the byte-identical bundle; no remote, signature, runtime-source, qualification, eligibility, or activation proof is claimed |
 | Deterministic rebuild DAG | Join verified control provenance, module dependencies, qualification gaps, and activation gates | Implemented and tested as an inert nine-action plan; zero actions are qualification-ready, all nine remain blocked, and no execution or effect authority is granted |
 
@@ -187,7 +188,8 @@ plan, portable bundle manifest, closed multi-factory portfolio plan,
 annotated-release source lock, qualification
 policy and plan, bundle-derived evidence, signed runtime evidence, runtime
 assessment, route-bound evidence-return record, deterministic rebuild DAG,
-sanitized receipts, factory hierarchy
+evidence-bound improvement-proposal specification and record, sanitized
+receipts, factory hierarchy
 and lifecycle, maturity boundaries, submission gates, public-safety rules,
 local links, and adversarial mutations. No model request, network access, cloud
 account, secret, Ansible or Nix execution, or production system is required.
@@ -510,6 +512,54 @@ scan content safety, prove secret absence, rerun verifier assertions, establish
 artifact truth, classify an improvement, make it promotion-eligible, authorize
 activation or execution, or grant any cross-factory effect.
 
+## Record an evidence-bound improvement proposal
+
+Use a typed proposal specification to record one suggestion against that exact
+returned evidence:
+
+```bash
+python3 scripts/zaibatsu.py improvement-proposal-record \
+  examples/economic-factory.improvement-proposal-spec.json \
+  /tmp/example-product.evidence-return.json \
+  /tmp/example-portfolio.plan.json \
+  examples/factory-portfolio.json \
+  example-product \
+  /tmp/example-product.runtime-evidence.tar \
+  examples/economic-factory.qualification-plan.json \
+  policies/runtime-qualification-v1.json \
+  /tmp/example-control.factory.tar \
+  /tmp/example-product.factory.tar \
+  /tmp/example-service.factory.tar \
+  --output /tmp/example-product.improvement-proposal.json
+python3 scripts/zaibatsu.py verify-improvement-proposal-record \
+  /tmp/example-product.improvement-proposal.json \
+  examples/economic-factory.improvement-proposal-spec.json \
+  /tmp/example-product.evidence-return.json \
+  /tmp/example-portfolio.plan.json \
+  examples/factory-portfolio.json \
+  example-product \
+  /tmp/example-product.runtime-evidence.tar \
+  examples/economic-factory.qualification-plan.json \
+  policies/runtime-qualification-v1.json \
+  /tmp/example-control.factory.tar \
+  /tmp/example-product.factory.tar \
+  /tmp/example-service.factory.tar
+```
+
+The checked [proposal specification](examples/economic-factory.improvement-proposal-spec.json)
+names a deterministic-gate suggestion and requires every later review class.
+The derived [proposal record](examples/economic-factory.improvement-proposal.json)
+reverifies the complete evidence-return chain and binds the specification's
+canonical JSON digest to its reporting factory, control factory, route, and
+runtime-evidence pack.
+
+This is proposal intake, not recursive authority. Zaibatsu does not
+authenticate the proposer, trust or scan the narrative, normalize an
+observation, classify the suggestion, establish merit, run reporting-factory
+or independent regressions, verify rollback, change policy, obtain approval,
+grant promotion or rollout eligibility, activate, execute, or authorize a
+cross-factory effect.
+
 ## Plan the factory rebuild
 
 Compile the verified control and qualification state into an ordered,
@@ -610,6 +660,11 @@ and the complete repository suite was rerun independently.
   — the exact verified pack, source bundle, portfolio, and evidence-only route,
   with transport, classification, promotion, activation, execution, and
   cross-factory effects explicitly denied.
+- [Improvement-proposal specification](examples/economic-factory.improvement-proposal-spec.json)
+  and [evidence-bound record](examples/economic-factory.improvement-proposal.json)
+  — one exact untrusted shared-change suggestion, its mandatory later review
+  gates, and explicit denials of classification, validation, promotion,
+  rollout, execution, and cross-factory authority.
 - [Factory rebuild plan](examples/economic-factory.rebuild-plan.json) — the
   exact nine-action dependency graph, evidence blockers, and four
   non-authorizing gates derived from fully reverified control inputs.
@@ -663,13 +718,16 @@ and the complete repository suite was rerun independently.
 16. A route-bound evidence-return record proves exact provenance and declared
     routing intent; it proves no transport, content safety, classification,
     promotion, activation, execution, or cross-factory effect.
-17. A rebuild plan reports intended actions and blockers; it executes no action
+17. An evidence-bound proposal proves which untrusted suggestion was recorded;
+    it does not authenticate, normalize, classify, validate, approve, promote,
+    roll out, activate, or execute that suggestion.
+18. A rebuild plan reports intended actions and blockers; it executes no action
     and grants no qualification, approval, activation, deployment, or recovery
     authority.
-18. Tests, schemas, linters, hashes, policy, receipts, and owner approval
+19. Tests, schemas, linters, hashes, policy, receipts, and owner approval
     outrank model confidence.
-19. Feedback may propose shared improvement but cannot self-promote.
-20. Failed work remains inspectable, and the owner retains a recovery path
+20. Feedback may propose shared improvement but cannot self-promote.
+21. Failed work remains inspectable, and the owner retains a recovery path
     outside Dispatcher.
 
 ## Factory Guild submission

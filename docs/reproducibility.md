@@ -118,6 +118,11 @@ The validator confirms:
     signatures, allowlists, and digests; source/route replay, forgery, scalar
     confusion, oversize input, and every transport, interpretation, promotion,
     activation, execution, or cross-factory authority inflation fail closed.
+36. the improvement-proposal record fully reverifies that evidence return and
+    every source input, binds one strict proposal specification by canonical
+    digest, preserves all mandatory later review gates, and rejects target,
+    replay, forgery, scalar, malformed, size, classification, promotion,
+    rollout, execution, and cross-factory authority mutations.
 
 The adversarial tests mutate valid architecture data and prove that the
 validator rejects meta-factory role drift, a missing or reclassified factory,
@@ -231,6 +236,32 @@ python3 scripts/zaibatsu.py verify-evidence-return-record \
   /tmp/example-control.factory.tar \
   /tmp/example-product.factory.tar \
   /tmp/example-service.factory.tar
+python3 scripts/zaibatsu.py improvement-proposal-record \
+  examples/economic-factory.improvement-proposal-spec.json \
+  /tmp/example-product.evidence-return.json \
+  /tmp/example-portfolio.plan.json \
+  examples/factory-portfolio.json \
+  example-product \
+  /tmp/example-product.runtime-evidence.tar \
+  examples/economic-factory.qualification-plan.json \
+  policies/runtime-qualification-v1.json \
+  /tmp/example-control.factory.tar \
+  /tmp/example-product.factory.tar \
+  /tmp/example-service.factory.tar \
+  --output /tmp/example-product.improvement-proposal.json
+python3 scripts/zaibatsu.py verify-improvement-proposal-record \
+  /tmp/example-product.improvement-proposal.json \
+  examples/economic-factory.improvement-proposal-spec.json \
+  /tmp/example-product.evidence-return.json \
+  /tmp/example-portfolio.plan.json \
+  examples/factory-portfolio.json \
+  example-product \
+  /tmp/example-product.runtime-evidence.tar \
+  examples/economic-factory.qualification-plan.json \
+  policies/runtime-qualification-v1.json \
+  /tmp/example-control.factory.tar \
+  /tmp/example-product.factory.tar \
+  /tmp/example-service.factory.tar
 python3 scripts/zaibatsu.py runtime-assessment \
   /tmp/example-product.runtime-evidence.tar \
   examples/economic-factory.qualification-evidence.json \
@@ -313,6 +344,15 @@ It does not claim that transport happened, inspect the content for secrets or
 safety, rerun the verifier, classify an improvement, modify shared policy, make
 a change promotion-eligible, or authorize activation, execution, or any
 cross-factory effect.
+
+The improvement-proposal record then rechecks that entire chain and binds one
+typed, untrusted shared-change suggestion to it by canonical JSON digest. The
+specification requires content-safety, classification, reporting-factory,
+independent-regression, owner-policy, rollback, and cross-factory-privilege
+review. Recording it does not authenticate the proposer, inspect or trust the
+narrative, normalize an observation, classify a candidate, establish merit,
+run a test, verify rollback, change policy, approve promotion, authorize
+rollout, activate, execute, or grant any cross-factory effect.
 
 The rebuild plan consumes those fully reverified inputs and emits an inert
 nine-action dependency graph plus four gates. The public result has zero

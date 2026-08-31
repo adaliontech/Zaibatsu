@@ -29,6 +29,12 @@ from factory_evidence_return import (
     factory_evidence_return_for_inputs,
     verify_factory_evidence_return_for_inputs,
 )
+from factory_improvement_proposal import (
+    MAX_IMPROVEMENT_PROPOSAL_BYTES,
+    MAX_IMPROVEMENT_PROPOSAL_SPEC_BYTES,
+    factory_improvement_proposal_for_inputs,
+    verify_factory_improvement_proposal_for_inputs,
+)
 from factory_portfolio import (
     MAX_FACTORIES,
     MAX_PORTFOLIO_BYTES,
@@ -664,6 +670,187 @@ def command_verify_evidence_return_record(
     print(f"destination factory: {record['route']['to_factory']}")
     print("transport observed: false")
     print("shared promotion eligible: false")
+    print("cross-factory effects authorized: false")
+    return 0
+
+
+def load_improvement_proposal_inputs(
+    specification_path: str,
+    evidence_return_path: str,
+    plan_path: str,
+    portfolio_path: str,
+    runtime_evidence_pack_path: str,
+    qualification_plan_path: str,
+    qualification_policy_path: str,
+    bundle_paths: list[str],
+) -> tuple[Any, Any, Any, Any, bytes, Any, Any, list[bytes]] | None:
+    if not valid_portfolio_bundle_count(bundle_paths):
+        return None
+    specification = load_bounded_json_document(
+        specification_path,
+        "factory improvement-proposal specification",
+        MAX_IMPROVEMENT_PROPOSAL_SPEC_BYTES,
+    )
+    evidence_return = load_bounded_json_document(
+        evidence_return_path,
+        "factory evidence-return record",
+        MAX_EVIDENCE_RETURN_JSON_BYTES,
+    )
+    if specification is None or evidence_return is None:
+        return None
+    evidence_inputs = load_evidence_return_inputs(
+        plan_path,
+        portfolio_path,
+        runtime_evidence_pack_path,
+        qualification_plan_path,
+        qualification_policy_path,
+        bundle_paths,
+    )
+    if evidence_inputs is None:
+        return None
+    plan, portfolio, pack, qualification_plan, qualification_policy, bundles = (
+        evidence_inputs
+    )
+    return (
+        specification,
+        evidence_return,
+        plan,
+        portfolio,
+        pack,
+        qualification_plan,
+        qualification_policy,
+        bundles,
+    )
+
+
+def command_improvement_proposal_record(
+    specification_path: str,
+    evidence_return_path: str,
+    plan_path: str,
+    portfolio_path: str,
+    source_factory_id: str,
+    runtime_evidence_pack_path: str,
+    qualification_plan_path: str,
+    qualification_policy_path: str,
+    bundle_paths: list[str],
+    output: str | None,
+) -> int:
+    inputs = load_improvement_proposal_inputs(
+        specification_path,
+        evidence_return_path,
+        plan_path,
+        portfolio_path,
+        runtime_evidence_pack_path,
+        qualification_plan_path,
+        qualification_policy_path,
+        bundle_paths,
+    )
+    if inputs is None:
+        return 2
+    (
+        specification,
+        evidence_return,
+        plan,
+        portfolio,
+        pack,
+        qualification_plan,
+        qualification_policy,
+        bundles,
+    ) = inputs
+    errors, record = factory_improvement_proposal_for_inputs(
+        specification,
+        evidence_return,
+        plan,
+        portfolio,
+        bundles,
+        source_factory_id,
+        pack,
+        qualification_plan,
+        qualification_policy,
+    )
+    if errors or record is None:
+        print("cannot build factory improvement-proposal record", file=sys.stderr)
+        for error in errors:
+            print(f"- {error}", file=sys.stderr)
+        return 1
+    return write_document(record, output)
+
+
+def command_verify_improvement_proposal_record(
+    record_path: str,
+    specification_path: str,
+    evidence_return_path: str,
+    plan_path: str,
+    portfolio_path: str,
+    source_factory_id: str,
+    runtime_evidence_pack_path: str,
+    qualification_plan_path: str,
+    qualification_policy_path: str,
+    bundle_paths: list[str],
+) -> int:
+    if not valid_portfolio_bundle_count(bundle_paths):
+        return 2
+    record = load_bounded_json_document(
+        record_path,
+        "factory improvement-proposal record",
+        MAX_IMPROVEMENT_PROPOSAL_BYTES,
+    )
+    if record is None:
+        return 2
+    inputs = load_improvement_proposal_inputs(
+        specification_path,
+        evidence_return_path,
+        plan_path,
+        portfolio_path,
+        runtime_evidence_pack_path,
+        qualification_plan_path,
+        qualification_policy_path,
+        bundle_paths,
+    )
+    if inputs is None:
+        return 2
+    (
+        specification,
+        evidence_return,
+        plan,
+        portfolio,
+        pack,
+        qualification_plan,
+        qualification_policy,
+        bundles,
+    ) = inputs
+    errors = verify_factory_improvement_proposal_for_inputs(
+        record,
+        specification,
+        evidence_return,
+        plan,
+        portfolio,
+        bundles,
+        source_factory_id,
+        pack,
+        qualification_plan,
+        qualification_policy,
+    )
+    if errors:
+        print(
+            f"factory improvement-proposal record failed: {record_path}",
+            file=sys.stderr,
+        )
+        for error in errors:
+            print(f"- {error}", file=sys.stderr)
+        return 1
+    assert isinstance(record, dict)
+    print(f"factory improvement-proposal record passed: {record_path}")
+    print(
+        "factory improvement-proposal sha256: "
+        f"{record['factory_improvement_proposal_sha256']}"
+    )
+    print(f"reporting factory: {record['source']['reporting_factory']}")
+    print(f"control factory: {record['portfolio']['control_factory']}")
+    print("proposal recorded: true")
+    print("improvement candidate classified: false")
+    print("shared promotion eligible: false")
+    print("execution authorized: false")
     print("cross-factory effects authorized: false")
     return 0
 
@@ -1531,6 +1718,39 @@ def build_parser() -> argparse.ArgumentParser:
     verify_evidence_return_record.add_argument("qualification_policy_path")
     verify_evidence_return_record.add_argument("bundle_paths", nargs="+")
 
+    improvement_proposal_record = commands.add_parser(
+        "improvement-proposal-record",
+        help="bind one typed shared-improvement proposal to verified returned evidence",
+    )
+    improvement_proposal_record.add_argument("specification_path")
+    improvement_proposal_record.add_argument("evidence_return_path")
+    improvement_proposal_record.add_argument("plan_path")
+    improvement_proposal_record.add_argument("portfolio_path")
+    improvement_proposal_record.add_argument("source_factory_id")
+    improvement_proposal_record.add_argument("runtime_evidence_pack_path")
+    improvement_proposal_record.add_argument("qualification_plan_path")
+    improvement_proposal_record.add_argument("qualification_policy_path")
+    improvement_proposal_record.add_argument("bundle_paths", nargs="+")
+    improvement_proposal_record.add_argument(
+        "--output",
+        help="write the improvement-proposal record to a new file instead of stdout",
+    )
+
+    verify_improvement_proposal_record = commands.add_parser(
+        "verify-improvement-proposal-record",
+        help="reverify a proposal, evidence return, route, pack, and every input",
+    )
+    verify_improvement_proposal_record.add_argument("record_path")
+    verify_improvement_proposal_record.add_argument("specification_path")
+    verify_improvement_proposal_record.add_argument("evidence_return_path")
+    verify_improvement_proposal_record.add_argument("plan_path")
+    verify_improvement_proposal_record.add_argument("portfolio_path")
+    verify_improvement_proposal_record.add_argument("source_factory_id")
+    verify_improvement_proposal_record.add_argument("runtime_evidence_pack_path")
+    verify_improvement_proposal_record.add_argument("qualification_plan_path")
+    verify_improvement_proposal_record.add_argument("qualification_policy_path")
+    verify_improvement_proposal_record.add_argument("bundle_paths", nargs="+")
+
     source_lock = commands.add_parser(
         "source-lock",
         help="lock a verified bundle to exact sources in an annotated release",
@@ -1917,6 +2137,32 @@ def main() -> int:
     if arguments.command == "verify-evidence-return-record":
         return command_verify_evidence_return_record(
             arguments.record_path,
+            arguments.plan_path,
+            arguments.portfolio_path,
+            arguments.source_factory_id,
+            arguments.runtime_evidence_pack_path,
+            arguments.qualification_plan_path,
+            arguments.qualification_policy_path,
+            arguments.bundle_paths,
+        )
+    if arguments.command == "improvement-proposal-record":
+        return command_improvement_proposal_record(
+            arguments.specification_path,
+            arguments.evidence_return_path,
+            arguments.plan_path,
+            arguments.portfolio_path,
+            arguments.source_factory_id,
+            arguments.runtime_evidence_pack_path,
+            arguments.qualification_plan_path,
+            arguments.qualification_policy_path,
+            arguments.bundle_paths,
+            arguments.output,
+        )
+    if arguments.command == "verify-improvement-proposal-record":
+        return command_verify_improvement_proposal_record(
+            arguments.record_path,
+            arguments.specification_path,
+            arguments.evidence_return_path,
             arguments.plan_path,
             arguments.portfolio_path,
             arguments.source_factory_id,

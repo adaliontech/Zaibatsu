@@ -1,5 +1,30 @@
 # Changelog
 
+## 1.13.0 - 2026-08-30
+
+- Added a schema-bound, untrusted factory improvement-proposal specification
+  for shared modules, factory templates, and deterministic gates. Every
+  specification requires content-safety, classification, reporting-factory,
+  independent-regression, owner-policy, rollback, and cross-factory-privilege
+  review gates.
+- Added a deterministic proposal record that fully reverifies the route-bound
+  evidence return and its complete portfolio, bundle, qualification,
+  evidence-pack, material, signature, and allowlist chain before binding the
+  exact canonical proposal content to it.
+- Added `improvement-proposal-record` and
+  `verify-improvement-proposal-record` CLI workflows. The checked fixture
+  records one proposal for control-layer review without authenticating its
+  proposer or interpreting its narrative.
+- Made the review boundary explicit: proposal structure, canonical content,
+  source evidence, and route bindings are verified; content safety, secret
+  absence, semantic truth, observation normalization, classification, merit,
+  regression results, rollback, approval, eligibility, rollout, activation,
+  execution, and cross-factory effects remain false.
+- Added weakened-gate, unsupported-target, replay, digest-refresh forgery,
+  scalar-confusion, malformed, recursive, size, input-order, and CLI boundary
+  tests. The integrated suite now contains 230 tests and the validator requires
+  105 files.
+
 ## 1.12.0 - 2026-08-30
 
 - Added a schema-bound factory evidence-return record that binds one fully

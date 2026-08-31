@@ -43,6 +43,16 @@ from factory_evidence_return import (
     load_factory_evidence_return,
     verify_factory_evidence_return_for_inputs,
 )
+from factory_improvement_proposal import (
+    EXAMPLE_IMPROVEMENT_PROPOSAL_PATH,
+    EXAMPLE_IMPROVEMENT_PROPOSAL_SPEC_PATH,
+    IMPROVEMENT_PROPOSAL_SCHEMA_REFERENCE,
+    IMPROVEMENT_PROPOSAL_SPEC_SCHEMA_REFERENCE,
+    load_factory_improvement_proposal,
+    load_factory_improvement_proposal_spec,
+    validate_factory_improvement_proposal_spec,
+    verify_factory_improvement_proposal_for_inputs,
+)
 from factory_portfolio import (
     EXAMPLE_PORTFOLIO_PATH,
     EXAMPLE_PORTFOLIO_PLAN_PATH,
@@ -154,6 +164,8 @@ REQUIRED_FILES = (
     "examples/economic-factory.runtime-evidence.json",
     "examples/economic-factory.runtime-evidence-pack-manifest.json",
     "examples/economic-factory.evidence-return.json",
+    "examples/economic-factory.improvement-proposal-spec.json",
+    "examples/economic-factory.improvement-proposal.json",
     "examples/control-factory.json",
     "examples/service-factory.json",
     "examples/factory-portfolio.json",
@@ -182,6 +194,8 @@ REQUIRED_FILES = (
     "schemas/factory-bundle-inspection.schema.json",
     "schemas/factory-bundle-manifest.schema.json",
     "schemas/factory-evidence-return.schema.json",
+    "schemas/factory-improvement-proposal-spec.schema.json",
+    "schemas/factory-improvement-proposal.schema.json",
     "schemas/factory-plan.schema.json",
     "schemas/factory-portfolio.schema.json",
     "schemas/factory-portfolio-plan.schema.json",
@@ -207,6 +221,7 @@ REQUIRED_FILES = (
     "scripts/factory_composer.py",
     "scripts/factory_evidence_pack.py",
     "scripts/factory_evidence_return.py",
+    "scripts/factory_improvement_proposal.py",
     "scripts/factory_portfolio.py",
     "scripts/factory_qualification.py",
     "scripts/factory_rebuild.py",
@@ -235,7 +250,7 @@ ARCHITECTURE_SCHEMA_VERSION = "zaibatsu.architecture.v1"
 FACTORY_MODEL_SCHEMA_VERSION = "zaibatsu.factory-model.v1"
 READINESS_SCHEMA_VERSION = "zaibatsu.submission-readiness.v1"
 FACTORY_DEFINITION_SCHEMA_VERSION = "zaibatsu.factory-definition.v2"
-INTEGRATED_TEST_COUNT = 221
+INTEGRATED_TEST_COUNT = 230
 LATEST_VALIDATED_RELEASE_TEST_COUNT = 221
 DROID_FACTORY_CLI_VERSION = "0.206.0"
 DROID_SESSION_REFERENCE = "46f941a9-82f8-4df3-a45c-b8158996360b"
@@ -287,6 +302,12 @@ CONTRACT_SCHEMA_REFERENCES = {
     "examples/economic-factory.evidence-return.json": (
         EVIDENCE_RETURN_SCHEMA_REFERENCE
     ),
+    "examples/economic-factory.improvement-proposal-spec.json": (
+        IMPROVEMENT_PROPOSAL_SPEC_SCHEMA_REFERENCE
+    ),
+    "examples/economic-factory.improvement-proposal.json": (
+        IMPROVEMENT_PROPOSAL_SCHEMA_REFERENCE
+    ),
     "examples/economic-factory.bundle-manifest.json": BUNDLE_MANIFEST_SCHEMA_REFERENCE,
     "examples/economic-factory.plan.json": FACTORY_PLAN_SCHEMA_REFERENCE,
     "examples/economic-factory.rebuild-plan.json": REBUILD_PLAN_SCHEMA_REFERENCE,
@@ -335,6 +356,12 @@ REMOTE_SCHEMA_LOCAL_PATHS = {
     ),
     "examples/economic-factory.evidence-return.json": (
         "schemas/factory-evidence-return.schema.json"
+    ),
+    "examples/economic-factory.improvement-proposal-spec.json": (
+        "schemas/factory-improvement-proposal-spec.schema.json"
+    ),
+    "examples/economic-factory.improvement-proposal.json": (
+        "schemas/factory-improvement-proposal.schema.json"
     ),
     "examples/economic-factory.bundle-manifest.json": (
         "schemas/factory-bundle-manifest.schema.json"
@@ -1199,6 +1226,7 @@ def validate_factory_model(data: Any) -> list[str]:
     feedback = data.get("feedback_policy")
     if not isinstance(feedback, dict) or feedback != {
         "evidence_return_maturity": "operational",
+        "improvement_proposal_maturity": "operational",
         "shared_pattern_promotion_maturity": "designed",
         "promotion_authority": "reviewed_deterministic_policy_and_owner_gate",
         "factory_may_self_promote": False,
@@ -1877,7 +1905,13 @@ def validate_contract_schema_files(root: Path = ROOT) -> list[str]:
         if schema.get("$schema") != "https://json-schema.org/draft/2020-12/schema":
             errors.append(f"{relative}: project-owned schema must declare JSON Schema 2020-12")
         schema_release = (
-            "v1.12.0"
+            "v1.13.0"
+            if schema_path.name
+            in {
+                "factory-improvement-proposal-spec.schema.json",
+                "factory-improvement-proposal.schema.json",
+            }
+            else "v1.12.0"
             if schema_path.name == "factory-evidence-return.schema.json"
             else "v1.11.0"
             if schema_path.name
@@ -2298,6 +2332,7 @@ def main() -> int:
                         f"runtime-evidence pack: {error}"
                         for error in pack_verify_errors
                     )
+    evidence_return_document: Any = None
     try:
         evidence_return_document = load_factory_evidence_return(
             EXAMPLE_EVIDENCE_RETURN_PATH
@@ -2325,6 +2360,50 @@ def main() -> int:
                     qualification_policy,
                 )
             )
+    try:
+        improvement_proposal_spec = load_factory_improvement_proposal_spec(
+            EXAMPLE_IMPROVEMENT_PROPOSAL_SPEC_PATH
+        )
+    except (OSError, RecursionError, ValueError) as exc:
+        errors.append(
+            f"cannot load example factory improvement-proposal specification: {exc}"
+        )
+    else:
+        errors.extend(
+            validate_factory_improvement_proposal_spec(improvement_proposal_spec)
+        )
+        try:
+            improvement_proposal = load_factory_improvement_proposal(
+                EXAMPLE_IMPROVEMENT_PROPOSAL_PATH
+            )
+        except (OSError, RecursionError, ValueError) as exc:
+            errors.append(
+                f"cannot load example factory improvement-proposal record: {exc}"
+            )
+        else:
+            if (
+                isinstance(portfolio_document, dict)
+                and isinstance(portfolio_plan_document, dict)
+                and len(portfolio_bundles) == len(PORTFOLIO_FACTORY_PATHS)
+                and runtime_evidence_pack is not None
+                and isinstance(qualification_plan, dict)
+                and isinstance(qualification_policy, dict)
+                and isinstance(evidence_return_document, dict)
+            ):
+                errors.extend(
+                    verify_factory_improvement_proposal_for_inputs(
+                        improvement_proposal,
+                        improvement_proposal_spec,
+                        evidence_return_document,
+                        portfolio_plan_document,
+                        portfolio_document,
+                        portfolio_bundles,
+                        "example-product",
+                        runtime_evidence_pack,
+                        qualification_plan,
+                        qualification_policy,
+                    )
+                )
     try:
         runtime_assessment = load_runtime_assessment(
             EXAMPLE_RUNTIME_ASSESSMENT_PATH
@@ -2405,8 +2484,8 @@ def main() -> int:
     print(
         "- 3-factory portfolio plus scheduler variant, content-addressed modules, "
         "control and portfolio plans, bundle manifest, source lock, signed "
-        "runtime-evidence pack, route-bound evidence return, and non-executing "
-        "rebuild DAG checked"
+        "runtime-evidence pack, route-bound evidence return, evidence-bound "
+        "improvement proposal, and non-executing rebuild DAG checked"
     )
     print(f"- {len(EVIDENCE_CONTRACTS)} evidence receipts checked")
     print(f"- {len(REQUIRED_FACTORY_INVARIANTS)} meta-factory invariants checked")

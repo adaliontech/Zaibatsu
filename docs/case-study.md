@@ -163,10 +163,11 @@ run -> observation/failure -> evidence -> classified improvement candidate
     -> owner-reviewed promotion -> eligible factory rollout with rollback
 ```
 
-Today, evidence capture and some improvement work are operational at bounded
-scope. General automatic classification, shared-template promotion, and
-cross-factory rollout are not deployed. Recursive improvement means reviewed
-versioned learning, not self-modifying production authority.
+Today, evidence capture, route binding, and non-authorizing proposal recording
+are operational at bounded public-kit scope. General automatic normalization,
+classification, validation, shared-template promotion, and cross-factory
+rollout are not deployed. Recursive improvement means reviewed versioned
+learning, not self-modifying production authority.
 
 ## Factory/Droid contribution
 
@@ -237,6 +238,11 @@ reusable contracts while preserving evidence and limitations:
   bundle and its declared evidence-only route into the control factory, while
   explicitly denying transport, classification, promotion, activation,
   execution, and cross-factory-effect claims;
+- `improvement-proposal-record` rechecks that complete return chain and binds
+  one typed, untrusted shared-module, factory-template, or deterministic-gate
+  suggestion to it, while mandatory later gates remain unmet and all
+  classification, validation, promotion, rollout, and effect authority stays
+  false;
 - the checked signature is fixture-only: it raises the verified count to 10,
   leaves 57 missing, and cannot create runtime eligibility; generated-key tests
   separately prove that complete `factory_runtime` evidence can reach
@@ -306,6 +312,9 @@ The public package can now reject claims or architectures in which:
   credential, database, worker-pool, or scheduler isolation.
 - The public evidence-return record binds exact verified inputs to one route;
   it does not transport, inspect, classify, promote, activate, or execute them.
+- The public improvement-proposal record binds exact untrusted intent to that
+  return; it does not authenticate, normalize, classify, validate, approve,
+  promote, roll out, activate, or execute the suggestion.
 - The public signed receipt is a cryptographic fixture, not operational runtime
   evidence. Registry selection and the assessment clock remain evaluator trust
   inputs; verifier assertions and detached evidence artifacts are not rerun or

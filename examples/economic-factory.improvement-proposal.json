@@ -1,0 +1,80 @@
+{
+  "contract_schema": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.13.0/schemas/factory-improvement-proposal.schema.json",
+  "schema_version": "zaibatsu.factory-improvement-proposal.v1",
+  "portfolio": {
+    "id": "example-software-factories",
+    "factory_portfolio_plan_sha256": "dc4303fb1fc8a013d3d5f3e91f29fb4935baa3b42f503c0595abbd7ae7fbbcbb",
+    "control_factory": "example-control"
+  },
+  "route": {
+    "position": 0,
+    "from_factory": "example-product",
+    "to_factory": "example-control",
+    "kind": "evidence_return",
+    "payload_scope": "evidence_only",
+    "grants_authority": false,
+    "can_self_promote": false,
+    "from_bundle_sha256": "d4918fd16f55b907a0b2b9734422d7106d3030a511e5cae5d6efc1cb7b253aba",
+    "to_bundle_sha256": "9b777fa3874485672a30b2a5f7e6db6e2895dfbd228767aded85898216c7db3c"
+  },
+  "source": {
+    "factory_evidence_return_sha256": "ac1765b07d96ffbcead1dd4270919833dae790359f7fe248b9f04f16d630c3ec",
+    "runtime_evidence_pack_sha256": "92357de9906842bdfaa14d2056173f24113f686e108d74ce44e7685d4b344759",
+    "reporting_factory": "example-product"
+  },
+  "proposal": {
+    "specification_sha256": "5ffb7fb09f6c5935843c3dd6eb203d5ba3a652a1f4f45e9fa807dde6366e15a4",
+    "id": "harden-source-revision-gate",
+    "summary": "Propose a shared deterministic gate that rejects source-revision evidence whose declared revision does not match its content-addressed artifact.",
+    "expected_outcome": "A future reviewed gate would make revision replay fail before evidence can enter qualification assessment.",
+    "target": {
+      "kind": "deterministic_gate",
+      "id": "source-revision-binding",
+      "operation": "add"
+    },
+    "validation_requirements": {
+      "content_safety_scan_required": true,
+      "candidate_classification_required": true,
+      "reporting_factory_validation_required": true,
+      "independent_regression_validation_required": true,
+      "owner_policy_promotion_required": true,
+      "rollback_plan_required": true,
+      "cross_factory_privilege_review_required": true
+    },
+    "proposal_boundary": {
+      "proposal_only": true,
+      "content_trusted": false,
+      "proposer_authenticated": false,
+      "grants_authority": false,
+      "can_self_promote": false,
+      "execution_authorized": false
+    }
+  },
+  "review_boundary": {
+    "evidence_return_reverified": true,
+    "evidence_return_bound": true,
+    "proposal_structure_validated": true,
+    "proposal_canonical_json_bound": true,
+    "proposal_recorded": true,
+    "transport_observed": false,
+    "proposal_content_safety_scanned": false,
+    "secret_absence_proved": false,
+    "proposer_authenticated": false,
+    "source_artifact_semantic_truth_verified": false,
+    "observation_normalized": false,
+    "improvement_candidate_classified": false,
+    "proposal_merit_verified": false,
+    "reporting_factory_validation_passed": false,
+    "independent_regression_validation_passed": false,
+    "rollback_plan_verified": false,
+    "changes_shared_policy": false,
+    "shared_promotion_eligible": false,
+    "owner_policy_approval_obtained": false,
+    "promotion_authorized": false,
+    "rollout_authorized": false,
+    "activation_authorized": false,
+    "execution_authorized": false,
+    "cross_factory_effects_authorized": false
+  },
+  "factory_improvement_proposal_sha256": "b5222630580cc03b092aedf6659defff9dae994957ed406cbd598a29da8efde4"
+}

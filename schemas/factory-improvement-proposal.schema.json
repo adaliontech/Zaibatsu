@@ -1,0 +1,138 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.13.0/schemas/factory-improvement-proposal.schema.json",
+  "title": "Zaibatsu evidence-bound factory improvement-proposal record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_schema", "schema_version", "portfolio", "route", "source", "proposal", "review_boundary", "factory_improvement_proposal_sha256"],
+  "properties": {
+    "contract_schema": {"const": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.13.0/schemas/factory-improvement-proposal.schema.json"},
+    "schema_version": {"const": "zaibatsu.factory-improvement-proposal.v1"},
+    "portfolio": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "factory_portfolio_plan_sha256", "control_factory"],
+      "properties": {
+        "id": {"$ref": "#/$defs/id"},
+        "factory_portfolio_plan_sha256": {"$ref": "#/$defs/sha256"},
+        "control_factory": {"$ref": "#/$defs/id"}
+      }
+    },
+    "route": {"$ref": "#/$defs/route"},
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["factory_evidence_return_sha256", "runtime_evidence_pack_sha256", "reporting_factory"],
+      "properties": {
+        "factory_evidence_return_sha256": {"$ref": "#/$defs/sha256"},
+        "runtime_evidence_pack_sha256": {"$ref": "#/$defs/sha256"},
+        "reporting_factory": {"$ref": "#/$defs/id"}
+      }
+    },
+    "proposal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["specification_sha256", "id", "summary", "expected_outcome", "target", "validation_requirements", "proposal_boundary"],
+      "properties": {
+        "specification_sha256": {"$ref": "#/$defs/sha256"},
+        "id": {"$ref": "#/$defs/id"},
+        "summary": {"$ref": "#/$defs/text"},
+        "expected_outcome": {"$ref": "#/$defs/text"},
+        "target": {"$ref": "#/$defs/target"},
+        "validation_requirements": {"$ref": "#/$defs/validation_requirements"},
+        "proposal_boundary": {"$ref": "#/$defs/proposal_boundary"}
+      }
+    },
+    "review_boundary": {"$ref": "#/$defs/review_boundary"},
+    "factory_improvement_proposal_sha256": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "id": {"type": "string", "minLength": 1, "maxLength": 64, "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+    "text": {"type": "string", "minLength": 1, "maxLength": 512, "pattern": "\\S"},
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "route": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["position", "from_factory", "to_factory", "kind", "payload_scope", "grants_authority", "can_self_promote", "from_bundle_sha256", "to_bundle_sha256"],
+      "properties": {
+        "position": {"type": "integer", "minimum": 0, "maximum": 62},
+        "from_factory": {"$ref": "#/$defs/id"},
+        "to_factory": {"$ref": "#/$defs/id"},
+        "kind": {"const": "evidence_return"},
+        "payload_scope": {"const": "evidence_only"},
+        "grants_authority": {"const": false},
+        "can_self_promote": {"const": false},
+        "from_bundle_sha256": {"$ref": "#/$defs/sha256"},
+        "to_bundle_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "id", "operation"],
+      "properties": {
+        "kind": {"enum": ["shared_module", "factory_template", "deterministic_gate"]},
+        "id": {"$ref": "#/$defs/id"},
+        "operation": {"enum": ["add", "modify", "replace"]}
+      }
+    },
+    "validation_requirements": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["content_safety_scan_required", "candidate_classification_required", "reporting_factory_validation_required", "independent_regression_validation_required", "owner_policy_promotion_required", "rollback_plan_required", "cross_factory_privilege_review_required"],
+      "properties": {
+        "content_safety_scan_required": {"const": true},
+        "candidate_classification_required": {"const": true},
+        "reporting_factory_validation_required": {"const": true},
+        "independent_regression_validation_required": {"const": true},
+        "owner_policy_promotion_required": {"const": true},
+        "rollback_plan_required": {"const": true},
+        "cross_factory_privilege_review_required": {"const": true}
+      }
+    },
+    "proposal_boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["proposal_only", "content_trusted", "proposer_authenticated", "grants_authority", "can_self_promote", "execution_authorized"],
+      "properties": {
+        "proposal_only": {"const": true},
+        "content_trusted": {"const": false},
+        "proposer_authenticated": {"const": false},
+        "grants_authority": {"const": false},
+        "can_self_promote": {"const": false},
+        "execution_authorized": {"const": false}
+      }
+    },
+    "review_boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["evidence_return_reverified", "evidence_return_bound", "proposal_structure_validated", "proposal_canonical_json_bound", "proposal_recorded", "transport_observed", "proposal_content_safety_scanned", "secret_absence_proved", "proposer_authenticated", "source_artifact_semantic_truth_verified", "observation_normalized", "improvement_candidate_classified", "proposal_merit_verified", "reporting_factory_validation_passed", "independent_regression_validation_passed", "rollback_plan_verified", "changes_shared_policy", "shared_promotion_eligible", "owner_policy_approval_obtained", "promotion_authorized", "rollout_authorized", "activation_authorized", "execution_authorized", "cross_factory_effects_authorized"],
+      "properties": {
+        "evidence_return_reverified": {"const": true},
+        "evidence_return_bound": {"const": true},
+        "proposal_structure_validated": {"const": true},
+        "proposal_canonical_json_bound": {"const": true},
+        "proposal_recorded": {"const": true},
+        "transport_observed": {"const": false},
+        "proposal_content_safety_scanned": {"const": false},
+        "secret_absence_proved": {"const": false},
+        "proposer_authenticated": {"const": false},
+        "source_artifact_semantic_truth_verified": {"const": false},
+        "observation_normalized": {"const": false},
+        "improvement_candidate_classified": {"const": false},
+        "proposal_merit_verified": {"const": false},
+        "reporting_factory_validation_passed": {"const": false},
+        "independent_regression_validation_passed": {"const": false},
+        "rollback_plan_verified": {"const": false},
+        "changes_shared_policy": {"const": false},
+        "shared_promotion_eligible": {"const": false},
+        "owner_policy_approval_obtained": {"const": false},
+        "promotion_authorized": {"const": false},
+        "rollout_authorized": {"const": false},
+        "activation_authorized": {"const": false},
+        "execution_authorized": {"const": false},
+        "cross_factory_effects_authorized": {"const": false}
+      }
+    }
+  }
+}

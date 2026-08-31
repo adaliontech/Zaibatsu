@@ -208,6 +208,9 @@ authority grant or hard dependency.
 
 - preserve the bounded public foundation that binds one verified evidence pack
   to one declared source-factory route without transporting or interpreting it;
+- preserve the bounded proposal foundation that binds one typed, untrusted
+  shared-module, factory-template, or deterministic-gate suggestion to one
+  fully reverified evidence return while leaving every later decision false;
 - normalize observations, failures, artifact outcomes, and owner corrections;
 - classify improvement candidates without granting mutation authority;
 - bind a proposed shared module/template/gate change to its source evidence;

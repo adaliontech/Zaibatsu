@@ -1,0 +1,31 @@
+{
+  "contract_schema": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.13.0/schemas/factory-improvement-proposal-spec.schema.json",
+  "schema_version": "zaibatsu.factory-improvement-proposal-spec.v1",
+  "proposal": {
+    "id": "harden-source-revision-gate",
+    "summary": "Propose a shared deterministic gate that rejects source-revision evidence whose declared revision does not match its content-addressed artifact.",
+    "expected_outcome": "A future reviewed gate would make revision replay fail before evidence can enter qualification assessment."
+  },
+  "target": {
+    "kind": "deterministic_gate",
+    "id": "source-revision-binding",
+    "operation": "add"
+  },
+  "validation_requirements": {
+    "content_safety_scan_required": true,
+    "candidate_classification_required": true,
+    "reporting_factory_validation_required": true,
+    "independent_regression_validation_required": true,
+    "owner_policy_promotion_required": true,
+    "rollback_plan_required": true,
+    "cross_factory_privilege_review_required": true
+  },
+  "proposal_boundary": {
+    "proposal_only": true,
+    "content_trusted": false,
+    "proposer_authenticated": false,
+    "grants_authority": false,
+    "can_self_promote": false,
+    "execution_authorized": false
+  }
+}

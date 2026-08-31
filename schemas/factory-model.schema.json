@@ -24,7 +24,7 @@
     "versioning_policy": {"type": "object", "required": ["source_and_intended_state", "encrypted_static_secrets", "runtime_machine_secrets", "plaintext_secrets_in_git"]},
     "scheduling_policy": {"type": "object", "required": ["supported_schedulers", "durable_default", "one_scheduler_of_record_per_workload"]},
     "agent_policy": {"type": "object", "required": ["skeleton_status", "factory_deployment_status", "harness_binding", "deterministic_gates", "model_may_authorize_external_effect"]},
-    "feedback_policy": {"type": "object", "required": ["evidence_return_maturity", "shared_pattern_promotion_maturity", "promotion_authority", "factory_may_self_promote"]},
+    "feedback_policy": {"type": "object", "required": ["evidence_return_maturity", "improvement_proposal_maturity", "shared_pattern_promotion_maturity", "promotion_authority", "factory_may_self_promote"]},
     "invariants": {"type": "object", "minProperties": 1, "additionalProperties": {"const": true}}
   }
 }

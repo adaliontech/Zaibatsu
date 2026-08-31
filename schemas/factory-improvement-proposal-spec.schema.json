@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.13.0/schemas/factory-improvement-proposal-spec.schema.json",
+  "title": "Zaibatsu non-authorizing factory improvement-proposal specification",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_schema", "schema_version", "proposal", "target", "validation_requirements", "proposal_boundary"],
+  "properties": {
+    "contract_schema": {"const": "https://raw.githubusercontent.com/adaliontech/Zaibatsu/v1.13.0/schemas/factory-improvement-proposal-spec.schema.json"},
+    "schema_version": {"const": "zaibatsu.factory-improvement-proposal-spec.v1"},
+    "proposal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "summary", "expected_outcome"],
+      "properties": {
+        "id": {"$ref": "#/$defs/id"},
+        "summary": {"$ref": "#/$defs/text"},
+        "expected_outcome": {"$ref": "#/$defs/text"}
+      }
+    },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "id", "operation"],
+      "properties": {
+        "kind": {"enum": ["shared_module", "factory_template", "deterministic_gate"]},
+        "id": {"$ref": "#/$defs/id"},
+        "operation": {"enum": ["add", "modify", "replace"]}
+      }
+    },
+    "validation_requirements": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["content_safety_scan_required", "candidate_classification_required", "reporting_factory_validation_required", "independent_regression_validation_required", "owner_policy_promotion_required", "rollback_plan_required", "cross_factory_privilege_review_required"],
+      "properties": {
+        "content_safety_scan_required": {"const": true},
+        "candidate_classification_required": {"const": true},
+        "reporting_factory_validation_required": {"const": true},
+        "independent_regression_validation_required": {"const": true},
+        "owner_policy_promotion_required": {"const": true},
+        "rollback_plan_required": {"const": true},
+        "cross_factory_privilege_review_required": {"const": true}
+      }
+    },
+    "proposal_boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["proposal_only", "content_trusted", "proposer_authenticated", "grants_authority", "can_self_promote", "execution_authorized"],
+      "properties": {
+        "proposal_only": {"const": true},
+        "content_trusted": {"const": false},
+        "proposer_authenticated": {"const": false},
+        "grants_authority": {"const": false},
+        "can_self_promote": {"const": false},
+        "execution_authorized": {"const": false}
+      }
+    }
+  },
+  "$defs": {
+    "id": {"type": "string", "minLength": 1, "maxLength": 64, "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+    "text": {"type": "string", "minLength": 1, "maxLength": 512, "pattern": "\\S"}
+  }
+}
