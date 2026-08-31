@@ -42,13 +42,18 @@ changes.
   record without presenting byte and route integrity as observed transport,
   safe content, classification, promotion, activation, execution, or
   cross-factory authority;
+- preserve the reproduced immutable `v1.13.0` evidence-bound
+  improvement-proposal record without presenting typed untrusted intent as
+  authentication, normalization, classification, validation, approval,
+  promotion, rollout, activation, execution, or cross-factory authority;
 - record the Guild demo and complete applicant-owned submission materials.
 
 Exit: the public narrative, architecture, portable factory, module artifacts,
 control plan, bundle, portfolio, source lock, qualification plan, partial
-assessment, signed runtime assessment, route-bound evidence return, rebuild
-plan, readiness, and evidence contracts describe the same meta-factory without
-inflating source-only or planned capabilities.
+assessment, signed runtime assessment, route-bound evidence return,
+evidence-bound improvement proposal, rebuild plan, readiness, and evidence
+contracts describe the same meta-factory without inflating source-only or
+planned capabilities.
 
 ## Phase 1 — Factory identity and versioning
 

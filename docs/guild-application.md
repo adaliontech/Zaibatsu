@@ -54,7 +54,9 @@ both Gitleaks modes. The v1.13 evidence-bound improvement-proposal candidate
 passed 230 tests, 105-file validation, a credential-disabled full-history
 clone, both Gitleaks modes, ten strict schemas, exact
 portfolio/return/proposal regeneration, explicit non-authorizing output, and
-independent CI. The gates remain in
+independent CI. Its immutable release and full-history tag clone passed
+roof/tag CI, two live-schema byte checks, exact regeneration, strict external
+validation, and both Gitleaks modes. The gates remain in
 [`architecture/submission-readiness.json`](../architecture/submission-readiness.json).
 
 ## Current project description
@@ -310,7 +312,7 @@ the public repository:
       authority adversarial tests.
 - [x] v1.13 candidate passes credential-disabled full-history clone, both
       Gitleaks modes, strict schemas, exact regeneration, and independent CI.
-- [ ] Immutable v1.13.0 passes evidence-roof and tag CI, tagged-schema byte
+- [x] Immutable v1.13.0 passes evidence-roof and tag CI, tagged-schema byte
       checks, tag-clone reproduction, and immutable-release proof.
 - [x] Public repository and article links resolve without authentication.
 - [ ] Demo clip or screenshots show a real Factory task and validation result.

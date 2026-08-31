@@ -103,18 +103,18 @@
       "id": "fresh_clone_reproduction",
       "status": "complete",
       "required_for_submission": true,
-      "evidence": "Credential-disabled full-history clones of v1.12.0 candidate 7eeb58ed132e8e32c395d0d6e2e81721cb0a83bd and immutable tag v1.12.0 passed 221 tests, 100-file validation, strict Git, both checksum-pinned Gitleaks modes, eight strict schemas, exact three-bundle portfolio-plan and route-bound evidence-return regeneration, non-authorizing assertions, one live tagged-schema byte check, and independent candidate, roof, and tag CI",
+      "evidence": "Credential-disabled full-history clones of v1.13.0 candidate bc3381ac7889fef4b61f837d20a030cc28ee6f0a and immutable tag v1.13.0 passed 230 tests, 105-file validation, strict Git, both checksum-pinned Gitleaks modes, ten strict schemas, exact three-bundle portfolio-plan, route-bound evidence-return, and evidence-bound improvement-proposal regeneration, non-authorizing assertions, two live tagged-schema byte checks, and independent candidate, roof, and tag CI",
       "proof": {
-        "candidate_commit": "7eeb58ed132e8e32c395d0d6e2e81721cb0a83bd",
-        "tests_passed": 221,
+        "candidate_commit": "bc3381ac7889fef4b61f837d20a030cc28ee6f0a",
+        "tests_passed": 230,
         "gitleaks_version": "8.30.1",
-        "github_actions_run": "https://github.com/adaliontech/Zaibatsu/actions/runs/33356978139",
-        "roof_actions_run": "https://github.com/adaliontech/Zaibatsu/actions/runs/33357109791",
-        "release_tag": "v1.12.0",
-        "tag_commit": "e1bed841c5d519426ef4fd36244ce0f366d58441",
-        "tag_object": "d73fa379bb2db703e9775493bbd031d6199bc755",
-        "tag_actions_run": "https://github.com/adaliontech/Zaibatsu/actions/runs/33357140454",
-        "release_url": "https://github.com/adaliontech/Zaibatsu/releases/tag/v1.12.0",
+        "github_actions_run": "https://github.com/adaliontech/Zaibatsu/actions/runs/33358242999",
+        "roof_actions_run": "https://github.com/adaliontech/Zaibatsu/actions/runs/33358390313",
+        "release_tag": "v1.13.0",
+        "tag_commit": "90921a43c2eb8fda3fe74a70db06ce52a617416c",
+        "tag_object": "6ea9da6729475b275a65d564ab4dce585325384b",
+        "tag_actions_run": "https://github.com/adaliontech/Zaibatsu/actions/runs/33358425856",
+        "release_url": "https://github.com/adaliontech/Zaibatsu/releases/tag/v1.13.0",
         "release_immutable": true
       }
     },
@@ -122,7 +122,7 @@
       "id": "public_demo",
       "status": "pending_external",
       "required_for_submission": true,
-      "evidence": "The immutable v1.12.0 route-bound evidence-return release proof passed; record and publish the final clip from that tag"
+      "evidence": "The immutable v1.13.0 evidence-bound improvement-proposal release proof passed; record and publish the final clip from that tag"
     },
     {
       "id": "applicant_materials",

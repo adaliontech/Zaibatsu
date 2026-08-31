@@ -1,6 +1,6 @@
 # Demo script
 
-Use only a full-history fresh clone of immutable `v1.12.0` after its release
+Use only a full-history fresh clone of immutable `v1.13.0` after its release
 proof passes. Do not show private terminals, history, settings,
 infrastructure, model credentials, notifications, or personal data. Lead with
 the real Factory
@@ -145,6 +145,32 @@ python3 scripts/zaibatsu.py verify-evidence-return-record \
   /tmp/example-control.factory.tar \
   /tmp/example-product.factory.tar \
   /tmp/example-service.factory.tar
+python3 scripts/zaibatsu.py improvement-proposal-record \
+  examples/economic-factory.improvement-proposal-spec.json \
+  /tmp/example-product.evidence-return.json \
+  /tmp/example-portfolio.plan.json \
+  examples/factory-portfolio.json \
+  example-product \
+  /tmp/example-product.runtime-evidence.tar \
+  examples/economic-factory.qualification-plan.json \
+  policies/runtime-qualification-v1.json \
+  /tmp/example-control.factory.tar \
+  /tmp/example-product.factory.tar \
+  /tmp/example-service.factory.tar \
+  --output /tmp/example-product.improvement-proposal.json
+python3 scripts/zaibatsu.py verify-improvement-proposal-record \
+  /tmp/example-product.improvement-proposal.json \
+  examples/economic-factory.improvement-proposal-spec.json \
+  /tmp/example-product.evidence-return.json \
+  /tmp/example-portfolio.plan.json \
+  examples/factory-portfolio.json \
+  example-product \
+  /tmp/example-product.runtime-evidence.tar \
+  examples/economic-factory.qualification-plan.json \
+  policies/runtime-qualification-v1.json \
+  /tmp/example-control.factory.tar \
+  /tmp/example-product.factory.tar \
+  /tmp/example-service.factory.tar
 python3 scripts/zaibatsu.py runtime-assessment \
   /tmp/example-product.runtime-evidence.tar \
   examples/economic-factory.qualification-evidence.json \
@@ -192,7 +218,10 @@ python3 scripts/zaibatsu.py verify-rebuild-plan \
 > rerun that verifier or prove the artifact or assertion semantically true. A
 > route-bound return record then joins that exact pack to the product factory's
 > declared evidence-only route. It proves no transport, content safety,
-> classification, promotion, activation, execution, or cross-factory effect. The
+> classification, promotion, activation, execution, or cross-factory effect.
+> The proposal record then binds one typed, untrusted deterministic-gate
+> suggestion to that exact return. It records the input without authenticating,
+> classifying, validating, approving, promoting, rolling out, or executing it. The
 > combined assessment records 10 verified and 57
 > missing, marks none eligible, and authorizes no activation or execution. A
 > signature authenticates the assertion; it does not prove key ownership,
@@ -216,7 +245,7 @@ make validate
 > evidence, force-added ignored files, misleading media suffixes, and premature
 > readiness.
 
-Pause on the final 221-test pass and 100-file validator summary.
+Pause on the final 230-test pass and 105-file validator summary.
 
 ### 2:05–2:30 — Honest current boundary
 
@@ -232,7 +261,7 @@ Open `docs/implementation-status.md`.
 
 ## Before recording
 
-1. Clone the immutable `v1.12.0` tag with full history into a new temporary
+1. Clone the immutable `v1.13.0` tag with full history into a new temporary
    directory after its release proof passes. Do not use `--depth 1`; source-lock
    verification requires the referenced annotated `v1.6.0` tag and objects.
 2. Increase terminal font size and hide unrelated tabs and notifications.
@@ -243,7 +272,7 @@ Open `docs/implementation-status.md`.
 
 ## Capture checklist
 
-- [ ] Repository URL and `v1.12.0` tag visible once.
+- [ ] Repository URL and `v1.13.0` tag visible once.
 - [ ] Real Factory/Droid session receipt and shipped diff visible first.
 - [ ] Pre-change gap and adversarial post-change result are understandable.
 - [ ] Portable factory scaffold and validation succeed on screen.
@@ -263,7 +292,7 @@ Open `docs/implementation-status.md`.
 - [ ] Rebuild-plan verification shows nine blocked actions, four separate gates,
       and false execution, activation, deployment, and recovery authority.
 - [ ] “The factory of software factories” hierarchy is visible.
-- [ ] `make validate` shows all 221 tests and 100 contract files passing.
+- [ ] `make validate` shows all 230 tests and 105 contract files passing.
 - [ ] Maturity limits are stated explicitly.
 - [ ] No private history, addresses, credentials, local settings, or host details.
 - [ ] Captions are included.
